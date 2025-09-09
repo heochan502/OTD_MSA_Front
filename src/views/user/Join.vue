@@ -1,7 +1,6 @@
 <script setup>
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
-import { signUp } from '@/services/userService';
 import { checkValidation } from '@/utils/validation';
 
 const fileInput = ref(null);
@@ -10,10 +9,10 @@ const router = useRouter();
 
 const state = reactive({
   data: {
-    nickName: '홍길동',
-    uid: 'mic2',
-    upw: 'aaaa1212!!',
-    chkUpw: 'aaaa1212!!',
+    nickName: '',
+    uid: '',
+    upw: '',
+    chkUpw: '',
     pic: null,
     roles: [],
   },

@@ -1,17 +1,19 @@
-import axios from './httpRequester';
+import axios from './HttpService';
 
-const path = '/user'
+const path = '/user';
 
-export const signUp = data => axios.post(`${path}/join`, data);
+export const join = (data) => axios.post(`${path}/join`, data);
 
-export const signIn = data => axios.post(`${path}/login`, data);
+export const login = (data) => axios.post(`${path}/login`, data);
 
-export const signOut = () => axios.post(`${path}/logout`);
+export const logout = () => axios.post(`${path}/logout`);
 
-export const reissue = data => axios.post(`${path}/reissue`, data);
+export const reissue = (data) => axios.post(`${path}/reissue`, data);
 
-export const getUserProfile = params => axios.get(`${path}/profile`, { params });
+export const getUserProfile = (params) =>
+  axios.get(`${path}/profile`, { params });
 
-export const patchUserProfilePic = data => axios.patch(`${path}/profile/pic`, data);
+export const patchUserProfilePic = (data) =>
+  axios.patch(`${path}/profile/pic`, data);
 
 export const deleteUserProfilePic = () => axios.delete(`${path}/profile/pic`);

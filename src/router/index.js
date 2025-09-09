@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-
+import { useAuthenticationStore } from '@/stores/user/authentication'
 import Test from '@/components/test.vue'
 import Community from '@/views/community/CommunityView.vue'
 
@@ -13,7 +13,7 @@ const router = createRouter({
     },   
     {
       path: '/community',
-      name: 'Commuity',
+      name: 'Community',
       component: Community
     },   
     {
@@ -22,14 +22,14 @@ const router = createRouter({
       component: Test,
     },
     {
-      path: '/login',
+      path: '/user/login',
       name: 'login',
       component: () => import('../views/user/Login.vue')
     },
     {
-      path: '/join',
+      path: '/user/join',
       name: 'join',
-      component: () => import('../views/user/Login.vue')
+      component: () => import('../views/user/Join.vue')
     },
     {
       path: '/fe/redirect',
@@ -56,8 +56,24 @@ const router = createRouter({
       name: 'pay-fail',
       component: () => import('../views/pay/PayFail.vue')
     },
-
   ],
 })
+
+//로그인 하지 않아도 이용할 수 있는 Path들
+const unSignedPathList = [ '/user/login', '/user/join', '/fe/redirect' ]
+
+//navigation guard
+router.beforeEach((to, from) => {
+  const authentcationStore = useAuthenticationStore();  
+  
+  if(unSignedPathList.includes(to.path) && authentcationStore.state.isSigned) {
+    //로그인 상태에서 /user/login, /user/join 경로로 이동하려고 하면
+    return { path: '/' }
+  } else if(!authentcationStore.state.isSigned && !unSignedPathList.includes(to.path)) {
+    console.log('로그아웃 상태에서 /user/login, /user/join, /fe/redirect 경로가 아닌 경우')
+    //로그아웃 상태에서 /user/login, /user/join 경로가 아닌 경우
+    return { path: '/user/login' }
+  }  
+});
 
 export default router

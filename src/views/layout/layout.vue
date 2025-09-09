@@ -23,6 +23,5 @@ import Footer from './Footer.vue'
     flex-direction: column;
     height: 805px;
   }
-
   
   </style>

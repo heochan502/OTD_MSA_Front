@@ -1,7 +1,7 @@
 <script setup>
 import { reactive } from 'vue';
 import { useRouter } from 'vue-router';
-import { login } from '@/services/userService';
+import { login } from '@/services/UserService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { checkValidation } from '@/utils/validation';
 
@@ -14,8 +14,8 @@ const redirectUrl = `${feBaseUrl}/fe/redirect`;
 
 const state = reactive({
   form: {
-    uid: 'mic2',
-    upw: 'aaaa1212!!',
+    uid: '',
+    upw: '',
   },
 });
 
@@ -40,7 +40,7 @@ const submit = async () => {
     <div class="container">
       <form class="py-5 d-flex flex-column gap-3" @submit.prevent="submit">
         <h1 class="h5 mb-3">로그인</h1>
-
+        <!-- 아이디 입력 -->
         <div class="form-floating">
           <input
             type="text"
@@ -53,6 +53,7 @@ const submit = async () => {
             regexp-message="아이디는 영어, 숫자, 언더바로만 구성되어야 하며 4~50자까지 작성할 수 있습니다." />
           <label for="uid">아이디</label>
         </div>
+        <!-- 비밀번호 입력 -->
         <div class="form-floating">
           <input
             type="password"
@@ -68,13 +69,21 @@ const submit = async () => {
         </div>
         <button class="w-100 h6 btn py-3 btn-primary">로그인</button>
       </form>
+      <div>
+        <router-link to="user/join">회원가입</router-link>
+      </div>
+      <!-- API 로그인 -->
       <div class="mb-3">
         <span class="pointer"><a :href="`${beBaseUrl}/oauth2/authorization/naver?redirect_uri=${redirectUrl}`">네이버</a></span>        
         <span class="pointer"><a :href="`${beBaseUrl}/oauth2/authorization/kakao?redirect_uri=${redirectUrl}`">카카오</a></span>        
       </div>
-      <div>
-        <router-link to="/join"><span>회원가입</span></router-link>
-      </div>
+      <div class="additional-links">
+          <div class="link-row">
+            <a href="#" class="link">아이디 찾기</a>
+            <span class="link-separator">|</span>
+            <a href="#" class="link">비밀번호 찾기</a>
+          </div>
+        </div>
     </div>
   </div>
 </template>

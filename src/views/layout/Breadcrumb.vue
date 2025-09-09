@@ -1,6 +1,6 @@
 <script setup>
 import {useRoute} from 'vue-router'
-import { useItems } from 'vuetify/lib/composables/list-items';
+
 
 const route = useRoute();
 </script>
@@ -19,6 +19,7 @@ const route = useRoute();
       <div class="info">
         <span class="  welcome_text">안녕하세요 :)</span>
         <span class="  name ">행키 님</span>
+        <router-link to="/user/login">로그인</router-link>
       </div>
     </div>
       <div class="point">

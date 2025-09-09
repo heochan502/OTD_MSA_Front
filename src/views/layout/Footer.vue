@@ -1,7 +1,6 @@
 <script setup>
 import { useRouter, useRoute } from 'vue-router';
 import {computed} from 'vue';
-import test from '@/components/test.vue';
 
 const route = useRoute();
 const isActive = computed(() => route.path === '/')

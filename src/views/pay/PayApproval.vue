@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { getPayApprove } from '@/services/payService';
+import { getPayApprove } from '@/services/PayService';
 
 const route = useRoute(); //쿼리스트링 받기 위해 사용
 const router = useRouter(); //라우팅 처리를 위해 사용
