@@ -6,6 +6,12 @@ import CommunityCategory from '@/components/community/CommunityCategory.vue';
 const route = useRoute();
 const router = useRouter();
 
+const userInfo = {
+  name : '보노보노',
+  nickName: '뭘보노',
+  userPoint: 10000,
+}
+
 const categoryLabelMap = {
   free:'자유수다',
   diet: '다이어트',
@@ -65,12 +71,21 @@ const handleClick= ()=>{
         <span class="  name ">행키 님</span>
       </div>
     </div>
+<<<<<<< HEAD
     <div class="point">
       <router-link to="/pointshop" class="point-link">
       <img class="point_img" src="/image/main/point.png" alt="포인트" />
       <span>5,000 </span>
       </router-link>
     </div>
+=======
+      <div class="point">
+        <router-link to="/pointshop" class="pointShop" :class="{active : route.path.startsWith('/pointshop')}">
+        <img class="point_img" src="/image/main/point.png" alt="포인트"/>
+        <span >{{ `${userInfo.userPoint.toLocaleString()}` }} </span>
+        </router-link>
+    </div>    
+>>>>>>> 86dff6e368a6c5be19ff1b99cca97675986e1d5f
   </div>
 
 </template>
@@ -132,26 +147,35 @@ const handleClick= ()=>{
   display: flex;
   flex-direction: row;
 }
+
 .user {
-  padding: 20px 20px 10px 20px;
+  padding: 20px 20px 0px 20px;
   display: flex;
   align-items: center;
+  
   justify-content: space-between; 
 
   .point{
-  display: flex;
+  display: flex;  
   justify-content: center; 
-  align-self:flex-end;
+  align-self:flex-end; 
    gap: 5px;
    cursor: pointer;
  
-  }
-  .point span{
+  }  
+  .pointShop{
     padding-top: 2px;
     font-size: 14px;
     font-weight: 500;
-    
+    color: #303030; 
+    text-decoration: none;
+    display: flex;
+    align-items: end; 
+    span {
+      margin-left: 7px;
+    }
    }
+   
 }
 
 .name { 

@@ -21,7 +21,8 @@ import Footer from './Footer.vue'
   <style scoped>
   .app-layout {
     display: flex;
-    row-gap: 20px; /* 행 간격을 20px로 설정 */
+    /* 행 간격을 20px로 설정 */
+    /* row-gap: 30px; */
     flex-direction: column;
     height: 805px;
 
@@ -29,7 +30,7 @@ import Footer from './Footer.vue'
   /* 공통 화면 좌우 여백 */
   .main_margin
   {
-    margin: 0px 20px 0 20px; 
+    margin: 30px 20px 0 20px; 
   }
   .nav-footer
   {

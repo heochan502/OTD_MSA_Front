@@ -77,7 +77,7 @@ margin-bottom: 20px;
   display: flex;
   font-weight: bold;
   font-size: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   color: #303030;
 }
 

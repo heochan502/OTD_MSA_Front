@@ -55,7 +55,7 @@ const router = createRouter({
       path: '/pointshop',
       name: 'PointShop',
       component: PointShop,
-      meta: {headerType: 'title', title: '포인트',  showUserPanel:false},
+      meta: {headerType: 'title', title: '포인트샵',  showUserPanel:false},
     },
   ],
 });
