@@ -45,7 +45,9 @@ const props = defineProps
 <template>
   <div class="search-bar-wrapper">
     <div class="input-container">
-    <b-form-input
+    <input class="form-control"
+      autocomplete="off"
+      type="text"
       list="search-list-id"
       @input="onTyping"
       @keyup.enter="pointData"
@@ -62,6 +64,17 @@ const props = defineProps
       Search
     </b-button>
   </div>
+
+  <div class="pointshop-container">
+    <div class="pointshop-item" v-for="item in 6" :key="item">
+      <img :src="`/image/pointshop/item${item}.png`" alt="Item Image" class="item-image" />
+      <div class="item-details">
+        <h5 class="item-name">Item {{ item }}</h5>
+        <p class="item-price">Price: {{ item * 100 }} Points</p>
+        <b-button variant="primary" size="sm">구매하기</b-button>
+        </div>
+      </div>
+    </div>
 </template>
 
 <style scoped>
@@ -70,10 +83,9 @@ const props = defineProps
   flex-direction: row;
   align-items: center;
   gap: 8px;
-  width: 80%;
+  width: 90%;
   max-width: 500px;
-  margin: 0 auto;
-  margin-top: 10px;
+  margin: 30px auto;
 }
 
 .input-container {
@@ -95,5 +107,13 @@ const props = defineProps
   font-size: 13px;
   pointer-events: none;
   opacity: 0.6;
+}
+
+.pointshop-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  padding: 20px;
 }
 </style>
