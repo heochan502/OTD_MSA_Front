@@ -9,6 +9,7 @@ import ChallengeHome from '@/views/challenge/ChallengeHome.vue';
 import ChallengeList from '@/views/challenge/ChallengeList.vue';
 import CommunityCategory from '@/components/community/CommunityCategory.vue';
 
+import PointShop from '@/components/pointshop/PointShop.vue'
 
 
 const router = createRouter({
@@ -50,6 +51,12 @@ const router = createRouter({
       name: 'ChallengeList',
       component: ChallengeList,
       meta: {headerType: 'title', title: '챌린지 목록',  showUserPanel:false},
+    },
+    {
+      path: '/pointshop',
+      name: 'PointShop',
+      component: PointShop,
+      meta: {headerType: 'title', title: '포인트샵',  showUserPanel:false},
     },
   ],
 });

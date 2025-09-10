@@ -2,10 +2,10 @@
 import { defineProps } from 'vue';
 
 const props = defineProps({
-  challengeId: 0,
+  challengeId: '',
   image: '',
   name: '',
-  reward: 0,
+  reward: '',
 });
 </script>
 
@@ -27,30 +27,37 @@ const props = defineProps({
   border-radius: 10px;
   box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-
+  margin-bottom: 15px;
   .challenge-img {
     width: 168px;
     height: 121px;
+    cursor: pointer;
   }
   
   .point-box {
     display: flex;
     align-items: center;
     position: absolute;
+    justify-content: space-between;
     width: 45px;
     height: 20px;
     border-radius: 10px;
     background-color: #d9d9d9;
     top: 5px;
     right: 5px;
-
+    gap: 2px;
     .point {
+      margin-left: 4px;
       width: 14px;
     }
 
     .point-text {
       font-size: 9px;
       color: #fafafa;
+      line-height: 1;
+      position: relative;
+      top: -0.5px;
+      margin-right: 4px;
     }
   }
 }

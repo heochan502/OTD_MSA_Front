@@ -1,10 +1,10 @@
 <script setup>
 import { useRouter, useRoute } from 'vue-router';
-import {computed} from 'vue';
+import { computed } from 'vue';
 import test from '@/components/test.vue';
 
 const route = useRoute();
-const isActive = computed(() => route.path === '/')
+const isActive = computed(() => route.path === '/');
 </script>
 
 <template>
@@ -12,52 +12,105 @@ const isActive = computed(() => route.path === '/')
     <div class="nav_container">
       <router-link to="/" class="nav-menu" active-class="active">
         <img
-          class="d-flex" 
-          :src="isActive ? '/image/navigator_img/home-s.png' : '/image/navigator_img/home.png'"
+          class="d-flex"
+          :src="
+            isActive
+              ? '/image/navigator_img/home-s.png'
+              : '/image/navigator_img/home.png'
+          "
           alt="홈화면"
         />
         <span class="d-flex justify-center">홈</span>
       </router-link>
     </div>
     <div class="nav_container">
-      <router-link to="/test" class="nav-menu" :class="{active : route.path.startsWith('/test')}">
-        <img  :src=" route.path.startsWith('/test') ? '/image/navigator_img/exercise-s.png' : '/image/navigator_img/exercise.png'" alt="운동" />
+      <router-link
+        to="/test"
+        class="nav-menu"
+        :class="{ active: route.path.startsWith('/test') }"
+      >
+        <img
+          :src="
+            route.path.startsWith('/test')
+              ? '/image/navigator_img/exercise-s.png'
+              : '/image/navigator_img/exercise.png'
+          "
+          alt="운동"
+        />
         운동</router-link
       >
     </div>
     <div class="nav_container">
-      <router-link to="/test" class="nav-menu" :class="{active : route.path.startsWith('/test')}">
-        <img  :src=" route.path.startsWith('/test') ? '/image/navigator_img/food-s.png' : '/image/navigator_img/food.png'" alt="식단" />
+      <router-link
+        to="/test"
+        class="nav-menu"
+        :class="{ active: route.path.startsWith('/test') }"
+      >
+        <img
+          :src="
+            route.path.startsWith('/test')
+              ? '/image/navigator_img/food-s.png'
+              : '/image/navigator_img/food.png'
+          "
+          alt="식단"
+        />
         식단</router-link
       >
     </div>
     <div class="nav_container">
-      <router-link to="/challenge" class="nav-menu" :class="{active : route.path.startsWith('/challenge')}">
-        <img  :src=" route.path.startsWith('/challenge') ? '/image/navigator_img/chellenge-s.png' : '/image/navigator_img/chellenge.png'" alt="챌린지" />
+      <router-link
+        to="/challenge"
+        class="nav-menu"
+        :class="{ active: route.path.startsWith('/challenge') }"
+      >
+        <img
+          :src="
+            route.path.startsWith('/challenge')
+              ? '/image/navigator_img/chellenge-s.png'
+              : '/image/navigator_img/chellenge.png'
+          "
+          alt="챌린지"
+        />
         챌린지</router-link
       >
     </div>
     <div class="nav_container">
-  <router-link
-    to="/community"
-    class="nav-menu"
-    :class="{ active: route.path.startsWith('/community') }"
-  >
-    <img
-      :src="route.path.startsWith('/community')
-        ? '/image/navigator_img/community-s.png'
-        : '/image/navigator_img/community.png'"
-      alt="커뮤니티"
-    />
-    커뮤니티
-  </router-link>
-</div>
+      <router-link
+        to="/community"
+        class="nav-menu"
+        :class="{ active: route.path.startsWith('/community') }"
+      >
+        <img
+          :src="
+            route.path.startsWith('/community')
+              ? '/image/navigator_img/community-s.png'
+              : '/image/navigator_img/community.png'
+          "
+          alt="커뮤니티"
+        />
+        커뮤니티
+      </router-link>
+    </div>
 
     <div class="nav_container">
-      <router-link to="/test" class="nav-menu" :class="{active : route.path.startsWith('/test')}">
-        <img  :src=" route.path.startsWith('/test') ? '/image/navigator_img/user-s.png' : '/image/navigator_img/user.png'" alt="내정보" />
+      <router-link
+        to="/test"
+        class="nav-menu"
+        :class="{ active: route.path.startsWith('/test') }"
+      >
+        <img
+          :src="
+            route.path.startsWith('/test')
+              ? '/image/navigator_img/user-s.png'
+              : '/image/navigator_img/user.png'
+          "
+          alt="내정보"
+        />
         내정보</router-link
       >
+    </div>
+    <div>
+      <img class="image" src="/image/main/fixed-bottom.png" />
     </div>
   </nav>
 </template>
@@ -67,28 +120,22 @@ const isActive = computed(() => route.path === '/')
   position: relative;
   height: 92px;
   display: flex;
-  flex-direction: column;
-
+  flex-direction: row;
+  justify-content: space-around;
   padding: 10px 10px;
   border-top: 1px solid #ddd;
   background: #ffffff;
-  border-radius: 0 0 20px 20px;
-
-  
+  border-radius: 0 0 60px 60px;
   color: #000;
-
-  
 }
 
-.nav-menu{
+.nav-menu {
   color: #989898;
   text-decoration: none;
-  display: flex;  
+  display: flex;
   flex-direction: column;
   align-items: center;
   font-size: 12px;
-
-
 }
 
 .nav_container {
@@ -100,8 +147,6 @@ const isActive = computed(() => route.path === '/')
   display: flex;
   flex-direction: column;
   align-items: center;
- 
-
 }
 .nav .active {
   font-weight: bold;
@@ -114,5 +159,9 @@ const isActive = computed(() => route.path === '/')
 .nav-menu img {
   max-width: 22px;
   margin-bottom: 15px;
+}
+.image {
+  width: 390px;
+  height: 5px;
 }
 </style>

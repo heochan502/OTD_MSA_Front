@@ -2,6 +2,7 @@
 import { onMounted, reactive } from 'vue';
 import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 import { getAll } from '@/services/challenge/ChallengeService';
+import { Swiper, SwiperSlide } from 'swiper/vue';
 
 const state = reactive({
   weeklyChallenge: [],
@@ -20,63 +21,81 @@ onMounted(async () => {
 </script>
 
 <template>
-   <!-- <swiper
-    :slidesPerView="1"
-    :spaceBetween="30"
-    :loop="true"
-    :pagination="{
-      clickable: true,
-    }"
-    :navigation="true"
-    :modules="modules"
-    class="mySwiper"
-  >
-    <swiper-slide>Slide 1</swiper-slide>
-    <swiper-slide>Slide 2</swiper-slide><swiper-slide>Slide 3</swiper-slide>
-    <swiper-slide>Slide 4</swiper-slide><swiper-slide>Slide 5</swiper-slide>
-    <swiper-slide>Slide 6</swiper-slide><swiper-slide>Slide 7</swiper-slide>
-    <swiper-slide>Slide 8</swiper-slide><swiper-slide>Slide 9</swiper-slide>
-  </swiper> -->
-  <div>
+  <div class="wrap">
     <!-- 주간 챌린지 -->
     <div>
-      <div>주간 챌린지</div>
-        <ChallengeCard
-          v-for="challenge in state.weeklyChallenge"
-          :id="challenge.id"
-          :image="challenge.image"
-          :name="challenge.name"
-          :reward="challenge.reward"
-        ></ChallengeCard>
+      <div class="first-title">주간 챌린지</div>
+      <Swiper :slides-per-view="2" :space-between="15" loop>
+        <SwiperSlide v-for="challenge in state.weeklyChallenge">
+          <ChallengeCard
+            class="challenge-card"
+            :id="challenge.id"
+            :image="challenge.image"
+            :name="challenge.name"
+            :reward="challenge.reward"
+          ></ChallengeCard>
+        </SwiperSlide>
+      </Swiper>
     </div>
     <!-- 월간 경쟁 챌린지 -->
     <div>
-      <div>월간 경쟁 챌린지</div>
-      <div v-for="(list, category) in state.monthlyChallenge">
-        <div>{{ `> ${category}` }}</div>
-        <div v-for="challenge in list">
-          <ChallengeCard
-            :id="challenge.id"
-            :image="challenge.image"
-            :name="challenge.name"
-            :reward="challenge.reward"
-          ></ChallengeCard>
-        </div>
+      <div class="title">월간 경쟁 챌린지</div>
+      <div v-for="(list, category) in state.monthlyChallenge" :key="category">
+        <div class="sub-title">{{ `> ${category}` }}</div>
+        <Swiper :slides-per-view="2" :space-between="15" loop>
+          <SwiperSlide v-for="challenge in list">
+            <ChallengeCard
+              class="challenge-card"
+              :key="challenge.id"
+              :id="challenge.id"
+              :image="challenge.image"
+              :name="challenge.name"
+              :reward="challenge.reward"
+            ></ChallengeCard>
+          </SwiperSlide>
+        </Swiper>
       </div>
       <!-- 월간 개인 챌린지 -->
       <div>
-        <div>월간 개인 챌린지</div>
-        <div v-for="challenge in state.dailyChallenge">
-          <ChallengeCard
-            :id="challenge.id"
-            :image="challenge.image"
-            :name="challenge.name"
-            :reward="challenge.reward"
-          ></ChallengeCard>
-        </div>
+        <div class="title">월간 개인 챌린지</div>
+        <Swiper :slides-per-view="2" :space-between="15" loop>
+          <SwiperSlide v-for="challenge in state.dailyChallenge">
+            <ChallengeCard
+              class="challenge-card"
+              :key="challenge.id"
+              :id="challenge.id"
+              :image="challenge.image"
+              :name="challenge.name"
+              :reward="challenge.reward"
+            ></ChallengeCard>
+          </SwiperSlide>
+        </Swiper>
       </div>
     </div>
   </div>
 </template>
 
-<style scoped></style>
+<style lang="scss" scoped>
+.wrap {
+  user-select: none;
+}
+:deep(.swiper-wrapper) {
+  display: flex;
+  cursor: grab;
+}
+.first-title {
+  margin-bottom: 15px;
+  font-size: 20px;
+  font-weight: bold;
+}
+.title {
+  margin-bottom: 15px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.sub-title {
+  font-size: 12px;
+  margin-bottom: 15px;
+}
+</style>
