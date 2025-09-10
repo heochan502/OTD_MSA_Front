@@ -23,7 +23,7 @@ onMounted(async () => {
 <template>
   <div class="wrap">
     <!-- 주간 챌린지 -->
-    <div>
+    <div class="weekly-challenge">
       <div class="first-title">주간 챌린지</div>
       <Swiper :slides-per-view="2" :space-between="15" loop>
         <SwiperSlide v-for="challenge in state.weeklyChallenge">
@@ -38,7 +38,7 @@ onMounted(async () => {
       </Swiper>
     </div>
     <!-- 월간 경쟁 챌린지 -->
-    <div>
+    <div class="monthly-challenge">
       <div class="title">월간 경쟁 챌린지</div>
       <div v-for="(list, category) in state.monthlyChallenge" :key="category">
         <div class="sub-title">{{ `> ${category}` }}</div>
@@ -79,6 +79,9 @@ onMounted(async () => {
 .wrap {
   user-select: none;
 }
+:deep(.swiper) {
+  overflow: hidden;
+}
 :deep(.swiper-wrapper) {
   display: flex;
   cursor: grab;
@@ -93,7 +96,6 @@ onMounted(async () => {
   font-size: 20px;
   font-weight: bold;
 }
-
 .sub-title {
   font-size: 12px;
   margin-bottom: 15px;
