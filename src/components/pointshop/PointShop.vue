@@ -1,12 +1,27 @@
 <script setup>
 import { defineProps, ref, reactive, computed } from 'vue';
 
-const allItems = ref(['Item1', 'Item2', 'Item3']);
+const allItems = ref([
+  { id: 1, name: 'Item1', price: 100 }, 
+  { id: 2, name: 'Item2', price: 200 }, 
+  { id: 3, name: 'Item3', price: 300 },
+  { id: 4, name: 'Item4', price: 400 },
+  { id: 5, name: 'Item5', price: 500 },
+  { id: 6, name: 'Item6', price: 600 },
+]);
 
 const state = reactive({
   search: '',
   searchList: [],
   showMessage: true,
+});
+
+const filteredItems = computed(() => {
+  const query = state.search.trim().toLowerCase();
+  if (!query) return allItems.value;
+  return allItems.value.filter(item =>
+    item.name.toLowerCase().includes(query)
+  );
 });
 
 const onTyping = () => {
@@ -25,9 +40,9 @@ const pointData = () => {
     state.searchList = [];
     return;
   }
-  state.searchList = allItems.value.filter(item =>
-    item.toLowerCase().includes(query)
-  );
+  state.searchList = allItems.value
+  .filter(item => item.name.toLowerCase().includes(query))
+  .map(item => item.name);
 };
 
 const showNoticeMessage = computed(() => {
@@ -40,6 +55,13 @@ const props = defineProps
   image: '',
   name: '',
 });
+
+const purchase = (item) => {
+  const ok = confirm(`${item.name} (${item.price}포인트)를 구매하시겠습니까?`);
+  if (ok) {
+    alert(`'${item.name}'을(를) 구매했습니다!`);
+  }
+};
 </script>
 
 <template>
@@ -66,15 +88,19 @@ const props = defineProps
   </div>
 
   <div class="pointshop-container">
-    <div class="pointshop-item" v-for="item in 6" :key="item">
-      <img :src="`/image/pointshop/item${item}.png`" alt="Item Image" class="item-image" />
+    <div class="pointshop-item" v-for="item in filteredItems" :key="item.id">
+      <img :src="`/image/pointshop/item${item.id}.png`" alt="Item Image" class="item-image" />
       <div class="item-details">
-        <h5 class="item-name">Item {{ item }}</h5>
-        <p class="item-price">Price: {{ item * 100 }} Points</p>
-        <b-button variant="primary" size="sm">구매하기</b-button>
+        <h5 class="item-name"> {{ item.name }}</h5>
+        <p class="item-price">Price: {{ item.price }} Points</p>
+        <b-button variant="primary" size="sm" @click="purchase(item)">구매</b-button>
         </div>
       </div>
     </div>
+
+      <div v-if="filteredItems.length === 0" class="no-result-message">
+      검색 결과가 없습니다.
+      </div>
 </template>
 
 <style scoped>
@@ -116,4 +142,12 @@ const props = defineProps
   justify-content: center;
   padding: 20px;
 }
+
+.no-result-message {
+  text-align: center;
+  color: gray;
+  font-size: 14px;
+  margin-top: 20px;
+}
+
 </style>
