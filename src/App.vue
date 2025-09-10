@@ -1,6 +1,7 @@
 <script setup>
 import Layout from './views/layout/layout.vue';
-
+import { useRoute, useRouter } from 'vue-router';
+import { ref, watch, onMounted } from 'vue';
 
 
 

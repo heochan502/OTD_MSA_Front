@@ -70,7 +70,7 @@ const submit = async () => {
         <button class="w-100 h6 btn py-3 btn-primary">로그인</button>
       </form>
       <div>
-        <router-link to="user/join">회원가입</router-link>
+        <router-link to="/user/join">회원가입</router-link>
       </div>
       <!-- API 로그인 -->
       <div class="mb-3">
