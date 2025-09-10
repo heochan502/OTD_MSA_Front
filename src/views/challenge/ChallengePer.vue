@@ -1,6 +1,7 @@
 <script setup>
 import RankingCard from '@/components/challenge/RankingCard.vue';
 import { reactive } from 'vue';
+import Progress from '@/components/challenge/ProgressSample.vue';
 
 const state = reactive({
   ranking: [],
@@ -12,7 +13,7 @@ const state = reactive({
     <!-- 진행률 -->
     <div>
       <div>현재 ${state.} 달렸어요!</div>
-      <div>progress</div>
+      <Progress></Progress>
     </div>
     <!-- 랭킹 -->
     <div>
@@ -22,7 +23,7 @@ const state = reactive({
       </div>
       <div v-for="ranking in state.ranking">
         <RankingCard :ranking-detail="ranking"></RankingCard>
-        <div>${state.}명이 참여했어요! </div>
+        <div>${state.}명이 참여했어요!</div>
       </div>
     </div>
   </div>

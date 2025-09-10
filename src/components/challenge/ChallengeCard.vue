@@ -27,11 +27,12 @@ const props = defineProps({
   border-radius: 10px;
   box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  
+
   .challenge-img {
     width: 168px;
     height: 121px;
   }
+  
   .point-box {
     display: flex;
     align-items: center;
