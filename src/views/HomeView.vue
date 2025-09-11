@@ -68,9 +68,10 @@ const handleClick = (index)=>{
 
 .progress-section {
   display: flex;
-margin-bottom: 20px;
+  margin-bottom: 20px;
   gap: 15px;
   flex-direction: row;
+  
 }
 
 .title_text {
