@@ -3,6 +3,8 @@ import { onMounted, reactive } from 'vue';
 import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 import { getAll } from '@/services/challenge/ChallengeService';
 import { Swiper, SwiperSlide } from 'swiper/vue';
+import { Autoplay } from 'swiper/modules';
+import 'swiper/css/autoplay';
 
 const state = reactive({
   weeklyChallenge: [],
@@ -25,7 +27,13 @@ onMounted(async () => {
     <!-- 주간 챌린지 -->
     <div class="weekly-challenge">
       <div class="first-title">주간 챌린지</div>
-      <Swiper :slides-per-view="2" :space-between="15" loop>
+      <Swiper
+        :modules="[Autoplay]"
+        :slides-per-view="2"
+        :space-between="15"
+        loop
+        :autoplay="{ delay: 3000, disableOnInteraction: false }"
+      >
         <SwiperSlide v-for="challenge in state.weeklyChallenge">
           <ChallengeCard
             class="challenge-card"
@@ -42,7 +50,13 @@ onMounted(async () => {
       <div class="title">월간 경쟁 챌린지</div>
       <div v-for="(list, category) in state.monthlyChallenge" :key="category">
         <div class="sub-title">{{ `> ${category}` }}</div>
-        <Swiper :slides-per-view="2" :space-between="15" loop>
+        <Swiper
+          :modules="[Autoplay]"
+          :slides-per-view="2"
+          :space-between="15"
+          loop
+          :autoplay="{ delay: 5000, disableOnInteraction: false }"
+        >
           <SwiperSlide v-for="challenge in list">
             <ChallengeCard
               class="challenge-card"
@@ -58,7 +72,13 @@ onMounted(async () => {
       <!-- 월간 개인 챌린지 -->
       <div>
         <div class="title">월간 개인 챌린지</div>
-        <Swiper :slides-per-view="2" :space-between="15" loop>
+        <Swiper
+          :modules="[Autoplay]"
+          :slides-per-view="2"
+          :space-between="15"
+          loop
+          :autoplay="{ delay: 5000, disableOnInteraction: false }"
+        >
           <SwiperSlide v-for="challenge in state.dailyChallenge">
             <ChallengeCard
               class="challenge-card"
