@@ -22,19 +22,13 @@ import Footer from './Footer.vue';
 <style lang="scss" scoped>
 .app-layout {
   display: flex;
-  /* 행 간격을 20px로 설정 */
-  /* row-gap: 30px; */
   flex-direction: column;
   height: 805px;
   user-select: none;
 }
 /* 공통 화면 좌우 여백 */
 .main_margin {
-  margin: 30px 20px 0 20px;
-  overflow: scroll;
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  margin: 0px 20px 0 20px;
 }
 .nav-footer {
   margin-top: auto;

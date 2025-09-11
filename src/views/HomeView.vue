@@ -68,6 +68,7 @@ const handleClick = (index)=>{
 
 .progress-section {
   display: flex;
+  margin-top: 30px;
   margin-bottom: 20px;
   gap: 15px;
   flex-direction: row;
