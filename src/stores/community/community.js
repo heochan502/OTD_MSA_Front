@@ -10,9 +10,9 @@ import {
 
 export const useCommunityStore = defineStore('community', {
   state: () => ({
-    posts: [], // 게시글 목록
-    selectedPost: null, // 현재 선택된 게시글
-    viewMode: 'list', // list | detail | write | edit
+    posts: [],
+    selectedPost: null,
+    viewMode: 'list',
     loading: false,
     error: null,
     page: 1,
@@ -21,42 +21,53 @@ export const useCommunityStore = defineStore('community', {
     searchText: '',
   }),
 
+  getters: {
+    list: (state) => (category) => {
+      if (!Array.isArray(state.posts)) return [];
+      return state.posts
+        .filter((p) => p?.category === category)
+        .map((p) => ({ ...p, likes: p.likes ?? p.like ?? 0 }));
+    },
+  },
+
   actions: {
-    // 게시글 목록 불러오기
     async loadPosts(page = 1, size = 10, searchText = '') {
       this.loading = true;
       this.error = null;
       try {
         const res = await fetchPosts(page, size, searchText);
-        this.posts = res.data.content ?? res.data; // 백엔드 응답 구조에 맞춤
+        const raw = res.data?.content ?? res.data ?? [];
+        this.posts = Array.isArray(raw)
+          ? raw.map((p) => ({
+              ...p,
+              likes: p.likes ?? p.like ?? 0,
+            }))
+          : [];
         this.page = page;
         this.size = size;
-        this.total = res.data.totalElements ?? this.posts.length;
+        this.total = res.data?.totalElements ?? this.posts.length;
       } catch (err) {
-        console.error('게시글 목록 불러오기 실패', err);
         this.error = err;
       } finally {
         this.loading = false;
       }
     },
 
-    // 특정 게시글 불러오기
     async loadPostDetail(postId) {
       this.loading = true;
       this.error = null;
       try {
         const res = await fetchPostById(postId);
-        this.selectedPost = res.data;
+        const d = res.data;
+        this.selectedPost = d ? { ...d, likes: d.likes ?? d.like ?? 0 } : null;
         this.viewMode = 'detail';
       } catch (err) {
-        console.error('게시글 상세 불러오기 실패', err);
         this.error = err;
       } finally {
         this.loading = false;
       }
     },
 
-    // 게시글 작성
     async createNewPost(formData) {
       try {
         const res = await createPost(formData);
@@ -64,13 +75,11 @@ export const useCommunityStore = defineStore('community', {
         this.viewMode = 'list';
         return res;
       } catch (err) {
-        console.error('게시글 작성 실패', err);
         this.error = err;
         throw err;
       }
     },
 
-    // 게시글 수정
     async updateExistingPost(postId, formData) {
       try {
         const res = await updatePost(postId, formData);
@@ -78,49 +87,49 @@ export const useCommunityStore = defineStore('community', {
         this.viewMode = 'list';
         return res;
       } catch (err) {
-        console.error('게시글 수정 실패', err);
         this.error = err;
         throw err;
       }
     },
 
-    // 게시글 삭제
     async removePost(postId) {
       try {
         await deletePost(postId);
         this.posts = this.posts.filter((p) => p.postId !== postId);
+        if (this.selectedPost?.postId === postId) this.selectedPost = null;
         this.viewMode = 'list';
       } catch (err) {
-        console.error('게시글 삭제 실패', err);
         this.error = err;
       }
     },
 
-    // 좋아요 토글
     async toggleLike(postId) {
       try {
         const res = await toggleLike(postId);
-        // 응답 데이터에 좋아요 상태/갯수 포함 시 업데이트
-        const idx = this.posts.findIndex((p) => p.postId === postId);
-        if (idx !== -1) {
-          this.posts[idx].like = res.data.likeCount;
-          this.posts[idx].liked = res.data.liked;
+        const likeCount = res.data?.likeCount ?? res.data?.likes ?? 0;
+        const liked = res.data?.liked ?? undefined;
+
+        const i = this.posts.findIndex((p) => p.postId === postId);
+        if (i !== -1) {
+          this.posts[i].likes = likeCount;
+          if (typeof liked === 'boolean') this.posts[i].liked = liked;
         }
         if (this.selectedPost?.postId === postId) {
-          this.selectedPost.like = res.data.likeCount;
-          this.selectedPost.liked = res.data.liked;
+          this.selectedPost.likes = likeCount;
+          if (typeof liked === 'boolean') this.selectedPost.liked = liked;
         }
       } catch (err) {
-        console.error('좋아요 토글 실패', err);
         this.error = err;
       }
     },
 
-    // 화면 모드 전환
     setViewMode(mode) {
       this.viewMode = mode;
     },
+    setSearchText(v) {
+      this.searchText = v ?? '';
+    },
   },
 
-  persist: true, // pinia-plugin-persistedstate 적용
+  persist: true,
 });
