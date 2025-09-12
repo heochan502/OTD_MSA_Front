@@ -1,7 +1,7 @@
 <script setup>
 const props = defineProps({
   categories: { type: Array, required: true }, // [{key,label,icon}]
-  selected: { type: String, required: true }
+  selected: { type: String, required: true },
 });
 const emit = defineEmits(['select']);
 
@@ -33,15 +33,13 @@ function clickCategory(key) {
   padding-bottom: 4px;
 }
 
-/* iOS 네오몰피즘 느낌의 카드 */
 .category-chip {
   min-width: 72px;
   height: 72px;
   background: #ffffff;
   border-radius: 14px;
-  box-shadow:
-    6px 6px 12px rgba(0,0,0,0.08),
-    -6px -6px 12px rgba(255,255,255,0.9);
+  box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.08),
+    -6px -6px 12px rgba(255, 255, 255, 0.9);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -53,9 +51,8 @@ function clickCategory(key) {
 }
 .category-chip.active {
   border-color: #2ec4c7;
-  box-shadow:
-    3px 3px 8px rgba(0,0,0,0.08),
-    -3px -3px 8px rgba(255,255,255,0.9);
+  box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.08),
+    -3px -3px 8px rgba(255, 255, 255, 0.9);
 }
 
 .category-chip img {
