@@ -2,6 +2,7 @@
 import { onMounted, reactive } from 'vue';
 import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 import { useRouter } from 'vue-router';
+import Calendar from '@/components/challenge/Calendar.vue';
 import { getSelectedAll } from '@/services/challenge/ChallengeService';
 
 const router = useRouter();
@@ -50,12 +51,17 @@ onMounted(async () => {
       </div> -->
     </div>
     <!-- 주간 챌린지 -->
+  <div>
     <div>
       <div class="weekly">
         <div class="title">진행중인 주간 챌린지</div>
         <!-- <div class="route-list" @click="toChallengeList">
           > 챌린지 목록 보기
         </div> -->
+      <!-- 주간 챌린지 -->
+      <div>
+        <div>진행중인 주간 챌린지</div>
+        <div @click="toList">> 챌린지 목록 보기</div>
       </div>
       <div class="challenge-card">
         <ChallengeCard
@@ -77,6 +83,12 @@ onMounted(async () => {
           >
         </div>
       </div>
+      <ChallengeCard
+        v-for="challenge in state.weeklyChallenge"
+        :id="challenge.id"
+        :image="challenge.image"
+        :name="challenge.name"
+      ></ChallengeCard>
     </div>
     <!-- 월간 챌린지 -->
     <div>
@@ -105,6 +117,13 @@ onMounted(async () => {
             >
           </div>
         </div>
+        <div>> 경쟁 챌린지</div>
+        <ChallengeCard
+          v-for="challenge in state.monthlyChallenge"
+          :id="challenge.id"
+          :image="challenge.image"
+          :name="challenge.name"
+        ></ChallengeCard>
       </div>
       <!-- 개인 -->
       <div>
@@ -132,6 +151,16 @@ onMounted(async () => {
         </div>
       </div>
     </div>
+        <div>> 개인 챌린지</div>
+        <ChallengeCard
+          v-for="challenge in state.dailyChallenge"
+          :id="challenge.id"
+          :image="challenge.image"
+          :name="challenge.name"
+        ></ChallengeCard>
+      </div>
+    </div>
+    <Calendar></Calendar>
   </div>
 </template>
 
