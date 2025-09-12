@@ -21,19 +21,19 @@ const categoryLabelMap = {
 const headerType = computed(() => route.meta.headerType ?? 'logo');
 const showUserPanel = computed(() => route.meta.showUserPanel === true);
 
-const headerTitle = computed (() =>
-{
- 
-  // 타이틀이 있으면 타이틀 우선으로 타이틀을 리턴하고
-  if (route.meta.title)
-  {
-    return route.meta.title;
+const headerTitle = computed(() => {
+  const metaTitle = route.meta.title
+  // 1. meta.title이 함수라면 실행 결과 리턴
+  if (typeof metaTitle === 'function') {
+    return metaTitle(route)
   }
-  // 타이틀이 없고 카테고리가 있으면 카테고리의 params에서 객체의 값을 mapping 해서 리턴 해줌
-  //  혹시나 값없으면 커뮤니티로 리턴 함  
-  if (route.name==='CommunityCategory')
-  {
-    return categoryLabelMap[route.params.category] ?? '커뮤니티';
+  // 2. 문자열이면 그대로 사용
+  if (typeof metaTitle === 'string') {
+    return metaTitle
+  }
+  // 3. meta.title이 없고, 커뮤니티 카테고리 라우트라면 categoryLabelMap 활용
+  if (route.name === 'CommunityCategory') {
+    return categoryLabelMap[route.params.category] ?? '커뮤니티'
   }
   return ''
 })
@@ -159,8 +159,8 @@ const handleClick= ()=>{
   display: flex;  
   justify-content: center; 
   align-self:flex-end; 
-   gap: 5px;
-   cursor: pointer;
+  gap: 5px;
+  cursor: pointer;
  
   }  
   .pointShop{
