@@ -22,7 +22,7 @@ const state = reactive({
       </div>
       <div v-for="ranking in state.ranking">
         <RankingCard :ranking-detail="ranking"></RankingCard>
-        <div>${state.}명이 참여했어요! </div>
+        <div>${state.}명이 참여했어요!</div>
       </div>
     </div>
   </div>
