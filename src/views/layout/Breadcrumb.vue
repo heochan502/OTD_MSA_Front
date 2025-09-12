@@ -6,6 +6,12 @@ import CommunityCategory from '@/components/community/CommunityCategory.vue';
 const route = useRoute();
 const router = useRouter();
 
+const userInfo = {
+  name : '보노보노',
+  nickName: '뭘보노',
+  userPoint: 10000,
+}
+
 const categoryLabelMap = {
   free:'자유수다',
   diet: '다이어트',
@@ -40,6 +46,9 @@ const handleClick= ()=>{
 
 <template>
   <div class="top_header">
+    <div>
+      <img class="image" src="/image/main/fixed-header.png">
+    </div>
     <!-- 로고 출력 해야할 때 -->
     <div class="title" v-if="headerType === 'logo'">
       <img class="otd_logo" src="/image/main/ontoday_logo.png" alt="로고" />
@@ -65,19 +74,26 @@ const handleClick= ()=>{
         <span class="  name ">행키 님</span>
       </div>
     </div>
-    <div class="point">
-      <img class="point_img" src="/image/main/point.png" alt="포인트" />
-      <span>5,000 </span>
-    </div>
+      <div class="point">
+        <router-link to="/pointshop" class="pointShop" :class="{active : route.path.startsWith('/pointshop')}">
+        <img class="point_img" src="/image/main/point.png" alt="포인트"/> //바로 닫는 코드로 변경
+        <span >{{ `${userInfo.userPoint.toLocaleString()}` }} </span>
+        </router-link>
+    </div>    
   </div>
 
 </template>
 
 <style scoped>
+.image{
+  position: absolute;
+  width: 390px;
+  right: 1px;
+  top: 1px;
+}
 .title {
-  background: #00D5DF;
-  margin-top: 24px;
-  
+  /* background: #00D5DF; */
+  margin-top: 38px;
   display: flex;
   justify-content: space-between;
   margin-bottom: 15px;
@@ -119,10 +135,11 @@ const handleClick= ()=>{
 }
 
 .top_header {
+  position: relative;
   background: #00D5DF;
   color: #000;
   padding: 20px;
-  border-radius: 20px 20px 0 0; 
+  border-radius: 60px 60px 0 0; 
   height: 104px;
 }
 .user_profile
@@ -130,28 +147,34 @@ const handleClick= ()=>{
   display: flex;
   flex-direction: row;
 }
+
 .user {
-  padding: 20px 20px 10px 20px;
+  padding: 20px 20px 0px 20px;
   display: flex;
   align-items: center;
+  
   justify-content: space-between; 
-  }
-  .point{
-  display: flex;
+}
+.point{
+  display: flex;  
   justify-content: center; 
-  align-self:flex-end;
+  align-self:flex-end; 
    gap: 5px;
-   cursor: pointer;
- 
-  }
-  .point span{
+   cursor: pointer; 
+  }  
+  .pointShop{
     padding-top: 2px;
     font-size: 14px;
     font-weight: 500;
-    
-   }
-
-
+    color: #303030; 
+    text-decoration: none;
+    display: flex;
+    align-items: end; 
+  }
+  span {
+    margin-left: 7px;
+  }
+  /* 하나씩 감싸게 변경 */
 .name { 
   font-size: 24px;
   font-weight: bold;

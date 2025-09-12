@@ -12,11 +12,14 @@ import ChallengeList from '@/views/challenge/ChallengeList.vue';
 import CommunityCategory from '@/components/community/CommunityCategory.vue';
 import Login from '@/views/user/Login.vue'
 import Join from '@/views/user/Join.vue'
-import Oauth2 from '@/views/OAuth2Handler.vue'
+import PassCallback from '@/views/auth/PassCallback.vue' 
+import Oauth2 from '@/views/auth/OAuth2Handler.vue'
 import PayApproval from '@/views/pay/PayApproval.vue';
 import PayCancel from '@/views/pay/PayCancel.vue';
 import PayCompleted from '@/views/pay/PayCompleted.vue';
 import PayFail from '@/views/pay/PayFail.vue';
+
+import PointShop from '@/components/pointshop/PointShop.vue'
 
 
 const router = createRouter({
@@ -70,6 +73,11 @@ const router = createRouter({
       component: Join
     },
     {
+    path: '/auth/pass/callback', 
+    name: 'PassCallback',
+    component: PassCallback
+    },
+    {
       path: '/fe/redirect',
       name: 'oauth2',
       component: Oauth2
@@ -93,6 +101,12 @@ const router = createRouter({
       path: '/pay/fail',
       name: 'pay-fail',
       component: PayFail
+    },
+    {
+      path: '/pointshop',
+      name: 'PointShop',
+      component: PointShop,
+      meta: {headerType: 'title', title: '포인트샵',  showUserPanel:false},
     },
   ],
 });

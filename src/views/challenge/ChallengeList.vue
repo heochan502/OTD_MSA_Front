@@ -2,6 +2,7 @@
 import { onMounted, reactive } from 'vue';
 import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 import { getAll } from '@/services/challenge/ChallengeService';
+import { Swiper, SwiperSlide } from 'swiper/vue';
 
 const state = reactive({
   weeklyChallenge: [],
@@ -20,7 +21,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div>
+  <div class="wrap">
     <!-- 주간 챌린지 -->
     <div>
       <div>진행중인 주간 챌린지</div>
@@ -63,4 +64,27 @@ onMounted(async () => {
   </div>
 </template>
 
-<style scoped></style>
+<style lang="scss" scoped>
+.wrap {
+  user-select: none;
+}
+:deep(.swiper-wrapper) {
+  display: flex;
+  cursor: grab;
+}
+.first-title {
+  margin-bottom: 15px;
+  font-size: 20px;
+  font-weight: bold;
+}
+.title {
+  margin-bottom: 15px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.sub-title {
+  font-size: 12px;
+  margin-bottom: 15px;
+}
+</style>
