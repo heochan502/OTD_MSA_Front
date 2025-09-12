@@ -2,7 +2,10 @@
 import { onMounted, reactive } from 'vue';
 import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 import { useRouter } from 'vue-router';
-import { getSelectedAll } from '@/services/challenge/ChallengeService';
+import {
+  getSelectedAll,
+  getChallenge,
+} from '@/services/challenge/ChallengeService';
 
 const router = useRouter();
 
@@ -16,13 +19,17 @@ const toChallengeList = () => {
   router.push('challenge/list');
 };
 
+const toList = async (keyword) => {
+  const res = await getChallenge(keyword);
+  console.log(res);
+};
+
 onMounted(async () => {
-  const res = await getSelectedAll();
+  const res = await getSelectedAll(1);
   state.weeklyChallenge = res.data.weeklyChallenge;
   state.monthlyChallenge = res.data.monthlyChallenge;
   state.dailyChallenge = res.data.dailyChallenge;
-
-  console.log('data', res.data);
+  console.log(res.data);
 });
 </script>
 
@@ -69,11 +76,10 @@ onMounted(async () => {
           v-for="n in Math.max(0, 2 - state.weeklyChallenge.length)"
           :key="'w-' + n"
           class="empty-card"
-          @click="toList"
         >
-          <span
+          <span @click="toList('weekly')"
             >새로운 챌린지에 <br />
-            도번해보세요!</span
+            도전해보세요!</span
           >
         </div>
       </div>
@@ -97,11 +103,10 @@ onMounted(async () => {
             v-for="n in Math.max(0, 2 - state.monthlyChallenge.length)"
             :key="'m-' + n"
             class="empty-card"
-            @click="toList"
           >
-            <span
+            <span @click="toList('monthly')"
               >새로운 챌린지에 <br />
-              도번해보세요!</span
+              도전해보세요!</span
             >
           </div>
         </div>
@@ -122,11 +127,10 @@ onMounted(async () => {
             v-for="n in Math.max(0, 2 - state.dailyChallenge.length)"
             :key="'d-' + n"
             class="empty-card"
-            @click="toChallengeList"
           >
-            <span
+            <span @click="toList('daily')"
               >새로운 챌린지에 <br />
-              도번해보세요!</span
+              도전해보세요!</span
             >
           </div>
         </div>
