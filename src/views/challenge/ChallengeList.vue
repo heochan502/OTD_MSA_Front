@@ -24,52 +24,41 @@ onMounted(async () => {
   <div class="wrap">
     <!-- 주간 챌린지 -->
     <div>
-      <div class="first-title">주간 챌린지</div>
-      <Swiper :slides-per-view="2" :space-between="15" loop>
-        <SwiperSlide v-for="challenge in state.weeklyChallenge">
+      <div>진행중인 주간 챌린지</div>
+      <div v-for="challenge in state.weeklyChallenge" :key="challenge.id">
+        <ChallengeCard
+          :id="challenge.id"
+          :image="challenge.image"
+          :name="challenge.name"
+          :reward="challenge.reward"
+        ></ChallengeCard>
+      </div>
+    </div>
+    <!-- 월간 경쟁 챌린지 -->
+    <div>
+      <div>월간 경쟁 챌린지</div>
+      <div v-for="(list, category) in state.monthlyChallenge" :key="category">
+        <div>{{ `> ${category}` }}</div>
+        <div v-for="challenge in list" :key="challenge.id">
           <ChallengeCard
-            class="challenge-card"
             :id="challenge.id"
             :image="challenge.image"
             :name="challenge.name"
             :reward="challenge.reward"
           ></ChallengeCard>
-        </SwiperSlide>
-      </Swiper>
-    </div>
-    <!-- 월간 경쟁 챌린지 -->
-    <div>
-      <div class="title">월간 경쟁 챌린지</div>
-      <div v-for="(list, category) in state.monthlyChallenge" :key="category">
-        <div class="sub-title">{{ `> ${category}` }}</div>
-        <Swiper :slides-per-view="2" :space-between="15" loop>
-          <SwiperSlide v-for="challenge in list">
-            <ChallengeCard
-              class="challenge-card"
-              :key="challenge.id"
-              :id="challenge.id"
-              :image="challenge.image"
-              :name="challenge.name"
-              :reward="challenge.reward"
-            ></ChallengeCard>
-          </SwiperSlide>
-        </Swiper>
+        </div>
       </div>
       <!-- 월간 개인 챌린지 -->
       <div>
-        <div class="title">월간 개인 챌린지</div>
-        <Swiper :slides-per-view="2" :space-between="15" loop>
-          <SwiperSlide v-for="challenge in state.dailyChallenge">
-            <ChallengeCard
-              class="challenge-card"
-              :key="challenge.id"
-              :id="challenge.id"
-              :image="challenge.image"
-              :name="challenge.name"
-              :reward="challenge.reward"
-            ></ChallengeCard>
-          </SwiperSlide>
-        </Swiper>
+        <div>월간 개인 챌린지</div>
+        <div v-for="challenge in state.dailyChallenge" :key="challenge.id">
+          <ChallengeCard
+            :id="challenge.id"
+            :image="challenge.image"
+            :name="challenge.name"
+            :reward="challenge.reward"
+          ></ChallengeCard>
+        </div>
       </div>
     </div>
   </div>

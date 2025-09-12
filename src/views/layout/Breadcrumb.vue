@@ -68,7 +68,7 @@ const handleClick= ()=>{
 
   <div class="user " v-if="route.name ==='Home'">
     <div class="user_profile ">
-      <img class="avatar" src="/image/main/test.png" alt="프로필"></img>
+      <img class="avatar" src="/image/main/test.png" alt="프로필"/>
       <div class="info">
         <span class="  welcome_text">안녕하세요 :)</span>
         <span class="  name ">행키 님</span>
@@ -76,7 +76,7 @@ const handleClick= ()=>{
     </div>
       <div class="point">
         <router-link to="/pointshop" class="pointShop" :class="{active : route.path.startsWith('/pointshop')}">
-        <img class="point_img" src="/image/main/point.png" alt="포인트"/>
+        <img class="point_img" src="/image/main/point.png" alt="포인트"/> //바로 닫는 코드로 변경
         <span >{{ `${userInfo.userPoint.toLocaleString()}` }} </span>
         </router-link>
     </div>    
@@ -154,14 +154,13 @@ const handleClick= ()=>{
   align-items: center;
   
   justify-content: space-between; 
-
-  .point{
+}
+.point{
   display: flex;  
   justify-content: center; 
   align-self:flex-end; 
    gap: 5px;
-   cursor: pointer;
- 
+   cursor: pointer; 
   }  
   .pointShop{
     padding-top: 2px;
@@ -171,13 +170,11 @@ const handleClick= ()=>{
     text-decoration: none;
     display: flex;
     align-items: end; 
-    span {
-      margin-left: 7px;
-    }
-   }
-   
-}
-
+  }
+  span {
+    margin-left: 7px;
+  }
+  /* 하나씩 감싸게 변경 */
 .name { 
   font-size: 24px;
   font-weight: bold;

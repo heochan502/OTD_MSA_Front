@@ -24,7 +24,7 @@ const toList = () => {
         <div>진행중인 주간 챌린지</div>
         <div @click="toList">> 챌린지 목록 보기</div>
       </div>
-      <div v-for="challenge in state.weeklyChallenge">
+      <div v-for="challenge in state.weeklyChallenge" :key="challenge.id">
         <ChallengeCard
           :id="challenge.id"
           :image="challenge.image"
@@ -38,7 +38,7 @@ const toList = () => {
       <!-- 경쟁 -->
       <div>
         <div>> 경쟁 챌린지</div>
-        <div v-for="challenge in state.monthlyChallenge">
+        <div v-for="challenge in state.monthlyChallenge" :key="challenge.id">
           <ChallengeCard
             :id="challenge.id"
             :image="challenge.image"
@@ -49,7 +49,7 @@ const toList = () => {
       <!-- 개인 -->
       <div>
         <div>> 개인 챌린지</div>
-        <div v-for="challenge in state.dailyChallenge">
+        <div v-for="challenge in state.dailyChallenge" :key="challenge.id">
           <ChallengeCard
             :id="challenge.id"
             :image="challenge.image"
