@@ -159,8 +159,8 @@ const handleClick= ()=>{
   display: flex;  
   justify-content: center; 
   align-self:flex-end; 
-   gap: 5px;
-   cursor: pointer;
+  gap: 5px;
+  cursor: pointer;
  
   }  
   .pointShop{
