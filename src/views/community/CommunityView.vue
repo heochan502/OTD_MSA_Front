@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import CommunitySearch from '@/components/community/CommunitySearch.vue';
 import CommunityCategory from '@/components/community/CommunityCategory.vue';
@@ -8,6 +8,11 @@ import { useCommunityStore } from '@/stores/community/community';
 
 const router = useRouter();
 const store = useCommunityStore();
+
+onMounted(() => {
+  // 최초 진입 시 더미/실데이터 로드
+  store.loadPosts(1, 10, '');
+});
 
 const categories = [
   { key: 'free', label: '자유수다', icon: '/image/community/free.png' },
