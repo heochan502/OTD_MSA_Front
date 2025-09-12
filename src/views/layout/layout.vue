@@ -28,7 +28,6 @@ import Footer from './Footer.vue';
 }
 /* 공통 화면 좌우 여백 */
 .main_margin {
-  margin: 0px 20px 0 20px;
   overflow: scroll;
   &::-webkit-scrollbar {
     display: none;
