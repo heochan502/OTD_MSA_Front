@@ -7,9 +7,9 @@ const displayValue = ref(0);
 
 onMounted(() => {
   setTimeout(() => {
-    targetValue.value = 68 // 통게치 받아왔다 가정
-    animateProgress(targetValue.value)
-  }, 50) // DOM 렌더링 직후 약간의 지연을 줘야 transition이 발동
+    targetValue.value = 68; // 통게치 받아왔다 가정
+    animateProgress(targetValue.value);
+  }, 50); // DOM 렌더링 직후 약간의 지연을 줘야 transition이 발동
 });
 
 const animateProgress = (target) => {
@@ -32,7 +32,7 @@ const animateProgress = (target) => {
 
 <template>
   <div class="progress">
-    <div class="progress-bar" :style="{ width : targetValue + '%'}"></div>
+    <div class="progress-bar" :style="{ width: targetValue + '%' }"></div>
     <div class="progress-num">
       <span>{{ displayValue }}%</span>
     </div>
