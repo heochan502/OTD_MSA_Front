@@ -33,6 +33,7 @@ const props = defineProps({
     height: 121px;
     cursor: pointer;
   }
+  
   .point-box {
     display: flex;
     align-items: center;

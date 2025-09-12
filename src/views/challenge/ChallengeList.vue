@@ -20,6 +20,7 @@ onMounted(async () => {
 
   console.log('data', res.data);
 });
+
 </script>
 
 <template>
