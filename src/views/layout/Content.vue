@@ -15,12 +15,5 @@
 </template>
 
 <style scoped>
-.content {
-  flex: 1;
-  height: 100%;
-  padding: 10px 20px 0;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto; /* 컨텐츠 길어질 때만 스크롤 */
-}
+
 </style>
