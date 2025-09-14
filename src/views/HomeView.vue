@@ -18,9 +18,9 @@ const challengeInfo = ref([
 ]);
 
 const healthInfo = ref([
-  {text: '체중(kg)', value: 70.5 },
-  {text: '체지방률(%)', value: 15.3 },
-  {text: '골격근량(kg)', value: 30.2 },
+  {text: '체중(kg)', value: 70.5, check: true },
+  {text: '체지방률(%)', value: 15.3, check: false },
+  {text: '골격근량(kg)', value: 30.2, check: false },
 ]);
 
 // 단식했어요 누르면 바로 참았어요로 변경됨
@@ -35,6 +35,16 @@ const handleClick = (index) => {
 //   mealInfo.value = data;
 // }); 
 
+const toggle = (index) => {
+  for (let i = 0; i < healthInfo.value.length; i++) {
+    if (i !== index) {
+      healthInfo.value[i].check = false;
+    }
+    else{
+      healthInfo.value[index].check = !healthInfo.value[index].check;
+    }
+  }
+}
 
 
 </script>
@@ -104,14 +114,13 @@ const handleClick = (index) => {
         </div>
       </div>
       <div class="otd-top-margin d-flex justify-content-between ">
-        <div v-for="(value, index) in healthInfo" :key="index" class="health-button">
-          <div class="otd-top-margin">
-            <div class="d-flex flex-column align-items-center">
-              <span class="otd-body-3">{{ value.text }}</span>
-              <span class="otd-subtitle-1">{{ value.value }}</span>
-            </div>
+        <button v-for="(value, index) in healthInfo" :key="index" :class="{ 'health-button': true, 'health-button-active': value.check }" @click="toggle(index)">
+          <div class="d-flex flex-column align-items-center">
+            <span class="otd-body-3">{{ value.text }}</span>
+            <span class="otd-subtitle-1">{{ value.value }}</span>
+
           </div>
-        </div>
+        </button>
       </div>
     </section>
 
@@ -254,5 +263,9 @@ const handleClick = (index) => {
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
   
 }
+.health-button-active{
+  background: #FFE864;  
+}
+
 </style>
   
