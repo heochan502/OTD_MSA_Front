@@ -11,6 +11,12 @@ const userInfo = {
   nickName: '뭘보노',
   userPoint: 10000,
 }
+const weatherInfo = {
+  temp : 23,
+  condition: '맑음',
+  humidity: 60,
+  location: '대구',
+}
 
 const categoryLabelMap = {
   free:'자유수다',
@@ -45,13 +51,13 @@ const handleClick= ()=>{
 </script>
 
 <template>
-  <div class="top_header">
+  <div class="top-header">
     <div>
       <img class="image" src="/image/main/fixed-header.png">
     </div>
     <!-- 로고 출력 해야할 때 -->
     <div class="title" v-if="headerType === 'logo'">
-      <img class="otd_logo" src="/image/main/ontoday_logo.png" alt="로고" />
+      <img class="otd-logo" src="/image/main/ontoday_logo.png" alt="로고" />
       <img class="alram" src="/image/main/alarm.png" alt="알람" @click="handleClick" />
     </div>
     <!-- 타이틀 출력 할때 -->
@@ -67,20 +73,20 @@ const handleClick= ()=>{
 
 
   <div class="user " v-if="route.name ==='Home'">
-    <div class="user_profile ">
+    <div class="user-profile ">
       <img class="avatar" src="/image/main/test.png" alt="프로필"></img>
       <div class="info">
-        <span class="  welcome_text">안녕하세요 :)</span>
-        <span class="  name ">행키 님</span>
-      </div>
+        <span class="  otd-body-3">오늘의 기온은 {{ weatherInfo.temp }}도 습도는 {{ weatherInfo.humidity }}%입니다.</span>
+        <span class="  otd-title ">행키 님</span>
+      </div>  
     </div>
-      <div class="point">
+      <div class="point otd-body-1">
         <router-link to="/pointshop" class="pointShop" :class="{active : route.path.startsWith('/pointshop')}">
-        <img class="point_img" src="/image/main/point.png" alt="포인트"/>
+        <img class="point-img" src="/image/main/point.png" alt="포인트"/>
         <span >{{ `${userInfo.userPoint.toLocaleString()}` }} </span>
         </router-link>
     </div>    
-  </div>
+  </div> 
 
 </template>
 
@@ -98,12 +104,12 @@ const handleClick= ()=>{
   justify-content: space-between;
   margin-bottom: 15px;
 }
-.point_img{
+.point-img{
   width: 20px;
   height: 20px;
 }
 
-.otd_logo {
+.otd-logo {
   width: 40%;  
 }
 .hearder-text {
@@ -134,7 +140,7 @@ const handleClick= ()=>{
   row-gap: 5px;
 }
 
-.top_header {
+.top-header {
   position: relative;
   background: #00D5DF;
   color: #000;
@@ -142,7 +148,7 @@ const handleClick= ()=>{
   border-radius: 60px 60px 0 0; 
   height: 104px;
 }
-.user_profile
+.user-profile
 {
   display: flex;
   flex-direction: row;
@@ -164,9 +170,7 @@ const handleClick= ()=>{
  
   }  
   .pointShop{
-    padding-top: 2px;
-    font-size: 14px;
-    font-weight: 500;
+    padding-top: 2px;   
     color: #303030; 
     text-decoration: none;
     display: flex;
@@ -178,14 +182,10 @@ const handleClick= ()=>{
    
 }
 
-.name { 
-  font-size: 24px;
-  font-weight: bold;
-}
 
 .avatar {
   /* font-size: 32px; */
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
 }
 </style>

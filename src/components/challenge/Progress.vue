@@ -1,5 +1,14 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, defineExpose } from 'vue';
+import { useRoute } from 'vue-router';
+const route = useRoute();
+
+const props = defineProps({
+  indataProgress: { // 외부에서 데이터 받아오겟다고 선언하는거 
+    type: Number,
+    default: 0
+  }
+});
 
 const targetValue = ref(0);
 
@@ -7,7 +16,7 @@ const displayValue = ref(0);
 
 onMounted(() => {
   setTimeout(() => {
-    targetValue.value = 68; // 통게치 받아왔다 가정
+    targetValue.value = props.indataProgress;
     animateProgress(targetValue.value);
   }, 50); // DOM 렌더링 직후 약간의 지연을 줘야 transition이 발동
 });
@@ -28,13 +37,18 @@ const animateProgress = (target) => {
     displayValue.value = Math.round(current);
   }, stepTime);
 };
+
+defineExpose({
+  animateProgress,
+});
+
 </script>
 
 <template>
   <div class="progress">
     <div class="progress-bar" :style="{ width: targetValue + '%' }"></div>
     <div class="progress-num">
-      <span>{{ displayValue }}%</span>
+      <span v-if="route.name !== 'Home'">{{ displayValue }}%</span>
     </div>
   </div>
 </template>
