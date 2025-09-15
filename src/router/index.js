@@ -82,12 +82,12 @@ const router = createRouter({
     },
     {
       path: '/user/login',
-      name: 'login',
+      name: 'Login',
       component: Login
     },
     {
       path: '/user/join',
-      name: 'join',
+      name: 'Join',
       component: Join
     },
     {
