@@ -1,38 +1,37 @@
 <script setup>
 import { onMounted, reactive } from 'vue';
-import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 import { useRouter } from 'vue-router';
-
-import {
-  getSelectedAll,
-  getChallenge,
-} from '@/services/challenge/ChallengeService';
-
+import { getSelectedAll } from '@/services/challenge/ChallengeService';
 import Calendar from '@/components/challenge/Calendar.vue';
+import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 
 const router = useRouter();
+const year = new Date().getFullYear();
+const month = new Date().getMonth() + 1;
 
 const state = reactive({
   weeklyChallenge: [],
-  monthlyChallenge: [],
-  dailyChallenge: [],
+  competitionChallenge: [],
+  personalChallenge: [],
+  dailyMission: [],
 });
 
 const toChallengeList = () => {
-  router.push('challenge/list');
+  router.push('challenge/alllist');
 };
 
 const toList = async (keyword) => {
-  const res = await getChallenge(keyword);
-  console.log(res);
+  router.push({ name: `Challenge${keyword}List`, params: { keyword } });
 };
 
 onMounted(async () => {
-  const res = await getSelectedAll(1);
+  console.log('date', year, month);
+  const res = await getSelectedAll(1, year, month);
   state.weeklyChallenge = res.data.weeklyChallenge;
-  state.monthlyChallenge = res.data.monthlyChallenge;
-  state.dailyChallenge = res.data.dailyChallenge;
-  console.log(res.data);
+  state.competitionChallenge = res.data.competitionChallenge;
+  state.personalChallenge = res.data.personalChallenge;
+  state.dailyMission = res.dailyMission;
+  console.log('data', res.data);
 });
 </script>
 
@@ -46,8 +45,8 @@ onMounted(async () => {
       </div>
     </div>
     <div class="challenge-card">
-      <!-- <ChallengeCard></ChallengeCard>
-      <div
+      <ChallengeCard></ChallengeCard>
+      <!-- <div
         v-for="n in Math.max(0, 2 - state.dailyMission.length)"
         :key="'dm-' + n"
         class="empty-card"
@@ -55,7 +54,7 @@ onMounted(async () => {
       >
         <span
           >새로운 미션에 <br />
-          도번해보세요!</span
+          도전해보세요!</span
         >
       </div> -->
     </div>
@@ -87,12 +86,6 @@ onMounted(async () => {
               >
             </div>
           </div>
-          <ChallengeCard
-            v-for="challenge in state.weeklyChallenge"
-            :id="challenge.id"
-            :image="challenge.image"
-            :name="challenge.name"
-          ></ChallengeCard>
         </div>
         <!-- 월간 챌린지 -->
         <div>
@@ -102,7 +95,7 @@ onMounted(async () => {
             <div class="sub-title">> 경쟁 챌린지</div>
             <div class="challenge-card">
               <ChallengeCard
-                v-for="challenge in state.monthlyChallenge"
+                v-for="challenge in state.competitionChallenge"
                 :key="challenge.id"
                 :id="challenge.id"
                 :image="challenge.image"
@@ -110,11 +103,11 @@ onMounted(async () => {
                 :reward="challenge.reward"
               ></ChallengeCard>
               <div
-                v-for="n in Math.max(0, 2 - state.monthlyChallenge.length)"
+                v-for="n in Math.max(0, 2 - state.competitionChallenge.length)"
                 :key="'m-' + n"
                 class="empty-card"
               >
-                <span @click="toList('monthly')"
+                <span @click="toList('competition')"
                   >새로운 챌린지에 <br />
                   도전해보세요!</span
                 >
@@ -126,7 +119,7 @@ onMounted(async () => {
             <div class="sub-title">> 개인 챌린지</div>
             <div class="challenge-card">
               <ChallengeCard
-                v-for="challenge in state.dailyChallenge"
+                v-for="challenge in state.personalChallenge"
                 :key="challenge.id"
                 :id="challenge.id"
                 :image="challenge.image"
@@ -134,11 +127,11 @@ onMounted(async () => {
                 :reward="challenge.reward"
               ></ChallengeCard>
               <div
-                v-for="n in Math.max(0, 2 - state.dailyChallenge.length)"
+                v-for="n in Math.max(0, 2 - state.personalChallenge.length)"
                 :key="'d-' + n"
                 class="empty-card"
               >
-                <span @click="toList('daily')"
+                <span @click="toList('personal')"
                   >새로운 챌린지에 <br />
                   도전해보세요!</span
                 >

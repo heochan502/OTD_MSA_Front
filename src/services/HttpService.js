@@ -8,11 +8,13 @@
 
 import axios from 'axios';
 
+
 const httpService = axios.create({
   baseURL: 'http://localhost:8080/api/OTD',
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
 });
+
 
 // 요청 인터셉터에서 토큰 자동 추가
 httpService.interceptors.request.use(

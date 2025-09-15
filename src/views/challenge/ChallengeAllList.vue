@@ -8,15 +8,15 @@ import 'swiper/css/autoplay';
 
 const state = reactive({
   weeklyChallenge: [],
-  monthlyChallenge: [],
-  dailyChallenge: [],
+  competitionChallenge: [],
+  personalChallenge: [],
 });
 
 onMounted(async () => {
   const res = await getAll();
   state.weeklyChallenge = res.data.weeklyChallenge;
-  state.monthlyChallenge = res.data.monthlyChallenge;
-  state.dailyChallenge = res.data.dailyChallenge;
+  state.competitionChallenge = res.data.competitionChallenge;
+  state.personalChallenge = res.data.personalChallenge;
 
   console.log('data', res.data);
 });
@@ -49,7 +49,7 @@ onMounted(async () => {
     <!-- 월간 경쟁 챌린지 -->
     <div class="monthly-challenge">
       <div class="title">월간 경쟁 챌린지</div>
-      <div v-for="(list, category) in state.monthlyChallenge" :key="category">
+      <div v-for="(list, category) in state.competitionChallenge" :key="category">
         <div class="sub-title">{{ `> ${category}` }}</div>
         <Swiper
           :modules="[Autoplay]"
@@ -80,7 +80,7 @@ onMounted(async () => {
           loop
           :autoplay="{ delay: 5000, disableOnInteraction: false }"
         >
-          <SwiperSlide v-for="challenge in state.dailyChallenge">
+          <SwiperSlide v-for="challenge in state.personalChallenge">
             <ChallengeCard
               class="challenge-card"
               :key="challenge.id"
