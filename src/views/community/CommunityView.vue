@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router';
 import CommunitySearch from '@/components/community/CommunitySearch.vue';
 import CommunityCategory from '@/components/community/CommunityCategory.vue';
 import PopularList from '@/components/community/PopularList.vue';
-import ComposeCategoryPicker from '@/components/community/ComposeCategoryPicker.vue';
 import ComposeForm from '@/components/community/ComposeForm.vue';
 import { useCommunityStore } from '@/stores/community/community';
 
@@ -44,7 +43,7 @@ const handleSearchSubmit = (q) => (searchVal.value = q);
 const handleClickPost = (post) =>
   router.push({ name: 'CommunityPost', params: { id: String(post.id) } });
 
-// 글쓰기 플로우
+// 작성 플로우
 const showOverlay = ref(false);
 const composeStep = ref('none');
 const selectedCategory = ref('');
@@ -70,32 +69,44 @@ function onSubmitSuccess() {
 
 <template>
   <div class="wrap">
-    <section class="community-page" :class="{ blurred: showOverlay }">
-      <div class="search-line">
-        <CommunitySearch
-          v-model="searchVal"
-          class="search-flex"
-          placeholder="검색어를 입력해 주세요"
-          @submit="handleSearchSubmit"
-        />
-        <button class="compose-emoji" aria-label="글쓰기" @click="openCompose">
-          ➕
-        </button>
+    <section :class="['community-page', { blurred: showOverlay }]">
+      <!-- 상단: 제목 + 검색 + 글쓰기 -->
+      <div class="head-row">
+        <div class="search-line">
+          <CommunitySearch
+            v-model="searchVal"
+            class="search-flex"
+            placeholder="검색어를 입력해 주세요"
+            @submit="handleSearchSubmit"
+          />
+          <button
+            class="compose-emoji"
+            aria-label="글쓰기"
+            @click="openCompose"
+          >
+            ➕
+          </button>
+        </div>
       </div>
 
-      <CommunityCategory
-        :categories="categories"
-        :selected="''"
-        @select="handleSelectCategory"
-      />
+      <!-- 카테고리 선택 -->
+      <div class="otd-top-margin">
+        <CommunityCategory
+          :categories="categories"
+          :selected="''"
+          @select="handleSelectCategory"
+        />
+      </div>
 
-      <div class="section-title">인기글</div>
+      <!-- 인기글 -->
+      <div class="otd-top-margin otd-subtitle-1">인기글</div>
       <PopularList
         :items="popularTop"
         detail-route-name="CommunityPost"
         :navigateOnClick="true"
-        id-key="postId"
+        id-key="id"
         route-param-key="id"
+        @click-post="handleClickPost"
       />
     </section>
 
@@ -120,15 +131,8 @@ function onSubmitSuccess() {
 </template>
 
 <style scoped>
-.wrap {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
 .community-page {
   display: flex;
-
   flex-direction: column;
   gap: 14px;
   transition: filter 0.2s ease, opacity 0.2s ease;
@@ -138,17 +142,20 @@ function onSubmitSuccess() {
   opacity: 0.6;
 }
 
+.head-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 .search-line {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0 var(--gap-lg);
 }
 .search-flex {
   flex: 1;
 }
 .compose-emoji {
-  margin-right: 28px;
   width: 44px;
   height: 44px;
   border-radius: 22px;
@@ -162,13 +169,13 @@ function onSubmitSuccess() {
   cursor: pointer;
 }
 
-/* ✅ 뷰포트 기준으로 전체 덮기 */
+/* 오버레이 */
 .overlay-full {
-  position: fixed; /* 뷰포트 전체 */
+  position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 390px; /* 아이폰 12 프레임과 동일 */
+  width: 390px;
   height: 805px;
   border-radius: 60px;
   background: rgba(0, 0, 0, 0.45);
@@ -180,8 +187,6 @@ function onSubmitSuccess() {
   padding-top: 96px;
   padding-right: 12px;
 }
-
-/* 버튼 스택 */
 .picker-floating {
   display: flex;
   flex-direction: column;
