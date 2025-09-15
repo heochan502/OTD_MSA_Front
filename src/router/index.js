@@ -3,7 +3,6 @@ import { useAuthenticationStore } from '@/stores/user/authentication'
 
 
 // 공통 뷰
-import Test from '@/components/test.vue';
 import Home from '@/views/HomeView.vue';
 
 // 커뮤니티
@@ -14,6 +13,7 @@ import CategoryFeedView from '@/views/community/categories/CategoryFeedView.vue'
 import ChallengeHome from '@/views/challenge/ChallengeHome.vue';
 import ChallengeList from '@/views/challenge/ChallengeList.vue';
 import CommunityCategory from '@/components/community/CommunityCategory.vue';
+
 import Login from '@/views/user/Login.vue'
 import Join from '@/views/user/Join.vue'
 import PassCallback from '@/views/auth/PassCallback.vue' 
@@ -25,6 +25,7 @@ import PayFail from '@/views/pay/PayFail.vue';
 
 // 포인트샵
 import PointShop from '@/components/pointshop/PointShop.vue'
+
 
 
 
@@ -65,7 +66,7 @@ const router = createRouter({
     {
       path: '/test',
       name: 'Test',
-      component: Test,
+      component: () => import('@/components/test.vue'), 
       meta: { headerType: 'title', title: '테스트', showUserPanel: false },
     },
     {
@@ -91,7 +92,7 @@ const router = createRouter({
       component: Join
     },
     {
-    path: '/auth/pass/callback', 
+    path: '/auth/pass/callback',
     name: 'PassCallback',
     component: PassCallback
     },
