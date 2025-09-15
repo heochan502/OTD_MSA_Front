@@ -1,10 +1,7 @@
 import axios from 'axios';
 
-axios.defaults.baseURL = 'http://localhost:8080/api';
+axios.defaults.baseURL = 'http://localhost:8082/api/OTD';
 
-class httpService {
+class HttpService {}
 
-
-}
-
-export default new httpService();
+export default new HttpService();

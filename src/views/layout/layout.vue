@@ -1,44 +1,39 @@
 <script setup>
-import Breadcrumb from './Breadcrumb.vue'
-import Content from './Content.vue'
-import Footer from './Footer.vue'
+import { useScroll } from '@vueuse/core';
+import Breadcrumb from './Breadcrumb.vue';
+import Content from './Content.vue';
+import Footer from './Footer.vue';
 </script>
 <template>
   <div class="app-layout">
     <div>
-      <Breadcrumb /> <!--  상단 내용 -->
+      <Breadcrumb />
+      <!--  상단 내용 -->
     </div>
     <div class="main_margin">
       <router-view />
     </div>
     <!-- <Content />    컨텐츠 내용 -->
-    <Footer class="nav-footer   " /> <!-- 하단 네비게이션 -->
+    <Footer class="nav-footer" />
+    <!-- 하단 네비게이션 -->
   </div>
 </template>
-  
 
-  
-  <style scoped>
-  .app-layout {
-    display: flex;
-    /* 행 간격을 20px로 설정 */
-    /* row-gap: 30px; */
-    flex-direction: column;
-    height: 805px;
-
+<style lang="scss" scoped>
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  height: 805px;
+  user-select: none;
+}
+/* 공통 화면 좌우 여백 */
+.main_margin {
+  overflow: scroll;
+  &::-webkit-scrollbar {
+    display: none;
   }
-  /* 공통 화면 좌우 여백 */
-  .main_margin
-  {
-    margin: 30px 20px 0 20px; 
-  }
-  .nav-footer
-  {
-    margin-top: auto;
-   
-  }
-
-
-
-  
-  </style>
+}
+.nav-footer {
+  margin-top: auto;
+}
+</style>

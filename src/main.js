@@ -1,15 +1,25 @@
-import App from "./App.vue";
-import router from "./router";
+import App from './App.vue';
+import router from './router';
 
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
+// 전역 스타일
+import './assets/main.css';
 
-import '@mdi/font/css/materialdesignicons.css'
-import 'vuetify/styles'
-import { createVuetify } from 'vuetify'
-import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
-import VCalendar from "v-calendar";
-import "v-calendar/style.css";
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
+
+// Vuetify & 관련 아이콘
+import '@mdi/font/css/materialdesignicons.css';
+import 'vuetify/styles';
+import { createVuetify } from 'vuetify';
+
+// Pinia 상태 유지
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
+
+// v-calendar
+import VCalendar from 'v-calendar';
+import 'v-calendar/style.css';
+
+// Bootstrap
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap';
 
@@ -23,6 +33,6 @@ app.use(pinia);
 app.use(vuetify);
 app.use(router);
 app.use(VCalendar, {
-    componentPrefix: "vc", // 모든 컴포넌트 이름 앞에 vc- 붙음
+  componentPrefix: 'vc', // 모든 컴포넌트 이름 앞에 vc- 붙음
 });
-app.mount("#app");
+app.mount('#app');
