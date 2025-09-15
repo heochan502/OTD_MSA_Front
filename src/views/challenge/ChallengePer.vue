@@ -1,8 +1,8 @@
 <script setup>
-import RankingCard from '@/components/challenge/RankingCard.vue';
-import { reactive, onMounted } from 'vue';
-import Progress from '@/components/challenge/Progress.vue';
-import { useRoute } from 'vue-router';
+import RankingCard from "@/components/challenge/RankingCard.vue";
+import { reactive, onMounted } from "vue";
+import Progress from "@/components/challenge/Progress.vue";
+import { useRoute } from "vue-router";
 
 const props = defineProps({
   id: Number,
@@ -16,8 +16,8 @@ const state = reactive({
 onMounted(() => {
   route.meta.title = props.name;
 
-  console.log('per', props.name);
-  console.log('per', props.id);
+  console.log("per", props.name);
+  console.log("per", props.id);
 });
 </script>
 
