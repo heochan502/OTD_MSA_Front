@@ -160,8 +160,8 @@ const handleClick= ()=>{
   align-items: center;
   
   justify-content: space-between; 
-
-  .point{
+}
+.point{
   display: flex;  
   justify-content: center; 
   align-self:flex-end; 
@@ -180,7 +180,7 @@ const handleClick= ()=>{
     }
    }
    
-}
+
 
 
 .avatar {
