@@ -30,7 +30,7 @@ onMounted(async () => {
   state.weeklyChallenge = res.data.weeklyChallenge;
   state.competitionChallenge = res.data.competitionChallenge;
   state.personalChallenge = res.data.personalChallenge;
-  state.dailyMission = res.dailyMission;
+  state.dailyMission = res.data.dailyMission;
   console.log('data', res.data);
 });
 </script>
@@ -45,18 +45,24 @@ onMounted(async () => {
       </div>
     </div>
     <div class="challenge-card">
-      <ChallengeCard></ChallengeCard>
-      <!-- <div
+      <ChallengeCard
+        v-for="challenge in state.dailyMission"
+        :id="challenge.cdId"
+        :image="challenge.image"
+        :name="challenge.name"
+        :reward="challenge.reward"
+      ></ChallengeCard>
+      <div
         v-for="n in Math.max(0, 2 - state.dailyMission.length)"
         :key="'dm-' + n"
         class="empty-card"
-        @click="toList"
+        @click="toList('daily')"
       >
         <span
           >새로운 미션에 <br />
           도전해보세요!</span
         >
-      </div> -->
+      </div>
     </div>
     <!-- 주간 챌린지 -->
     <div>
@@ -70,7 +76,7 @@ onMounted(async () => {
           <div class="challenge-card">
             <ChallengeCard
               v-for="challenge in state.weeklyChallenge"
-              :id="challenge.id"
+              :id="challenge.cdId"
               :image="challenge.image"
               :name="challenge.name"
               :reward="challenge.reward"
@@ -96,8 +102,8 @@ onMounted(async () => {
             <div class="challenge-card">
               <ChallengeCard
                 v-for="challenge in state.competitionChallenge"
-                :key="challenge.id"
-                :id="challenge.id"
+                :key="challenge.cdId"
+                :id="challenge.cdId"
                 :image="challenge.image"
                 :name="challenge.name"
                 :reward="challenge.reward"
@@ -120,8 +126,8 @@ onMounted(async () => {
             <div class="challenge-card">
               <ChallengeCard
                 v-for="challenge in state.personalChallenge"
-                :key="challenge.id"
-                :id="challenge.id"
+                :key="challenge.cdId"
+                :id="challenge.cdId"
                 :image="challenge.image"
                 :name="challenge.name"
                 :reward="challenge.reward"
