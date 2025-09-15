@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import Progress from '@/components/challenge/Progress.vue';
 import ProgressJs from '@/components/challenge/ProgressJs.vue';
+import mealCard from '@/components/meal/mealCard.vue';
 
 const mealInfo = ref([
   { meal_day: '아침', kcal: 150, check: true, img: '/image/main/breakfast.png' },
@@ -35,7 +36,7 @@ const handleClick = (index) => {
 //   mealInfo.value = data;
 // }); 
 
-const toggle = (index) => {
+const healthToggle = (index) => {
   for (let i = 0; i < healthInfo.value.length; i++) {
     if (i !== index) {
       healthInfo.value[i].check = false;
@@ -55,10 +56,12 @@ const toggle = (index) => {
 
 
     <section class="meal">
+    <mealCard />
+<!-- 
       <span class="title-text">오늘의 식단</span>
       <div class="meal-cards">
         <div class="meal-card" v-for="(item, index) in mealInfo" :key="item.meal_day">
-          <!-- 상단 -->
+          상단
           <button class="meal-card-top d-flex justify-content-between">
             <div class="d-flex flex-column">
               <img class="meal-top-img" :src="item.img" :alt="item.meal_day" />
@@ -70,7 +73,7 @@ const toggle = (index) => {
             </div>
           </button>
 
-          <!-- 하단 -->
+          하단
           <button class="meal-card-bottom">
             <div v-if="item.kcal > 0">{{ item.kcal }} kcal</div>
             <img v-else-if="item.kcal === 0 && item.check && item.meal_day !='간식'" src="/image/main/meal_check.png"
@@ -78,13 +81,13 @@ const toggle = (index) => {
             <img v-else-if="item.kcal === 0 && !item.check && item.meal_day !='간식'" src="/image/main/meal_default.png"
               alt="단식 미체크" @click="handleClick(index)" />
             <img class="snack" v-else-if="item.kcal === 0 && !item.check && item.meal_day ==='간식'"
-              src="/image/main/snack_default.png" alt="간식" />
-            <img class="snack" v-else="item.meal_day === '간식'" src="/image/main/snack_check.png" alt="간식" />
+              src="/image/main/snack_default.png" @click="handleClick(index)" alt="간식" />
+            <img class="snack" v-else="item.meal_day === '간식'"  src="/image/main/snack_check.png"  @click="handleClick(index)" alt="간식" />
 
           </button>
 
         </div>
-      </div>
+      </div> -->
     </section>
 
     <section class="challenge-progress otd-top-margin">
@@ -114,7 +117,7 @@ const toggle = (index) => {
         </div>
       </div>
       <div class="otd-top-margin d-flex justify-content-between ">
-        <button v-for="(value, index) in healthInfo" :key="index" :class="{ 'health-button': true, 'health-button-active': value.check }" @click="toggle(index)">
+        <button v-for="(value, index) in healthInfo" :key="index" :class="{ 'health-button': true, 'health-button-active': value.check }" @click="healthToggle(index)">
           <div class="d-flex flex-column align-items-center">
             <span class="otd-body-3">{{ value.text }}</span>
             <span class="otd-subtitle-1">{{ value.value }}</span>
@@ -145,7 +148,7 @@ const toggle = (index) => {
 }
 
 
-
+/* 
 .meal-cards {
   width: 350px;
   height: 265px;
@@ -196,7 +199,7 @@ const toggle = (index) => {
     width: 70px;
     height: 17px;
   }
-}
+} */
 .challenge-progress-container{
   margin-bottom: 4px;
 }
