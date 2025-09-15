@@ -7,13 +7,16 @@ import Home from '@/views/HomeView.vue';
 // 커뮤니티
 import Community from '@/views/community/CommunityView.vue';
 import CategoryFeedView from '@/views/community/categories/CategoryFeedView.vue';
-
+import PostDetailView from '@/views/community/PostDetailView.vue';
 // 챌린지
 import ChallengeHome from '@/views/challenge/ChallengeHome.vue';
 import ChallengeList from '@/views/challenge/ChallengeList.vue';
 
 // 포인트샵
 import PointShop from '@/components/pointshop/PointShop.vue';
+
+//식단
+import MealMainView from '@/views/meal/MealMainView.vue';
 
 // 카테고리 라벨 맵
 const CATEGORY_LABEL = {
@@ -50,6 +53,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/community/post/:id(\\d+)',
+      name: 'CommunityPost',
+      component: PostDetailView,
+      meta: { headerType: 'title', title: '커뮤니티', showUserPanel: false },
+      props: true,
+    },
+
+    {
       path: '/test',
       name: 'Test',
       component: Test,
@@ -72,6 +83,12 @@ const router = createRouter({
       name: 'PointShop',
       component: PointShop,
       meta: { headerType: 'title', title: '포인트샵', showUserPanel: false },
+    },
+    {
+      path: '/meal',
+      name: 'MealMainView',
+      component: MealMainView,
+      meta: { headerType: 'title', title: '식단', showUserPanel: false },
     },
   ],
 });

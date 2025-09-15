@@ -42,13 +42,13 @@ const isActive = computed(() => route.path === '/');
     </div>
     <div class="nav_container">
       <router-link
-        to="/test"
+        to="/meal"
         class="nav-menu"
-        :class="{ active: route.path.startsWith('/test') }"
+        :class="{ active: route.path.startsWith('/meal') }"
       >
         <img
           :src="
-            route.path.startsWith('/test')
+            route.path.startsWith('/meal')
               ? '/image/navigator_img/food-s.png'
               : '/image/navigator_img/food.png'
           "

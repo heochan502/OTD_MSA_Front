@@ -1,17 +1,52 @@
 <script setup>
-const props = defineProps({ post: { type: Object, required: true } });
+import { useRouter } from 'vue-router';
+
+const props = defineProps({
+  post: { type: Object, required: true },
+  badge: { type: String, default: '' }, // '인기' 등
+  clickable: { type: Boolean, default: true }, // 클릭 시 상세 이동할지
+  routeName: { type: String, default: 'CommunityPost' },
+  routeParamKey: { type: String, default: 'id' }, // /:id or /:postId
+  idKey: { type: String, default: 'postId' }, // 데이터 식별자 키
+});
+
+const emit = defineEmits(['click']);
+const router = useRouter();
+
+const getId = (p) => p?.[props.idKey] ?? p?.id ?? p?.postId;
+const getAuthor = (p) => p?.author ?? p?.writer?.nickName ?? '익명';
+const getTime = (p) => p?.time ?? p?.createdAt ?? '';
+const getLikes = (p) => p?.likes ?? p?.like ?? 0;
+const getComments = (p) => p?.comments ?? 0;
+
+function open() {
+  if (!props.clickable) return emit('click', props.post);
+  const id = getId(props.post);
+  if (!id) return;
+  router.push({
+    name: props.routeName,
+    params: { [props.routeParamKey]: String(id) },
+  });
+}
 </script>
 
 <template>
-  <article class="card">
+  <article
+    class="card"
+    role="button"
+    tabindex="0"
+    @click="open"
+    @keydown.enter.prevent="open"
+    @keydown.space.prevent="open"
+  >
     <div class="meta">
       <span class="avatar" aria-hidden="true"></span>
       <div class="meta-text">
         <div class="author-row">
-          <span class="author">{{ post.author }}</span>
-          <span class="time">· {{ post.time }}</span>
+          <span class="author">{{ getAuthor(post) }}</span>
+          <span class="time" v-if="getTime(post)">· {{ getTime(post) }}</span>
         </div>
-        <div class="badge">인기</div>
+        <div class="badge" v-if="badge">{{ badge }}</div>
       </div>
       <div class="right-skel" aria-hidden="true"></div>
     </div>
@@ -19,8 +54,8 @@ const props = defineProps({ post: { type: Object, required: true } });
     <h3 class="title">{{ post.title }}</h3>
 
     <div class="stats">
-      <span class="like">❤️ {{ post.likes }}</span>
-      <span class="comment">💬 {{ post.comments }}</span>
+      <span class="like">❤️ {{ getLikes(post) }}</span>
+      <span class="comment">💬 {{ getComments(post) }}</span>
     </div>
   </article>
 </template>
@@ -34,7 +69,13 @@ const props = defineProps({ post: { type: Object, required: true } });
   display: flex;
   flex-direction: column;
   row-gap: 8px;
+  cursor: pointer; /* ← 클릭 가능 표시 */
+  outline: none;
 }
+.card:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+
 .meta {
   display: flex;
   align-items: center;
