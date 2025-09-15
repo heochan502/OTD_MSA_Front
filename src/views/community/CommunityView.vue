@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import CommunitySearch from '@/components/community/CommunitySearch.vue';
 import CommunityCategory from '@/components/community/CommunityCategory.vue';
 import PopularList from '@/components/community/PopularList.vue';
+
 import ComposeForm from '@/components/community/ComposeForm.vue';
 import { useCommunityStore } from '@/stores/community/community';
 
@@ -43,7 +44,6 @@ const handleSearchSubmit = (q) => (searchVal.value = q);
 const handleClickPost = (post) =>
   router.push({ name: 'CommunityPost', params: { id: String(post.id) } });
 
-// 작성 플로우
 const showOverlay = ref(false);
 const composeStep = ref('none');
 const selectedCategory = ref('');
@@ -100,6 +100,7 @@ function onSubmitSuccess() {
 
       <!-- 인기글 -->
       <div class="otd-top-margin otd-subtitle-1">인기글</div>
+
       <PopularList
         :items="popularTop"
         detail-route-name="CommunityPost"
@@ -131,8 +132,15 @@ function onSubmitSuccess() {
 </template>
 
 <style scoped>
+.wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
 .community-page {
   display: flex;
+
   flex-direction: column;
   gap: 14px;
   transition: filter 0.2s ease, opacity 0.2s ease;
@@ -204,6 +212,7 @@ function onSubmitSuccess() {
   cursor: pointer;
   text-align: center;
 }
+
 .pill-cancel {
   background: #f7f7f7;
   color: #666;

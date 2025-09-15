@@ -40,7 +40,8 @@ const todayWater = ref(0.0);
   </div>
 </template>
 
-<style scoped>
+<style setup >
 /* 이 뷰는 공통 유틸(main.css) + 각 카드 내부 스타일을 사용
    */
 </style>
+

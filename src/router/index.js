@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 
 // 공통 뷰
-import Test from '@/components/test.vue';
 import Home from '@/views/HomeView.vue';
 
 // 커뮤니티
@@ -16,10 +15,13 @@ import ChallengeWeeklyList from '@/views/challenge/ChallengeWeeklyList.vue';
 import ChallengeCompetitionList from '@/views/challenge/ChallengeMonthlyList.vue';
 
 import CommunityCategory from '@/components/community/CommunityCategory.vue';
-import Login from '@/views/user/Login.vue';
-import Join from '@/views/user/Join.vue';
-import PassCallback from '@/views/auth/PassCallback.vue';
-import Oauth2 from '@/views/auth/OAuth2Handler.vue';
+
+
+import Login from '@/views/user/Login.vue'
+import Join from '@/views/user/Join.vue'
+import PassCallback from '@/views/auth/PassCallback.vue' 
+import Oauth2 from '@/views/auth/OAuth2Handler.vue'
+
 import PayApproval from '@/views/pay/PayApproval.vue';
 import PayCancel from '@/views/pay/PayCancel.vue';
 import PayCompleted from '@/views/pay/PayCompleted.vue';
@@ -30,6 +32,7 @@ import PointShop from '@/components/pointshop/PointShop.vue';
 
 //식단
 import MealMainView from '@/views/meal/MealMainView.vue';
+
 import MealDetailView from '@/views/meal/MealDetailView.vue';
 
 // 카테고리 라벨 맵
@@ -77,7 +80,7 @@ const router = createRouter({
     {
       path: '/test',
       name: 'Test',
-      component: Test,
+      component: () => import('@/components/test.vue'), 
       meta: { headerType: 'title', title: '테스트', showUserPanel: false },
     },
     {
@@ -129,9 +132,11 @@ const router = createRouter({
       component: Join,
     },
     {
+
       path: '/auth/pass/callback',
       name: 'PassCallback',
       component: PassCallback,
+
     },
     {
       path: '/fe/redirect',
