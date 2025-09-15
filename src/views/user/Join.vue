@@ -1,7 +1,7 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
-//import { usePassAuth } from '@/components/user/UserPassAuth'
+import { usePassAuth } from '@/components/user/UsePassAuth'
 
 
 const router = useRouter()
