@@ -3,7 +3,6 @@ import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useCommunityStore } from '@/stores/community/community';
 import PostCard from '@/components/community/PostCard.vue';
-import FabComposer from '@/components/community/FabComposer.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -92,8 +91,6 @@ const goWrite = (category) =>
         더 이상 게시물이 없습니다.
       </div>
     </div>
-
-    <FabComposer @pick-category="goWrite" />
   </section>
 </template>
 

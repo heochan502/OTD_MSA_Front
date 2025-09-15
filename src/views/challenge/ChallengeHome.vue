@@ -13,6 +13,7 @@ const state = reactive({
   weeklyChallenge: [],
   competitionChallenge: [],
   personalChallenge: [],
+  dailyMission: [],
 });
 
 const toChallengeList = () => {
@@ -29,6 +30,7 @@ onMounted(async () => {
   state.weeklyChallenge = res.data.weeklyChallenge;
   state.competitionChallenge = res.data.competitionChallenge;
   state.personalChallenge = res.data.personalChallenge;
+  state.dailyMission = res.dailyMission;
   console.log('data', res.data);
 });
 </script>
@@ -43,8 +45,8 @@ onMounted(async () => {
       </div>
     </div>
     <div class="challenge-card">
-      <!-- <ChallengeCard></ChallengeCard>
-      <div
+      <ChallengeCard></ChallengeCard>
+      <!-- <div
         v-for="n in Math.max(0, 2 - state.dailyMission.length)"
         :key="'dm-' + n"
         class="empty-card"
@@ -52,7 +54,7 @@ onMounted(async () => {
       >
         <span
           >새로운 미션에 <br />
-          도번해보세요!</span
+          도전해보세요!</span
         >
       </div> -->
     </div>
@@ -93,7 +95,7 @@ onMounted(async () => {
             <div class="sub-title">> 경쟁 챌린지</div>
             <div class="challenge-card">
               <ChallengeCard
-                v-for="challenge in state.monthlyChallenge"
+                v-for="challenge in state.competitionChallenge"
                 :key="challenge.id"
                 :id="challenge.id"
                 :image="challenge.image"
@@ -101,7 +103,7 @@ onMounted(async () => {
                 :reward="challenge.reward"
               ></ChallengeCard>
               <div
-                v-for="n in Math.max(0, 2 - state.monthlyChallenge.length)"
+                v-for="n in Math.max(0, 2 - state.competitionChallenge.length)"
                 :key="'m-' + n"
                 class="empty-card"
               >
@@ -117,7 +119,7 @@ onMounted(async () => {
             <div class="sub-title">> 개인 챌린지</div>
             <div class="challenge-card">
               <ChallengeCard
-                v-for="challenge in state.dailyChallenge"
+                v-for="challenge in state.personalChallenge"
                 :key="challenge.id"
                 :id="challenge.id"
                 :image="challenge.image"
@@ -125,7 +127,7 @@ onMounted(async () => {
                 :reward="challenge.reward"
               ></ChallengeCard>
               <div
-                v-for="n in Math.max(0, 2 - state.dailyChallenge.length)"
+                v-for="n in Math.max(0, 2 - state.personalChallenge.length)"
                 :key="'d-' + n"
                 class="empty-card"
               >

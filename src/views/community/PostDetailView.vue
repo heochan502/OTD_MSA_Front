@@ -6,12 +6,7 @@ import { useCommunityStore } from '@/stores/community/community';
 const route = useRoute();
 const store = useCommunityStore();
 const routeId = computed(() => String(route.params.id));
-
-const post = computed(() => {
-  const viaState = history.state?.post;
-  if (viaState && String(viaState.id) === routeId.value) return viaState;
-  return store.getById(routeId.value);
-});
+const post = computed(() => store.getById(routeId.value)); // ✅ 정규화된 객체
 
 const myComment = ref('');
 const like = () => {
