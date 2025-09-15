@@ -8,15 +8,15 @@ import 'swiper/css/autoplay';
 
 const state = reactive({
   weeklyChallenge: [],
-  monthlyChallenge: [],
-  dailyChallenge: [],
+  competitionChallenge: [],
+  personalChallenge: [],
 });
 
 onMounted(async () => {
   const res = await getAll();
   state.weeklyChallenge = res.data.weeklyChallenge;
-  state.monthlyChallenge = res.data.monthlyChallenge;
-  state.dailyChallenge = res.data.dailyChallenge;
+  state.competitionChallenge = res.data.competitionChallenge;
+  state.personalChallenge = res.data.personalChallenge;
 
   console.log('data', res.data);
 });

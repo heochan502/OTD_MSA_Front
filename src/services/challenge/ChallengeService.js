@@ -6,9 +6,10 @@ export const getAll = () => {
   return axios.get().catch((e) => e.response);
 };
 
-export const getSelectedAll = (userId) => {
+export const getSelectedAll = (userId, year, month) => {
+  console.log('test', userId, year, month)
   return axios
-    .get('/selected', { params: { userId } })
+    .get('/selected', { params: { userId, year, month } })
     .catch((e) => e.response);
 };
 
