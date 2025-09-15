@@ -1,5 +1,9 @@
 <script setup></script>
 
-<template>운동 메인페이지</template>
+<template>
+  <div>날짜</div> 
+  <div>운동기록</div>
+  <div>체성분 분석</div>
+</template>
 
 <style scoped></style>
