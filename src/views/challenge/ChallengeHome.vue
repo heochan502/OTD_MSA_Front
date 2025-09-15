@@ -1,39 +1,35 @@
 <script setup>
 import { onMounted, reactive } from 'vue';
-import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 import { useRouter } from 'vue-router';
-
-import {
-  getSelectedAll,
-  getChallenge,
-} from '@/services/challenge/ChallengeService';
-
+import { getSelectedAll } from '@/services/challenge/ChallengeService';
 import Calendar from '@/components/challenge/Calendar.vue';
-
+import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 
 const router = useRouter();
+const year = new Date().getFullYear();
+const month = new Date().getMonth() + 1;
 
 const state = reactive({
   weeklyChallenge: [],
-  monthlyChallenge: [],
-  dailyChallenge: [],
+  competitionChallenge: [],
+  personalChallenge: [],
 });
 
 const toChallengeList = () => {
-  router.push('challenge/list');
+  router.push('challenge/alllist');
 };
 
 const toList = async (keyword) => {
-  const res = await getChallenge(keyword);
-  console.log(res);
+  router.push({ name: `Challenge${keyword}List`, params: { keyword } });
 };
 
 onMounted(async () => {
-  const res = await getSelectedAll(1);
+  console.log('date', year, month);
+  const res = await getSelectedAll(1, year, month);
   state.weeklyChallenge = res.data.weeklyChallenge;
-  state.monthlyChallenge = res.data.monthlyChallenge;
-  state.dailyChallenge = res.data.dailyChallenge;
-  console.log(res.data);
+  state.competitionChallenge = res.data.competitionChallenge;
+  state.personalChallenge = res.data.personalChallenge;
+  console.log('data', res.data);
 });
 </script>
 
@@ -61,110 +57,86 @@ onMounted(async () => {
       </div> -->
     </div>
     <!-- 주간 챌린지 -->
-  <div>
     <div>
-      <div class="weekly">
+      <div>
         <div class="title">진행중인 주간 챌린지</div>
-        <!-- <div class="route-list" @click="toChallengeList">
+        <div class="weekly">
+          <!-- <div class="route-list" @click="toChallengeList">
           > 챌린지 목록 보기
         </div> -->
-      <!-- 주간 챌린지 -->
-      <div>
-        <div>진행중인 주간 챌린지</div>
-        <div @click="toList">> 챌린지 목록 보기</div>
-      </div>
-      <div class="challenge-card">
-        <ChallengeCard
-          v-for="challenge in state.weeklyChallenge"
-          :id="challenge.id"
-          :image="challenge.image"
-          :name="challenge.name"
-          :reward="challenge.reward"
-        ></ChallengeCard>
-        <div
-          v-for="n in Math.max(0, 2 - state.weeklyChallenge.length)"
-          :key="'w-' + n"
-          class="empty-card"
-        >
-          <span @click="toList('weekly')"
-            >새로운 챌린지에 <br />
-            도전해보세요!</span
-          >
-        </div>
-      </div>
-      <ChallengeCard
-        v-for="challenge in state.weeklyChallenge"
-        :id="challenge.id"
-        :image="challenge.image"
-        :name="challenge.name"
-      ></ChallengeCard>
-    </div>
-    <!-- 월간 챌린지 -->
-    <div>
-      <div class="title">진행중인 월간 챌린지</div>
-      <!-- 경쟁 -->
-      <div>
-        <div class="sub-title">> 경쟁 챌린지</div>
-        <div class="challenge-card">
-          <ChallengeCard
-            v-for="challenge in state.monthlyChallenge"
-            :key="challenge.id"
-            :id="challenge.id"
-            :image="challenge.image"
-            :name="challenge.name"
-            :reward="challenge.reward"
-          ></ChallengeCard>
-          <div
-            v-for="n in Math.max(0, 2 - state.monthlyChallenge.length)"
-            :key="'m-' + n"
-            class="empty-card"
-          >
-            <span @click="toList('monthly')"
-              >새로운 챌린지에 <br />
-              도전해보세요!</span
+          <!-- 주간 챌린지 -->
+          <div class="challenge-card">
+            <ChallengeCard
+              v-for="challenge in state.weeklyChallenge"
+              :id="challenge.id"
+              :image="challenge.image"
+              :name="challenge.name"
+              :reward="challenge.reward"
+            ></ChallengeCard>
+            <div
+              v-for="n in Math.max(0, 2 - state.weeklyChallenge.length)"
+              :key="'w-' + n"
+              class="empty-card"
             >
+              <span @click="toList('weekly')"
+                >새로운 챌린지에 <br />
+                도전해보세요!</span
+              >
+            </div>
           </div>
         </div>
-        <div>> 경쟁 챌린지</div>
-        <ChallengeCard
-          v-for="challenge in state.monthlyChallenge"
-          :id="challenge.id"
-          :image="challenge.image"
-          :name="challenge.name"
-        ></ChallengeCard>
-      </div>
-      <!-- 개인 -->
-      <div>
-        <div class="sub-title">> 개인 챌린지</div>
-        <div class="challenge-card">
-          <ChallengeCard
-            v-for="challenge in state.dailyChallenge"
-            :key="challenge.id"
-            :id="challenge.id"
-            :image="challenge.image"
-            :name="challenge.name"
-            :reward="challenge.reward"
-          ></ChallengeCard>
-          <div
-            v-for="n in Math.max(0, 2 - state.dailyChallenge.length)"
-            :key="'d-' + n"
-            class="empty-card"
-          >
-            <span @click="toList('daily')"
-              >새로운 챌린지에 <br />
-              도전해보세요!</span
-            >
+        <!-- 월간 챌린지 -->
+        <div>
+          <div class="title">진행중인 월간 챌린지</div>
+          <!-- 경쟁 -->
+          <div>
+            <div class="sub-title">> 경쟁 챌린지</div>
+            <div class="challenge-card">
+              <ChallengeCard
+                v-for="challenge in state.monthlyChallenge"
+                :key="challenge.id"
+                :id="challenge.id"
+                :image="challenge.image"
+                :name="challenge.name"
+                :reward="challenge.reward"
+              ></ChallengeCard>
+              <div
+                v-for="n in Math.max(0, 2 - state.monthlyChallenge.length)"
+                :key="'m-' + n"
+                class="empty-card"
+              >
+                <span @click="toList('competition')"
+                  >새로운 챌린지에 <br />
+                  도전해보세요!</span
+                >
+              </div>
+            </div>
+          </div>
+          <!-- 개인 -->
+          <div>
+            <div class="sub-title">> 개인 챌린지</div>
+            <div class="challenge-card">
+              <ChallengeCard
+                v-for="challenge in state.dailyChallenge"
+                :key="challenge.id"
+                :id="challenge.id"
+                :image="challenge.image"
+                :name="challenge.name"
+                :reward="challenge.reward"
+              ></ChallengeCard>
+              <div
+                v-for="n in Math.max(0, 2 - state.dailyChallenge.length)"
+                :key="'d-' + n"
+                class="empty-card"
+              >
+                <span @click="toList('personal')"
+                  >새로운 챌린지에 <br />
+                  도전해보세요!</span
+                >
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-        <div>> 개인 챌린지</div>
-        <ChallengeCard
-          v-for="challenge in state.dailyChallenge"
-          :id="challenge.id"
-          :image="challenge.image"
-          :name="challenge.name"
-        ></ChallengeCard>
       </div>
     </div>
     <Calendar></Calendar>

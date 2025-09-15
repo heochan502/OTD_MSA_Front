@@ -10,7 +10,10 @@ import CategoryFeedView from '@/views/community/categories/CategoryFeedView.vue'
 
 // 챌린지
 import ChallengeHome from '@/views/challenge/ChallengeHome.vue';
-import ChallengeList from '@/views/challenge/ChallengeList.vue';
+import ChallengeAllList from '@/views/challenge/ChallengeAllList.vue';
+import ChallengeWeeklyList from '@/views/challenge/ChallengeWeeklyList.vue';
+import ChallengeCompetitionList from '@/views/challenge/ChallengeMonthlyList.vue';
+
 
 // 포인트샵
 import PointShop from '@/components/pointshop/PointShop.vue';
@@ -62,10 +65,28 @@ const router = createRouter({
       meta: { headerType: 'title', title: '챌린지', showUserPanel: false },
     },
     {
-      path: '/challenge/list',
-      name: 'ChallengeList',
-      component: ChallengeList,
+      path: '/challenge/alllist',
+      name: 'ChallengeAllList',
+      component: ChallengeAllList,
       meta: { headerType: 'title', title: '챌린지 목록', showUserPanel: false },
+    },
+    {
+      path: '/challenge/weeklylist',
+      name: 'ChallengeWeeklyList',
+      component: ChallengeWeeklyList,
+      meta: { headerType: 'title', title: '주간 챌린지 목록', showUserPanel: false },
+    },
+    {
+      path: '/challenge/competitionlist',
+      name: 'ChallengecompetitionList',
+      component: ChallengeCompetitionList,
+      meta: { headerType: 'title', title: '월간 경쟁챌린지 목록', showUserPanel: false },
+    },
+    {
+      path: '/challenge/personallist',
+      name: 'ChallengePersonalList',
+      component: ChallengeWeeklyList,
+      meta: { headerType: 'title', title: '월간 개인챌린지 목록', showUserPanel: false },
     },
     {
       path: '/pointshop',
