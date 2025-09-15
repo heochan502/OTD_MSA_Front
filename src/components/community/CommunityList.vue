@@ -2,8 +2,8 @@
 const props = defineProps({
   items: {
     type: Array,
-    default: () => []
-  }
+    default: () => [],
+  },
 });
 const emit = defineEmits(['click-post']);
 
@@ -42,9 +42,7 @@ function openPost(item) {
       </footer>
     </article>
 
-    <div v-if="items.length === 0" class="empty">
-      아직 게시글이 없어요.
-    </div>
+    <div v-if="items.length === 0" class="empty">아직 게시글이 없어요.</div>
   </div>
 </template>
 
@@ -61,7 +59,7 @@ function openPost(item) {
   background: #ffffff;
   border-radius: 14px;
   padding: 14px 12px;
-  box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
   cursor: pointer;
 }
 
