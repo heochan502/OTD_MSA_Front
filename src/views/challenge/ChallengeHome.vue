@@ -20,8 +20,15 @@ const toChallengeList = () => {
   router.push('challenge/alllist');
 };
 
-const toList = async (keyword) => {
-  router.push({ name: `Challenge${keyword}List`, params: { keyword } });
+const toList = async (type) => {
+  router.push({
+    name: `Challenge${type}List`,
+    state: {
+      year,
+      month,
+      type,
+    },
+  });
 };
 
 onMounted(async () => {
@@ -30,7 +37,7 @@ onMounted(async () => {
   state.weeklyChallenge = res.data.weeklyChallenge;
   state.competitionChallenge = res.data.competitionChallenge;
   state.personalChallenge = res.data.personalChallenge;
-  state.dailyMission = res.dailyMission;
+  state.dailyMission = res.dailyChallenge;
   console.log('data', res.data);
 });
 </script>
