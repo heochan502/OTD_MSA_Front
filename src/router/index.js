@@ -2,13 +2,12 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 
 // 공통 뷰
-import Test from '@/components/test.vue';
 import Home from '@/views/HomeView.vue';
 
 // 커뮤니티
 import Community from '@/views/community/CommunityView.vue';
 import CategoryFeedView from '@/views/community/categories/CategoryFeedView.vue';
-
+import PostDetailView from '@/views/community/PostDetailView.vue';
 // 챌린지
 import ChallengeHome from '@/views/challenge/ChallengeHome.vue';
 import ChallengeAllList from '@/views/challenge/ChallengeAllList.vue';
@@ -16,10 +15,13 @@ import ChallengeWeeklyList from '@/views/challenge/ChallengeWeeklyList.vue';
 import ChallengeCompetitionList from '@/views/challenge/ChallengeMonthlyList.vue';
 
 import CommunityCategory from '@/components/community/CommunityCategory.vue';
-import Login from '@/views/user/Login.vue';
-import Join from '@/views/user/Join.vue';
-import PassCallback from '@/views/auth/PassCallback.vue';
-import Oauth2 from '@/views/auth/OAuth2Handler.vue';
+
+
+import Login from '@/views/user/Login.vue'
+import Join from '@/views/user/Join.vue'
+import PassCallback from '@/views/auth/PassCallback.vue' 
+import Oauth2 from '@/views/auth/OAuth2Handler.vue'
+
 import PayApproval from '@/views/pay/PayApproval.vue';
 import PayCancel from '@/views/pay/PayCancel.vue';
 import PayCompleted from '@/views/pay/PayCompleted.vue';
@@ -27,6 +29,10 @@ import PayFail from '@/views/pay/PayFail.vue';
 
 // 포인트샵
 import PointShop from '@/components/pointshop/PointShop.vue';
+
+//식단
+import MealMainView from '@/views/meal/MealMainView.vue';
+
 
 // 카테고리 라벨 맵
 const CATEGORY_LABEL = {
@@ -63,9 +69,17 @@ const router = createRouter({
       },
     },
     {
+      path: '/community/post/:id(\\d+)',
+      name: 'CommunityPost',
+      component: PostDetailView,
+      meta: { headerType: 'title', title: '커뮤니티', showUserPanel: false },
+      props: true,
+    },
+
+    {
       path: '/test',
       name: 'Test',
-      component: Test,
+      component: () => import('@/components/test.vue'), 
       meta: { headerType: 'title', title: '테스트', showUserPanel: false },
     },
     {
@@ -119,9 +133,11 @@ const router = createRouter({
       component: Join,
     },
     {
+
       path: '/auth/pass/callback',
       name: 'PassCallback',
       component: PassCallback,
+
     },
     {
       path: '/fe/redirect',
@@ -153,6 +169,12 @@ const router = createRouter({
       name: 'PointShop',
       component: PointShop,
       meta: { headerType: 'title', title: '포인트샵', showUserPanel: false },
+    },
+    {
+      path: '/meal',
+      name: 'MealMainView',
+      component: MealMainView,
+      meta: { headerType: 'title', title: '식단', showUserPanel: false },
     },
   ],
 });
