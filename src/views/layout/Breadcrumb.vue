@@ -71,21 +71,12 @@ const handleClick= ()=>{
         <span class="  name ">행키 님</span>
       </div>
     </div>
-<<<<<<< HEAD
-    <div class="point">
-      <router-link to="/pointshop" class="point-link">
-      <img class="point_img" src="/image/main/point.png" alt="포인트" />
-      <span>5,000 </span>
-      </router-link>
-    </div>
-=======
       <div class="point">
         <router-link to="/pointshop" class="pointShop" :class="{active : route.path.startsWith('/pointshop')}">
         <img class="point_img" src="/image/main/point.png" alt="포인트"/>
         <span >{{ `${userInfo.userPoint.toLocaleString()}` }} </span>
         </router-link>
     </div>    
->>>>>>> 86dff6e368a6c5be19ff1b99cca97675986e1d5f
   </div>
 
 </template>

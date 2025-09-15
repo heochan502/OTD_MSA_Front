@@ -2,12 +2,12 @@
 import { defineProps, ref, reactive, computed } from 'vue';
 
 const allItems = ref([
-  { id: 1, name: 'Item1', price: 100 }, 
-  { id: 2, name: 'Item2', price: 200 }, 
-  { id: 3, name: 'Item3', price: 300 },
-  { id: 4, name: 'Item4', price: 400 },
-  { id: 5, name: 'Item5', price: 500 },
-  { id: 6, name: 'Item6', price: 600 },
+  { id: 1, name: '갤럭시', price: 100 }, 
+  { id: 2, name: '아이폰', price: 200 }, 
+  { id: 3, name: '노트북', price: 300 },
+  { id: 4, name: '아이패드', price: 400 },
+  { id: 5, name: '충전기', price: 500 },
+  { id: 6, name: '마우스', price: 600 },
 ]);
 
 const state = reactive({
@@ -111,7 +111,6 @@ const purchase = (item) => {
   gap: 8px;
   width: 90%;
   max-width: 500px;
-  margin: 30px auto;
 }
 
 .input-container {
