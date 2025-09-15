@@ -172,10 +172,10 @@ export function usePassAuth() {
 
   // 환경 변수에서 설정 읽기
   const authManager = new PassAuthManager({
-    clientId: import.meta.env.VITE_PASS_CLIENT_ID || process.env.VUE_APP_PASS_CLIENT_ID || 'test_client_id',
-    clientSecret: import.meta.env.VITE_PASS_CLIENT_SECRET || process.env.VUE_APP_PASS_CLIENT_SECRET || 'test_client_secret',
+    clientId: import.meta.env.VITE_PASS_CLIENT_ID || 'test_client_id',
+    clientSecret: import.meta.env.VITE_PASS_CLIENT_SECRET || 'test_client_secret',
     redirectUri: `${window.location.origin}/auth/pass/callback`,
-    apiBaseUrl: import.meta.env.VITE_API_BASE_URL || process.env.VUE_APP_API_BASE_URL || '/api'
+    apiBaseUrl: import.meta.env.VITE_API_BASE_URL || '/api'
   })
 
   // PASS 인증 실행 (개발용 시뮬레이션 포함)
