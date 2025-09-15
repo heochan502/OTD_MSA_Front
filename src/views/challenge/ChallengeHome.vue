@@ -175,6 +175,7 @@ onMounted(async () => {
 }
 .empty-card {
   display: flex;
+  margin-bottom: 15px;
   width: 168px;
   height: 121px;
   border-radius: 10px;
