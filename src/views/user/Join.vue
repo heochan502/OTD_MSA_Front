@@ -1,8 +1,8 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { usePassAuth } from '@/components/user/UsePassAuth'
-import { sendEmailVerification as sendEmailAPI, verifyEmailCode as verifyEmailAPI, join, checkUidDuplicate, checkNicknameDuplicate } from '@/components/user/UserApi'
+//import { usePassAuth } from '@/components/user/UserPassAuth'
+
 
 const router = useRouter()
 const { authenticateWithPass, PASS_SERVICES } = usePassAuth()
@@ -1552,5 +1552,10 @@ svg {
 .checkbox-label,
 .pass-service-btn {
   transition: all 0.2s ease-in-out;
+}
+.button-group {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 8px;
 }
 </style>

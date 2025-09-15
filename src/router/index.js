@@ -130,7 +130,7 @@ const router = createRouter({
 });
 
 //로그인 하지 않아도 이용할 수 있는 Path들
-const unSignedPathList = [ '/user/login', '/user/join', '/fe/redirect' ]
+const unSignedPathList = [ '/user/login', '/user/join', '/fe/redirect']
 
 //navigation guard
 router.beforeEach((to, from) => {
