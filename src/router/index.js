@@ -29,6 +29,7 @@ import PayFail from '@/views/pay/PayFail.vue';
 
 // 포인트샵
 import PointShop from '@/components/pointshop/PointShop.vue';
+import ChallengePer from '@/views/challenge/ChallengePer.vue';
 
 //식단
 import MealMainView from '@/views/meal/MealMainView.vue';
@@ -95,6 +96,16 @@ const router = createRouter({
       meta: { headerType: 'title', title: '챌린지 목록', showUserPanel: false },
     },
     {
+      path: '/challenge/dailylist',
+      name: 'ChallengedailyList',
+      component: ChallengeWeeklyList,
+      meta: {
+        headerType: 'title',
+        title: '일일 미션 목록',
+        showUserPanel: false,
+      },
+    },
+    {
       path: '/challenge/weeklylist',
       name: 'ChallengeweeklyList',
       component: ChallengeWeeklyList,
@@ -124,9 +135,21 @@ const router = createRouter({
         showUserPanel: false,
       },
     },
-    { path: '/user/login',
-      name: 'login', 
-      component: Login },
+    {
+      path: '/challenge/detail/:id',
+      name: 'ChallengeDetail',
+      component: ChallengePer,
+      props: (route) => ({
+        id: route.params.id,
+        name: route.query.name,
+      }),
+      meta: {
+        headerType: 'title',
+        title: '',
+        showUserPanel: false,
+      },
+    },
+    { path: '/user/login', name: 'login', component: Login },
     {
       path: '/user/join',
       name: 'join',
@@ -189,6 +212,10 @@ router.beforeEach((to, from) => {
   const isUnsignedPath = unSignedPathList.some((path) =>
     to.path.startsWith(path)
   );
+
+  if (to.name === 'ChallengeDetail' && to.params.name) {
+    to.meta.title = to.params.name; // 카드 이름을 제목으로
+  }
 
   if (unSignedPathList.includes(to.path) && authentcationStore.state.isSigned) {
     //로그인 상태에서 /user/login, /user/join 경로로 이동하려고 하면
