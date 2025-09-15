@@ -5,39 +5,64 @@ axios.defaults.withCredentials = true;
 
 class PointService {
   // 아이템
-  async getAllItems() {
-    return axios.get('/items').catch((e) => e.response);
+  async getItems(categoryId = null) {
+    const params = categoryId ? { category: categoryId } : {};
+    try {
+      return await axios.get('/items', { params });
+    } catch (e) {
+      return e.response;
+    }
   }
 
   async searchItems(query) {
-    return axios.get('/search', { params: { query } }).catch((e) => e.response);
-  }
-
-  async getItemsByCategory(categoryId) {
-    return axios.get('/items', { params: { category: categoryId } }).catch((e) => e.response);
+    try {
+      return axios.get('/search', { params: { query } });
+    } catch(e) {
+    return e.response;
+    }
   }
 
   // 유저
   async getUserPoints() {
-    return axios.get('/user/points').catch((e) => e.response);
+    try {
+      return await axios.get('/user/points');
+    } catch (e) {
+      return e.response;
+    }
   }
 
-  async getUserPurchases() {
-    return axios.get('/user/purchases').catch((e) => e.response);
+  async fetchPurchaseHistory() {
+    try {
+      return await axios.get('/user/purchases');
+    } catch (e) {
+      return e.response;
+    }
   }
 
   // 구매
-  async purchaseItem(itemId) {
-    return axios.post(`/purchase/${itemId}`).catch((e) => e.response);
+  async createPurchase(itemId) {
+    try {
+      return await axios.post(`/purchase/${itemId}`);
+    } catch (e) {
+      return e.response;
+    }
   }
 
-  async cancelPurchase(purchaseId) {
-    return axios.delete(`/user/purchases/${purchaseId}`).catch((e) => e.response);
+  async deletePurchase(purchaseId) {
+    try {
+      return await axios.delete(`/user/purchases/${purchaseId}`);
+    } catch (e) {
+      return e.response;
+    }
   }
 
   // 포인트 사용/교환 관련
-  async redeemPoints(amount) {
-    return axios.post('/user/redeem', { amount }).catch((e) => e.response);
+  async redeemUserPoints(amount) {
+  try {
+      return await axios.post('/user/redeem', { amount });
+    } catch (e) {
+      return e.response;
+    }
   }
 }
 
