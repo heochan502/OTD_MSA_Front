@@ -1,5 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+const route = useRoute();
 
 const targetValue = ref(68);
 
@@ -31,7 +33,7 @@ const animateProgress = (target) => {
   <div class="progress">
     <div class="progress-bar" :style="{ '--width': animatedWidth + '%' }"></div>
     <div class="progress-num">
-      <span>{{ Math.round(animatedWidth) }}%</span>
+      <span >{{ Math.round(animatedWidth) }}%</span>
     </div>
   </div>
 </template>
