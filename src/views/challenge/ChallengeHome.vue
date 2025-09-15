@@ -10,7 +10,6 @@ import {
 
 import Calendar from '@/components/challenge/Calendar.vue';
 
-
 const router = useRouter();
 
 const state = reactive({
@@ -61,110 +60,92 @@ onMounted(async () => {
       </div> -->
     </div>
     <!-- 주간 챌린지 -->
-  <div>
     <div>
-      <div class="weekly">
+      <div>
         <div class="title">진행중인 주간 챌린지</div>
-        <!-- <div class="route-list" @click="toChallengeList">
+        <div class="weekly">
+          <!-- <div class="route-list" @click="toChallengeList">
           > 챌린지 목록 보기
         </div> -->
-      <!-- 주간 챌린지 -->
-      <div>
-        <div>진행중인 주간 챌린지</div>
-        <div @click="toList">> 챌린지 목록 보기</div>
-      </div>
-      <div class="challenge-card">
-        <ChallengeCard
-          v-for="challenge in state.weeklyChallenge"
-          :id="challenge.id"
-          :image="challenge.image"
-          :name="challenge.name"
-          :reward="challenge.reward"
-        ></ChallengeCard>
-        <div
-          v-for="n in Math.max(0, 2 - state.weeklyChallenge.length)"
-          :key="'w-' + n"
-          class="empty-card"
-        >
-          <span @click="toList('weekly')"
-            >새로운 챌린지에 <br />
-            도전해보세요!</span
-          >
-        </div>
-      </div>
-      <ChallengeCard
-        v-for="challenge in state.weeklyChallenge"
-        :id="challenge.id"
-        :image="challenge.image"
-        :name="challenge.name"
-      ></ChallengeCard>
-    </div>
-    <!-- 월간 챌린지 -->
-    <div>
-      <div class="title">진행중인 월간 챌린지</div>
-      <!-- 경쟁 -->
-      <div>
-        <div class="sub-title">> 경쟁 챌린지</div>
-        <div class="challenge-card">
+          <!-- 주간 챌린지 -->
+          <div class="challenge-card">
+            <ChallengeCard
+              v-for="challenge in state.weeklyChallenge"
+              :id="challenge.id"
+              :image="challenge.image"
+              :name="challenge.name"
+              :reward="challenge.reward"
+            ></ChallengeCard>
+            <div
+              v-for="n in Math.max(0, 2 - state.weeklyChallenge.length)"
+              :key="'w-' + n"
+              class="empty-card"
+            >
+              <span @click="toList('weekly')"
+                >새로운 챌린지에 <br />
+                도전해보세요!</span
+              >
+            </div>
+          </div>
           <ChallengeCard
-            v-for="challenge in state.monthlyChallenge"
-            :key="challenge.id"
+            v-for="challenge in state.weeklyChallenge"
             :id="challenge.id"
             :image="challenge.image"
             :name="challenge.name"
-            :reward="challenge.reward"
           ></ChallengeCard>
-          <div
-            v-for="n in Math.max(0, 2 - state.monthlyChallenge.length)"
-            :key="'m-' + n"
-            class="empty-card"
-          >
-            <span @click="toList('monthly')"
-              >새로운 챌린지에 <br />
-              도전해보세요!</span
-            >
+        </div>
+        <!-- 월간 챌린지 -->
+        <div>
+          <div class="title">진행중인 월간 챌린지</div>
+          <!-- 경쟁 -->
+          <div>
+            <div class="sub-title">> 경쟁 챌린지</div>
+            <div class="challenge-card">
+              <ChallengeCard
+                v-for="challenge in state.monthlyChallenge"
+                :key="challenge.id"
+                :id="challenge.id"
+                :image="challenge.image"
+                :name="challenge.name"
+                :reward="challenge.reward"
+              ></ChallengeCard>
+              <div
+                v-for="n in Math.max(0, 2 - state.monthlyChallenge.length)"
+                :key="'m-' + n"
+                class="empty-card"
+              >
+                <span @click="toList('monthly')"
+                  >새로운 챌린지에 <br />
+                  도전해보세요!</span
+                >
+              </div>
+            </div>
+          </div>
+          <!-- 개인 -->
+          <div>
+            <div class="sub-title">> 개인 챌린지</div>
+            <div class="challenge-card">
+              <ChallengeCard
+                v-for="challenge in state.dailyChallenge"
+                :key="challenge.id"
+                :id="challenge.id"
+                :image="challenge.image"
+                :name="challenge.name"
+                :reward="challenge.reward"
+              ></ChallengeCard>
+              <div
+                v-for="n in Math.max(0, 2 - state.dailyChallenge.length)"
+                :key="'d-' + n"
+                class="empty-card"
+              >
+                <span @click="toList('daily')"
+                  >새로운 챌린지에 <br />
+                  도전해보세요!</span
+                >
+              </div>
+            </div>
           </div>
         </div>
-        <div>> 경쟁 챌린지</div>
-        <ChallengeCard
-          v-for="challenge in state.monthlyChallenge"
-          :id="challenge.id"
-          :image="challenge.image"
-          :name="challenge.name"
-        ></ChallengeCard>
-      </div>
-      <!-- 개인 -->
-      <div>
-        <div class="sub-title">> 개인 챌린지</div>
-        <div class="challenge-card">
-          <ChallengeCard
-            v-for="challenge in state.dailyChallenge"
-            :key="challenge.id"
-            :id="challenge.id"
-            :image="challenge.image"
-            :name="challenge.name"
-            :reward="challenge.reward"
-          ></ChallengeCard>
-          <div
-            v-for="n in Math.max(0, 2 - state.dailyChallenge.length)"
-            :key="'d-' + n"
-            class="empty-card"
-          >
-            <span @click="toList('daily')"
-              >새로운 챌린지에 <br />
-              도전해보세요!</span
-            >
-          </div>
-        </div>
-      </div>
-    </div>
-        <div>> 개인 챌린지</div>
-        <ChallengeCard
-          v-for="challenge in state.dailyChallenge"
-          :id="challenge.id"
-          :image="challenge.image"
-          :name="challenge.name"
-        ></ChallengeCard>
       </div>
     </div>
     <Calendar></Calendar>
@@ -203,6 +184,7 @@ onMounted(async () => {
 }
 .empty-card {
   display: flex;
+  margin-bottom: 15px;
   width: 168px;
   height: 121px;
   border-radius: 10px;
