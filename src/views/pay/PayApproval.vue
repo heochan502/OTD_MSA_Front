@@ -11,16 +11,16 @@ onMounted(async () => {
     if(!pg_token) { await router.push('/pay/fail'); }
     const params = { pg_token }
 
-    const res = await getPayApprove(params);
-    if(res.status === 200) {
-        const data = res.data.result;
+    // const res = await getPayApprove(params);
+    // if(res.status === 200) {
+    //     const data = res.data.result;
 
-        if(data?.aid) {
-            await router.push('/pay/completed');
-        } else {
-            await router.push('/pay/fail');
-        }
-    }
+    //     if(data?.aid) {
+    //         await router.push('/pay/completed');
+    //     } else {
+    //         await router.push('/pay/fail');
+    //     }
+    // }
 });
 
 </script>

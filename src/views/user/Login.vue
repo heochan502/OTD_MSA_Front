@@ -1,7 +1,7 @@
 <script setup>
 import { reactive } from 'vue';
 import { useRouter } from 'vue-router';
-import { login } from '@/services/user/UserService';
+import { login } from '@/services/user/userService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { checkValidation } from '@/utils/validation';
 

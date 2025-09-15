@@ -11,6 +11,12 @@ const userInfo = {
   nickName: '뭘보노',
   userPoint: 10000,
 }
+const weatherInfo = {
+  temp : 23,
+  condition: '맑음',
+  humidity: 60,
+  location: '대구',
+}
 
 const categoryLabelMap = {
   free:'자유수다',
@@ -21,19 +27,19 @@ const categoryLabelMap = {
 const headerType = computed(() => route.meta.headerType ?? 'logo');
 const showUserPanel = computed(() => route.meta.showUserPanel === true);
 
-const headerTitle = computed (() =>
-{
- 
-  // 타이틀이 있으면 타이틀 우선으로 타이틀을 리턴하고
-  if (route.meta.title)
-  {
-    return route.meta.title;
+const headerTitle = computed(() => {
+  const metaTitle = route.meta.title
+  // 1. meta.title이 함수라면 실행 결과 리턴
+  if (typeof metaTitle === 'function') {
+    return metaTitle(route)
   }
-  // 타이틀이 없고 카테고리가 있으면 카테고리의 params에서 객체의 값을 mapping 해서 리턴 해줌
-  //  혹시나 값없으면 커뮤니티로 리턴 함  
-  if (route.name==='CommunityCategory')
-  {
-    return categoryLabelMap[route.params.category] ?? '커뮤니티';
+  // 2. 문자열이면 그대로 사용
+  if (typeof metaTitle === 'string') {
+    return metaTitle
+  }
+  // 3. meta.title이 없고, 커뮤니티 카테고리 라우트라면 categoryLabelMap 활용
+  if (route.name === 'CommunityCategory') {
+    return categoryLabelMap[route.params.category] ?? '커뮤니티'
   }
   return ''
 })
@@ -45,13 +51,13 @@ const handleClick= ()=>{
 </script>
 
 <template>
-  <div class="top_header">
+  <div class="top-header">
     <div>
       <img class="image" src="/image/main/fixed-header.png">
     </div>
     <!-- 로고 출력 해야할 때 -->
     <div class="title" v-if="headerType === 'logo'">
-      <img class="otd_logo" src="/image/main/ontoday_logo.png" alt="로고" />
+      <img class="otd-logo" src="/image/main/ontoday_logo.png" alt="로고" />
       <img class="alram" src="/image/main/alarm.png" alt="알람" @click="handleClick" />
     </div>
     <!-- 타이틀 출력 할때 -->
@@ -67,20 +73,20 @@ const handleClick= ()=>{
 
 
   <div class="user " v-if="route.name ==='Home'">
-    <div class="user_profile ">
-      <img class="avatar" src="/image/main/test.png" alt="프로필"/>
+    <div class="user-profile ">
+      <img class="avatar" src="/image/main/test.png" alt="프로필"></img>
       <div class="info">
-        <span class="  welcome_text">안녕하세요 :)</span>
-        <span class="  name ">행키 님</span>
-      </div>
+        <span class="  otd-body-3">오늘의 기온은 {{ weatherInfo.temp }}도 습도는 {{ weatherInfo.humidity }}%입니다.</span>
+        <span class="  otd-title ">행키 님</span>
+      </div>  
     </div>
-      <div class="point">
+      <div class="point otd-body-1">
         <router-link to="/pointshop" class="pointShop" :class="{active : route.path.startsWith('/pointshop')}">
-        <img class="point_img" src="/image/main/point.png" alt="포인트"/> //바로 닫는 코드로 변경
+        <img class="point-img" src="/image/main/point.png" alt="포인트"/>
         <span >{{ `${userInfo.userPoint.toLocaleString()}` }} </span>
         </router-link>
     </div>    
-  </div>
+  </div> 
 
 </template>
 
@@ -98,12 +104,12 @@ const handleClick= ()=>{
   justify-content: space-between;
   margin-bottom: 15px;
 }
-.point_img{
+.point-img{
   width: 20px;
   height: 20px;
 }
 
-.otd_logo {
+.otd-logo {
   width: 40%;  
 }
 .hearder-text {
@@ -134,7 +140,7 @@ const handleClick= ()=>{
   row-gap: 5px;
 }
 
-.top_header {
+.top-header {
   position: relative;
   background: #00D5DF;
   color: #000;
@@ -142,7 +148,7 @@ const handleClick= ()=>{
   border-radius: 60px 60px 0 0; 
   height: 104px;
 }
-.user_profile
+.user-profile
 {
   display: flex;
   flex-direction: row;
@@ -159,30 +165,27 @@ const handleClick= ()=>{
   display: flex;  
   justify-content: center; 
   align-self:flex-end; 
-   gap: 5px;
-   cursor: pointer; 
+  gap: 5px;
+  cursor: pointer;
+ 
   }  
   .pointShop{
-    padding-top: 2px;
-    font-size: 14px;
-    font-weight: 500;
+    padding-top: 2px;   
     color: #303030; 
     text-decoration: none;
     display: flex;
     align-items: end; 
-  }
-  span {
-    margin-left: 7px;
-  }
-  /* 하나씩 감싸게 변경 */
-.name { 
-  font-size: 24px;
-  font-weight: bold;
-}
+    span {
+      margin-left: 7px;
+    }
+   }
+   
+
+
 
 .avatar {
   /* font-size: 32px; */
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
 }
 </style>
