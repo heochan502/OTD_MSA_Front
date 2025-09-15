@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import Progress from '@/components/challenge/Progress.vue';
 import ProgressJs from '@/components/challenge/ProgressJs.vue';
 import MealCard from '@/components/meal/mealCard.vue';
@@ -39,6 +39,12 @@ const inbodyData = ref([
 ]);
 
 
+
+
+const today = new Date().toISOString().slice(0, 10)
+const todayData = computed(() => {
+  return inbodyData.value.find(item => item.dataTime === today)
+});
 // TODO: 실제 데이터 연동 시
 // onMounted(async () => {
 //   const { data } = await api.get('/diet/today'); // 예시
@@ -136,7 +142,7 @@ const healthToggle = (index) => {
                   {{ field.label }}({{ field.unit}}) </span>
               </div>
               <div class="otd-subtitle-1 text-center ">
-                {{ inbodyData[0][field.key] }}
+                {{ todayData?.[field.key] }}
               </div>
               </v-card>
 
