@@ -180,7 +180,7 @@ const handleClick= ()=>{
     }
    }
    
-}
+
 
 
 .avatar {

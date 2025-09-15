@@ -23,11 +23,10 @@ import PayCancel from '@/views/pay/PayCancel.vue';
 import PayCompleted from '@/views/pay/PayCompleted.vue';
 import PayFail from '@/views/pay/PayFail.vue';
 
+// 포인트샵
 import PointShop from '@/components/pointshop/PointShop.vue'
 
 
-// 포인트샵
-import PointShop from '@/components/pointshop/PointShop.vue';
 
 // 카테고리 라벨 맵
 const CATEGORY_LABEL = {
