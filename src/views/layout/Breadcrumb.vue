@@ -70,7 +70,7 @@ const handleClick= ()=>{
     <div class="user-profile ">
       <img class="avatar" src="/image/main/test.png" alt="프로필"></img>
       <div class="info">
-        <weather />
+        <weather/>
         <span class="  otd-title ">행키 님</span>
       </div>  
     </div>

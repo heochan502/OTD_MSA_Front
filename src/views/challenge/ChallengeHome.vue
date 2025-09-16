@@ -221,5 +221,6 @@ onMounted(async () => {
   font-size: 12px;
   align-items: center;
   justify-content: center;
+  text-align: center;
 }
 </style>

@@ -3,7 +3,6 @@ import { ref, onMounted } from 'vue';
 import Progress from '@/components/challenge/Progress.vue';
 import ProgressJs from '@/components/challenge/ProgressJs.vue';
 import mealCard from '@/components/meal/MealDayCards.vue';
-
 const mealInfo = ref([
   {
     meal_day: '아침',

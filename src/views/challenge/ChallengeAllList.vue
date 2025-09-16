@@ -87,7 +87,6 @@ onMounted(async () => {
           <SwiperSlide v-for="challenge in list" :key="challenge.id">
             <ChallengeCard
               class="challenge-card"
-
               :id="challenge.id"
               :image="challenge.image"
               :name="challenge.name"
