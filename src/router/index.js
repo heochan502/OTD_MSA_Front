@@ -9,22 +9,23 @@ import Community from "@/views/community/CommunityView.vue";
 import CategoryFeedView from "@/views/community/categories/CategoryFeedView.vue";
 import PostDetailView from "@/views/community/PostDetailView.vue";
 // 챌린지
-import ChallengeHome from "@/views/challenge/ChallengeHome.vue";
-import ChallengeAllList from "@/views/challenge/ChallengeAllList.vue";
-import ChallengeWeeklyList from "@/views/challenge/ChallengeWeeklyList.vue";
-import ChallengeCompetitionList from "@/views/challenge/ChallengeMonthlyList.vue";
 
-import CommunityCategory from "@/components/community/CommunityCategory.vue";
+import ChallengeHome from '@/views/challenge/ChallengeHome.vue';
+import ChallengeAllList from '@/views/challenge/ChallengeAllList.vue';
+import ChallengeWeeklyList from '@/views/challenge/ChallengeWeeklyList.vue';
+import ChallengeCompetitionList from '@/views/challenge/ChallengeMonthlyList.vue';
+import ChallengePer from '@/views/challenge/ChallengePer.vue';
 
-import Login from "@/views/user/Login.vue";
-import Join from "@/views/user/Join.vue";
-import PassCallback from "@/views/auth/PassCallback.vue";
-import Oauth2 from "@/views/auth/OAuth2Handler.vue";
+import Login from '@/views/user/Login.vue';
+import Join from '@/views/user/Join.vue';
+import PassCallback from '@/views/auth/PassCallback.vue';
+import Oauth2 from '@/views/auth/OAuth2Handler.vue';
 
-import PayApproval from "@/views/pay/PayApproval.vue";
-import PayCancel from "@/views/pay/PayCancel.vue";
-import PayCompleted from "@/views/pay/PayCompleted.vue";
-import PayFail from "@/views/pay/PayFail.vue";
+import PayApproval from '@/views/pay/PayApproval.vue';
+import PayCancel from '@/views/pay/PayCancel.vue';
+import PayCompleted from '@/views/pay/PayCompleted.vue';
+import PayFail from '@/views/pay/PayFail.vue';
+
 
 // 포인트샵
 import PointShop from "@/components/pointshop/PointShop.vue";
@@ -83,10 +84,10 @@ const router = createRouter({
     },
 
     {
-      path: "/test",
-      name: "Test",
-      component: () => import("@/components/test.vue"),
-      meta: { headerType: "title", title: "테스트", showUserPanel: false },
+      path: '/test',
+      name: 'Test',
+      component: () => import('@/components/test.vue'),
+      meta: { headerType: 'title', title: '테스트', showUserPanel: false },
     },
     {
       path: "/challenge",
@@ -99,6 +100,17 @@ const router = createRouter({
       name: "ChallengeAllList",
       component: ChallengeAllList,
       meta: { headerType: "title", title: "챌린지 목록", showUserPanel: false },
+    },
+    {
+      path: "/challenge/dailylist",
+      name: "ChallengedailyList",
+      component: ChallengeWeeklyList,
+      meta: {
+        headerType: "title",
+        title: "일일 미션 목록",
+
+        showUserPanel: false,
+      },
     },
     {
       path: "/challenge/weeklylist",
@@ -130,6 +142,22 @@ const router = createRouter({
         showUserPanel: false,
       },
     },
+    { path: '/user/login', name: 'login', component: Login },
+    {
+      path: '/challenge/detail/:id',
+      name: 'ChallengeDetail',
+      component: ChallengePer,
+      props: (route) => ({
+        id: Number(route.params.id),
+        name: route.params.name,
+      }),
+      meta: {
+        headerType: 'title',
+        title: '',
+
+        showUserPanel: false,
+      },
+    },
 
     { path: "/user/login", name: "login", component: Login },
     {
@@ -138,8 +166,8 @@ const router = createRouter({
       component: Join,
     },
     {
-      path: "/auth/pass/callback",
-      name: "PassCallback",
+      path: '/auth/pass/callback',
+      name: 'PassCallback',
       component: PassCallback,
     },
     {
@@ -216,31 +244,34 @@ const router = createRouter({
   ],
 });
 
-//로그인 하지 않아도 이용할 수 있는 Path들
 
-// const unSignedPathList = ["/user/login", "/user/join", "/fe/redirect"];
+// //로그인 하지 않아도 이용할 수 있는 Path들
+// const unSignedPathList = ['/user/login', '/user/join', '/fe/redirect'];
 
-//navigation guard
+// //navigation guard
 // router.beforeEach((to, from) => {
-//   console.log("to.path:", `"${to.path}"`);
+//   console.log('to.path:', `"${to.path}"`);
 
 //   const authentcationStore = useAuthenticationStore();
 //   const isUnsignedPath = unSignedPathList.some((path) =>
 //     to.path.startsWith(path)
 //   );
 
+
+//   if (to.name === 'ChallengeDetail' && to.params.name) {
+//     to.meta.title = to.params.name; // 카드 이름을 제목으로
+//   }
+
 //   if (unSignedPathList.includes(to.path) && authentcationStore.state.isSigned) {
-
-//로그인 상태에서 /user/login, /user/join 경로로 이동하려고 하면
-//   return { path: "/" };
-// } else if (
-//   !authentcationStore.state.isSigned &&
-//   !unSignedPathList.includes(to.path)
-// ) {
-//   console.log("로그아웃 상태에서 접근 불가 경로");
-//로그아웃 상태에서 /user/login, /user/join 경로가 아닌 경우
-//     return { path: "/user/login" };
-
+//     //로그인 상태에서 /user/login, /user/join 경로로 이동하려고 하면
+//     return { path: '/' };
+//   } else if (
+//     !authentcationStore.state.isSigned &&
+//     !unSignedPathList.includes(to.path)
+//   ) {
+//     console.log('로그아웃 상태에서 접근 불가 경로');
+//     //로그아웃 상태에서 /user/login, /user/join 경로가 아닌 경우
+//     return { path: '/user/login' };
 //   }
 // });
 

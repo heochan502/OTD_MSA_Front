@@ -5,8 +5,7 @@ import ProgressJs from '@/components/challenge/ProgressJs.vue';
 
 import LineChart from  '@/components/excercise/lineChart.vue'
 
-
-import ealCard from '@/components/meal/MealDayCards.vue';
+import MealCard from '@/components/meal/MealDayCards.vue';
 
 const mealInfo = ref([
   {

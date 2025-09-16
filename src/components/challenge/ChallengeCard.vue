@@ -1,12 +1,16 @@
 <script setup>
 import { defineProps } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 const props = defineProps({
-  challengeId: '',
-  image: '',
-  name: '',
-  reward: '',
+  id: Number,
+  image: String,
+  name: String,
+  reward: Number,
 });
+const router = useRouter();
+const route = useRoute();
+
 </script>
 
 <template>
@@ -33,7 +37,7 @@ const props = defineProps({
     height: 121px;
     cursor: pointer;
   }
-  
+
   .point-box {
     display: flex;
     align-items: center;
