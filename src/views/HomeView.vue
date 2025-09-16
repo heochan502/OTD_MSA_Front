@@ -2,8 +2,23 @@
 import { ref, onMounted, computed } from 'vue';
 import Progress from '@/components/challenge/Progress.vue';
 import ProgressJs from '@/components/challenge/ProgressJs.vue';
-import MealCard from '@/components/meal/mealCard.vue';
+
 import LineChart from  '@/components/excercise/lineChart.vue'
+
+
+import ealCard from '@/components/meal/MealDayCards.vue';
+
+const mealInfo = ref([
+  {
+    meal_day: '아침',
+    kcal: 150,
+    check: true,
+    img: '/image/main/breakfast.png',
+  },
+  { meal_day: '점심', kcal: 0, check: false, img: '/image/main/lunch.png' },
+  { meal_day: '저녁', kcal: 0, check: true, img: '/image/main/dinner.png' },
+  { meal_day: '간식', kcal: 0, check: true, img: '/image/main/snack.png' },
+]);
 
 const challengeInfo = ref([
   { challenge_name: '달리기 30km', progress: 62 },
@@ -15,9 +30,9 @@ const challengeInfo = ref([
 
 
 const healthInfo = ref([
-  {text: '체중(kg)', value: 70.5, check: true },
-  {text: '체지방률(%)', value: 15.3, check: false },
-  {text: '골격근량(kg)', value: 30.2, check: false },
+  { text: '체중(kg)', value: 70.5, check: true },
+  { text: '체지방률(%)', value: 15.3, check: false },
+  { text: '골격근량(kg)', value: 30.2, check: false },
 ]);
 
 const fields = [
@@ -49,28 +64,23 @@ const todayData = computed(() => {
 // onMounted(async () => {
 //   const { data } = await api.get('/diet/today'); // 예시
 //   mealInfo.value = data;
-// }); 
+// });
 
 const healthToggle = (index) => {
   for (let i = 0; i < healthInfo.value.length; i++) {
     if (i !== index) {
       healthInfo.value[i].check = false;
-    }
-    else{
+    } else {
       healthInfo.value[index].check = !healthInfo.value[index].check;
     }
   }
-}
-
-
+};
 </script>
 
 <template>
   <div class="wrap">
-
-
-
     <section class="meal">
+
     <MealCard />
 <!-- 
       <span class="title-text">오늘의 식단</span>
@@ -109,13 +119,24 @@ const healthToggle = (index) => {
       <span class="otd-subtitle-1">챌린지 달성률</span>
       <div class="challenge-progress-card otd-top-margin">
         <div class=" ">
-          <div v-for="value in challengeInfo"
-            class="d-flex justify-content-around align-items-center  challenge-progress-container">
-            <span class="otd-body-3 space-span-start">{{ value.challenge_name }} </span>
+          <div
+            v-for="value in challengeInfo"
+            class="d-flex justify-content-around align-items-center challenge-progress-container"
+          >
+            <span class="otd-body-3 space-span-start"
+              >{{ value.challenge_name }}
+            </span>
             <!-- 차트에 해당하는 데이터를 불러와서 그값을 뿌림-->
             <Progress
-              :class="{ 'progress-chart': true, 'progress-chart-high': value.progress > 70, 'progress-chart-middle': value.progress > 30 && value.progress <= 70, 'progress-chart-low': value.progress <= 30 }"
-              :indata-progress="value.progress" />
+              :class="{
+                'progress-chart': true,
+                'progress-chart-high': value.progress > 70,
+                'progress-chart-middle':
+                  value.progress > 30 && value.progress <= 70,
+                'progress-chart-low': value.progress <= 30,
+              }"
+              :indata-progress="value.progress"
+            />
             <span class="otd-body-3 space-span-end">{{ value.progress }}%</span>
           </div>
         </div>
@@ -155,10 +176,10 @@ const healthToggle = (index) => {
 
       <!-- <div class="otd-top-margin d-flex justify-content-between ">
         <button v-for="(value, index) in healthInfo" :key="index" :class="{ 'health-button': true, 'health-button-active': value.check }" @click="healthToggle(index)">
+
           <div class="d-flex flex-column align-items-center">
             <span class="otd-body-3">{{ value.text }}</span>
             <span class="otd-subtitle-1">{{ value.value }}</span>
-
           </div>
         </button>
       </div> -->
@@ -172,8 +193,6 @@ const healthToggle = (index) => {
       /> -->
       </div>
     </section>
-
-
   </div>
 </template>
 
@@ -181,7 +200,7 @@ const healthToggle = (index) => {
 .progress-section {
   display: flex;
   margin-top: 30px;
-  margin-bottom: 20px; 
+  margin-bottom: 20px;
   flex-direction: row;
 }
 
@@ -192,7 +211,6 @@ const healthToggle = (index) => {
   margin-bottom: 15px;
   color: #303030;
 }
-
 
 /* 
 .meal-cards {
@@ -246,62 +264,57 @@ const healthToggle = (index) => {
     height: 17px;
   }
 } */
-.challenge-progress-container{
+.challenge-progress-container {
   margin-bottom: 4px;
 }
 
 .challenge-progress {
-
   flex-direction: row;
 }
-.challenge-progress-card
-{
+.challenge-progress-card {
   width: 350px;
   height: 125px;
   padding: 10px;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-  
 }
 
 .progress-chart {
   width: 176px;
   height: 15px;
-  box-shadow: none ;
+  box-shadow: none;
 }
- 
 
 /* Progress.vue 커스텀 */
 
-.progress-chart-low :deep( .progress-bar) {
-  background: #FF8282;
+.progress-chart-low :deep(.progress-bar) {
+  background: #ff8282;
 }
 
-.progress-chart-middle :deep( .progress-bar) {
-  background: #FFB996;
+.progress-chart-middle :deep(.progress-bar) {
+  background: #ffb996;
 }
 
-.progress-chart-high :deep( .progress-bar) {
-  background: #00D5DF;
+.progress-chart-high :deep(.progress-bar) {
+  background: #00d5df;
 }
 
-.space-span-start {  
+.space-span-start {
   width: 30%;
 }
 .space-span-end {
   width: 10%;
 }
 
-
-.health-card{
+.health-card {
   width: 350px;
   height: 87px;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-  
 }
+
 .item-group {
   display: flex;
   flex-wrap: nowrap;
@@ -310,16 +323,14 @@ const healthToggle = (index) => {
 }
 .health-button
 {
+
   width: 110px;
   height: 75px;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-  
 }
-.health-button-active{
-  background: #FFE864;  
+.health-button-active {
+  background: #ffe864;
 }
-
 </style>
-  
