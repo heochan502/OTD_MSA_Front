@@ -13,6 +13,7 @@ import ChallengeHome from '@/views/challenge/ChallengeHome.vue';
 import ChallengeAllList from '@/views/challenge/ChallengeAllList.vue';
 import ChallengeWeeklyList from '@/views/challenge/ChallengeWeeklyList.vue';
 import ChallengeCompetitionList from '@/views/challenge/ChallengeMonthlyList.vue';
+import ChallengePer from '@/views/challenge/ChallengePer.vue';
 
 import Login from '@/views/user/Login.vue';
 import Join from '@/views/user/Join.vue';
@@ -31,7 +32,6 @@ import PointShop from '@/components/pointshop/PointShop.vue';
 import MealMainView from '@/views/meal/MealMainView.vue';
 
 import MealDetailView from '@/views/meal/MealDetailView.vue';
->>>>>>>>> Temporary merge branch 2
 
 // 카테고리 라벨 맵
 const CATEGORY_LABEL = {
@@ -133,10 +133,7 @@ const router = createRouter({
         showUserPanel: false,
       },
     },
-<<<<<<<<< Temporary merge branch 1
-=========
     { path: '/user/login', name: 'login', component: Login },
->>>>>>>>> Temporary merge branch 2
     {
       path: '/challenge/detail/:id',
       name: 'ChallengeDetail',
