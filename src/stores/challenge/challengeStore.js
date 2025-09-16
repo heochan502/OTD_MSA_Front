@@ -12,14 +12,25 @@ export const useChallengeStore = defineStore(
 
     const setProgressChallenge = (data) => (state.progressChallenge = data);
 
-    const setCurrentYear = (data) => (state.currentYear = data);
+    // const setCurrentYear = (data) => (state.currentYear = data);
 
-    const setCurrentMonth = (data) => (state.currentMonth = data);
+    // const setCurrentMonth = (data) => (state.currentMonth = data);
+
+    // const checkChallenge = (type) => {
+    //   const dailyChallenge = state.progressChallenge.dailyMission.length();
+    //   const weeklyChallenge = state.progressChallenge.weeklyChallenge.length();
+    //   const competitionChallenge = state.progressChallenge.
+    //   switch(type){
+    //     case 'daily':
+
+    //   }
+    //   state.progressChallenge
+    // }
 
     return {
       state,
-      setCurrentYear,
-      setCurrentMonth,
+      // setCurrentYear,
+      // setCurrentMonth,
       setProgressChallenge,
     };
   }

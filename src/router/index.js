@@ -96,8 +96,8 @@ const router = createRouter({
       meta: { headerType: "title", title: "챌린지 목록", showUserPanel: false },
     },
     {
-      path: "/challenge/dailylist",
-      name: "ChallengedailyList",
+      path: "/challenge/weeklylist",
+      name: "ChallengeweeklyList",
       component: ChallengeWeeklyList,
       meta: {
         headerType: 'title',

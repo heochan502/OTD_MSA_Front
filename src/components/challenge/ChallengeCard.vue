@@ -11,17 +11,10 @@ const props = defineProps({
 const router = useRouter();
 const route = useRoute();
 
-const detail = () => {
-  router.push({
-    name: 'ChallengeDetail',
-    params: { id: props.id },
-    query: { name: props.name },
-  });
-};
 </script>
 
 <template>
-  <div class="challenge-card" @click="detail">
+  <div class="challenge-card">
     <img :src="`${props.image}`" :alt="`${props.name}`" class="challenge-img" />
     <div class="point-box">
       <img src="/image/main/point.png" alt="point" class="point" />

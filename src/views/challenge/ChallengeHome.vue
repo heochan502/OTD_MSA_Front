@@ -10,8 +10,8 @@ const challengeStore = useChallengeStore();
 
 const router = useRouter();
 
-const year = challengeStore.state.year
-const month = challengeStore.state.month 
+const year = challengeStore.state.year;
+const month = challengeStore.state.month;
 
 const state = reactive({
   weeklyChallenge: [],
@@ -21,7 +21,7 @@ const state = reactive({
 });
 
 const toChallengeList = () => {
-  router.push("challenge/alllist");
+  router.push('challenge/alllist');
 };
 
 const toList = async (type) => {
@@ -35,8 +35,15 @@ const toList = async (type) => {
   });
 };
 
+const detail = (id) => {
+  router.push({
+    name: 'ChallengeDetail',
+    params: { id },
+  });
+};
+
 onMounted(async () => {
-  console.log("date", year, month);
+  console.log('date', year, month);
   const res = await getSelectedAll(1, year, month);
   state.weeklyChallenge = res.data.weeklyChallenge;
   state.competitionChallenge = res.data.competitionChallenge;
@@ -64,13 +71,15 @@ onMounted(async () => {
         :image="challenge.image"
         :name="challenge.name"
         :reward="challenge.reward"
+        @click="detail(challenge.cdId)"
       ></ChallengeCard>
       <div
         v-for="n in Math.max(0, 2 - state.dailyMission.length)"
         :key="'dm-' + n"
         class="empty-card"
+        @click="toList('daily')"
       >
-        <span @click="toList('daily')"
+        <span
           >새로운 미션에 <br />
           도전해보세요!</span
         >
@@ -93,13 +102,15 @@ onMounted(async () => {
               :image="challenge.image"
               :name="challenge.name"
               :reward="challenge.reward"
+              @click="detail(challenge.cdId)"
             ></ChallengeCard>
             <div
               v-for="n in Math.max(0, 2 - state.weeklyChallenge.length)"
               :key="'w-' + n"
               class="empty-card"
+              @click="toList('weekly')"
             >
-              <span @click="toList('weekly')"
+              <span
                 >새로운 챌린지에 <br />
                 도전해보세요!</span
               >
@@ -120,13 +131,15 @@ onMounted(async () => {
                 :image="challenge.image"
                 :name="challenge.name"
                 :reward="challenge.reward"
+                @click="detail(challenge.cdId)"
               ></ChallengeCard>
               <div
                 v-for="n in Math.max(0, 2 - state.competitionChallenge.length)"
                 :key="'m-' + n"
                 class="empty-card"
+                @click="toList('competition')"
               >
-                <span @click="toList('competition')"
+                <span
                   >새로운 챌린지에 <br />
                   도전해보세요!</span
                 >
@@ -144,13 +157,15 @@ onMounted(async () => {
                 :image="challenge.image"
                 :name="challenge.name"
                 :reward="challenge.reward"
+                @click="detail(challenge.cdId)"
               ></ChallengeCard>
               <div
                 v-for="n in Math.max(0, 2 - state.personalChallenge.length)"
                 :key="'d-' + n"
                 class="empty-card"
+                @click="toList('personal')"
               >
-                <span @click="toList('personal')"
+                <span
                   >새로운 챌린지에 <br />
                   도전해보세요!</span
                 >
