@@ -31,7 +31,9 @@ import PointShop from "@/components/pointshop/PointShop.vue";
 import ChallengePer from "@/views/challenge/ChallengePer.vue";
 
 //식단
-import MealMainView from "@/views/meal/MealMainView.vue";
+import MealMainView from '@/views/meal/MealMainView.vue';
+
+import MealDetailView from '@/views/meal/MealDetailView.vue';
 
 // 카테고리 라벨 맵
 const CATEGORY_LABEL = {
@@ -128,26 +130,12 @@ const router = createRouter({
       name: "ChallengepersonalList",
       component: ChallengeWeeklyList,
       meta: {
-        headerType: "title",
-        title: "월간 개인챌린지 목록",
+        headerType: 'title',
+        title: '월간 개인챌린지 목록',
         showUserPanel: false,
       },
     },
-    {
-      path: "/challenge/detail/:id",
-      name: "ChallengeDetail",
-      component: ChallengePer,
-      props: (route) => ({
-        id: route.params.id,
-        name: route.query.name,
-      }),
-      meta: {
-        headerType: "title",
-        title: "",
-        showUserPanel: false,
-      },
-    },
-    { path: "/user/login", name: "login", component: Login },
+    { path: '/user/login', name: 'login', component: Login },
     {
       path: "/user/join",
       name: "join",
@@ -193,7 +181,29 @@ const router = createRouter({
       path: "/meal",
       name: "MealMainView",
       component: MealMainView,
-      meta: { headerType: "title", title: "식단", showUserPanel: false },
+      meta: { headerType: 'title', title: '식단', showUserPanel: false },
+    },
+    {
+      path: '/meal/detail',
+      name: 'MealDetailView',
+      component: MealDetailView,
+      meta: { headerType: 'title', title: '음식 상세', showUserPanel: false },
+    },
+    {
+      path: '/meal/water',
+      name: 'WaterLog',
+      component: () => import('@/views/meal/WaterLogView.vue'), // lazy 권장
+      meta: { headerType: 'title', title: '물 섭취량', showUserPanel: false },
+    },
+    {
+      path: '/meal/food-search',
+      name: 'MealFoodSearchView',
+      component: () => import('@/views/meal/MealFoodSearchView.vue'),
+    },
+    {
+      path: '/meal/record',
+      name: 'MealRecordView',
+      component: () => import('@/views/meal/MealRecordView.vue'),
     },
   ],
 });
