@@ -101,17 +101,7 @@ const router = createRouter({
       component: ChallengeWeeklyList,
       meta: {
         headerType: 'title',
-        title: '주간 챌린지 목록',
-        showUserPanel: false,
-      },
-    },
-    {
-      path: '/challenge/competitionlist',
-      name: 'ChallengecompetitionList',
-      component: ChallengeCompetitionList,
-      meta: {
-        headerType: 'title',
-        title: '월간 경쟁챌린지 목록',
+        title: '주간 챌린지 추가하기',
         showUserPanel: false,
       },
     },
@@ -121,7 +111,27 @@ const router = createRouter({
       component: ChallengeWeeklyList,
       meta: {
         headerType: 'title',
-        title: '월간 개인챌린지 목록',
+        title: '월간 개인챌린지 추가하기',
+        showUserPanel: false,
+      },
+    },
+    {
+      path: '/challenge/dailylist',
+      name: 'ChallengedailyList',
+      component: ChallengeWeeklyList,
+      meta: {
+        headerType: 'title',
+        title: '일일 미션 추가하기',
+        showUserPanel: false,
+      },
+    },
+    {
+      path: '/challenge/competitionlist',
+      name: 'ChallengecompetitionList',
+      component: ChallengeCompetitionList,
+      meta: {
+        headerType: 'title',
+        title: '월간 경쟁챌린지 추가하기',
         showUserPanel: false,
       },
     },

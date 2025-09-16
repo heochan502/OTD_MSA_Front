@@ -2,7 +2,7 @@
 import { defineProps } from 'vue';
 
 const props = defineProps({
-  challengeId: '',
+  id: '',
   image: '',
   name: '',
   reward: '',

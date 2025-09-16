@@ -35,7 +35,7 @@ onMounted(async () => {
         loop
         :autoplay="{ delay: 3000, disableOnInteraction: false }"
       >
-        <SwiperSlide v-for="challenge in state.weeklyChallenge">
+        <SwiperSlide v-for="challenge in state.weeklyChallenge" :key="challenge.id">
           <ChallengeCard
             class="challenge-card"
             :id="challenge.id"
@@ -58,10 +58,10 @@ onMounted(async () => {
           loop
           :autoplay="{ delay: 5000, disableOnInteraction: false }"
         >
-          <SwiperSlide v-for="challenge in list">
+          <SwiperSlide v-for="challenge in list" :key="challenge.id">
             <ChallengeCard
               class="challenge-card"
-              :key="challenge.id"
+
               :id="challenge.id"
               :image="challenge.image"
               :name="challenge.name"
@@ -80,10 +80,9 @@ onMounted(async () => {
           loop
           :autoplay="{ delay: 5000, disableOnInteraction: false }"
         >
-          <SwiperSlide v-for="challenge in state.personalChallenge">
+          <SwiperSlide v-for="challenge in state.personalChallenge" :key="challenge.id">
             <ChallengeCard
               class="challenge-card"
-              :key="challenge.id"
               :id="challenge.id"
               :image="challenge.image"
               :name="challenge.name"

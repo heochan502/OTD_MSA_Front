@@ -1,7 +1,10 @@
 <script setup>
 import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
-import { reactive, onMounted} from 'vue';
-import { getChallenge } from '@/services/challenge/ChallengeService';
+import { reactive, onMounted } from 'vue';
+import { getMapChallenge } from '@/services/challenge/ChallengeService';
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import { Autoplay } from 'swiper/modules';
+import 'swiper/css/autoplay';
 
 const state = reactive({
   ChallengeList: [],
@@ -13,26 +16,16 @@ onMounted(async () => {
   const month = history.state.month;
 
   console.log('type', type);
-  const res = await getChallenge(1, year, month, type);
-  console.log('resmonthdata', res.data);
+  const res = await getMapChallenge(1, year, month, type);
+  console.log('monthdata', res.data);
   state.ChallengeList = res.data;
 });
 </script>
 
 <template>
-  <div>
-    <div v-for="challenge in state.ChallengeList" :key="id">
-      <ChallengeCard
-        class="challenge-card"
-        :key="challenge.id"
-        :id="challenge.id"
-        :image="challenge.image"
-        :name="challenge.name"
-        :reward="challenge.reward"
-      ></ChallengeCard>
-    </div>
-    <!-- <div v-for="(list, category) in state.ChallengeList" :key="category">
-      <div class="sub-title">{{ `> ${category}` }}</div>
+  <div class="wrap">
+    <div v-for="(list, category) in state.ChallengeList" :key="category">
+      <div class="otd-category">{{ `${category}` }}</div>
       <Swiper
         :modules="[Autoplay]"
         :slides-per-view="2"
@@ -51,8 +44,16 @@ onMounted(async () => {
           ></ChallengeCard>
         </SwiperSlide>
       </Swiper>
-    </div> -->
+    </div>
   </div>
 </template>
 
-<style scoped></style> 
+<style scoped>
+:deep(.swiper) {
+  overflow: hidden;
+}
+:deep(.swiper-wrapper) {
+  display: flex;
+  cursor: grab;
+}
+</style>

@@ -4,10 +4,14 @@ import { useRouter } from 'vue-router';
 import { getSelectedAll } from '@/services/challenge/ChallengeService';
 import Calendar from '@/components/challenge/Calendar.vue';
 import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
+import { useChallengeStore } from '@/stores/challenge/challengeStore';
+
+const challengeStore = useChallengeStore();
 
 const router = useRouter();
-const year = new Date().getFullYear();
-const month = new Date().getMonth() + 1;
+
+const year = challengeStore.state.year
+const month = challengeStore.state.month 
 
 const state = reactive({
   weeklyChallenge: [],
@@ -37,7 +41,8 @@ onMounted(async () => {
   state.weeklyChallenge = res.data.weeklyChallenge;
   state.competitionChallenge = res.data.competitionChallenge;
   state.personalChallenge = res.data.personalChallenge;
-  state.dailyMission = res.dailyChallenge;
+  state.dailyMission = res.data.dailyMission;
+  challengeStore.state.progressChallenge = res.data;
   console.log('data', res.data);
 });
 </script>
@@ -52,18 +57,23 @@ onMounted(async () => {
       </div>
     </div>
     <div class="challenge-card">
-      <ChallengeCard></ChallengeCard>
-      <!-- <div
+      <ChallengeCard
+        v-for="challenge in state.dailyMission"
+        :id="challenge.cdId"
+        :image="challenge.image"
+        :name="challenge.name"
+        :reward="challenge.reward"
+      ></ChallengeCard>
+      <div
         v-for="n in Math.max(0, 2 - state.dailyMission.length)"
         :key="'dm-' + n"
         class="empty-card"
-        @click="toList"
       >
-        <span
+        <span @click="toList('daily')"
           >새로운 미션에 <br />
           도전해보세요!</span
         >
-      </div> -->
+      </div>
     </div>
     <!-- 주간 챌린지 -->
     <div>
@@ -77,7 +87,8 @@ onMounted(async () => {
           <div class="challenge-card">
             <ChallengeCard
               v-for="challenge in state.weeklyChallenge"
-              :id="challenge.id"
+              :key="challenge.cdId"
+              :id="challenge.cdId"
               :image="challenge.image"
               :name="challenge.name"
               :reward="challenge.reward"
@@ -103,8 +114,8 @@ onMounted(async () => {
             <div class="challenge-card">
               <ChallengeCard
                 v-for="challenge in state.competitionChallenge"
-                :key="challenge.id"
-                :id="challenge.id"
+                :key="challenge.cdId"
+                :id="challenge.cdId"
                 :image="challenge.image"
                 :name="challenge.name"
                 :reward="challenge.reward"
@@ -127,8 +138,8 @@ onMounted(async () => {
             <div class="challenge-card">
               <ChallengeCard
                 v-for="challenge in state.personalChallenge"
-                :key="challenge.id"
-                :id="challenge.id"
+                :key="challenge.cdId"
+                :id="challenge.cdId"
                 :image="challenge.image"
                 :name="challenge.name"
                 :reward="challenge.reward"

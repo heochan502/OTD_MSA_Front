@@ -20,6 +20,6 @@ export const getChallenge = (userId, year, month, type) => {
 
 export const getMapChallenge = (userId, year, month, type) => {
   return axios
-    .get(`${baseURL}/addCompetitionlist`, { params: { userId,  year, month, type } })
+    .get(`${baseURL}/addcompetitionlist`, { params: { userId,  year, month, type } })
     .catch((e) => e.response);
 };
