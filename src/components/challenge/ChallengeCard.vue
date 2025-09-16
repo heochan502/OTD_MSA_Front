@@ -15,7 +15,6 @@ const detail = () => {
   router.push({
     name: 'ChallengeDetail',
     params: { id: props.id },
-    query: { name: props.name },
   });
 };
 </script>

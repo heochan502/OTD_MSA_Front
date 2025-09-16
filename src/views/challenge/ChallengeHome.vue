@@ -1,9 +1,9 @@
 <script setup>
-import { onMounted, reactive } from "vue";
-import { useRouter } from "vue-router";
-import { getSelectedAll } from "@/services/challenge/ChallengeService";
-import Calendar from "@/components/challenge/Calendar.vue";
-import ChallengeCard from "@/components/challenge/ChallengeCard.vue";
+import { onMounted, reactive } from 'vue';
+import { useRouter } from 'vue-router';
+import { getSelectedAll } from '@/services/challenge/ChallengeService';
+import Calendar from '@/components/challenge/Calendar.vue';
+import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 
 const router = useRouter();
 const year = new Date().getFullYear();
@@ -17,7 +17,7 @@ const state = reactive({
 });
 
 const toChallengeList = () => {
-  router.push("challenge/alllist");
+  router.push('challenge/alllist');
 };
 
 const toList = async (keyword) => {
@@ -25,13 +25,13 @@ const toList = async (keyword) => {
 };
 
 onMounted(async () => {
-  console.log("date", year, month);
+  console.log('date', year, month);
   const res = await getSelectedAll(1, year, month);
   state.weeklyChallenge = res.data.weeklyChallenge;
   state.competitionChallenge = res.data.competitionChallenge;
   state.personalChallenge = res.data.personalChallenge;
   state.dailyMission = res.data.dailyMission;
-  console.log("data", res.data);
+  console.log('data', res.data);
 });
 </script>
 
@@ -195,5 +195,6 @@ onMounted(async () => {
   font-size: 12px;
   align-items: center;
   justify-content: center;
+  text-align: center;
 }
 </style>
