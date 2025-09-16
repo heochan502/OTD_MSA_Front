@@ -13,56 +13,70 @@ const content = ref('');
 
 function submit() {
   if (!title.value.trim() || !content.value.trim()) return;
-  const p = store.addPost(category, {
+  const p = store.addPost?.(category, {
     title: title.value,
     content: content.value,
     author: '행키',
-  });
+  }) ?? {
+    id: Date.now(),
+    title: title.value,
+    content: content.value,
+    author: '행키',
+    time: new Date().toISOString(),
+    likes: 0,
+    comments: 0,
+  };
   router.replace({ name: 'CommunityPost', params: { id: p.id } });
 }
 </script>
 
 <template>
-  <section class="write">
-    <div class="field">
-      <label>제목</label>
-      <input class="input" v-model="title" placeholder="제목을 입력하세요" />
-    </div>
-    <div class="field">
-      <label>내용</label>
-      <textarea
-        class="textarea"
-        v-model="content"
-        rows="8"
-        placeholder="내용을 입력하세요"
-      ></textarea>
-    </div>
-    <button class="btn btn-primary w-100" @click="submit">작성하기</button>
-  </section>
+  <div class="wrap">
+    <section class="write">
+      <div class="otd-category">게시글 작성</div>
+
+      <div class="field otd-top-margin">
+        <label class="otd-body-3">제목</label>
+        <input
+          class="input otd-body-2"
+          v-model="title"
+          placeholder="제목을 입력하세요"
+        />
+      </div>
+
+      <div class="field">
+        <label class="otd-body-3">내용</label>
+        <textarea
+          class="textarea otd-body-2"
+          v-model="content"
+          rows="8"
+          placeholder="내용을 입력하세요"
+        ></textarea>
+      </div>
+
+      <button class="btn btn-primary otd-button w-100" @click="submit">
+        작성하기
+      </button>
+    </section>
+  </div>
 </template>
 
 <style scoped>
 .write {
   display: flex;
   flex-direction: column;
-  gap: var(--gap-md);
-  padding: 0 var(--gap-lg) var(--gap-lg);
+  gap: 12px;
 }
 .field {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
-label {
-  font-size: 12px;
-  color: var(--color-typo-secondary);
-}
 .input,
 .textarea {
-  border: var(--border-1);
+  border: 1px solid #e5e5e5;
   border-radius: 12px;
   padding: 12px;
-  font-size: var(--fs-body-2);
   background: #fff;
 }
 .w-100 {
@@ -71,12 +85,12 @@ label {
 .btn {
   height: 40px;
   padding: 0 14px;
-  border-radius: 12px;
   border: none;
+  border-radius: 12px;
   cursor: pointer;
 }
 .btn-primary {
-  background: var(--color-primary);
+  background: #00d5df;
   color: #fff;
 }
 </style>

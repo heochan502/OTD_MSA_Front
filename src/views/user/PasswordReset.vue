@@ -333,7 +333,7 @@ onUnmounted(() => {
                 required
                 :disabled="isLoading"
                 class="form-input"
-                pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?]).{10,}$"
+                pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':\"\\|,.>\/?]).{10,}$"
                 title="영문자, 숫자, 특수기호로 구성되며 10자 이상이어야 합니다."
                 autocomplete="new-password"
               />

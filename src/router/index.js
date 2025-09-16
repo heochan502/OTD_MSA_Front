@@ -32,9 +32,13 @@ import PointShop from "@/components/pointshop/PointShop.vue";
 //식단
 import MealMainView from "@/views/meal/MealMainView.vue";
 
+
 // 운동
 import ExerciseMain from "@/views/exercise/ExerciseMain.vue";
 import ExerciseRecord from "@/views/exercise/ExerciseRecord.vue";
+
+import MealDetailView from '@/views/meal/MealDetailView.vue';
+
 
 // 카테고리 라벨 맵
 const CATEGORY_LABEL = {
@@ -126,6 +130,7 @@ const router = createRouter({
         showUserPanel: false,
       },
     },
+
     { path: "/user/login", name: "login", component: Login },
     {
       path: "/user/join",
@@ -186,21 +191,46 @@ const router = createRouter({
       component: ExerciseRecord,
       meta: { headerType: "title", title: "이달의 기록", showUserPanel: false },
     },
+    {
+      path: '/meal/detail',
+      name: 'MealDetailView',
+      component: MealDetailView,
+      meta: { headerType: 'title', title: '음식 상세', showUserPanel: false },
+    },
+    {
+      path: '/meal/water',
+      name: 'WaterLog',
+      component: () => import('@/views/meal/WaterLogView.vue'), // lazy 권장
+      meta: { headerType: 'title', title: '물 섭취량', showUserPanel: false },
+    },
+    {
+      path: '/meal/food-search',
+      name: 'MealFoodSearchView',
+      component: () => import('@/views/meal/MealFoodSearchView.vue'),
+    },
+    {
+      path: '/meal/record',
+      name: 'MealRecordView',
+      component: () => import('@/views/meal/MealRecordView.vue'),
+    },
   ],
 });
 
 //로그인 하지 않아도 이용할 수 있는 Path들
+
 // const unSignedPathList = ["/user/login", "/user/join", "/fe/redirect"];
 
 //navigation guard
 // router.beforeEach((to, from) => {
 //   console.log("to.path:", `"${to.path}"`);
+
 //   const authentcationStore = useAuthenticationStore();
 //   const isUnsignedPath = unSignedPathList.some((path) =>
 //     to.path.startsWith(path)
 //   );
 
 //   if (unSignedPathList.includes(to.path) && authentcationStore.state.isSigned) {
+
 //로그인 상태에서 /user/login, /user/join 경로로 이동하려고 하면
 //   return { path: "/" };
 // } else if (
@@ -210,6 +240,7 @@ const router = createRouter({
 //   console.log("로그아웃 상태에서 접근 불가 경로");
 //로그아웃 상태에서 /user/login, /user/join 경로가 아닌 경우
 //     return { path: "/user/login" };
+
 //   }
 // });
 
