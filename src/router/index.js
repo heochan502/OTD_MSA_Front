@@ -33,6 +33,7 @@ import PointShop from '@/components/pointshop/PointShop.vue';
 //식단
 import MealMainView from '@/views/meal/MealMainView.vue';
 
+import MealDetailView from '@/views/meal/MealDetailView.vue';
 
 // 카테고리 라벨 맵
 const CATEGORY_LABEL = {
@@ -124,9 +125,7 @@ const router = createRouter({
         showUserPanel: false,
       },
     },
-    { path: '/user/login',
-      name: 'login', 
-      component: Login },
+    { path: '/user/login', name: 'login', component: Login },
     {
       path: '/user/join',
       name: 'join',
@@ -175,6 +174,28 @@ const router = createRouter({
       name: 'MealMainView',
       component: MealMainView,
       meta: { headerType: 'title', title: '식단', showUserPanel: false },
+    },
+    {
+      path: '/meal/detail',
+      name: 'MealDetailView',
+      component: MealDetailView,
+      meta: { headerType: 'title', title: '음식 상세', showUserPanel: false },
+    },
+    {
+      path: '/meal/water',
+      name: 'WaterLog',
+      component: () => import('@/views/meal/WaterLogView.vue'), // lazy 권장
+      meta: { headerType: 'title', title: '물 섭취량', showUserPanel: false },
+    },
+    {
+      path: '/meal/food-search',
+      name: 'MealFoodSearchView',
+      component: () => import('@/views/meal/MealFoodSearchView.vue'),
+    },
+    {
+      path: '/meal/record',
+      name: 'MealRecordView',
+      component: () => import('@/views/meal/MealRecordView.vue'),
     },
   ],
 });
