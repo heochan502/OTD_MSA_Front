@@ -1,16 +1,27 @@
 <script setup>
 import { defineProps } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 const props = defineProps({
-  id: '',
-  image: '',
-  name: '',
-  reward: '',
+  id: Number,
+  image: String,
+  name: String,
+  reward: Number,
 });
+const router = useRouter();
+const route = useRoute();
+
+const detail = () => {
+  router.push({
+    name: 'ChallengeDetail',
+    params: { id: props.id },
+    query: { name: props.name },
+  });
+};
 </script>
 
 <template>
-  <div class="challenge-card">
+  <div class="challenge-card" @click="detail">
     <img :src="`${props.image}`" :alt="`${props.name}`" class="challenge-img" />
     <div class="point-box">
       <img src="/image/main/point.png" alt="point" class="point" />
@@ -33,7 +44,7 @@ const props = defineProps({
     height: 121px;
     cursor: pointer;
   }
-  
+
   .point-box {
     display: flex;
     align-items: center;

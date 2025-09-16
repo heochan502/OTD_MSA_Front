@@ -21,7 +21,7 @@ const state = reactive({
 });
 
 const toChallengeList = () => {
-  router.push('challenge/alllist');
+  router.push("challenge/alllist");
 };
 
 const toList = async (type) => {
@@ -36,7 +36,7 @@ const toList = async (type) => {
 };
 
 onMounted(async () => {
-  console.log('date', year, month);
+  console.log("date", year, month);
   const res = await getSelectedAll(1, year, month);
   state.weeklyChallenge = res.data.weeklyChallenge;
   state.competitionChallenge = res.data.competitionChallenge;
@@ -59,6 +59,7 @@ onMounted(async () => {
     <div class="challenge-card">
       <ChallengeCard
         v-for="challenge in state.dailyMission"
+        :key="challenge.cdId"
         :id="challenge.cdId"
         :image="challenge.image"
         :name="challenge.name"

@@ -1,7 +1,7 @@
 <script setup>
 import {useRoute, useRouter} from 'vue-router'
 import { computed } from 'vue';
-import CommunityCategory from '@/components/community/CommunityCategory.vue';
+import weather from '@/components/weather/weather.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -10,12 +10,6 @@ const userInfo = {
   name : '보노보노',
   nickName: '뭘보노',
   userPoint: 10000,
-}
-const weatherInfo = {
-  temp : 23,
-  condition: '맑음',
-  humidity: 60,
-  location: '대구',
 }
 
 const categoryLabelMap = {
@@ -76,7 +70,7 @@ const handleClick= ()=>{
     <div class="user-profile ">
       <img class="avatar" src="/image/main/test.png" alt="프로필"></img>
       <div class="info">
-        <span class="  otd-body-3">오늘의 기온은 {{ weatherInfo.temp }}도 습도는 {{ weatherInfo.humidity }}%입니다.</span>
+        <weather />
         <span class="  otd-title ">행키 님</span>
       </div>  
     </div>
