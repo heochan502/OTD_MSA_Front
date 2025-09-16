@@ -34,6 +34,7 @@ import MealMainView from "@/views/meal/MealMainView.vue";
 
 // 운동
 import ExerciseMain from "@/views/exercise/ExerciseMain.vue";
+import ExerciseRecord from "@/views/exercise/ExerciseRecord.vue";
 
 // 카테고리 라벨 맵
 const CATEGORY_LABEL = {
@@ -178,6 +179,12 @@ const router = createRouter({
       name: "ExerciseMain",
       component: ExerciseMain,
       meta: { headerType: "title", title: "운동", showUserPanel: false },
+    },
+    {
+      path: "/exercise/record",
+      name: "ExerciseRecord",
+      component: ExerciseRecord,
+      meta: { headerType: "title", title: "이달의 기록", showUserPanel: false },
     },
   ],
 });
