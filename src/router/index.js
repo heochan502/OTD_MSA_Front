@@ -35,6 +35,7 @@ import MealMainView from "@/views/meal/MealMainView.vue";
 // 운동
 import ExerciseMain from "@/views/exercise/ExerciseMain.vue";
 import ExerciseRecord from "@/views/exercise/ExerciseRecord.vue";
+import ExerciseRecordForm from "@/views/exercise/ExerciseRecordForm.vue";
 
 // 카테고리 라벨 맵
 const CATEGORY_LABEL = {
@@ -184,6 +185,12 @@ const router = createRouter({
       path: "/exercise/record",
       name: "ExerciseRecord",
       component: ExerciseRecord,
+      meta: { headerType: "title", title: "이달의 기록", showUserPanel: false },
+    },
+    {
+      path: "/exercise/record_form",
+      name: "ExerciseRecordForm",
+      component: ExerciseRecordForm,
       meta: { headerType: "title", title: "이달의 기록", showUserPanel: false },
     },
   ],
