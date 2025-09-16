@@ -1,12 +1,18 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useCommunityStore } from '@/stores/community/community';
 
 const route = useRoute();
 const store = useCommunityStore();
 const routeId = computed(() => String(route.params.id));
-const post = computed(() => store.getById(routeId.value)); // ✅ 정규화된 객체
+
+const post = computed(() => store.getById(routeId.value)); // 정규화된 객체( id / author / time ... )
+
+onMounted(() => {
+  if (!post.value) store.loadPostDetail(routeId.value);
+});
+
 
 const myComment = ref('');
 const like = () => {
@@ -20,53 +26,58 @@ const addComment = () => {
 </script>
 
 <template>
-  <section v-if="post" class="detail">
-    <h1 class="title">{{ post.title }}</h1>
-    <div class="meta">
-      <span class="avatar"></span>
-      <span class="author">{{ post.author }}</span>
-      <span class="time">· {{ post.time }}</span>
-      <span class="sep">|</span>
-      <button class="link danger">삭제하기</button>
-    </div>
+  <div class="wrap">
+    <section v-if="post" class="detail">
+      <h1 class="otd-title">{{ post.title }}</h1>
 
-    <article class="content">{{ post.content }}</article>
+      <div class="meta">
+        <span class="avatar" aria-hidden="true"></span>
+        <span class="otd-body-3" style="font-weight: 600">{{
+          post.author
+        }}</span>
+        <span class="otd-body-3">· {{ post.time }}</span>
+        <span class="sep">|</span>
+        <button class="link danger otd-body-3">삭제하기</button>
+      </div>
 
-    <div class="actions">
-      <button class="btn-ghost" @click="like">❤️ {{ post.likes }}</button>
-      <span class="caption">댓글 {{ post.comments }}개</span>
-    </div>
+      <article class="content otd-body-1">{{ post.content }}</article>
 
-    <div class="comment-box">
-      <input
-        class="input"
-        v-model="myComment"
-        placeholder="댓글을 입력하세요"
-      />
-      <button class="btn btn-primary" @click="addComment">등록</button>
-    </div>
-  </section>
+      <div class="actions otd-top-margin">
+        <button class="btn-ghost otd-body-3" @click="like">
+          ❤️ {{ post.likes }}
+        </button>
+        <span class="otd-body-3">댓글 {{ post.comments }}개</span>
+      </div>
 
-  <section v-else class="detail"><p>글을 찾을 수 없습니다.</p></section>
+      <div class="comment-box otd-top-margin">
+        <input
+          class="input otd-body-2"
+          v-model="myComment"
+          placeholder="댓글을 입력하세요"
+        />
+        <button class="btn btn-primary otd-button" @click="addComment">
+          등록
+        </button>
+      </div>
+    </section>
+
+    <section v-else class="detail">
+      <p class="otd-body-1">글을 찾을 수 없습니다.</p>
+    </section>
+  </div>
 </template>
 
 <style scoped>
 .detail {
   display: flex;
   flex-direction: column;
-  gap: var(--gap-md);
-  padding: 0 var(--gap-lg) var(--gap-lg);
-}
-.title {
-  font-size: var(--fs-category-bold);
-  font-weight: 800;
+  gap: 12px;
 }
 .meta {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--color-typo-caption);
-  font-size: 12px;
+  color: #777;
 }
 .avatar {
   width: 24px;
@@ -74,14 +85,10 @@ const addComment = () => {
   border-radius: 50%;
   background: #eaeaea;
 }
-.author {
-  color: var(--color-typo-secondary);
-  font-weight: 600;
-}
 .link {
   background: none;
   border: none;
-  color: var(--color-typo-secondary);
+  color: #666;
   cursor: pointer;
 }
 .link.danger {
@@ -93,9 +100,10 @@ const addComment = () => {
 }
 .content {
   white-space: pre-wrap;
-  line-height: var(--lh-relaxed);
-  color: var(--color-typo-primary);
+  line-height: 1.6;
+  color: #303030;
 }
+
 .actions {
   display: flex;
   align-items: center;
@@ -105,10 +113,11 @@ const addComment = () => {
   height: 36px;
   padding: 0 12px;
   border-radius: 999px;
-  border: var(--border-1);
+  border: 1px solid #e5e5e5;
   background: #fff;
   cursor: pointer;
 }
+
 .comment-box {
   display: flex;
   gap: 8px;
@@ -116,19 +125,19 @@ const addComment = () => {
 .input {
   flex: 1;
   height: 40px;
-  border: var(--border-1);
+  border: 1px solid #e5e5e5;
   border-radius: 12px;
   padding: 0 12px;
 }
 .btn {
   height: 40px;
   padding: 0 14px;
-  border-radius: 12px;
   border: none;
+  border-radius: 12px;
   cursor: pointer;
 }
 .btn-primary {
-  background: var(--color-primary);
+  background: #00d5df;
   color: #fff;
 }
 </style>
