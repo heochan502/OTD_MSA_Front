@@ -5,24 +5,33 @@ const props = defineProps({
   rankingDetail: {
     type: Array,
     default: () => [],
-  // rank: '',
-  // memebrId: 0,
-  // prifileImage: '',
-  // nickName: '',
-  // data: '',
+    // rank: '',
+    // memebrId: 0,
+    // prifileImage: '',
+    // nickName: '',
+    // data: '',
   },
 });
 </script>
 
 <template>
   <div>
-    <div>
-      <div>{{ props.rankingDetail.rank }}</div>
-      <div>{{ props.rankingDetail.prifileImage }}</div>
-      <div>{{ props.rankingDetail.nickName }}</div>
-      <div>{{ props.rankingDetail.data }}</div>
+    <div class="box otd-box-style otd-border">
+      <div class="rank otd-subtitle-2">{{ props.rankingDetail.rank }}위</div>
+      <div class="image">{{ props.rankingDetail.profileImage }}</div>
+      <div class="nick-name otd-body-2">{{ props.rankingDetail.nickName }}</div>
+      <div class="value otd-body-3">{{ props.rankingDetail.totalRecord }}</div>
     </div>
   </div>
 </template>
 
-<style scoped></style>
+<style lang="scss" scoped>
+.box {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 15px;
+  width: 311px;
+  height: 57px;
+}
+</style>
