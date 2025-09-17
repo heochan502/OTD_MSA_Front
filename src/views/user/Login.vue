@@ -38,8 +38,8 @@ const submit = async () => {
 <template>
   <div class="login">
     <div class="container">
-      <form class="py-5 d-flex flex-column gap-3" @submit.prevent="submit">
-        <h1 class="h5 mb-3">로그인</h1>
+      <form class="form" @submit.prevent="submit">
+        <h1 class="inputa">로그인</h1>
         <!-- 아이디 입력 -->
         <div class="form-floating">
           <input
@@ -74,8 +74,8 @@ const submit = async () => {
       </div>
       <!-- API 로그인 -->
       <div class="mb-3">
-        <span class="pointer"><a :href="`${beBaseUrl}/oauth2/authorization/naver?redirect_uri=${redirectUrl}`">네이버</a></span>        
-        <span class="pointer"><a :href="`${beBaseUrl}/oauth2/authorization/kakao?redirect_uri=${redirectUrl}`">카카오</a></span>      
+        <span class="naver"><a :href="`${beBaseUrl}/oauth2/authorization/naver?redirect_uri=${redirectUrl}`">네이버</a></span>        
+        <span class="kakao"><a :href="`${beBaseUrl}/oauth2/authorization/kakao?redirect_uri=${redirectUrl}`">카카오</a></span>      
       </div>
       <div class="additional-links">
         <div class="link-row">
@@ -115,5 +115,32 @@ const submit = async () => {
   color: white;
   text-decoration: none;
 }
+.form {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.form-floating {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+.inputa {
+  
+  font-size: 20px;
+  padding-top: 10px;
+  padding-left: 10px;
+}
+.mb-3 {
+  text-align: center;
+}
+
+.naver {
+  padding-right: 0.5rem;
+}
+
+.additional-links {
+  text-align: center;
+}
+
 
 </style>
