@@ -10,22 +10,21 @@ import CategoryFeedView from "@/views/community/categories/CategoryFeedView.vue"
 import PostDetailView from "@/views/community/PostDetailView.vue";
 // 챌린지
 
-import ChallengeHome from '@/views/challenge/ChallengeHome.vue';
-import ChallengeAllList from '@/views/challenge/ChallengeAllList.vue';
-import ChallengeWeeklyList from '@/views/challenge/ChallengeWeeklyList.vue';
-import ChallengeCompetitionList from '@/views/challenge/ChallengeMonthlyList.vue';
-import ChallengePer from '@/views/challenge/ChallengePer.vue';
+import ChallengeHome from "@/views/challenge/ChallengeHome.vue";
+import ChallengeAllList from "@/views/challenge/ChallengeAllList.vue";
+import ChallengeWeeklyList from "@/views/challenge/ChallengeWeeklyList.vue";
+import ChallengeCompetitionList from "@/views/challenge/ChallengeMonthlyList.vue";
+import ChallengePer from "@/views/challenge/ChallengePer.vue";
 
-import Login from '@/views/user/Login.vue';
-import Join from '@/views/user/Join.vue';
-import PassCallback from '@/views/auth/PassCallback.vue';
-import Oauth2 from '@/views/auth/OAuth2Handler.vue';
+import Login from "@/views/user/Login.vue";
+import Join from "@/views/user/Join.vue";
+import PassCallback from "@/views/auth/PassCallback.vue";
+import Oauth2 from "@/views/auth/OAuth2Handler.vue";
 
-import PayApproval from '@/views/pay/PayApproval.vue';
-import PayCancel from '@/views/pay/PayCancel.vue';
-import PayCompleted from '@/views/pay/PayCompleted.vue';
-import PayFail from '@/views/pay/PayFail.vue';
-
+import PayApproval from "@/views/pay/PayApproval.vue";
+import PayCancel from "@/views/pay/PayCancel.vue";
+import PayCompleted from "@/views/pay/PayCompleted.vue";
+import PayFail from "@/views/pay/PayFail.vue";
 
 // 포인트샵
 import PointShop from "@/components/pointshop/PointShop.vue";
@@ -33,14 +32,12 @@ import PointShop from "@/components/pointshop/PointShop.vue";
 //식단
 import MealMainView from "@/views/meal/MealMainView.vue";
 
-
 // 운동
 import ExerciseMain from "@/views/exercise/ExerciseMain.vue";
 import ExerciseRecord from "@/views/exercise/ExerciseRecord.vue";
 import ExerciseRecordForm from "@/views/exercise/ExerciseRecordForm.vue";
 
-import MealDetailView from '@/views/meal/MealDetailView.vue';
-
+import MealDetailView from "@/views/meal/MealDetailView.vue";
 
 // 카테고리 라벨 맵
 const CATEGORY_LABEL = {
@@ -85,10 +82,10 @@ const router = createRouter({
     },
 
     {
-      path: '/test',
-      name: 'Test',
-      component: () => import('@/components/test.vue'),
-      meta: { headerType: 'title', title: '테스트', showUserPanel: false },
+      path: "/test",
+      name: "Test",
+      component: () => import("@/components/test.vue"),
+      meta: { headerType: "title", title: "테스트", showUserPanel: false },
     },
     {
       path: "/challenge",
@@ -143,18 +140,18 @@ const router = createRouter({
         showUserPanel: false,
       },
     },
-    { path: '/user/login', name: 'login', component: Login },
+    { path: "/user/login", name: "login", component: Login },
     {
-      path: '/challenge/detail/:id',
-      name: 'ChallengeDetail',
+      path: "/challenge/detail/:id",
+      name: "ChallengeDetail",
       component: ChallengePer,
       props: (route) => ({
         id: Number(route.params.id),
         name: route.params.name,
       }),
       meta: {
-        headerType: 'title',
-        title: '',
+        headerType: "title",
+        title: "",
 
         showUserPanel: false,
       },
@@ -167,8 +164,8 @@ const router = createRouter({
       component: Join,
     },
     {
-      path: '/auth/pass/callback',
-      name: 'PassCallback',
+      path: "/auth/pass/callback",
+      name: "PassCallback",
       component: PassCallback,
     },
     {
@@ -221,36 +218,35 @@ const router = createRouter({
       meta: { headerType: "title", title: "이달의 기록", showUserPanel: false },
     },
     {
-      path: '/meal/detail',
-      name: 'MealDetailView',
-      component: MealDetailView,
-      meta: { headerType: 'title', title: '음식 상세', showUserPanel: false },
-    },
-    {
-      path: '/meal/water',
-      name: 'WaterLog',
-      component: () => import('@/views/meal/WaterLogView.vue'), // lazy 권장
-      meta: { headerType: 'title', title: '물 섭취량', showUserPanel: false },
-    },
-    {
-      path: '/meal/food-search',
-      name: 'MealFoodSearchView',
-      component: () => import('@/views/meal/MealFoodSearchView.vue'),
-    },
-    {
-      path: '/meal/record',
-      name: 'MealRecordView',
-      component: () => import('@/views/meal/MealRecordView.vue'),
-    },
-    {
       path: "/exercise/record_form",
       name: "ExerciseRecordForm",
       component: ExerciseRecordForm,
-      meta: { headerType: "title", title: "이달의 기록", showUserPanel: false },
+      meta: { headerType: "title", title: "기록 추가", showUserPanel: false },
+    },
+    {
+      path: "/meal/detail",
+      name: "MealDetailView",
+      component: MealDetailView,
+      meta: { headerType: "title", title: "음식 상세", showUserPanel: false },
+    },
+    {
+      path: "/meal/water",
+      name: "WaterLog",
+      component: () => import("@/views/meal/WaterLogView.vue"), // lazy 권장
+      meta: { headerType: "title", title: "물 섭취량", showUserPanel: false },
+    },
+    {
+      path: "/meal/food-search",
+      name: "MealFoodSearchView",
+      component: () => import("@/views/meal/MealFoodSearchView.vue"),
+    },
+    {
+      path: "/meal/record",
+      name: "MealRecordView",
+      component: () => import("@/views/meal/MealRecordView.vue"),
     },
   ],
 });
-
 
 // //로그인 하지 않아도 이용할 수 있는 Path들
 // const unSignedPathList = ['/user/login', '/user/join', '/fe/redirect'];
@@ -263,7 +259,6 @@ const router = createRouter({
 //   const isUnsignedPath = unSignedPathList.some((path) =>
 //     to.path.startsWith(path)
 //   );
-
 
 //   if (to.name === 'ChallengeDetail' && to.params.name) {
 //     to.meta.title = to.params.name; // 카드 이름을 제목으로

@@ -56,4 +56,8 @@ import ExerciseRecordList from "@/components/exercise/ExerciseRecordList.vue";
     height: 50px;
   }
 }
+
+:hover {
+  border: none;
+}
 </style>
