@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { getSelectedAll } from '@/services/challenge/ChallengeService';
 import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 import { useChallengeStore } from '@/stores/challenge/challengeStore';
+import Progress from '@/components/challenge/Progress.vue';
 
 const challengeStore = useChallengeStore();
 
@@ -34,11 +35,19 @@ const toList = async (type) => {
   });
 };
 
-const detail = (id) => {
-  router.push({
-    name: 'ChallengeDetail',
-    params: { id },
-  });
+const detail = (id, type) => {
+  console.log('type', type);
+  if (type == 'personal') {
+    router.push({
+      name: 'ChallengeDay',
+      params: { id },
+    });
+  } else {
+    router.push({
+      name: 'ChallengePer',
+      params: { id },
+    });
+  }
 };
 
 onMounted(async () => {
@@ -55,6 +64,53 @@ onMounted(async () => {
 
 <template>
   <div class="wrap">
+    <!-- 내정보 -->
+    <div>
+      <div>내 정보</div>
+      <div>
+        <div>티어 이미지</div>
+        <div>
+          <span>6레벨 Silver</span>
+          <span>승급까지 2레벨 남았어요!</span>
+        </div>
+        <Progress></Progress>
+      </div>
+      <div>
+        <div>
+          <img src="" alt="" />
+          <span>보유한 포인트</span>
+          <span>5,000P</span>
+        </div>
+        <div>
+          <img src="" alt="" />
+          <span>성공한 챌린지</span>
+          <span>5개</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div>일일 미션</div>
+      <div>
+        <div>
+          <img src="" alt="" />
+          <span>아침에 일어나서 물 한 잔</span>
+          <span>5P</span>
+          <input type="checkbox" />
+        </div>
+        <div>
+          <img src="" alt="" />
+          <span>가벼운 스트레칭 5분</span>
+          <span>5P</span>
+          <input type="checkbox" />
+        </div>
+        <div>
+          <img src="" alt="" />
+          <span>명상 1분</span>
+          <span>5P</span>
+          <input type="checkbox" />
+        </div>
+      </div>
+    </div>
     <!-- 월간 챌린지 -->
     <div>
       <div class="monthly">
@@ -74,7 +130,7 @@ onMounted(async () => {
             :image="challenge.image"
             :name="challenge.name"
             :reward="challenge.reward"
-            @click="detail(challenge.cdId)"
+            @click="detail(challenge.cdId, challenge.type)"
           ></ChallengeCard>
           <div
             v-for="n in Math.max(0, 2 - state.competitionChallenge.length)"
@@ -100,7 +156,7 @@ onMounted(async () => {
             :image="challenge.image"
             :name="challenge.name"
             :reward="challenge.reward"
-            @click="detail(challenge.cdId)"
+            @click="detail(challenge.cdId, challenge.type)"
           ></ChallengeCard>
           <div
             v-for="n in Math.max(0, 2 - state.personalChallenge.length)"
@@ -116,30 +172,6 @@ onMounted(async () => {
         </div>
       </div>
     </div>
-    <!-- 일간 미션 -->
-    <div class="title">진행중인 일일 미션</div>
-    <div class="challenge-card">
-      <ChallengeCard
-        v-for="challenge in state.dailyMission"
-        :key="challenge.cdId"
-        :id="challenge.cdId"
-        :image="challenge.image"
-        :name="challenge.name"
-        :reward="challenge.reward"
-        @click="detail(challenge.cdId)"
-      ></ChallengeCard>
-      <div
-        v-for="n in Math.max(0, 2 - state.dailyMission.length)"
-        :key="'dm-' + n"
-        class="empty-card"
-        @click="toList('daily')"
-      >
-        <span
-          >새로운 미션에 <br />
-          도전해보세요!</span
-        >
-      </div>
-    </div>
     <!-- 주간 챌린지 -->
     <div>
       <div>
@@ -147,7 +179,7 @@ onMounted(async () => {
         <div class="weekly">
           <!-- <div class="route-list" @click="toChallengeList">
           > 챌린지 목록 보기
-        </div> -->
+          </div> -->
           <!-- 주간 챌린지 -->
           <div class="challenge-card">
             <ChallengeCard
@@ -157,7 +189,7 @@ onMounted(async () => {
               :image="challenge.image"
               :name="challenge.name"
               :reward="challenge.reward"
-              @click="detail(challenge.cdId)"
+              @click="detail(challenge.cdId, challenge.type)"
             ></ChallengeCard>
             <div
               v-for="n in Math.max(0, 2 - state.weeklyChallenge.length)"
