@@ -36,6 +36,7 @@ import MealMainView from "@/views/meal/MealMainView.vue";
 import ExerciseMain from "@/views/exercise/ExerciseMain.vue";
 import ExerciseRecord from "@/views/exercise/ExerciseRecord.vue";
 import ExerciseRecordForm from "@/views/exercise/ExerciseRecordForm.vue";
+import ExerciseRecordDetail from "@/views/exercise/ExerciseRecordDetail.vue";
 
 import MealDetailView from "@/views/meal/MealDetailView.vue";
 
@@ -222,6 +223,12 @@ const router = createRouter({
       name: "ExerciseRecordForm",
       component: ExerciseRecordForm,
       meta: { headerType: "title", title: "기록 추가", showUserPanel: false },
+    },
+    {
+      path: "/exercise/record/:exerciseRecordId",
+      name: "ExerciseRecordDeatil",
+      component: ExerciseRecordDetail,
+      meta: { headerType: "title", title: "운동 기록", showUserPanel: false },
     },
     {
       path: "/meal/detail",

@@ -1,4 +1,13 @@
-<script setup></script>
+<script setup>
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+
+// @click
+const goDetail = (exerciseRecordId) => {
+  router.push(`exercise/record/${exerciseRecordId}`);
+};
+</script>
 
 <template>
   <!-- 운동기록 영역 -->
@@ -15,11 +24,11 @@
         </div>
         <div class="d-flex align-center ga-2">
           <span class="otd-body-3">운동시작시간</span>
-
           <img
             class="btn_more"
             src="\public\image\main\btn_more.png"
             alt="상세보기 버튼"
+            @click.prevent="goDetail(1)"
           />
         </div>
       </li>
