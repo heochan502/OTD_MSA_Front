@@ -37,6 +37,7 @@ import MealMainView from "@/views/meal/MealMainView.vue";
 // 운동
 import ExerciseMain from "@/views/exercise/ExerciseMain.vue";
 import ExerciseRecord from "@/views/exercise/ExerciseRecord.vue";
+import ExerciseRecordForm from "@/views/exercise/ExerciseRecordForm.vue";
 
 import MealDetailView from '@/views/meal/MealDetailView.vue';
 
@@ -240,6 +241,12 @@ const router = createRouter({
       path: '/meal/record',
       name: 'MealRecordView',
       component: () => import('@/views/meal/MealRecordView.vue'),
+    },
+    {
+      path: "/exercise/record_form",
+      name: "ExerciseRecordForm",
+      component: ExerciseRecordForm,
+      meta: { headerType: "title", title: "이달의 기록", showUserPanel: false },
     },
   ],
 });
