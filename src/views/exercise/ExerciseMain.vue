@@ -20,9 +20,9 @@ import BodyCompositionSummary from "@/components/exercise/BodyCompositionSummary
       <WeeklyDatePick />
     </div>
     <div class="exercise_report">
-      <div class="subtitle">
+      <div class="subtitle ga-1">
         <div class="d-flex align-center ga-1">
-          <p class="otd-subtitle-1 mb-0">운동기록</p>
+          <span class="otd-subtitle-1 mb-0">운동기록</span>
           <router-link to="/exercise/record_form">
             <img
               class="btn_add"

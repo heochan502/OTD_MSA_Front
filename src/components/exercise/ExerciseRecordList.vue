@@ -5,7 +5,7 @@ const router = useRouter();
 
 // @click
 const goDetail = (exerciseRecordId) => {
-  router.push(`exercise/record/${exerciseRecordId}`);
+  router.push(`/exercise/record/${exerciseRecordId}`);
 };
 </script>
 
