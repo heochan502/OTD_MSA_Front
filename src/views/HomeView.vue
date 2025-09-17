@@ -7,6 +7,8 @@ import LineChart from  '@/components/excercise/lineChart.vue'
 
 import MealCard from '@/components/meal/MealDayCards.vue';
 
+import BmiProg from "@/components/exercise/BmiProg.vue";
+
 const mealInfo = ref([
   {
     meal_day: '아침',
@@ -146,17 +148,19 @@ const healthToggle = (index) => {
       <span class="otd-subtitle-1 otd-top-margin">건강</span>
       <div class="health-card">
         <div class="otd-top-margin">
-          <div>
-            <span class="otd-body-3">BMI</span>
+          <!-- bmi 프로그래스바  -->
+          <div class="bmi-prog">
+            <BmiProg  />
           </div>
         </div>
       </div>
+      <!-- 선형 그래프 선택 부분 -->
       <v-item-group v-model="selectedField" >
         <div class="otd-top-margin item-group ">
           <div v-for="(field, idx) in fields" :key="idx" class="card-wrapper ">
             <v-item v-slot="{selectedClass, toggle}" :value="field.key">
-              <v-card :class="['health-button d-flex flex-column justify-center align-center text-center', selectedClass, ,]"
-              @click="toggle">
+              <v-card :class="[` health-button d-flex flex-column justify-center align-center text-center`,  { 'health-button-active': selectedClass }, ,]"
+              @click="toggle"   v-ripple="false" >
               <div>
                 <span class="otd-body-3">
                   {{ field.label }}({{ field.unit}}) </span>
@@ -165,9 +169,7 @@ const healthToggle = (index) => {
                 {{ todayData?.[field.key] }}
               </div>
               </v-card>
-
             </v-item>
-
           </div>
         </div>
       </v-item-group>
@@ -183,13 +185,13 @@ const healthToggle = (index) => {
         </button>
       </div> -->
 
-      <div>
-        <!-- <LineChart
-        :selected-date="inbodyData.dataTime"
+      <div class = otd-top-margin >
+        <LineChart
+        :selected-date="today"
         :selectedField="selectedField"
         :fields="fields"
-        :logs="healthStore.logList"
-      /> -->
+        :logs="inbodyData"
+      />
       </div>
     </section>
   </div>
@@ -314,10 +316,14 @@ const healthToggle = (index) => {
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
 }
 
+.bmi-prog
+{
+  padding: 10px;
+}
+
 .item-group {
   display: flex;
-  flex-wrap: nowrap;
-  
+  flex-wrap: nowrap;  
   gap: 10px;
 }
 .health-button
