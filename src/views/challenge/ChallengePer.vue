@@ -13,10 +13,12 @@ const route = useRoute();
 const year = new Date().getFullYear();
 const month = new Date().getMonth() + 1;
 const state = reactive({
+  userId: '',
   name: '',
   progress: { goal: '', totalRecord: '', percent: '' },
   myRank: '',
-  ranking: [],
+  aroundRanking: [],
+  topRanking: [],
   totalUsers: '',
 });
 
@@ -24,11 +26,13 @@ onMounted(async () => {
   const req = { userId: 1, year: year, month: month };
   const cdId = props.id;
   const res = await getRank(cdId, req);
+  state.userId = res.data.userId;
   state.progress.goal = res.data.goal;
   state.progress.totalRecord = res.data.totalRecord;
   state.progress.percent = res.data.percent;
   state.myRank = res.data.myRank;
-  state.ranking = res.data.ranking;
+  state.aroundRanking = res.data.aroundRanking;
+  state.topRanking = res.data.topRanking;
   state.totalUsers = res.data.totalUsers;
   console.log('per res.data', res);
 
@@ -67,15 +71,23 @@ onMounted(async () => {
           <button class="otd-border otd-box-style">내 순위 보기</button>
           <button class="otd-border otd-box-style">Top5 보기</button>
         </div>
-
-        <div v-for="(ranking, idx) in state.ranking" :key="idx">
+        <div v-for="ranking in state.topRanking" :key="ranking.userId">
           <RankingCard
-            :class="`card-${idx}`"
+            :is-me="ranking.userId === state.userId"
             :ranking-detail="ranking"
           ></RankingCard>
         </div>
 
-        <div class="otd-body-3 my-rank">내 순위 : {{ state.myRank }}위</div>
+        <div class="otd-body-3 my-info">내 순위 : {{ state.myRank }}위</div>
+      </div>
+      <div>
+        <div v-for="ranking in state.aroundRanking" :key="ranking.userId">
+          <RankingCard
+            :is-me="ranking.userId === state.userId"
+            :ranking-detail="ranking"
+          ></RankingCard>
+        </div>
+        <div class="otd-body-3 my-info">내 순위 : {{ state.myRank }}위</div>
       </div>
     </div>
   </div>
@@ -117,35 +129,7 @@ onMounted(async () => {
     color: #303030;
   }
 }
-.card-0 {
-  :deep(.box) {
-    border: 2px solid #ffba57;
-  }
-  :deep(.rank) {
-    content: url('/public/image/challenge/medal1.png');
-    width: 30px;
-  }
-}
-.card-1 {
-  :deep(.box) {
-    border: 2px solid #9e9e9e;
-  }
-  :deep(.rank) {
-    content: url('/public/image/challenge/medal2.png');
-    width: 30px;
-  }
-}
-.card-2 {
-  :deep(.box) {
-    border: 2px solid #ce7430;
-  }
-  :deep(.rank) {
-    content: url('/public/image/challenge/medal3.png');
-    width: 30px;
-  }
-}
-.my-rank {
-  margin: 0;
-  margin-bottom: 15px;
+.rank {
+  border: 2px solid;
 }
 </style>
