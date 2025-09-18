@@ -190,7 +190,7 @@ const chartOptions = {
       title: { display: false },
     },
     y: {
-      display: true,
+      display: false,
       grid: { display: false },
       min: minValue.value -  (minValue.value * 0.1) , // 최소값보다 약간 작게 설정, null일 때 0
       max: maxValue.value + (maxValue.value * 0.1) , // 최대값보다 약간 크게 설정, null일 때 10
@@ -198,11 +198,6 @@ const chartOptions = {
   },
 };
 // 차트 업데이트
-watch([chartData, chartOptions], () => {
-  if (chartRef.value) {
-    chartRef.value?.update();
-  }
-});
 
 
 </script>
