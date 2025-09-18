@@ -25,62 +25,29 @@ const mealClick = (i) => {
 <template>
   <span class="title-text">오늘의 식단</span>
   <div class="meal-cards">
-    <div
-      class="meal-card"
-      v-for="(item, index) in mealInfo"
-      :key="item.meal_day"
-    >
+    <div class="meal-card" v-for="(item, index) in mealInfo" :key="item.meal_day">
       <button class="meal-card-top d-flex justify-content-between">
         <div class="d-flex flex-column">
           <img class="meal-top-img" :src="item.img" :alt="item.meal_day" />
           <span class="d-flex align-self-center otd-subtitle-1">{{
             item.meal_day
-          }}</span>
+            }}</span>
         </div>
         <div class="d-flex align-items-right">
-          <img
-            class="meal-check-img"
-            v-if="item.check"
-            src="/image/main/check.png"
-            alt="체크"
-          />
-          <img
-            class="meal-check-img"
-            v-else
-            src="/image/main/cross.png"
-            alt="미체크"
-          />
+          <img class="meal-check-img" v-if="item.check" src="/otd/image/main/check.png" alt="체크" />
+          <img class="meal-check-img" v-else src="/otd/image/main/cross.png" alt="미체크" />
         </div>
       </button>
 
       <button class="meal-card-bottom">
         <div v-if="item.kcal > 0">{{ item.kcal }} kcal</div>
-        <img
-          v-else-if="item.kcal === 0 && item.check && item.meal_day != '간식'"
-          src="/image/main/meal_check.png"
-          alt="단식 체크"
-          @click="mealClick(index)"
-        />
-        <img
-          v-else-if="item.kcal === 0 && !item.check && item.meal_day != '간식'"
-          src="/image/main/meal_default.png"
-          alt="단식 미체크"
-          @click="mealClick(index)"
-        />
-        <img
-          class="snack"
-          v-else-if="item.kcal === 0 && !item.check && item.meal_day === '간식'"
-          src="/image/main/snack_default.png"
-          @click="mealClick(index)"
-          alt="간식"
-        />
-        <img
-          class="snack"
-          v-else
-          src="/image/main/snack_check.png"
-          @click="mealClick(index)"
-          alt="간식"
-        />
+        <img v-else-if="item.kcal === 0 && item.check && item.meal_day != '간식'" src="/image/main/meal_check.png"
+          alt="단식 체크" @click="mealClick(index)" />
+        <img v-else-if="item.kcal === 0 && !item.check && item.meal_day != '간식'" src="/image/main/meal_default.png"
+          alt="단식 미체크" @click="mealClick(index)" />
+        <img class="snack" v-else-if="item.kcal === 0 && !item.check && item.meal_day === '간식'"
+          src="/otd/image/main/snack_default.png" @click="mealClick(index)" alt="간식" />
+        <img class="snack" v-else src="/otd/image/main/snack_check.png" @click="mealClick(index)" alt="간식" />
       </button>
     </div>
   </div>
