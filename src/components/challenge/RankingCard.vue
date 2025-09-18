@@ -22,9 +22,9 @@ const getBorderColor = (rank) => {
   <div>
     <div
       class="box otd-box-style otd-border"
-      :class="{ 'my-rank': isMe }"
+      :class="{ 'my-rank': isMe && props.rankingDetail.rank > 3 }"
       :style="
-        !isMe
+        !isMe || props.rankingDetail.rank < 3
           ? { border: '2px solid ' + getBorderColor(props.rankingDetail.rank) }
           : {}
       "
@@ -52,6 +52,12 @@ const getBorderColor = (rank) => {
       <div class="value otd-body-3">
         {{ props.rankingDetail.formattedTotalRecord }}
       </div>
+      <img
+        src="/public/image/challenge/me.png"
+        alt="myRank"
+        v-if="props.isMe"
+        class="me-image"
+      />
     </div>
   </div>
 </template>
@@ -59,17 +65,25 @@ const getBorderColor = (rank) => {
 <style lang="scss" scoped>
 .box {
   display: flex;
+  position: relative;
   align-items: center;
   justify-content: space-around;
   gap: 15px;
   width: 311px;
   height: 57px;
+  .me-image {
+    width: 30px;
+    position: absolute;
+    top: -7px;
+    left: -7px;
+  }
 }
 .my-rank {
-  border: 2px solid transparent;
+  // border: 2px solid transparent;
+  // background-image: linear-gradient(#fff, #fff),
+  //   linear-gradient(to right, #00c3ff, #ffff1c, #ff7a18, #ff00f5);
+  border: 2px solid #00d5df;
   border-radius: 10px;
-  background-image: linear-gradient(#fff, #fff),
-    linear-gradient(to right, #00c3ff, #ffff1c, #ff7a18, #ff00f5);
   background-origin: border-box;
   background-clip: padding-box, border-box;
 }

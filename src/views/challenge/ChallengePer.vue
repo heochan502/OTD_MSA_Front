@@ -1,6 +1,6 @@
 <script setup>
 import RankingCard from '@/components/challenge/RankingCard.vue';
-import { reactive, onMounted } from 'vue';
+import { reactive, onMounted, ref } from 'vue';
 import Progress from '@/components/challenge/Progress.vue';
 import { getRank, putSuccess } from '@/services/challenge/ChallengeService';
 
@@ -16,14 +16,37 @@ const state = reactive({
   topRanking: [],
   activeTab: 'around',
 });
-
 const aroundRankingList = () => {
   state.activeTab = 'around';
 };
 const topRankingList = () => {
   state.activeTab = 'top';
 };
+const ment = ref('null');
 
+const recordGap = ref('');
+const gap = () => {
+  let myIdx;
+
+  myIdx = state.aroundRanking.findIndex(
+    (r) => r.userId === state.progress.userId
+  );
+  const beforeIdx = myIdx - 1;
+  const afterIdx = myIdx + 1;
+  const myTotalRecord = state.aroundRanking[myIdx].totalRecord;
+  const beforeMe = state.aroundRanking[beforeIdx].totalRecord;
+  const afterMe = state.aroundRanking[afterIdx].totalRecord;
+
+  if (state.progress.myRank === 1) {
+    recordGap.value = (myTotalRecord - afterMe).toFixed(1);
+    ment.value;
+    console.log('af', recordGap.value);
+  } else {
+    recordGap.value = (beforeMe - myTotalRecord).toFixed(1);
+    ment.value = `만 더 하면 ${state.progress.myRank - 1}위!`;
+    console.log('be', recordGap.value);
+  }
+};
 onMounted(async () => {
   const req = { userId: 1, year: year, month: month };
   const cdId = props.id;
@@ -31,8 +54,8 @@ onMounted(async () => {
   state.progress = res.data;
   state.aroundRanking = res.data.aroundRanking;
   state.topRanking = res.data.topRanking;
-  console.log('per res.data', res);
-
+  console.log('per res.data', res.data);
+  gap();
   if (state.progress.percent >= 100 && res.data.success == false) {
     await putSuccess(res.data.cpId);
     console.log('목표 성공');
@@ -81,13 +104,13 @@ onMounted(async () => {
             :key="ranking.userId"
           >
             <RankingCard
-              :is-me="ranking.userId === state.userId"
+              :is-me="ranking.userId === state.progress.userId"
               :ranking-detail="ranking"
             ></RankingCard>
           </div>
           <div v-else v-for="(ranking, idx) in state.topRanking" :key="idx">
             <RankingCard
-              :is-me="ranking.userId === state.userId"
+              :is-me="ranking.userId === state.progress.userId"
               :ranking-detail="ranking"
             ></RankingCard>
           </div>
@@ -95,7 +118,7 @@ onMounted(async () => {
 
         <div class="info">
           <div class="otd-body-3 my-info">
-            <!-- {{state.activeTab === 'top' ? '내 순위 : ' + state.myRank + '위' :  }} -->
+            {{ recordGap + state.progress.unit + ment }}
           </div>
         </div>
       </div>
@@ -129,6 +152,10 @@ onMounted(async () => {
   display: flex;
   gap: 15px;
   border: none;
+
+  .me {
+    width: 30px;
+  }
 }
 .button {
   display: flex;
