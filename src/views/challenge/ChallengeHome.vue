@@ -59,6 +59,8 @@ onMounted(async () => {
   state.dailyMission = res.data.dailyMission;
   challengeStore.state.progressChallenge = res.data;
   console.log('data', res.data);
+
+  
 });
 </script>
 
