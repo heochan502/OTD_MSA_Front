@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
@@ -96,7 +96,8 @@ const labels = weeklyLogs.value.map((item) =>
 );
 
 // Chart.js 데이터셋
-const chartData = computed(() => ( console.log('주간 데이터:', minValue.value ), {
+const chartData = computed(() => ( console.log('min 데이터:', minValue.value ),
+console.log('max 데이터:', maxValue.value ), {
   
   labels: labels,
   datasets: [
@@ -187,12 +188,19 @@ const chartOptions = {
       title: { display: false },
     },
     y: {
-      display: false,
+      display: true,
       grid: { display: false },
-      min: minValue.value - 2,
+      min: minValue.value -  (minValue.value * 0.1) , // 최소값보다 약간 작게 설정, null일 때 0
+      max: maxValue.value + (maxValue.value * 0.1) , // 최대값보다 약간 크게 설정, null일 때 10
     },
   },
 };
+
+onMounted(() => {
+  
+
+});
+
 </script>
 
 <template>

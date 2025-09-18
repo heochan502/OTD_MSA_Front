@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import Progress from '@/components/challenge/Progress.vue';
 import ProgressJs from '@/components/challenge/ProgressJs.vue';
 
-import LineChart from  '@/components/excercise/lineChart.vue'
+import LineChart from  '@/components/exercise/lineChart.vue'
 
 import MealCard from '@/components/meal/MealDayCards.vue';
 
