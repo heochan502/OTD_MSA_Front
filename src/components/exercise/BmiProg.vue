@@ -71,6 +71,8 @@ const bmiStatus = computed(() => {
 
 <style lang="scss" scoped>
 .content_bmi {
+  width: 315px;
+
   .chip_bmi {
     display: flex;
     align-items: center;
@@ -90,7 +92,7 @@ const bmiStatus = computed(() => {
     top: 50%;
     transform: translateY(-50%);
     height: 8px;
-    // width: 100%;
+    max-width: 315px;
     border-radius: 6px;
     background: linear-gradient(
       to right,
@@ -113,5 +115,6 @@ const bmiStatus = computed(() => {
   justify-content: space-between;
   //   color: #ececec;
   font-size: 9px;
+  max-width: 315px;
 }
 </style>
