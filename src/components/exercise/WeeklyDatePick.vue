@@ -10,9 +10,8 @@ const claendarAttrs = ref([
 
 <template>
   <div class="content_wrap">
-    
     <!-- weekly 영역 -->
-    <div class="d-flex justify-center otd-top-margin">
+    <div class="d-flex justify-center">
       <vc-calendar view="weekly" :attributes="claendarAttrs">
         <template #header-title-wrapper></template>
       </vc-calendar>
@@ -20,6 +19,4 @@ const claendarAttrs = ref([
   </div>
 </template>
 
-<style lang="scss" scoped>
-
-</style>
+<style lang="scss" scoped></style>

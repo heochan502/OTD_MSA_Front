@@ -1,7 +1,33 @@
 <script setup>
+import { onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { getExerciseRecordList } from "@/services/exercise/exerciseService";
+import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
 
 const router = useRouter();
+const exerciseRecordStore = useExerciseRecordStore();
+
+// 페이징 정보
+const req = {
+  page: 1,
+  rowPerPage: 2,
+};
+
+onMounted(() => {
+  getData();
+});
+
+const getData = async () => {
+  const params = req;
+  const res = await getExerciseRecordList(params);
+  console.log("res", res.data);
+  if (res.status === 200) {
+    const result = res.data;
+    if (result && result.length > 0) {
+      exerciseStore.addToday(result.data);
+    }
+  }
+};
 
 // @click
 const goDetail = (exerciseRecordId) => {
@@ -15,7 +41,7 @@ const goDetail = (exerciseRecordId) => {
     <!-- <운동기록> -->
   </div>
   <!-- <리스트> -->
-  <div class="otd-top-margin">
+  <div>
     <ul class="d-flex flex-column ga-2 p-0">
       <li class="list_item otd-box-style">
         <div class="d-flex flex-column otd-body-1">

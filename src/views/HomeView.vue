@@ -3,23 +3,11 @@ import { ref, onMounted, computed } from "vue";
 import Progress from "@/components/challenge/Progress.vue";
 import ProgressJs from "@/components/challenge/ProgressJs.vue";
 
-import LineChart from "@/components/excercise/lineChart.vue";
+import LineChart from "@/components/exercise/lineChart.vue";
 
 import MealCard from "@/components/meal/MealDayCards.vue";
-// bmi 프로그레스바 컴포넌트
-import BmiProg from "@/components/exercise/BmiProg.vue";
 
-const mealInfo = ref([
-  {
-    meal_day: '아침',
-    kcal: 150,
-    check: true,
-    img: '/image/main/breakfast.png',
-  },
-  { meal_day: '점심', kcal: 0, check: false, img: '/image/main/lunch.png' },
-  { meal_day: '저녁', kcal: 0, check: true, img: '/image/main/dinner.png' },
-  { meal_day: '간식', kcal: 0, check: true, img: '/image/main/snack.png' },
-]);
+import BmiProg from "@/components/exercise/BmiProg.vue";
 
 const challengeInfo = ref([
   { challenge_name: "달리기 30km", progress: 62 },
@@ -142,24 +130,34 @@ const healthToggle = (index) => {
       <span class="otd-subtitle-1 otd-top-margin">건강</span>
       <div class="health-card">
         <div class="otd-top-margin">
-          <div>
-            <span class="otd-body-3">BMI</span>
+          <!-- bmi 프로그래스바  -->
+          <div class="bmi-prog">
+            <BmiProg />
           </div>
         </div>
       </div>
-      <v-item-group v-model="selectedField" >
-        <div class="otd-top-margin item-group ">
-          <div v-for="(field, idx) in fields" :key="idx" class="card-wrapper ">
-            <v-item v-slot="{selectedClass, toggle}" :value="field.key">
-              <v-card :class="['health-button d-flex flex-column justify-center align-center text-center', selectedClass, ,]"
-              @click="toggle">
-              <div>
-                <span class="otd-body-3">
-                  {{ field.label }}({{ field.unit}}) </span>
-              </div>
-              <div class="otd-subtitle-1 text-center ">
-                {{ todayData?.[field.key] }}
-              </div>
+      <!-- 선형 그래프 선택 부분 -->
+      <v-item-group v-model="selectedField">
+        <div class="otd-top-margin item-group">
+          <div v-for="(field, idx) in fields" :key="idx" class="card-wrapper">
+            <v-item v-slot="{ selectedClass, toggle }" :value="field.key">
+              <v-card
+                :class="[
+                  ` health-button d-flex flex-column justify-center align-center text-center`,
+                  { 'health-button-active': selectedClass },
+                  ,
+                ]"
+                @click="toggle"
+                v-ripple="false"
+              >
+                <div>
+                  <span class="otd-body-3">
+                    {{ field.label }}({{ field.unit }})
+                  </span>
+                </div>
+                <div class="otd-subtitle-1 text-center">
+                  {{ todayData?.[field.key] }}
+                </div>
               </v-card>
             </v-item>
           </div>
@@ -176,13 +174,13 @@ const healthToggle = (index) => {
         </button>
       </div> -->
 
-      <div class = otd-top-margin >
+      <div class="otd-top-margin">
         <LineChart
-        :selected-date="today"
-        :selectedField="selectedField"
-        :fields="fields"
-        :logs="inbodyData"
-      />
+          :selected-date="today"
+          :selectedField="selectedField"
+          :fields="fields"
+          :logs="inbodyData"
+        />
       </div>
     </section>
   </div>
@@ -300,9 +298,6 @@ const healthToggle = (index) => {
 }
 
 .health-card {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   width: 350px;
   height: 87px;
   background: #fff;
@@ -310,15 +305,13 @@ const healthToggle = (index) => {
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
 }
 
-.bmi-prog
-{
+.bmi-prog {
   padding: 10px;
 }
 
 .item-group {
   display: flex;
   flex-wrap: nowrap;
-  
   gap: 10px;
 }
 .health-button {
