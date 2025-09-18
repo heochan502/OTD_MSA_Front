@@ -9,17 +9,6 @@ import MealCard from '@/components/meal/MealDayCards.vue';
 
 import BmiProg from "@/components/exercise/BmiProg.vue";
 
-const mealInfo = ref([
-  {
-    meal_day: '아침',
-    kcal: 150,
-    check: true,
-    img: '/image/main/breakfast.png',
-  },
-  { meal_day: '점심', kcal: 0, check: false, img: '/image/main/lunch.png' },
-  { meal_day: '저녁', kcal: 0, check: true, img: '/image/main/dinner.png' },
-  { meal_day: '간식', kcal: 0, check: true, img: '/image/main/snack.png' },
-]);
 
 const challengeInfo = ref([
   { challenge_name: '달리기 30km', progress: 62 },
