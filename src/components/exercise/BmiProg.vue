@@ -96,15 +96,10 @@ const bmiStatus = computed(() => {
     border-radius: 6px;
     background: linear-gradient(
       to right,
-      #3f51b1 0%,
-      #5a55ae 13%,
-      #7b5fac 25%,
-      #8f6aae 38%,
-      #a86aa4 50%,
-      #cc6b8e 62%,
-      #f18271 75%,
-      #f3a469 87%,
-      #f7c978 100%
+      #00d5df 11%,
+      #9ae095 39%,
+      #ffe864 65%,
+      #ff5050 100%
     );
     z-index: 0;
   }
