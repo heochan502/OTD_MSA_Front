@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
@@ -34,6 +34,8 @@ ChartJS.register(
   Filler,
   ChartDataLabels
 );
+
+const chartRef = ref(null);
 
 const props = defineProps({
   selectedDate: {
@@ -195,17 +197,19 @@ const chartOptions = {
     },
   },
 };
-
-onMounted(() => {
-  
-
+// 차트 업데이트
+watch([chartData, chartOptions], () => {
+  if (chartRef.value) {
+    chartRef.value?.update();
+  }
 });
+
 
 </script>
 
 <template>
   <v-card class="chart">
-    <Line :data="chartData" :options="chartOptions" style="width: 100%" />
+    <Line ref="chartRef" :data="chartData" :options="chartOptions" style="width: 100%" />
   </v-card>
 </template>
 

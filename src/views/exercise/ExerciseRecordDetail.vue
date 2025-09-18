@@ -65,7 +65,7 @@ const hasDistance = false;
       </div>
       <div>
         <WeeklyChart
-          :selectedDate="2025 - 09 - 17"
+          :selectedDate="`2025-09-17`"
           :logs="0"
           label="exerciseDuration"
         />

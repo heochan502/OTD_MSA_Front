@@ -30,4 +30,6 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  base:'/otd/', // GitHub Pages 배포 시 경로 설정
 });
+  

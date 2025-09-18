@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from "vue";
-import { useHealthStore } from "@/stores/healthStore";
-import { useExerciseStore } from "@/stores/exerciseStore";
+// import { useHealthStore } from "@/stores/healthStore";
+// import { useExerciseStore } from "@/stores/exerciseStore";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 // Chart.js
