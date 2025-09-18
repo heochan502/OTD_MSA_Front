@@ -47,19 +47,19 @@ const handleClick= ()=>{
 <template>
   <div class="top-header">
     <div>
-      <img class="image" src="/image/main/fixed-header.png">
+      <img class="image" src="/otd/image/main/fixed-header.png">
     </div>
     <!-- 로고 출력 해야할 때 -->
     <div class="title" v-if="headerType === 'logo'">
-      <img class="otd-logo" src="/image/main/ontoday_logo.png" alt="로고" />
-      <img class="alram" src="/image/main/alarm.png" alt="알람" @click="handleClick" />
+      <img class="otd-logo" src="/otd/image/main/ontoday_logo.png" alt="로고" />
+      <img class="alram" src="/otd/image/main/alarm.png" alt="알람" @click="handleClick" />
     </div>
     <!-- 타이틀 출력 할때 -->
     <div class="title" v-else>
       <button class="black-btn" @click="$router.back()" aria-label="뒤로가기">
-        <img class="back-btn" src="/image/main/back_icon.png" alt="뒤로가기"></button>
+        <img class="back-btn" src="/otd/image/main/back_icon.png" alt="뒤로가기"></button>
       <div class="hearder-text">{{ headerTitle }}</div>
-      <img class="alram" src="/image/main/alarm.png" alt="알람" @click="handleClick" />
+      <img class="alram" src="/otd/image/main/alarm.png" alt="알람" @click="handleClick" />
     </div>
   </div>
 
@@ -68,7 +68,7 @@ const handleClick= ()=>{
 
   <div class="user " v-if="route.name ==='Home'">
     <div class="user-profile ">
-      <img class="avatar" src="/image/main/test.png" alt="프로필"></img>
+      <img class="avatar" src="/otd/image/main/test.png" alt="프로필"></img>
       <div class="info">
         <weather/>
         <span class="  otd-title ">행키 님</span>
@@ -76,7 +76,7 @@ const handleClick= ()=>{
     </div>
       <div class="point otd-body-1">
         <router-link to="/pointshop" class="pointShop" :class="{active : route.path.startsWith('/pointshop')}">
-        <img class="point-img" src="/image/main/point.png" alt="포인트"/>
+        <img class="point-img" src="/otd/image/main/point.png" alt="포인트"/>
         <span >{{ `${userInfo.userPoint.toLocaleString()}` }} </span>
         </router-link>
     </div>    

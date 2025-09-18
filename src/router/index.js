@@ -10,11 +10,14 @@ import CategoryFeedView from "@/views/community/categories/CategoryFeedView.vue"
 import PostDetailView from "@/views/community/PostDetailView.vue";
 // 챌린지
 
-import ChallengeHome from "@/views/challenge/ChallengeHome.vue";
-import ChallengeAllList from "@/views/challenge/ChallengeAllList.vue";
-import ChallengeWeeklyList from "@/views/challenge/ChallengeWeeklyList.vue";
-import ChallengeCompetitionList from "@/views/challenge/ChallengeMonthlyList.vue";
-import ChallengePer from "@/views/challenge/ChallengePer.vue";
+
+import ChallengeHome from '@/views/challenge/ChallengeHome.vue';
+import ChallengeAllList from '@/views/challenge/ChallengeAllList.vue';
+import ChallengeWeeklyList from '@/views/challenge/ChallengeWeeklyList.vue';
+import ChallengeCompetitionList from '@/views/challenge/ChallengeMonthlyList.vue';
+import ChallengePer from '@/views/challenge/ChallengePer.vue';
+import ChallengeDay from "@/views/challenge/ChallengeDay.vue";
+
 
 import Login from "@/views/user/Login.vue";
 import Join from "@/views/user/Join.vue";
@@ -143,8 +146,8 @@ const router = createRouter({
     },
     { path: "/user/login", name: "login", component: Login },
     {
-      path: "/challenge/detail/:id",
-      name: "ChallengeDetail",
+      path: '/challenge/detail/per/:id',
+      name: 'ChallengePer',
       component: ChallengePer,
       props: (route) => ({
         id: Number(route.params.id),
@@ -153,6 +156,21 @@ const router = createRouter({
       meta: {
         headerType: "title",
         title: "",
+
+        showUserPanel: false,
+      },
+    },
+    {
+      path: '/challenge/detail/day/:id',
+      name: 'ChallengeDay',
+      component: ChallengeDay,
+      props: (route) => ({
+        id: Number(route.params.id),
+        name: route.params.name,
+      }),
+      meta: {
+        headerType: 'title',
+        title: '',
 
         showUserPanel: false,
       },

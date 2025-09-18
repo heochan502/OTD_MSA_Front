@@ -168,6 +168,9 @@ const chartOptions = {
     },
   },
 };
+
+
+
 </script>
 
 <template>

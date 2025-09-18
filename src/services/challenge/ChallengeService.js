@@ -7,7 +7,6 @@ export const getAll = () => {
 };
 
 export const getSelectedAll = (userId, year, month) => {
-  console.log('test', userId, year, month);
   return axios
     .get(`${baseURL}/selected`, { params: { userId, year, month } })
     .catch((e) => e.response);
@@ -15,19 +14,24 @@ export const getSelectedAll = (userId, year, month) => {
 
 export const getChallenge = (userId, year, month, type) => {
   return axios
-    .get(`${baseURL}/addlist`, { params: { userId,  year, month, type } })
+    .get(`${baseURL}/addlist`, { params: { userId, year, month, type } })
     .catch((e) => e.response);
 };
 
 export const getMapChallenge = (userId, year, month, type) => {
   return axios
-    .get(`${baseURL}/addcompetitionlist`, { params: { userId,  year, month, type } })
+    .get(`${baseURL}/addcompetitionlist`, {
+      params: { userId, year, month, type },
+    })
     .catch((e) => e.response);
-}
+};
 
 export const getRank = (cdId, req) => {
-  console.log('rank', req);
   return axios
     .get(`${baseURL}/detail/${cdId}`, { params: req })
     .catch((e) => e.response);
+};
+
+export const putSuccess = (cpId) => {
+  return axios.put(`${baseURL}/success`, { cpId }).catch((e) => e.response);
 };

@@ -11,14 +11,14 @@ import BmiProg from "@/components/exercise/BmiProg.vue";
 
 const mealInfo = ref([
   {
-    meal_day: "아침",
+    meal_day: '아침',
     kcal: 150,
     check: true,
-    img: "/image/main/breakfast.png",
+    img: '/image/main/breakfast.png',
   },
-  { meal_day: "점심", kcal: 0, check: false, img: "/image/main/lunch.png" },
-  { meal_day: "저녁", kcal: 0, check: true, img: "/image/main/dinner.png" },
-  { meal_day: "간식", kcal: 0, check: true, img: "/image/main/snack.png" },
+  { meal_day: '점심', kcal: 0, check: false, img: '/image/main/lunch.png' },
+  { meal_day: '저녁', kcal: 0, check: true, img: '/image/main/dinner.png' },
+  { meal_day: '간식', kcal: 0, check: true, img: '/image/main/snack.png' },
 ]);
 
 const challengeInfo = ref([
@@ -141,28 +141,25 @@ const healthToggle = (index) => {
     <section class="health-progress otd-top-margin">
       <span class="otd-subtitle-1 otd-top-margin">건강</span>
       <div class="health-card">
-        <BmiProg />
+        <div class="otd-top-margin">
+          <div>
+            <span class="otd-body-3">BMI</span>
+          </div>
+        </div>
       </div>
-      <v-item-group v-model="selectedField">
-        <div class="otd-top-margin item-group">
-          <div v-for="(field, idx) in fields" :key="idx" class="card-wrapper">
-            <v-item v-slot="{ selectedClass, toggle }" :value="field.key">
-              <v-card
-                :class="[
-                  'health-button d-flex flex-column justify-center align-center text-center',
-                  selectedClass,
-                  ,
-                ]"
-                @click="toggle"
-              >
-                <div>
-                  <span class="otd-body-3">
-                    {{ field.label }}({{ field.unit }})
-                  </span>
-                </div>
-                <div class="otd-subtitle-1 text-center">
-                  {{ todayData?.[field.key] }}
-                </div>
+      <v-item-group v-model="selectedField" >
+        <div class="otd-top-margin item-group ">
+          <div v-for="(field, idx) in fields" :key="idx" class="card-wrapper ">
+            <v-item v-slot="{selectedClass, toggle}" :value="field.key">
+              <v-card :class="['health-button d-flex flex-column justify-center align-center text-center', selectedClass, ,]"
+              @click="toggle">
+              <div>
+                <span class="otd-body-3">
+                  {{ field.label }}({{ field.unit}}) </span>
+              </div>
+              <div class="otd-subtitle-1 text-center ">
+                {{ todayData?.[field.key] }}
+              </div>
               </v-card>
             </v-item>
           </div>
@@ -179,13 +176,13 @@ const healthToggle = (index) => {
         </button>
       </div> -->
 
-      <div>
-        <!-- <LineChart
-        :selected-date="inbodyData.dataTime"
+      <div class = otd-top-margin >
+        <LineChart
+        :selected-date="today"
         :selectedField="selectedField"
         :fields="fields"
-        :logs="healthStore.logList"
-      /> -->
+        :logs="inbodyData"
+      />
       </div>
     </section>
   </div>
@@ -313,10 +310,15 @@ const healthToggle = (index) => {
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
 }
 
+.bmi-prog
+{
+  padding: 10px;
+}
+
 .item-group {
   display: flex;
   flex-wrap: nowrap;
-
+  
   gap: 10px;
 }
 .health-button {
