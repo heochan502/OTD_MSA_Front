@@ -2,34 +2,35 @@
 import RankingCard from '@/components/challenge/RankingCard.vue';
 import { reactive, onMounted } from 'vue';
 import Progress from '@/components/challenge/Progress.vue';
-import { useRoute } from 'vue-router';
 import { getRank, putSuccess } from '@/services/challenge/ChallengeService';
 
 const props = defineProps({
   id: Number,
   name: String,
 });
-const route = useRoute();
 const year = new Date().getFullYear();
 const month = new Date().getMonth() + 1;
 const state = reactive({
-  name: '',
-  progress: { goal: '', totalRecord: '', percent: '' },
-  myRank: '',
-  ranking: [],
-  totalUsers: '',
+  progress: {},
+  aroundRanking: [],
+  topRanking: [],
+  activeTab: 'around',
 });
+
+const aroundRankingList = () => {
+  state.activeTab = 'around';
+};
+const topRankingList = () => {
+  state.activeTab = 'top';
+};
 
 onMounted(async () => {
   const req = { userId: 1, year: year, month: month };
   const cdId = props.id;
   const res = await getRank(cdId, req);
-  state.progress.goal = res.data.goal;
-  state.progress.totalRecord = res.data.totalRecord;
-  state.progress.percent = res.data.percent;
-  state.myRank = res.data.myRank;
-  state.ranking = res.data.ranking;
-  state.totalUsers = res.data.totalUsers;
+  state.progress = res.data;
+  state.aroundRanking = res.data.aroundRanking;
+  state.topRanking = res.data.topRanking;
   console.log('per res.data', res);
 
   if (state.progress.percent >= 100 && res.data.success == false) {
@@ -45,12 +46,14 @@ onMounted(async () => {
     <div class="title-wrap">
       <div class="otd-category">
         {{
-          state.progress.percent == 0
+          state.progress.formattedTotalRecord == 0
             ? '아직 기록이 없어요ㅠㅠ'
-            : '현재 ' + state.progress.totalRecord + ' 달렸어요!'
+            : '현재 ' + state.progress.formattedTotalRecord + ' 달렸어요!'
         }}
       </div>
-      <div class="otd-body-3">목표 {{ state.progress.goal }}</div>
+      <div class="otd-body-3">
+        목표 {{ state.progress.goal + state.progress.unit }}
+      </div>
     </div>
     <Progress
       class="otd-top-margin"
@@ -62,20 +65,39 @@ onMounted(async () => {
         <div class="otd-category">챌린지 랭킹</div>
         <div class="otd-body-3">{{ state.totalUsers }}명이 참여했어요!</div>
       </div>
-      <div class="box otd-border otd-box-style otd-top-margin">
+      <div class="box otd-border otd-box-style">
         <div class="button otd-body-3">
-          <button class="otd-border otd-box-style">내 순위 보기</button>
-          <button class="otd-border otd-box-style">Top5 보기</button>
+          <button class="otd-border otd-box-style" @click="aroundRankingList">
+            내 순위 보기
+          </button>
+          <button class="otd-border otd-box-style" @click="topRankingList">
+            Top5 보기
+          </button>
+        </div>
+        <div class="card">
+          <div
+            v-if="state.activeTab === 'around'"
+            v-for="ranking in state.aroundRanking"
+            :key="ranking.userId"
+          >
+            <RankingCard
+              :is-me="ranking.userId === state.userId"
+              :ranking-detail="ranking"
+            ></RankingCard>
+          </div>
+          <div v-else v-for="(ranking, idx) in state.topRanking" :key="idx">
+            <RankingCard
+              :is-me="ranking.userId === state.userId"
+              :ranking-detail="ranking"
+            ></RankingCard>
+          </div>
         </div>
 
-        <div v-for="(ranking, idx) in state.ranking" :key="idx">
-          <RankingCard
-            :class="`card-${idx}`"
-            :ranking-detail="ranking"
-          ></RankingCard>
+        <div class="info">
+          <div class="otd-body-3 my-info">
+            <!-- {{state.activeTab === 'top' ? '내 순위 : ' + state.myRank + '위' :  }} -->
+          </div>
         </div>
-
-        <div class="otd-body-3 my-rank">내 순위 : {{ state.myRank }}위</div>
       </div>
     </div>
   </div>
@@ -90,6 +112,7 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   margin-top: 20px;
+  margin-bottom: 20px;
 }
 .otd-body-3 {
   margin-top: 10px;
@@ -101,8 +124,11 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   gap: 15px;
-  width: 351px;
-  height: 442px;
+}
+.card {
+  display: flex;
+  gap: 15px;
+  border: none;
 }
 .button {
   display: flex;
@@ -117,35 +143,11 @@ onMounted(async () => {
     color: #303030;
   }
 }
-.card-0 {
-  :deep(.box) {
-    border: 2px solid #ffba57;
+.info {
+  position: relative;
+  width: 89%;
+  .my-info {
+    margin: 0 0 15px 0;
   }
-  :deep(.rank) {
-    content: url('/public/image/challenge/medal1.png');
-    width: 30px;
-  }
-}
-.card-1 {
-  :deep(.box) {
-    border: 2px solid #9e9e9e;
-  }
-  :deep(.rank) {
-    content: url('/public/image/challenge/medal2.png');
-    width: 30px;
-  }
-}
-.card-2 {
-  :deep(.box) {
-    border: 2px solid #ce7430;
-  }
-  :deep(.rank) {
-    content: url('/public/image/challenge/medal3.png');
-    width: 30px;
-  }
-}
-.my-rank {
-  margin: 0;
-  margin-bottom: 15px;
 }
 </style>
