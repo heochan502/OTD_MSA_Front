@@ -5,10 +5,7 @@ import BmiProg from "@/components/exercise/BmiProg.vue";
 <template>
   <div class="content_wrap">
     <!-- 소제목 -->
-    <div class="subtitle">
-      <span class="otd-subtitle-1">체성분 분석</span>
-      <span class="otd-body-2">변화 보기</span>
-    </div>
+    
     <!-- 내용 -->
     <div class="content_main otd-box-style otd-top-margin">
       <!-- 체성분 기록일 -->
@@ -35,15 +32,8 @@ import BmiProg from "@/components/exercise/BmiProg.vue";
 </template>
 
 <style lang="scss" scoped>
-* {
-  text-decoration: none;
-}
 
-.subtitle {
-  display: flex;
-  align-content: center;
-  justify-content: space-between;
-}
+
 
 .content_main {
   width: 350px;
