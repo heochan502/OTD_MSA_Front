@@ -49,7 +49,9 @@ const getBorderColor = (rank) => {
       </div>
       <div class="image">{{ props.rankingDetail.profileImage }}</div>
       <div class="nick-name otd-body-2">{{ props.rankingDetail.nickName }}</div>
-      <div class="value otd-body-3">{{ props.rankingDetail.totalRecord }}</div>
+      <div class="value otd-body-3">
+        {{ props.rankingDetail.formattedTotalRecord }}
+      </div>
     </div>
   </div>
 </template>
