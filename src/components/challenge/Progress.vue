@@ -4,10 +4,11 @@ import { useRoute } from 'vue-router';
 const route = useRoute();
 
 const props = defineProps({
-  indataProgress: { // 외부에서 데이터 받아오겟다고 선언하는거 
+  indataProgress: {
+    // 외부에서 데이터 받아오겟다고 선언하는거
     type: Number,
-    default: 0
-  }
+    default: 0,
+  },
 });
 
 const targetValue = ref(0);
@@ -34,14 +35,17 @@ const animateProgress = (target) => {
       current = target;
       clearInterval(interval);
     }
-    displayValue.value = Math.round(current);
+    if (current % 1 == 0) {
+      displayValue.value = current;
+    } else {
+      displayValue.value = current.toFixed(1);
+    }
   }, stepTime);
 };
 
 defineExpose({
   animateProgress,
 });
-
 </script>
 
 <template>

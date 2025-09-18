@@ -6,11 +6,13 @@ import { useCommunityStore } from '@/stores/community/community';
 const route = useRoute();
 const store = useCommunityStore();
 const routeId = computed(() => String(route.params.id));
+
 const post = computed(() => store.getById(routeId.value)); // 정규화된 객체( id / author / time ... )
 
 onMounted(() => {
   if (!post.value) store.loadPostDetail(routeId.value);
 });
+
 
 const myComment = ref('');
 const like = () => {

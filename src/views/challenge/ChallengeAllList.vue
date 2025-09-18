@@ -10,6 +10,7 @@ const state = reactive({
   weeklyChallenge: [],
   competitionChallenge: [],
   personalChallenge: [],
+  dailyMission: [],
 });
 
 onMounted(async () => {
@@ -17,14 +18,36 @@ onMounted(async () => {
   state.weeklyChallenge = res.data.weeklyChallenge;
   state.competitionChallenge = res.data.competitionChallenge;
   state.personalChallenge = res.data.personalChallenge;
+  state.dailyMission = res.data.dailyMission;
 
   console.log('data', res.data);
 });
-
 </script>
 
 <template>
   <div class="wrap">
+    <!-- 일일 미션 -->
+    <div class="daily-mission">
+      <div class="first-title">일일 미션</div>
+      <Swiper
+        :modules="[Autoplay]"
+        :slides-per-view="2"
+        :space-between="15"
+        loop
+        :autoplay="{ delay: 3000, disableOnInteraction: false }"
+      >
+        <SwiperSlide v-for="challenge in state.dailyMission">
+          <ChallengeCard
+            class="challenge-card"
+            :id="challenge.id"
+            :image="challenge.image"
+            :name="challenge.name"
+            :reward="challenge.reward"
+          ></ChallengeCard>
+        </SwiperSlide>
+      </Swiper>
+    </div>
+
     <!-- 주간 챌린지 -->
     <div class="weekly-challenge">
       <div class="first-title">주간 챌린지</div>
@@ -35,7 +58,7 @@ onMounted(async () => {
         loop
         :autoplay="{ delay: 3000, disableOnInteraction: false }"
       >
-        <SwiperSlide v-for="challenge in state.weeklyChallenge">
+        <SwiperSlide v-for="challenge in state.weeklyChallenge" :key="challenge.id">
           <ChallengeCard
             class="challenge-card"
             :id="challenge.id"
@@ -49,7 +72,10 @@ onMounted(async () => {
     <!-- 월간 경쟁 챌린지 -->
     <div class="monthly-challenge">
       <div class="title">월간 경쟁 챌린지</div>
-      <div v-for="(list, category) in state.competitionChallenge" :key="category">
+      <div
+        v-for="(list, category) in state.competitionChallenge"
+        :key="category"
+      >
         <div class="sub-title">{{ `> ${category}` }}</div>
         <Swiper
           :modules="[Autoplay]"
@@ -58,10 +84,9 @@ onMounted(async () => {
           loop
           :autoplay="{ delay: 5000, disableOnInteraction: false }"
         >
-          <SwiperSlide v-for="challenge in list">
+          <SwiperSlide v-for="challenge in list" :key="challenge.id">
             <ChallengeCard
               class="challenge-card"
-              :key="challenge.id"
               :id="challenge.id"
               :image="challenge.image"
               :name="challenge.name"
@@ -80,10 +105,9 @@ onMounted(async () => {
           loop
           :autoplay="{ delay: 5000, disableOnInteraction: false }"
         >
-          <SwiperSlide v-for="challenge in state.personalChallenge">
+          <SwiperSlide v-for="challenge in state.personalChallenge" :key="challenge.id">
             <ChallengeCard
               class="challenge-card"
-              :key="challenge.id"
               :id="challenge.id"
               :image="challenge.image"
               :name="challenge.name"
