@@ -1,8 +1,8 @@
 <script setup>
-import RankingCard from '@/components/challenge/RankingCard.vue';
-import { reactive, onMounted, ref } from 'vue';
-import Progress from '@/components/challenge/Progress.vue';
-import { getRank, putSuccess } from '@/services/challenge/ChallengeService';
+import RankingCard from "@/components/challenge/RankingCard.vue";
+import { reactive, onMounted, ref } from "vue";
+import Progress from "@/components/challenge/Progress.vue";
+import { getRank, putSuccess } from "@/services/challenge/ChallengeService";
 
 const props = defineProps({
   id: Number,
@@ -14,37 +14,46 @@ const state = reactive({
   progress: {},
   aroundRanking: [],
   topRanking: [],
-  activeTab: 'around',
+  activeTab: "around",
 });
 const aroundRankingList = () => {
-  state.activeTab = 'around';
+  state.activeTab = "around";
+  console.log("around");
 };
 const topRankingList = () => {
-  state.activeTab = 'top';
+  state.activeTab = "top";
+  console.log("top");
 };
-const ment = ref('null');
+const ment = ref("null");
+const recordGap = ref("");
 
-const recordGap = ref('');
 const gap = () => {
-  let myIdx;
-
-  myIdx = state.aroundRanking.findIndex(
+  const myRank = state.progress.myRank;
+  const myIdx = state.aroundRanking.findIndex(
     (r) => r.userId === state.progress.userId
   );
-  const beforeIdx = myIdx - 1;
-  const afterIdx = myIdx + 1;
-  const myTotalRecord = state.aroundRanking[myIdx].totalRecord;
-  const beforeMe = state.aroundRanking[beforeIdx].totalRecord;
-  const afterMe = state.aroundRanking[afterIdx].totalRecord;
+  const myTotalRecord = Number(state.aroundRanking[myIdx].totalRecord);
 
-  if (state.progress.myRank === 1) {
+  // 앞뒤 값 안전하게 가져오기
+  const beforeMe = state.aroundRanking[myIdx - 1]?.totalRecord
+    ? Number(state.aroundRanking[myIdx - 1].totalRecord)
+    : null;
+  const afterMe = state.aroundRanking[myIdx + 1]?.totalRecord
+    ? Number(state.aroundRanking[myIdx + 1].totalRecord)
+    : null;
+
+  if (myRank === 1 && afterMe !== null) {
+    // 1등일 때 → 아래사람과 비교
     recordGap.value = (myTotalRecord - afterMe).toFixed(1);
-    ment.value;
-    console.log('af', recordGap.value);
-  } else {
+    ment.value = `2위와 ${recordGap.value}${state.progress.unit} 차이!`;
+  } else if (beforeMe !== null) {
+    // 위사람과 비교
     recordGap.value = (beforeMe - myTotalRecord).toFixed(1);
-    ment.value = `만 더 하면 ${state.progress.myRank - 1}위!`;
-    console.log('be', recordGap.value);
+    ment.value = `${recordGap.value}${state.progress.unit}만 더 하면 ${
+      myRank - 1
+    }위!`;
+  } else {
+    ment.value = `아직 비교할 상대가 없어요 😅`;
   }
 };
 onMounted(async () => {
@@ -54,11 +63,11 @@ onMounted(async () => {
   state.progress = res.data;
   state.aroundRanking = res.data.aroundRanking;
   state.topRanking = res.data.topRanking;
-  console.log('per res.data', res.data);
+  console.log("per res.data", res.data);
   gap();
   if (state.progress.percent >= 100 && res.data.success == false) {
     await putSuccess(res.data.cpId);
-    console.log('목표 성공');
+    console.log("목표 성공");
   }
 });
 </script>
@@ -69,9 +78,9 @@ onMounted(async () => {
     <div class="title-wrap">
       <div class="otd-category">
         {{
-          state.progress.formattedTotalRecord == 0
-            ? '아직 기록이 없어요ㅠㅠ'
-            : '현재 ' + state.progress.formattedTotalRecord + ' 달렸어요!'
+          state.progress.totalRecord == 0
+            ? "아직 기록이 없어요ㅠㅠ"
+            : "현재 " + state.progress.formattedTotalRecord + " 달렸어요!"
         }}
       </div>
       <div class="otd-body-3">
@@ -86,7 +95,9 @@ onMounted(async () => {
     <div>
       <div class="sub-wrap">
         <div class="otd-category">챌린지 랭킹</div>
-        <div class="otd-body-3">{{ state.totalUsers }}명이 참여했어요!</div>
+        <div class="otd-body-3">
+          {{ state.progress.totalUsers }}명이 참여했어요!
+        </div>
       </div>
       <div class="box otd-border otd-box-style">
         <div class="button otd-body-3">
@@ -118,7 +129,15 @@ onMounted(async () => {
 
         <div class="info">
           <div class="otd-body-3 my-info">
-            {{ recordGap + state.progress.unit + ment }}
+            <template v-if="state.activeTab === 'around'">
+              {{ ment }}
+            </template>
+            <template v-else-if="state.progress.myRank <= 5">
+              {{ ment }}
+            </template>
+            <template v-else>
+              나는 현재 {{ state.progress.myRank }}위에 있어요!
+            </template>
           </div>
         </div>
       </div>
