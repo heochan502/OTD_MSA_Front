@@ -1,15 +1,21 @@
 <script setup>
 import { ref } from 'vue';
+import homeSImg from '/public/image/navigator_img/home-s.png';
+import breakfastImg from '/public/image/main/breakfast.png';
+import lunchImg from '/public/image/main/lunch.png';
+import dinnerImg from '/public/image/main/dinner.png';
+import snackImg from '/public/image/main/snack.png';
+
 const mealInfo = ref([
   {
     meal_day: '아침',
     kcal: 150,
     check: true,
-    img: '/image/main/breakfast.png',
+    img: '/otd/image/main/breakfast.png',
   },
-  { meal_day: '점심', kcal: 0, check: false, img: '/image/main/lunch.png' },
-  { meal_day: '저녁', kcal: 0, check: true, img: '/image/main/dinner.png' },
-  { meal_day: '간식', kcal: 0, check: true, img: '/image/main/snack.png' },
+  { meal_day: '점심', kcal: 0, check: false, img: '/otd/image/main/lunch.png' },
+  { meal_day: '저녁', kcal: 0, check: true, img: '/otd/image/main/dinner.png' },
+  { meal_day: '간식', kcal: 0, check: true, img: '/otd/image/main/snack.png' },
 ]);
 const mealClick = (i) => {
   mealInfo.value[i].check = !mealInfo.value[i].check;
