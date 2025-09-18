@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, reactive } from 'vue';
+import { onMounted, reactive, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { getSelectedAll } from '@/services/challenge/ChallengeService';
 import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
@@ -13,11 +13,17 @@ const router = useRouter();
 const year = challengeStore.state.year;
 const month = challengeStore.state.month;
 
+const totalXp = ref();
+const totalLevel = computed(() => Math.floor(totalXp / 100));
+const leftXp = computed(() => totalXp % 100);
+const leftLevel = computed(() => setTargetLevel(totalLevel) - totalLevel);
+
 const state = reactive({
   weeklyChallenge: [],
   competitionChallenge: [],
   personalChallenge: [],
   dailyMission: [],
+  user: {},
 });
 
 const toChallengeList = () => {
@@ -57,11 +63,21 @@ onMounted(async () => {
   state.competitionChallenge = res.data.competitionChallenge;
   state.personalChallenge = res.data.personalChallenge;
   state.dailyMission = res.data.dailyMission;
+  state.user = res.data.user;
   challengeStore.state.progressChallenge = res.data;
-  console.log('data', res.data);
-
-  
+  totalLevel.value = res.data.user.level;
 });
+
+const setTargetLevel = (level) => {
+  if (level < 5) {
+    return 5;
+  } else if (level < 10) {
+    return 10;
+  } else if (level < 15) {
+    return 15;
+  }
+};
+
 </script>
 
 <template>
@@ -72,8 +88,8 @@ onMounted(async () => {
       <div>
         <div>티어 이미지</div>
         <div>
-          <span>6레벨 Silver</span>
-          <span>승급까지 2레벨 남았어요!</span>
+          <span>{{totalLevel}}레벨</span><span>silver</span>
+          <span>승급까지 {{leftLevel}}레벨 남았어요!</span>
         </div>
         <Progress></Progress>
       </div>

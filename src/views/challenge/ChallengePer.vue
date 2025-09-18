@@ -18,9 +18,11 @@ const state = reactive({
 });
 
 const aroundRankingList = () => {
+  console.log('around');
   state.activeTab = 'around';
 };
 const topRankingList = () => {
+  console.log('top');
   state.activeTab = 'top';
 };
 
@@ -63,7 +65,9 @@ onMounted(async () => {
     <div>
       <div class="sub-wrap">
         <div class="otd-category">챌린지 랭킹</div>
-        <div class="otd-body-3">{{ state.totalUsers }}명이 참여했어요!</div>
+        <div class="otd-body-3">
+          {{ state.progress.totalUsers }}명이 참여했어요!
+        </div>
       </div>
       <div class="box otd-border otd-box-style">
         <div class="button otd-body-3">
@@ -94,9 +98,7 @@ onMounted(async () => {
         </div>
 
         <div class="info">
-          <div class="otd-body-3 my-info">
-            <!-- {{state.activeTab === 'top' ? '내 순위 : ' + state.myRank + '위' :  }} -->
-          </div>
+          <div class="otd-body-3 my-info">...</div>
         </div>
       </div>
     </div>
