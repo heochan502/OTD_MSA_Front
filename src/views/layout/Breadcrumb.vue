@@ -1,11 +1,12 @@
 <script setup>
 import {useRoute, useRouter} from 'vue-router'
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import weather from '@/components/weather/weather.vue';
+import { useHeaderStore } from '@/stores/challenge/headerStore';
 
 const route = useRoute();
 const router = useRouter();
-
+const headerStore = useHeaderStore();
 const userInfo = {
   name : '보노보노',
   nickName: '뭘보노',
@@ -22,7 +23,11 @@ const headerType = computed(() => route.meta.headerType ?? 'logo');
 const showUserPanel = computed(() => route.meta.showUserPanel === true);
 
 const headerTitle = computed(() => {
+  if (route.name === 'ChallengePer' || route.name === 'ChallengeDay') {
+    return headerStore.detailName + ' 챌린지';
+  }
   const metaTitle = route.meta.title
+
   // 1. meta.title이 함수라면 실행 결과 리턴
   if (typeof metaTitle === 'function') {
     return metaTitle(route)

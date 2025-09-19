@@ -154,7 +154,6 @@ const router = createRouter({
       meta: {
         headerType: 'title',
         title: '',
-
         showUserPanel: false,
       },
     },

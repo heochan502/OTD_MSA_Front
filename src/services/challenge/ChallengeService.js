@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from '@/services/httpRequester';
 
 const baseURL = '/challenge';
 
@@ -28,7 +28,13 @@ export const getMapChallenge = (userId, year, month, type) => {
 
 export const getRank = (cdId, req) => {
   return axios
-    .get(`${baseURL}/detail/${cdId}`, { params: req })
+    .get(`${baseURL}/detail/per/${cdId}`, { params: req })
+    .catch((e) => e.response);
+};
+
+export const getDay = (cdId, req) => {
+  return axios
+    .get(`${baseURL}/detail/day/${cdId}`, { params: req })
     .catch((e) => e.response);
 };
 
