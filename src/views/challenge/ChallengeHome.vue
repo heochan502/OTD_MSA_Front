@@ -166,7 +166,7 @@ const setTargetLevel = (level) => Math.ceil((level + 1) / 5) * 5;
             :image="challenge.image"
             :name="challenge.name"
             :reward="challenge.reward"
-            @click="detail(challenge.cdId, challenge.type)"
+            @click="detail(challenge.cdId, challenge.type, challenge.name)"
           ></ChallengeCard>
           <div
             v-for="n in Math.max(0, 2 - state.competitionChallenge.length)"
@@ -192,7 +192,7 @@ const setTargetLevel = (level) => Math.ceil((level + 1) / 5) * 5;
             :image="challenge.image"
             :name="challenge.name"
             :reward="challenge.reward"
-            @click="detail(challenge.cdId, challenge.type)"
+            @click="detail(challenge.cdId, challenge.type, challenge.name)"
           ></ChallengeCard>
           <div
             v-for="n in Math.max(0, 2 - state.personalChallenge.length)"

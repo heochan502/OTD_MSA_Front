@@ -64,11 +64,11 @@ const hasDistance = false;
         <span class="otd-subtitle-1">주간 운동 시간</span>
       </div>
       <div>
-        <WeeklyChart
-          :selectedDate="`2025-09-17`"
+        <!-- <WeeklyChart
+          :selectedDate="2025 - 09 - 17"
           :logs="0"
           label="exerciseDuration"
-        />
+        /> -->
       </div>
     </div>
   </div>

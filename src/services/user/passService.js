@@ -1,6 +1,5 @@
-import axios from './HttpService';
+import axios from '@/services/httpRequester';
 
 const path = '/pass';
 
-export const verifyPassAuth = (data) => 
-  axios.post(`${path}/verify`, data);
+export const verifyPassAuth = (data) => axios.post(`${path}/verify`, data);

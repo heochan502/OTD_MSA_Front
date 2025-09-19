@@ -71,6 +71,8 @@ const bmiStatus = computed(() => {
 
 <style lang="scss" scoped>
 .content_bmi {
+  width: 315px;
+
   .chip_bmi {
     display: flex;
     align-items: center;
@@ -90,19 +92,14 @@ const bmiStatus = computed(() => {
     top: 50%;
     transform: translateY(-50%);
     height: 8px;
-    // width: 100%;
+    max-width: 315px;
     border-radius: 6px;
     background: linear-gradient(
       to right,
-      #3f51b1 0%,
-      #5a55ae 13%,
-      #7b5fac 25%,
-      #8f6aae 38%,
-      #a86aa4 50%,
-      #cc6b8e 62%,
-      #f18271 75%,
-      #f3a469 87%,
-      #f7c978 100%
+      #00d5df 11%,
+      #9ae095 39%,
+      #ffe864 65%,
+      #ff5050 100%
     );
     z-index: 0;
   }
@@ -113,5 +110,6 @@ const bmiStatus = computed(() => {
   justify-content: space-between;
   //   color: #ececec;
   font-size: 9px;
+  max-width: 315px;
 }
 </style>
