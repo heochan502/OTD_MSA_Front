@@ -24,19 +24,29 @@ const submit = async () => {
   //유효성 체크
   if (checkValidation()) { return; }
   
-  const res = await login(state.form);
-  console.log('Login.vue - submit() - res: ', res);
-  if (res.status === 200) {
-    const signedUser = res.data.result;
-    console.log('signedUser:', signedUser);
-    authentication.setSignedUser(signedUser);
-    await router.push('/');
+  try {
+    console.log('전송할 데이터:', state.form); // 디버깅용
+    const res = await login(state.form);
+    console.log('Login.vue - submit() - res: ', res);
+    
+    if (res.status === 200) {
+      const signedUser = res.data.result;
+      console.log('signedUser:', signedUser);
+      authentication.setSignedUser(signedUser);
+      await router.push('/');
+    }
+  } catch (error) {
+    console.error('로그인 오류:', error);
+    console.error('오류 상세:', error.response?.data);
+    console.error('요청 설정:', error.config);
+    // 사용자에게 오류 메시지 표시
+    alert('로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.');
   }
 };
 </script>
 
 <template>
-  <div class="login">
+  <div class="login wrap">
     <div class="container">
       <form class="form" @submit.prevent="submit">
         <h1 class="inputa">로그인</h1>
@@ -63,20 +73,21 @@ const submit = async () => {
             v-model="state.form.upw"
             autocomplete="off"
             not-null-message="비밀번호는 필수로 입력하셔야 합니다."
-            regexp="^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&amp;*()_+\-=\[\]{};':&quot;\\|,.&lt;&gt;\/?])[A-Za-z\d!@#$%^&amp;*()_+\-=\[\]{};':&quot;\\|,.&lt;&gt;\/?]{10,}$"
+            regexp="^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':\&quot;\\|,.<>\/?])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':\&quot;\\|,.<>\/?]{10,}$"
             regexp-message="비밀번호는 영문자, 숫자, 특수기호로 구성되며 10자 이상이어야 합니다." />
           <label for="upw">비밀번호</label>
         </div>
-        <button type="submit" class="button">로그인</button>
+        <button type="submit" class="buttonlogin">로그인</button>
       </form>
       <div class="mb-3">
-        <router-link class="button signup-button" to="/user/join">회원가입</router-link>
+        <router-link class="buttonjoin" to="/user/join">회원가입</router-link>
       </div>
       <!-- API 로그인 -->
       <div class="mb-3">
         <span class="naver"><a :href="`${beBaseUrl}/oauth2/authorization/naver?redirect_uri=${redirectUrl}`">네이버</a></span>        
         <span class="kakao"><a :href="`${beBaseUrl}/oauth2/authorization/kakao?redirect_uri=${redirectUrl}`">카카오</a></span>      
       </div>
+      
       <div class="additional-links">
         <div class="link-row">
           <a href="#" class="link">아이디 찾기</a>
@@ -91,19 +102,36 @@ const submit = async () => {
 <style scoped>
 .container {
   max-width: 576px;
+  padding: 0px;
 }
 
-.button {
+.buttonlogin {
   width: 100%;
-  font-size: 1rem;
-  padding-top: 1rem;
-  padding-bottom: 1rem;
+  font-size: 16px;
+  padding-top: 10px;
+  padding-bottom:  10px;
   padding-left: 0.5rem;
   padding-right: 0.5rem;
-  background-color: #0d6efd;
+  background-color: #393E46;
   color: white;
   border: none;
-  border-radius: 0.375rem;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+}
+.buttonjoin {
+  width: 100%;
+  font-size: 16px;
+  padding-top: 10px;
+  padding-bottom:  10px;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  background-color: #E6E6E6;
+  color: white;
+  border: none;
+  border-radius: 10px;
   cursor: pointer;
   text-align: center;
   text-decoration: none;
@@ -111,7 +139,7 @@ const submit = async () => {
 }
 
 .button:hover {
-  background-color: #0b5ed7;
+  background-color: #E6E6E6;
   color: white;
   text-decoration: none;
 }
@@ -135,7 +163,36 @@ const submit = async () => {
 }
 
 .naver {
+  width: 100%;
+  font-size: 16px;
+  padding-top: 10px;
+  padding-bottom:  10px;
+  padding-left: 0.5rem;
   padding-right: 0.5rem;
+  background-color: #FBE900;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+}
+.kakao {
+  width: 100%;
+  font-size: 16px;
+  padding-top: 10px;
+  padding-bottom:  10px;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  background-color: #03C75A;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
 }
 
 .additional-links {
