@@ -10,7 +10,6 @@ const props = defineProps({
 });
 const router = useRouter();
 const route = useRoute();
-
 </script>
 
 <template>

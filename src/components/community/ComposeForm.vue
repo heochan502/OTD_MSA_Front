@@ -1,4 +1,3 @@
-<!-- src/components/community/ComposeForm.vue -->
 <script setup>
 import { ref, computed } from 'vue';
 import { useCommunityStore } from '@/stores/community/community';

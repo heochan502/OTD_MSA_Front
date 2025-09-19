@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from '@/services/httpRequester';
 
 const path = '/pay';
 

@@ -1,9 +1,7 @@
 <script setup>
-import { computed, ref } from "vue";
-
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
-
 // Chart.js
 import {
   Chart as ChartJS,
@@ -51,6 +49,17 @@ const weekRange = computed(() => {
     end: base.endOf("isoWeek"), // 일요일
   };
 });
+
+// 주차 데이터 필터링
+// const weeklyLogs = computed(() => {
+//   return healthStore.logs.filter((log) => {
+//     const day = dayjs(log.healthlogDatetime);
+//     return (
+//       day.isAfter(weekRange.value.start.subtract(1, "day")) &&
+//       day.isBefore(weekRange.value.end.add(1, "day"))
+//     );
+//   });
+// });
 
 const weeklyLogs = computed(() => {
   return props.logs.filter((log) => {
@@ -159,6 +168,9 @@ const chartOptions = {
     },
   },
 };
+
+
+
 </script>
 
 <template>
@@ -170,8 +182,8 @@ const chartOptions = {
 <style lang="scss" scoped>
 .chart {
   display: flex;
-
-  height: 250px;
+  min-width: 210px;
+  height: 350px;
   padding: 12px;
 }
 </style>
