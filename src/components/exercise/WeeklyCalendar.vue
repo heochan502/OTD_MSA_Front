@@ -44,6 +44,8 @@ const selectDate = (day) => {
   currentDate.value = day;
   emit("click-date", day.toDate());
 };
+
+
 </script>
 
 <template>

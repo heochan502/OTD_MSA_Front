@@ -1,5 +1,14 @@
 <script setup>
 import ExerciseRecordList from "@/components/exercise/ExerciseRecordList.vue";
+
+  const params = reactive({
+    page: 1,
+    row_per_page: 10,
+    type: monthly,
+    date: date.toISOString().slice(0, 10), // YYYY-MM-DD 형태
+    memberId: 1,
+  });
+
 </script>
 
 <template>
