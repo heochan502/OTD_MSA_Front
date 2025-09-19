@@ -10,7 +10,7 @@ import BodyCompositionSummary from "@/components/exercise/BodyCompositionSummary
       <div class="d-flex align-center ga-2">
         <!-- 캘린더 아이콘 -->
         <img
-          src="\public\image\main\calender.png"
+          src="\image\main\calender.png"
           alt="캘린더 아이콘"
           class="calendar_icon"
         />
@@ -21,12 +21,12 @@ import BodyCompositionSummary from "@/components/exercise/BodyCompositionSummary
     </div>
     <div class="exercise_report">
       <div class="subtitle ga-1">
-        <div class="d-flex align-center ga-1">
+        <div class="d-flex align-center ga-1 mb-3">
           <span class="otd-subtitle-1 mb-0">운동기록</span>
           <router-link to="/exercise/record_form">
             <img
               class="btn_add"
-              src="\public\image\main\btn_add_grey.png"
+              src="\image\main\btn_add_grey.png"
               alt="운동기록 추가 버튼"
             />
           </router-link>
@@ -41,11 +41,11 @@ import BodyCompositionSummary from "@/components/exercise/BodyCompositionSummary
     </div>
     <div class="body_composition">
       <div class="subtitle">
-        <div class="d-flex align-center ga-1">
+        <div class="d-flex align-center ga-1 mb-3">
           <span class="otd-subtitle-1">체성분</span>
           <img
             class="btn_add"
-            src="\public\image\main\btn_add_grey.png"
+            src="\image\main\btn_add_grey.png"
             alt="체성분 추가 버튼"
           />
         </div>
@@ -69,6 +69,7 @@ import BodyCompositionSummary from "@/components/exercise/BodyCompositionSummary
   display: flex;
   align-content: center;
   justify-content: space-between;
+  margin-top: 15px;
 }
 .calendar_icon {
   width: 18px;
