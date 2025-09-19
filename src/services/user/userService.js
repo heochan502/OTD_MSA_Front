@@ -1,4 +1,4 @@
-import axios from '../httpRequester';
+import axios from '@/services/httpRequester';
 
 const path = '/user';
 

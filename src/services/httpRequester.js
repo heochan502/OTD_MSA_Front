@@ -1,13 +1,6 @@
-// import axios from 'axios';
-
-// axios.defaults.baseURL = 'http://localhost:8080/api/OTD';
-
-// class HttpService {}
-
-// export default new HttpService();
-
 import axios from 'axios';
 
+// 환경별 baseURL (dev → localhost:8080, prod → greenart.n-e.kr/otd-api)
 axios.defaults.baseURL = `${import.meta.env.VITE_BASE_URL}/api/OTD`;
 axios.defaults.withCredentials = true;
 
@@ -26,5 +19,5 @@ axios.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
-
+console.log('Axios BaseURL:', axios.defaults.baseURL);
 export default axios;

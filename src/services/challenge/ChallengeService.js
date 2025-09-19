@@ -1,26 +1,26 @@
 import axios from '@/services/httpRequester';
 
-const baseURL = '/challenge';
+const BASE_URL = 'challenge';
 
 export const getAll = () => {
-  return axios.get(`${baseURL}/list`).catch((e) => e.response);
+  return axios.get(`${BASE_URL}/list`).catch((e) => e.response);
 };
 
 export const getSelectedAll = (userId, year, month) => {
   return axios
-    .get(`${baseURL}/selected`, { params: { userId, year, month } })
+    .get(`${BASE_URL}/selected`, { params: { userId, year, month } })
     .catch((e) => e.response);
 };
 
 export const getChallenge = (userId, year, month, type) => {
   return axios
-    .get(`${baseURL}/addlist`, { params: { userId, year, month, type } })
+    .get(`${BASE_URL}/addlist`, { params: { userId, year, month, type } })
     .catch((e) => e.response);
 };
 
 export const getMapChallenge = (userId, year, month, type) => {
   return axios
-    .get(`${baseURL}/addcompetitionlist`, {
+    .get(`${BASE_URL}/addcompetitionlist`, {
       params: { userId, year, month, type },
     })
     .catch((e) => e.response);
@@ -28,16 +28,16 @@ export const getMapChallenge = (userId, year, month, type) => {
 
 export const getRank = (cdId, req) => {
   return axios
-    .get(`${baseURL}/detail/per/${cdId}`, { params: req })
+    .get(`${BASE_URL}/detail/per/${cdId}`, { params: req })
     .catch((e) => e.response);
 };
 
 export const getDay = (cdId, req) => {
   return axios
-    .get(`${baseURL}/detail/day/${cdId}`, { params: req })
+    .get(`${BASE_URL}/detail/day/${cdId}`, { params: req })
     .catch((e) => e.response);
 };
 
 export const putSuccess = (cpId) => {
-  return axios.put(`${baseURL}/success`, { cpId }).catch((e) => e.response);
+  return axios.put(`${BASE_URL}/success`, { cpId }).catch((e) => e.response);
 };
