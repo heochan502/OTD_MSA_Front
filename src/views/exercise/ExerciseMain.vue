@@ -1,23 +1,15 @@
 <script setup>
-import WeeklyDatePick from "@/components/exercise/WeeklyDatePick.vue";
+import WeeklyDatePick from "@/components/exercise/WeeklyCalendar.vue";
 import ExerciseRecordList from "@/components/exercise/ExerciseRecordList.vue";
 import BodyCompositionSummary from "@/components/exercise/BodyCompositionSummary.vue";
+import testWeeklyCalendar from "@/components/exercise/WeeklyCalendar.vue";
 </script>
 
 <template>
   <div class="wrap content_wrap">
     <div class="weekly_calendar">
-      <div class="d-flex align-center ga-2">
-        <!-- 캘린더 아이콘 -->
-        <img
-          src="\image\main\calender.png"
-          alt="캘린더 아이콘"
-          class="calendar_icon"
-        />
-        <!-- 현재 년월 -->
-        <span class="otd-subtitle-1">{{ "2025년 9월" }}</span>
-      </div>
-      <WeeklyDatePick />
+      <!-- <WeeklyDatePick /> -->
+      <test-weekly-calendar />
     </div>
     <div class="exercise_report">
       <div class="subtitle ga-1">
@@ -26,7 +18,7 @@ import BodyCompositionSummary from "@/components/exercise/BodyCompositionSummary
           <router-link to="/exercise/record_form">
             <img
               class="btn_add"
-              src="\image\main\btn_add_grey.png"
+              src="\image\exercise\btn_add_grey.png"
               alt="운동기록 추가 버튼"
             />
           </router-link>
@@ -45,7 +37,7 @@ import BodyCompositionSummary from "@/components/exercise/BodyCompositionSummary
           <span class="otd-subtitle-1">체성분</span>
           <img
             class="btn_add"
-            src="\image\main\btn_add_grey.png"
+            src="\image\exercise\btn_add_grey.png"
             alt="체성분 추가 버튼"
           />
         </div>
@@ -71,10 +63,7 @@ import BodyCompositionSummary from "@/components/exercise/BodyCompositionSummary
   justify-content: space-between;
   margin-top: 15px;
 }
-.calendar_icon {
-  width: 18px;
-  height: 18px;
-}
+
 .btn_add {
   width: 16px;
   height: 16px;

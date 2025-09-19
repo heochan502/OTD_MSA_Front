@@ -12,36 +12,38 @@ import ExerciseRecordList from "@/components/exercise/ExerciseRecordList.vue";
           <col style="width: 120px" />
           <col style="width: 120px" />
         </colgroup>
-        <tr>
-          <td></td>
-          <td>전체</td>
-          <td>평균</td>
-        </tr>
-        <tr>
-          <td>운동</td>
-          <td>2</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>시간</td>
-          <td>{{ "전체시간" }}</td>
-          <td>{{ "평균시간" }}</td>
-        </tr>
-        <tr>
-          <td>킬로칼로리</td>
-          <td>{{ "전체칼로리" }}</td>
-          <td>{{ "평균칼로리" }}</td>
-        </tr>
+        <tbody>
+          <tr>
+            <td></td>
+            <td>전체</td>
+            <td>평균</td>
+          </tr>
+          <tr>
+            <td>운동</td>
+            <td>2</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td>시간</td>
+            <td>{{ "전체시간" }}</td>
+            <td>{{ "평균시간" }}</td>
+          </tr>
+          <tr>
+            <td>킬로칼로리</td>
+            <td>{{ "전체칼로리" }}</td>
+            <td>{{ "평균칼로리" }}</td>
+          </tr>
+        </tbody>
       </table>
     </div>
-    <div>
+    <div class="item_wrap">
       <ExerciseRecordList />
     </div>
     <div class="d-flex flex-row-reverse btn">
       <router-link to="/exercise/record_form">
         <img
           class="btn_add"
-          src="\public\image\main\btn_add.png"
+          src="\public\image\exercise\btn_add.png"
           alt="운동기록 추가하기 버튼"
         />
       </router-link>

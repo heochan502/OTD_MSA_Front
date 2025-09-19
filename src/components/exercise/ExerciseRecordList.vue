@@ -79,7 +79,7 @@ const goDetail = (exerciseRecordId) => {
           <span class="otd-body-3">{{ formatTimeKR(item.startAt) }}</span>
           <img
             class="btn_more"
-            src="\image\main\btn_more.png"
+            src="\image\exercise\btn_more.png"
             alt="상세보기 버튼"
             @click.prevent="goDetail(1)"
           />
