@@ -118,7 +118,6 @@ function onSubmitSuccess() {
         <button class="pill" @click="onPickCategory('diet')">다이어트</button>
         <button class="pill" @click="onPickCategory('work')">운동</button>
         <button class="pill" @click="onPickCategory('love')">연애</button>
-        <button class="pill pill-cancel" @click="closeOverlay">취소</button>
       </div>
 
       <ComposeForm

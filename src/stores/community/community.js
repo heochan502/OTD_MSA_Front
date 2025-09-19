@@ -6,7 +6,7 @@ import {
   updatePost,
   deletePost,
   toggleLike,
-} from '@/services/community/communityService';
+} from '@/services/community/postService';
 
 // ------------------------------
 // Demo data generator
