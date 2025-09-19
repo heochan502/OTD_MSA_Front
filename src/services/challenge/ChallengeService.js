@@ -35,3 +35,9 @@ export const getRank = (cdId, req) => {
 export const putSuccess = (cpId) => {
   return axios.put(`${baseURL}/success`, { cpId }).catch((e) => e.response);
 };
+
+export const postMissionRecord = (userId, cdId) => {
+  return axios
+    .post(`${baseURL}/record/mission`, { userId, cdId })
+    .catch((e) => e.response);
+};

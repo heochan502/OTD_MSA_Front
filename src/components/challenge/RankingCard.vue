@@ -21,7 +21,7 @@ const getBorderColor = (rank) => {
 <template>
   <div>
     <div
-      class="box otd-box-style otd-border"
+      class="box otd-list-box-style otd-border"
       :class="{ 'my-rank': isMe }"
       :style="
         !isMe
