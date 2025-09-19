@@ -10,7 +10,10 @@ const exerciseRecordStore = useExerciseRecordStore();
 // 페이징 정보
 const req = {
   page: 1,
-  rowPerPage: 2,
+  row_per_page: 3,
+  type: "daily",
+  date: "2025-09-18",
+  memberId: 1,
 };
 
 onMounted(() => {
@@ -21,12 +24,12 @@ const getData = async () => {
   const params = req;
   const res = await getExerciseRecordList(params);
   console.log("res", res.data);
-  if (res.status === 200) {
-    const result = res.data;
-    if (result && result.length > 0) {
-      exerciseStore.addToday(result.data);
-    }
-  }
+  // if (res.status === 200) {
+  //   const result = res.data;
+  //   if (result && result.length > 0) {
+  //     exerciseRecordStore.addToday(result.data);
+  //   }
+  // }
 };
 
 // @click
@@ -52,7 +55,7 @@ const goDetail = (exerciseRecordId) => {
           <span class="otd-body-3">운동시작시간</span>
           <img
             class="btn_more"
-            src="\public\image\main\btn_more.png"
+            src="\image\main\btn_more.png"
             alt="상세보기 버튼"
             @click.prevent="goDetail(1)"
           />
@@ -67,7 +70,7 @@ const goDetail = (exerciseRecordId) => {
           <span class="otd-body-3">운동시작시간</span>
           <img
             class="btn_more"
-            src="\public\image\main\btn_more.png"
+            src="\image\main\btn_more.png"
             alt="더보기 버튼"
           />
         </div>

@@ -9,7 +9,7 @@ export const saveExerciseRecord = (formData) => {
 
 // 운동기록 목록
 export const getExerciseRecordList = (params) => {
-  return axios.get(baseURL, params).catch((e) => e.response);
+  return axios.get(`${baseURL}/list`, { params }).catch((e) => e.response);
 };
 
 // 운동기록 상세조회

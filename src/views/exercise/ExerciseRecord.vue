@@ -10,6 +10,7 @@ import ExerciseRecordList from "@/components/exercise/ExerciseRecordList.vue";
         <colgroup>
           <col style="width: 120px" />
           <col style="width: 120px" />
+          <col style="width: 120px" />
         </colgroup>
         <tr>
           <td></td>
@@ -19,6 +20,7 @@ import ExerciseRecordList from "@/components/exercise/ExerciseRecordList.vue";
         <tr>
           <td>운동</td>
           <td>2</td>
+          <td></td>
         </tr>
         <tr>
           <td>시간</td>
