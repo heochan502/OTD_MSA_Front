@@ -21,6 +21,7 @@ const logoutAccount = async () => {
       await logout();     // 서버 로그아웃
       await authStore.logout(); // Pinia 상태 초기화
       console.log('로그아웃 완료');
+      await router.push('/user/login')
     }
   } catch (error) {
     console.error('로그아웃 중 오류:', error);
