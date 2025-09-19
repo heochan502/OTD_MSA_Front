@@ -1,6 +1,15 @@
 <script setup>
 import { ref, computed } from "vue";
-import { startOfWeek, addDays, isSameDay, format } from "date-fns";
+import dayjs from "dayjs";
+import isoWeek from "dayjs/plugin/isoWeek"; // 주 시작일 설정용
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+dayjs.extend(isoWeek);
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
+dayjs.extend(customParseFormat);
 
 const props = defineProps({
   recordDate: {
@@ -10,59 +19,63 @@ const props = defineProps({
 });
 const emit = defineEmits(["click-date"]);
 
-const today = new Date();
+const today = dayjs();
 const currentDate = ref(today);
-const weekStart = ref(startOfWeek(today, { weekStartsOn: 0 })); // 일요일 시작
 
-// 한 주(7일): 현재 주의 날짜 배열만 계산
+// 이번 주의 "일요일"을 시작으로 설정
+const weekStart = ref(today.startOf("week")); // 기본은 일요일 시작
+
+// 한 주(7일) 배열
 const weekDays = computed(() =>
-  Array.from({ length: 7 }, (_, i) => addDays(weekStart.value, i))
+  Array.from({ length: 7 }, (_, i) => weekStart.value.add(i, "day"))
 );
 
-const goPrevWeek = () => (weekStart.value = addDays(weekStart.value, -7));
-const goNextWeek = () => (weekStart.value = addDays(weekStart.value, 7));
+const goPrevWeek = () => {
+  weekStart.value = weekStart.value.subtract(1, "week");
+};
+const goNextWeek = () => {
+  weekStart.value = weekStart.value.add(1, "week");
+};
 
-const isToday = (day) => isSameDay(day, today);
-const isSelected = (day) => isSameDay(day, currentDate.value);
+const isToday = (day) => day.isSame(today, "day");
+const isSelected = (day) => day.isSame(currentDate.value, "day");
 
 const selectDate = (day) => {
   currentDate.value = day;
-  emit("click-date", day);
+  emit("click-date", day.toDate());
 };
 </script>
 
 <template>
   <div class="d-flex align-center ga-2">
-    <!-- 캘린더 아이콘 -->
     <img
       src="\image\exercise\calender.png"
       alt="캘린더 아이콘"
       class="calendar_icon"
     />
-    <!-- 현재 년월 -->
-    <span class="otd-subtitle-1">{{ "2025년 9월" }}</span>
+    <span class="otd-subtitle-1">{{ currentDate.format("YYYY년 M월") }}</span>
   </div>
+
   <div class="weekly-calendar otd-body-1">
     <button class="btn" @click="goPrevWeek">
       <img src="\image\exercise\btn_prev.png" alt="" width="10" />
     </button>
+
     <div class="days">
       <div
         v-for="day in weekDays"
-        :key="day"
+        :key="day.format('YYYY-MM-DD')"
         class="day-cell"
-        :class="{
-          today: isToday(day),
-          selected: isSelected(day),
-        }"
+        :class="{ today: isToday(day), selected: isSelected(day) }"
         @click="selectDate(day)"
       >
-        <span class="date">{{ format(day, "d") }}</span>
+        <span class="date">{{ day.format("D") }}</span>
         <span class="weekday">{{
-          ["일", "월", "화", "수", "목", "금", "토"][day.getDay()]
+          ["일", "월", "화", "수", "목", "금", "토"][day.day()]
         }}</span>
       </div>
     </div>
+
     <button class="btn" @click="goNextWeek">
       <img src="\image\exercise\btn_next.png" alt="" width="10" />
     </button>
