@@ -48,7 +48,14 @@ const getBorderColor = (rank) => {
         <span v-else>{{ props.rankingDetail.rank }}위</span>
       </div>
       <div class="image">{{ props.rankingDetail.profileImage }}</div>
-      <div class="nick-name otd-body-2">{{ props.rankingDetail.nickName }}</div>
+      <div class="user-info">
+        <div class="profile">
+          {{ props.rankingDetail.pic }}
+        </div>
+        <div class="nick-name otd-body-2">
+          {{ props.rankingDetail.nickName }}
+        </div>
+      </div>
       <div class="value otd-body-3">
         {{ props.rankingDetail.formattedTotalRecord }}
       </div>
@@ -86,5 +93,9 @@ const getBorderColor = (rank) => {
   border-radius: 10px;
   background-origin: border-box;
   background-clip: padding-box, border-box;
+}
+.user-info {
+  display: flex;
+  gap: 10px;
 }
 </style>

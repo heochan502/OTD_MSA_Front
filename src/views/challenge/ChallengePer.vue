@@ -1,31 +1,33 @@
 <script setup>
-import RankingCard from "@/components/challenge/RankingCard.vue";
-import { reactive, onMounted, ref } from "vue";
-import Progress from "@/components/challenge/Progress.vue";
-import { getRank, putSuccess } from "@/services/challenge/ChallengeService";
-
+import RankingCard from '@/components/challenge/RankingCard.vue';
+import { reactive, onMounted, ref } from 'vue';
+import Progress from '@/components/challenge/Progress.vue';
+import { getRank, putSuccess } from '@/services/challenge/ChallengeService';
+import { useChallengeStore } from '../../stores/challenge/challengeStore';
+import { useHeaderStore } from '@/stores/challenge/headerStore';
 const props = defineProps({
   id: Number,
   name: String,
 });
-const year = new Date().getFullYear();
-const month = new Date().getMonth() + 1;
+const challengeStore = useChallengeStore();
+const headerStore = useHeaderStore();
+const year = challengeStore.state.year;
+const month = challengeStore.state.month;
+
 const state = reactive({
   progress: {},
   aroundRanking: [],
   topRanking: [],
-  activeTab: "around",
+  activeTab: 'around',
 });
 const aroundRankingList = () => {
-  state.activeTab = "around";
-  console.log("around");
+  state.activeTab = 'around';
 };
 const topRankingList = () => {
-  state.activeTab = "top";
-  console.log("top");
+  state.activeTab = 'top';
 };
-const ment = ref("null");
-const recordGap = ref("");
+const ment = ref('null');
+const recordGap = ref('');
 
 const gap = () => {
   const myRank = state.progress.myRank;
@@ -63,11 +65,13 @@ onMounted(async () => {
   state.progress = res.data;
   state.aroundRanking = res.data.aroundRanking;
   state.topRanking = res.data.topRanking;
-  console.log("per res.data", res.data);
+  console.log('per res.data', res.data);
+  headerStore.setDetailName(res.data.name);
   gap();
+
   if (state.progress.percent >= 100 && res.data.success == false) {
     await putSuccess(res.data.cpId);
-    console.log("목표 성공");
+    console.log('목표 성공');
   }
 });
 </script>
@@ -79,8 +83,8 @@ onMounted(async () => {
       <div class="otd-category">
         {{
           state.progress.totalRecord == 0
-            ? "아직 기록이 없어요ㅠㅠ"
-            : "현재 " + state.progress.formattedTotalRecord + " 달렸어요!"
+            ? '아직 기록이 없어요ㅠㅠ'
+            : '현재 ' + state.progress.formattedTotalRecord + ' 달렸어요!'
         }}
       </div>
       <div class="otd-body-3">
