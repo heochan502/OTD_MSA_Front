@@ -9,7 +9,7 @@ export const saveExerciseRecord = (formData) => {
 
 // 운동기록 목록
 export const getExerciseRecordList = (params) => {
-  return axios.get(baseURL, params).catch((e) => e.response);
+  return axios.get(`${baseURL}/list`, { params }).catch((e) => e.response);
 };
 
 // 운동기록 상세조회
@@ -20,4 +20,9 @@ export const getExerciseRecordDetail = (recordId) => {
 // 운동기록삭제
 export const deleteExerciseRecord = (recordId) => {
   return axios.delete(baseURL, recordId).catch((e) => e.response);
+};
+
+// 운동종목가져오기
+export const getExercise = () => {
+  return axios.get("/exercise").catch((e) => e.response);
 };

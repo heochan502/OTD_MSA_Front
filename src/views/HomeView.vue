@@ -1,54 +1,48 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import Progress from '@/components/challenge/Progress.vue';
-import ProgressJs from '@/components/challenge/ProgressJs.vue';
+import { ref, onMounted, computed } from "vue";
+import Progress from "@/components/challenge/Progress.vue";
+import ProgressJs from "@/components/challenge/ProgressJs.vue";
 
-import LineChart from  '@/components/exercise/lineChart.vue'
+import LineChart from "@/components/exercise/lineChart.vue";
 
-import MealCard from '@/components/meal/MealDayCards.vue';
+import MealCard from "@/components/meal/MealDayCards.vue";
 
 import BmiProg from "@/components/exercise/BmiProg.vue";
 
-
 const challengeInfo = ref([
-  { challenge_name: '달리기 30km', progress: 62 },
-  { challenge_name: '운동시간 60시간', progress: 82 },
-  { challenge_name: '팔굽혀 펴기 100개', progress: 22 },
-  { challenge_name: '운동시간 50시간', progress: 72 },
-  { challenge_name: '일간 미션 ', progress: 100 },
+  { challenge_name: "달리기 30km", progress: 62 },
+  { challenge_name: "운동시간 60시간", progress: 82 },
+  { challenge_name: "팔굽혀 펴기 100개", progress: 22 },
+  { challenge_name: "운동시간 50시간", progress: 72 },
+  { challenge_name: "일간 미션 ", progress: 100 },
 ]);
 
-
 const healthInfo = ref([
-  { text: '체중(kg)', value: 70.5, check: true },
-  { text: '체지방률(%)', value: 15.3, check: false },
-  { text: '골격근량(kg)', value: 30.2, check: false },
+  { text: "체중(kg)", value: 70.5, check: true },
+  { text: "체지방률(%)", value: 15.3, check: false },
+  { text: "골격근량(kg)", value: 30.2, check: false },
 ]);
 
 const fields = [
-  { key: 'weight', label: '체중', unit: 'kg' },
-  { key: 'BFP', label: '체지방률', unit: '%' },
-  { key: 'SMM', label: '골격근량', unit: 'kg' },
+  { key: "weight", label: "체중", unit: "kg" },
+  { key: "BFP", label: "체지방률", unit: "%" },
+  { key: "SMM", label: "골격근량", unit: "kg" },
 ];
 const selectedField = ref(fields[0].key);
 
-
 const inbodyData = ref([
-  {dataTime: '2025-09-15', weight : '62.4', BFP : '20', SMM: '23'}, 
-  {dataTime: '2025-09-16', weight : '62.1', BFP : '20.2', SMM: '22.9'}, 
-  {dataTime: '2025-09-17', weight : '61.9', BFP : '20.1', SMM: '23.1'}, 
-  {dataTime: '2025-09-18', weight : '62.5', BFP : '20.5', SMM: '22.8'}, 
-  {dataTime: '2025-09-19', weight : '62.2', BFP : '20.3', SMM: '22.9'}, 
-  {dataTime: '2025-09-20', weight : '61.8', BFP : '19.9', SMM: '23.2'}, 
-  {dataTime: '2025-09-21', weight : '62.0', BFP : '20.0', SMM: '23.0'}, 
+  { dataTime: "2025-09-15", weight: "62.4", BFP: "20", SMM: "23" },
+  { dataTime: "2025-09-16", weight: "62.1", BFP: "20.2", SMM: "22.9" },
+  { dataTime: "2025-09-17", weight: "61.9", BFP: "20.1", SMM: "23.1" },
+  { dataTime: "2025-09-18", weight: "62.5", BFP: "20.5", SMM: "22.8" },
+  { dataTime: "2025-09-19", weight: "62.2", BFP: "20.3", SMM: "22.9" },
+  { dataTime: "2025-09-20", weight: "61.8", BFP: "19.9", SMM: "23.2" },
+  { dataTime: "2025-09-21", weight: "62.0", BFP: "20.0", SMM: "23.0" },
 ]);
 
-
-
-
-const today = new Date().toISOString().slice(0, 10)
+const today = new Date().toISOString().slice(0, 10);
 const todayData = computed(() => {
-  return inbodyData.value.find(item => item.dataTime === today)
+  return inbodyData.value.find((item) => item.dataTime === today);
 });
 // TODO: 실제 데이터 연동 시
 // onMounted(async () => {
@@ -70,9 +64,8 @@ const healthToggle = (index) => {
 <template>
   <div class="wrap">
     <section class="meal">
-
-    <MealCard />
-<!-- 
+      <MealCard />
+      <!-- 
       <span class="title-text">오늘의 식단</span>
       <div class="meal-cards">
         <div class="meal-card" v-for="(item, index) in mealInfo" :key="item.meal_day">
@@ -139,30 +132,37 @@ const healthToggle = (index) => {
         <div class="otd-top-margin">
           <!-- bmi 프로그래스바  -->
           <div class="bmi-prog">
-            <BmiProg  />
+            <BmiProg />
           </div>
         </div>
       </div>
       <!-- 선형 그래프 선택 부분 -->
-      <v-item-group v-model="selectedField" >
-        <div class="otd-top-margin item-group ">
-          <div v-for="(field, idx) in fields" :key="idx" class="card-wrapper ">
-            <v-item v-slot="{selectedClass, toggle}" :value="field.key">
-              <v-card :class="[` health-button d-flex flex-column justify-center align-center text-center`,  { 'health-button-active': selectedClass }, ,]"
-              @click="toggle"   v-ripple="false" >
-              <div>
-                <span class="otd-body-3">
-                  {{ field.label }}({{ field.unit}}) </span>
-              </div>
-              <div class="otd-subtitle-1 text-center ">
-                {{ todayData?.[field.key] }}
-              </div>
+      <v-item-group v-model="selectedField">
+        <div class="otd-top-margin item-group">
+          <div v-for="(field, idx) in fields" :key="idx" class="card-wrapper">
+            <v-item v-slot="{ selectedClass, toggle }" :value="field.key">
+              <v-card
+                :class="[
+                  ` health-button d-flex flex-column justify-center align-center text-center`,
+                  { 'health-button-active': selectedClass },
+                  ,
+                ]"
+                @click="toggle"
+                v-ripple="false"
+              >
+                <div>
+                  <span class="otd-body-3">
+                    {{ field.label }}({{ field.unit }})
+                  </span>
+                </div>
+                <div class="otd-subtitle-1 text-center">
+                  {{ todayData?.[field.key] }}
+                </div>
               </v-card>
             </v-item>
           </div>
         </div>
       </v-item-group>
-
 
       <!-- <div class="otd-top-margin d-flex justify-content-between ">
         <button v-for="(value, index) in healthInfo" :key="index" :class="{ 'health-button': true, 'health-button-active': value.check }" @click="healthToggle(index)">
@@ -174,13 +174,13 @@ const healthToggle = (index) => {
         </button>
       </div> -->
 
-      <div class = otd-top-margin >
+      <div class="otd-top-margin">
         <LineChart
-        :selected-date="today"
-        :selectedField="selectedField"
-        :fields="fields"
-        :logs="inbodyData"
-      />
+          :selected-date="today"
+          :selectedField="selectedField"
+          :fields="fields"
+          :logs="inbodyData"
+        />
       </div>
     </section>
   </div>
@@ -305,19 +305,16 @@ const healthToggle = (index) => {
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
 }
 
-.bmi-prog
-{
+.bmi-prog {
   padding: 10px;
 }
 
 .item-group {
   display: flex;
-  flex-wrap: nowrap;  
+  flex-wrap: nowrap;
   gap: 10px;
 }
-.health-button
-{
-
+.health-button {
   width: 110px;
   height: 75px;
   background: #fff;
