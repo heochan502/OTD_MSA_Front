@@ -21,3 +21,8 @@ export const getExerciseRecordDetail = (recordId) => {
 export const deleteExerciseRecord = (recordId) => {
   return axios.delete(baseURL, recordId).catch((e) => e.response);
 };
+
+// 운동종목가져오기
+export const getExercise = () => {
+  return axios.get("/exercise").catch((e) => e.response);
+};

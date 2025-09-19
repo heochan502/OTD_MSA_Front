@@ -1,10 +1,8 @@
 import { defineStore } from "pinia";
 import { reactive } from "vue";
-import {
-  getDateString,
-  getYesterdayDateString,
-  filterExerciseLogsByDate,
-} from "@/utils/exerciseUtils";
+import { getExercise } from "@/services/exercise/exerciseService";
+import { filterExerciseLogsByDate } from "@/utils/exerciseUtils";
+import { getDateString, getYesterdayDateString } from "@/utils/dateTimeUtils";
 
 export const useExerciseRecordStore = defineStore("exerciseRecord", {
   state: () => ({
@@ -51,13 +49,7 @@ export const useExerciseRecordStore = defineStore("exerciseRecord", {
       this.recordList = [];
     },
     addToday(list) {
-      const newRecords = list.filter(
-        (record) =>
-          !this.today.some(
-            (t) => t.exerciseRecordId === record.exerciseRecordId
-          )
-      );
-      this.today.push(...newRecords);
+      this.today = [...list];
     },
 
     addYesterDay(list) {
