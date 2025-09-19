@@ -1,4 +1,4 @@
-import axios from '../HttpService';
+import axios from '../httpRequester';
 
 const path = '/user';
 
@@ -12,18 +12,22 @@ export const logout = () => axios.post(`${path}/logout`);
 export const reissue = (data) => axios.post(`${path}/reissue`, data);
 
 // 프로필 관련
-export const getUserProfile = (params) => axios.get(`${path}/profile`, { params });
+export const getUserProfile = (params) =>
+  axios.get(`${path}/profile`, { params });
 
-export const patchUserProfilePic = (data) => axios.patch(`${path}/profile/pic`, data);
+export const patchUserProfilePic = (data) =>
+  axios.patch(`${path}/profile/pic`, data);
 
 export const deleteUserProfilePic = () => axios.delete(`${path}/profile/pic`);
 
 // 중복 체크 관련
 export const checkUidDuplicate = (uid) => axios.get(`${path}/check-uid/${uid}`);
 
-export const checkNicknameDuplicate = (nickname) => axios.get(`${path}/check-nickname/${nickname}`);
+export const checkNicknameDuplicate = (nickname) =>
+  axios.get(`${path}/check-nickname/${nickname}`);
 
-export const checkDuplicateUser = (data) => axios.post(`${path}/check-duplicate`, data);
+export const checkDuplicateUser = (data) =>
+  axios.post(`${path}/check-duplicate`, data);
 
 // 비밀번호 관련
 export const changePassword = (data) => axios.patch(`${path}/password`, data);

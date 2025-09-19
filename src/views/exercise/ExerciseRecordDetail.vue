@@ -1,8 +1,8 @@
 <script setup>
-import WeeklyDatePick from "@/components/exercise/WeeklyDatePick.vue";
-import WeeklyChart from "@/components/exercise/WeeklyChart.vue";
-import { template } from "lodash";
-import { ref } from "vue";
+import WeeklyDatePick from '@/components/exercise/WeeklyDatePick.vue';
+import WeeklyChart from '@/components/exercise/WeeklyChart.vue';
+import { template } from 'lodash';
+import { ref } from 'vue';
 
 const hasDistance = false;
 </script>
@@ -19,7 +19,7 @@ const hasDistance = false;
           class="calendar_icon"
         />
         <!-- 현재 년월 -->
-        <span class="otd-subtitle-1">{{ "2025년 9월" }}</span>
+        <span class="otd-subtitle-1">{{ '2025년 9월' }}</span>
       </div>
       <WeeklyDatePick />
     </div>
@@ -32,14 +32,14 @@ const hasDistance = false;
       <div class="content_main otd-top-margin">
         <div class="content_effort otd-box-style">
           <span>운동 강도</span>
-          <span class="emoji">{{ "😓" }}</span>
-          <span class="otd-subtitle-2">{{ "어려움" }}</span>
+          <span class="emoji">{{ '😓' }}</span>
+          <span class="otd-subtitle-2">{{ '어려움' }}</span>
         </div>
         <div class="content_detail otd-box-style">
           <div class="item_wrap mb-3">
             <div class="item">
               <span>시작 시간</span>
-              <span class="otd-subtitle-2">{{ 16 }}시{{ "00" }}분</span>
+              <span class="otd-subtitle-2">{{ 16 }}시{{ '00' }}분</span>
             </div>
             <div class="item">
               <span>운동 시간</span>
@@ -49,11 +49,11 @@ const hasDistance = false;
           <div class="item_wrap">
             <div class="item">
               <span>킬로칼로리</span>
-              <span class="otd-subtitle-2">{{ "223" }}kcal</span>
+              <span class="otd-subtitle-2">{{ '223' }}kcal</span>
             </div>
             <div v-if="hasDistance" class="item">
               <span>{{ 거리 }}</span>
-              <span class="otd-subtitle-2">{{ "16시 00분" }}</span>
+              <span class="otd-subtitle-2">{{ '16시 00분' }}</span>
             </div>
           </div>
         </div>
