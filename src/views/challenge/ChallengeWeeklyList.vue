@@ -1,7 +1,10 @@
 <script setup>
-import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
-import { reactive, onMounted, ref } from 'vue';
-import { getChallenge } from '@/services/challenge/ChallengeService';
+import ChallengeCard from "@/components/challenge/ChallengeCard.vue";
+import { reactive, onMounted, ref } from "vue";
+import {
+  getChallenge,
+  postChallenge,
+} from "@/services/challenge/ChallengeService";
 
 const dialog = ref(false);
 const state = reactive({
@@ -14,24 +17,28 @@ const openDialog = (challenge) => {
 };
 const confirmYes = async () => {
   dialog.value = false;
-  console.log(state.selectedChallenge.id);
-  await postChallenge(state.selectedChallenge.id);
+  const params = {
+    userId: 1,
+    cdId: state.selectedChallenge.id,
+    type: state.selectedChallenge.type,
+  };
+  await postChallenge(params);
 };
 onMounted(async () => {
   const type = history.state.type;
   const year = history.state.year;
   const month = history.state.month;
 
-  console.log('type', type);
+  console.log("type", type);
   const res = await getChallenge(1, year, month, type);
-  console.log('resdata', res.data);
+  console.log("resdata", res.data);
   state.challengeList = res.data;
 });
 </script>
 
 <template>
   <div class="wrap">
-    <div v-for="challenge in state.challengeList" :key="id">
+    <div v-for="challenge in state.challengeList" :key="challenge.id">
       <ChallengeCard
         class="challenge-card"
         :key="challenge.id"
@@ -43,16 +50,21 @@ onMounted(async () => {
       ></ChallengeCard>
     </div>
   </div>
-  <v-dialog v-model="dialog" max-width="300" min-height="100">
+  <v-dialog v-model="dialog" max-width="380" min-height="100">
     <v-card>
       <v-card-title class="text-h8">확인</v-card-title>
-      <v-card-text
-        >{{
-          state.selectedChallenge?.name +
-          `(${state.selectedChallenge.goal}${state.selectedChallenge.unit})`
-        }}
-        챌린지에 도전 하시겠습니까?</v-card-text
-      >
+      <v-card-text>
+        <div class="challenge-info">
+          {{
+            state.selectedChallenge?.name +
+            `(${state.selectedChallenge.goal}${state.selectedChallenge.unit})`
+          }}
+          챌린지에 도전 하시겠습니까?
+        </div>
+        <div class="warning">
+          ⚠️ 한 번 시작한 챌린지는 <strong>취소할 수 없습니다.</strong>
+        </div>
+      </v-card-text>
       <v-card-actions>
         <v-spacer />
         <v-btn color="dark" text @click="dialog = false">아니오</v-btn>
@@ -65,5 +77,13 @@ onMounted(async () => {
 <style lang="scss" scoped>
 .challenge-card {
   cursor: pointer;
+}
+.warning {
+  margin-top: 10px;
+  color: #e53935; /* 빨간색 경고 */
+  font-size: 0.85rem;
+}
+.challenge-info {
+  margin-bottom: 8px;
 }
 </style>
