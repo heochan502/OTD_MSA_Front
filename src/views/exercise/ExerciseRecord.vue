@@ -1,18 +1,43 @@
 <script setup>
-import { reactive } from "vue";
+import { computed, onMounted, onUnmounted, reactive } from "vue";
+import { useRoute } from "vue-router";
+import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
 import ExerciseRecordList from "@/components/exercise/ExerciseRecordList.vue";
+import { getExerciseRecordList } from "@/services/exercise/exerciseService";
+import { formatDateYearMonthKR } from "@/utils/dateTimeUtils";
+import { result } from "lodash";
 
-const params = reactive({
-  page: 1,
-  row_per_page: 10,
-  type: monthly,
-  date: date.toISOString().slice(0, 10), // YYYY-MM-DD 형태
-  memberId: 1,
+const route = useRoute();
+const exerciseRecordStore = useExerciseRecordStore();
+const now = formatDateYearMonthKR(route.query.date);
+
+onMounted(async () => {
+  exerciseRecordStore.clearRecords();
+  const date = route.query.date;
+
+  const params = {
+    page: 1,
+    row_per_page: 10,
+    type: "monthly",
+    date: date,
+    memberId: 1,
+  };
+
+  const res = await getExerciseRecordList(params);
+
+  exerciseRecordStore.records = res.data;
 });
+
+onUnmounted(() => {
+  exerciseRecordStore.clearRecords();
+});
+
+const countRecord = exerciseRecordStore.records.length;
 </script>
+
 <template>
   <div class="wrap parent">
-    <div class="otd-subtitle-1">{{ "2025년 9월" }}</div>
+    <div class="otd-subtitle-1">{{ now }}</div>
     <div class="d-flex justify-center otd-body-1 mb-8">
       <table>
         <colgroup>
@@ -28,7 +53,7 @@ const params = reactive({
           </tr>
           <tr>
             <td>운동</td>
-            <td>2</td>
+            <td>{{ countRecord }}</td>
             <td></td>
           </tr>
           <tr>

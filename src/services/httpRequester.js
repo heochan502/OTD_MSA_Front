@@ -13,11 +13,11 @@ axios.defaults.withCredentials = true;
 axios.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("accessToken"); // JWT 토큰
-    console.log("Request token:", token); // 디버깅
+    // console.log("Request token:", token); // 디버깅
     if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
   },
   (error) => Promise.reject(error)
 );
-console.log("Axios BaseURL:", axios.defaults.baseURL);
+// console.log("Axios BaseURL:", axios.defaults.baseURL);
 export default axios;

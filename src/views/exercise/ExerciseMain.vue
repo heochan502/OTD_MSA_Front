@@ -1,21 +1,28 @@
 <script setup>
 import { ref, reactive, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
 import ExerciseRecordList from "@/components/exercise/ExerciseRecordList.vue";
 import BodyCompositionSummary from "@/components/exercise/BodyCompositionSummary.vue";
 import WeeklyCalendar from "@/components/exercise/WeeklyCalendar.vue";
 import { getExerciseRecordList } from "@/services/exercise/exerciseService";
-
+import { formatDateYearMonthISO } from "@/utils/dateTimeUtils";
 import btnAdd from "/image/exercise/btn_add_grey.png";
+
 
 const exerciseRecordStore = useExerciseRecordStore();
 const selectedDate = ref(new Date());
+const monthly = formatDateYearMonthISO(selectedDate.value);
 
+onMounted(() => {
+  exerciseRecordStore.fetchExercises();
+});
+
+// @click
 const onDateClick = async (date) => {
-  exerciseRecordStore.clearDailyRecords();
+  exerciseRecordStore.clearRecords();
   selectedDate.value = date;
   // date 는 JS Date 객체 (컴포넌트에서 toDate()로 emit)
-  // console.log(date);
 
   const params = reactive({
     page: 1,
@@ -27,13 +34,7 @@ const onDateClick = async (date) => {
 
   const res = await getExerciseRecordList(params);
   exerciseRecordStore.records = res.data;
-  console.log(exerciseRecordStore.dailyRecords);
 };
-onMounted(() => {
-  exerciseRecordStore.fetchExercises();
-});
-
-const nowDate = new Date();
 </script>
 
 <template>
@@ -50,7 +51,14 @@ const nowDate = new Date();
           </router-link>
         </div>
         <div>
-          <router-link to="/exercise/record">
+          <router-link
+            :to="{
+              path: '/exercise/record',
+              query: {
+                date: monthly,
+              },
+            }"
+          >
             <span class="otd-body-2">더보기</span>
           </router-link>
         </div>
