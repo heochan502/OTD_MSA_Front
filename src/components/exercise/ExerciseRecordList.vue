@@ -11,37 +11,13 @@ const route = useRoute();
 const exerciseRecordStore = useExerciseRecordStore();
 const todayStr = getDateString();
 
-// 페이징 정보
-const params = reactive({
-  page: 1,
-  row_per_page: null,
-  type: null,
-  date: null,
-  memberId: 1,
+const props = defineProps({
+  records: {
+    type: Array,
+    default: () => [],
+  },
 });
 
-onMounted(() => {
-  exerciseRecordStore.fetchExercises();
-  getData();
-});
-
-const getData = async () => {
-  if (route.name === "ExerciseMain") {
-    // 메인 화면에서 일간 기록
-    params.type = "daily";
-    params.row_per_page = 3;
-    params.date = todayStr;
-  } else if (route.name === "ExerciseRecord") {
-    // 더보기화면이면 월간 기록
-    params.type = "monthly";
-    params.row_per_page = 10;
-    params.date = exerciseRecordStore.today;
-  }
-
-  const res = await getExerciseRecordList(params);
-
-  exerciseRecordStore.addToday(res.data);
-};
 
 // @click
 const goDetail = (exerciseRecordId) => {
@@ -79,7 +55,7 @@ const goDetail = (exerciseRecordId) => {
           <span class="otd-body-3">{{ formatTimeKR(item.startAt) }}</span>
           <img
             class="btn_more"
-            src="\image\main\btn_more.png"
+            src="\image\exercise\btn_more.png"
             alt="상세보기 버튼"
             @click.prevent="goDetail(1)"
           />

@@ -12,6 +12,7 @@ export const useExerciseRecordStore = defineStore("exerciseRecord", {
     yesterday: [], // 어제 기록
     recordList: [], // 페이징처리한 리스트
     records: [],
+    monthlyRecords: [], // 월간기록
   }),
   actions: {
     async fetchExercises() {
