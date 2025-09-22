@@ -1,22 +1,64 @@
 <script setup>
-import { reactive, computed, ref } from "vue";
+import { reactive, computed, ref, watch } from "vue";
+import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
+import effortLevels from "@/assets/effortLevels.json";
+import { calcDuration } from "@/utils/exerciseUtils";
+
+const exerciseRecordStore = useExerciseRecordStore();
+
 const state = reactive({
   form: {
     exerciseId: null,
     effortLevel: 1,
     startAt: null,
     endAt: null,
+    distance: null,
+    activityKcal: 0,
   },
 });
-
-// 거리기반운동여부
-const hasDistance = true;
 
 // 운동강도 색상
 const color = computed(() => {
   if (state.form.effortLevel < 4) return "#00D5DF";
   if (state.form.effortLevel < 7) return "#FFB996";
   return "#FF8282";
+});
+const hasDistance = computed(() => {
+  if (!state.form.exerciseId) return 0;
+
+  const target = exerciseRecordStore.exerciseList.find(
+    (e) => e.exerciseId === state.form.exerciseId.value
+  );
+
+  return target ? target.hasDistance : 0; // 1 또는 0 그대로 반환
+});
+
+// 운동지속시간
+const exerciseDuration = computed(() => {
+  const startAt = state.form.startAt;
+  const endAt = state.form.endAt;
+
+  return calcDuration(startAt, endAt);
+});
+
+// 칼로리 소모량
+const calcKcal = computed(() => {
+  // MET × 체중(kg) × 운동시간(분) × 0.0175 = 소모 칼로리(kcal).
+
+  const target = exerciseRecordStore.exerciseList.find(
+    (e) => e.exerciseId === state.form.exerciseId.value
+  );
+
+  const result = target.exerciseMet * 68 * exerciseDuration * 0.0175;
+  return result;
+});
+
+watch(state.form, () => {
+  console.log(state.form.startAt);
+  console.log(state.form.endAt);
+
+  console.log(exerciseDuration.value);
+  console.log("met", calcKcal.value);
 });
 </script>
 
@@ -26,13 +68,21 @@ const color = computed(() => {
       <div class="content_main">
         <div>운동 시작</div>
         <div class="input_box otd-box-style otd-shadow">
-          <input type="datetime-local" class="otd-body-1" />
+          <input
+            type="datetime-local"
+            v-model="state.form.startAt"
+            class="otd-body-1"
+          />
         </div>
       </div>
       <div class="content_main">
         <div>운동 종료</div>
         <div class="input_box otd-box-style otd-shadow">
-          <input type="datetime-local" class="otd-body-1" />
+          <input
+            type="datetime-local"
+            v-model="state.form.endAt"
+            class="otd-body-1"
+          />
         </div>
       </div>
       <div class="content_main">
@@ -40,7 +90,13 @@ const color = computed(() => {
         <div class="input_box otd-box-style otd-shadow">
           <v-combobox
             v-model="state.form.exerciseId"
-            items="0"
+            :items="
+              exerciseRecordStore.exerciseList.map((e) => ({
+                title: e.exerciseName,
+                value: e.exerciseId,
+              }))
+            "
+            placeholder="운동을 선택하세요"
             variant="plain"
             density="compact"
             hide-details
@@ -52,7 +108,9 @@ const color = computed(() => {
         <div>거리</div>
         <div class="input_box otd-box-style otd-shadow">
           <v-text-field
+            v-model="state.form.distance"
             suffix="km"
+            placeholder="운동한 거리를 입력하세요"
             variant="plain"
             density="compact"
             hide-details
@@ -64,8 +122,11 @@ const color = computed(() => {
       <div class="content_main">
         <div class="d-flex justify-space-between">
           <div>운동강도</div>
-          <div>{{ state.form.effortLevel }}</div>
+          <p>
+            {{ effortLevels[state.form.effortLevel - 1].label }}
+          </p>
         </div>
+
         <div>
           <v-slider
             v-model="state.form.effortLevel"
@@ -81,11 +142,14 @@ const color = computed(() => {
             hide-details
           >
             <!-- thumb 내용 -->
-            <!-- <template v-slot:thumb-label="{ modelValue }">
-            {{ effortLevels[modelValue - 1].emoji }}
-          </template> -->
+            <template v-slot:thumb-label="{ modelValue }">
+              {{ effortLevels[modelValue - 1].emoji }}
+            </template>
           </v-slider>
         </div>
+        <p class="otd-body-2 text-center">
+          {{ effortLevels[state.form.effortLevel - 1].description }}
+        </p>
       </div>
       <div class="content_result">
         <div>
@@ -94,7 +158,7 @@ const color = computed(() => {
         </div>
         <div>
           <div>운동시간</div>
-          <div class="otd-title">{{ "60분" }}</div>
+          <div class="otd-title">{{ exerciseDuration }}분</div>
         </div>
       </div>
     </div>
@@ -127,7 +191,7 @@ const color = computed(() => {
     color: rgba(0, 0, 0, 0);
     opacity: 1;
     display: block;
-    background: url("/image/main/calender.png") center/80% no-repeat;
+    background: url("/image/exercise/calender.png") center/80% no-repeat;
     width: 15px;
     height: 15px;
 
