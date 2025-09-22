@@ -4,9 +4,14 @@ import { useRouter } from 'vue-router';
 import CommunitySearch from '@/components/community/CommunitySearch.vue';
 import CommunityCategory from '@/components/community/CommunityCategory.vue';
 import PopularList from '@/components/community/PopularList.vue';
-
 import ComposeForm from '@/components/community/ComposeForm.vue';
 import { useCommunityStore } from '@/stores/community/community';
+
+/* 아이콘 (src/assets/img/community) */
+import iconFree from '@/assets/img/community/free.png';
+import iconDiet from '@/assets/img/community/diet.png';
+import iconWork from '@/assets/img/community/workout.png';
+import iconLove from '@/assets/img/community/love.png';
 
 const router = useRouter();
 const store = useCommunityStore();
@@ -16,10 +21,10 @@ onMounted(() => {
 });
 
 const categories = [
-  { key: 'free', label: '자유수다', icon: '/image/community/free.png' },
-  { key: 'diet', label: '다이어트', icon: '/image/community/diet.png' },
-  { key: 'work', label: '운동', icon: '/image/community/workout.png' },
-  { key: 'love', label: '연애', icon: '/image/community/love.png' },
+  { key: 'free', label: '자유수다', icon: iconFree },
+  { key: 'diet', label: '다이어트', icon: iconDiet },
+  { key: 'work', label: '운동', icon: iconWork },
+  { key: 'love', label: '연애', icon: iconLove },
 ];
 
 const searchVal = ref('');
@@ -68,52 +73,54 @@ function onSubmitSuccess() {
 </script>
 
 <template>
-  <div class="wrap">
+  <!-- ✅ 전역 .wrap 과 충돌하지 않도록 클래스명 변경 -->
+  <div class="cv-wrap">
     <section :class="['community-page', { blurred: showOverlay }]">
-      <!-- 상단: 제목 + 검색 + 글쓰기 -->
-      <div class="head-row">
-        <div class="search-line">
-          <CommunitySearch
-            v-model="searchVal"
-            class="search-flex"
-            placeholder="검색어를 입력해 주세요"
-            @submit="handleSearchSubmit"
+      <!-- 상단 카드 (검색 + 글쓰기 + 카테고리) -->
+      <div class="section-card top-card">
+        <div class="head-row">
+          <div class="search-line">
+            <CommunitySearch
+              v-model="searchVal"
+              class="search-flex"
+              placeholder="검색어를 입력해 주세요"
+              @submit="handleSearchSubmit"
+            />
+            <button
+              class="compose-emoji"
+              aria-label="글쓰기"
+              @click="openCompose"
+            >
+              +
+            </button>
+          </div>
+        </div>
+
+        <div class="cat-wrap">
+          <CommunityCategory
+            :categories="categories"
+            :selected="''"
+            @select="handleSelectCategory"
           />
-          <button
-            class="compose-emoji"
-            aria-label="글쓰기"
-            @click="openCompose"
-          >
-            ➕
-          </button>
         </div>
       </div>
 
-      <!-- 카테고리 선택 -->
-      <div class="otd-top-margin">
-        <CommunityCategory
-          :categories="categories"
-          :selected="''"
-          @select="handleSelectCategory"
+      <h3 class="section-title">인기글</h3>
+
+      <div class="section-card list-card">
+        <PopularList
+          :items="popularTop"
+          detail-route-name="CommunityPost"
+          :navigateOnClick="true"
+          id-key="id"
+          route-param-key="id"
+          @click-post="handleClickPost"
         />
       </div>
-
-      <!-- 인기글 -->
-      <div class="otd-top-margin otd-subtitle-1">인기글</div>
-
-      <PopularList
-        :items="popularTop"
-        detail-route-name="CommunityPost"
-        :navigateOnClick="true"
-        id-key="id"
-        route-param-key="id"
-        @click-post="handleClickPost"
-      />
     </section>
 
     <!-- 오버레이 -->
     <div v-if="showOverlay" class="overlay-full" @click.self="closeOverlay">
-      <!-- 카테고리 선택 버튼은 composeStep === 'pick' 일때만 보이게 -->
       <div v-if="composeStep === 'pick'" class="picker-floating">
         <button class="pill" @click="onPickCategory('free')">자유수다</button>
         <button class="pill" @click="onPickCategory('diet')">다이어트</button>
@@ -121,7 +128,6 @@ function onSubmitSuccess() {
         <button class="pill" @click="onPickCategory('love')">연애</button>
       </div>
 
-      <!-- 작성하기 폼은 composeStep === 'form' 일때만 -->
       <ComposeForm
         v-if="composeStep === 'form'"
         :category="selectedCategory"
@@ -133,17 +139,33 @@ function onSubmitSuccess() {
 </template>
 
 <style scoped>
-.wrap {
-  position: relative;
+/* ===== 전역 중앙정렬의 영향 무효화 =====
+   #app이 flex 중앙정렬이라도, 이 안쪽 컨테이너는
+   스스로 폭을 가지고 좌우 대칭 패딩으로 가운데 배치 */
+.cv-wrap {
+  /* 전역 .wrap margin(30px 20px) 무시 */
+  margin: 0 !important;
+
+  /* 전역 부모가 align-items:center 여도 너비를 꽉 채우게 */
+  align-self: stretch;
+
   width: 100%;
-  height: 100%;
+  min-height: 100%;
+  background: #f4f6f8;
+  overflow-x: hidden;
 }
 
+/* 본문 컨테이너: 가운데 정렬 & 대칭 패딩 */
 .community-page {
+  width: 100%;
+  max-width: 420px;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding: 16px 16px 28px !important;
   display: flex;
-
   flex-direction: column;
   gap: 14px;
+  box-sizing: border-box;
   transition: filter 0.2s ease, opacity 0.2s ease;
 }
 .blurred {
@@ -151,15 +173,40 @@ function onSubmitSuccess() {
   opacity: 0.6;
 }
 
+/* 카드 공통 */
+.section-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(17, 24, 39, 0.07);
+  border: 1px solid #eef1f4;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+.top-card {
+  padding: 14px;
+}
+.list-card {
+  padding: 10px;
+}
+
+/* 타이틀(좌우 마진 0으로 비대칭 방지) */
+.section-title {
+  margin: 8px 0 4px !important;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+/* 검색 줄 */
 .head-row {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 .search-line {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 .search-flex {
   flex: 1;
@@ -167,15 +214,27 @@ function onSubmitSuccess() {
 .compose-emoji {
   width: 44px;
   height: 44px;
-  border-radius: 22px;
-  border: none;
-  background: #e6e6e6;
+  border: 1px solid #e8ebef;
+  background: #ffffff;
+  border-radius: 50%;
   font-size: 22px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 4px 10px rgba(17, 24, 39, 0.06);
   cursor: pointer;
+}
+
+/* 카테고리 */
+.cat-wrap {
+  margin-top: 8px;
+}
+:deep(.cat-row) {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 0 2px;
+  margin: 0;
 }
 
 /* 오버레이 */
@@ -213,9 +272,15 @@ function onSubmitSuccess() {
   cursor: pointer;
   text-align: center;
 }
-
 .pill-cancel {
   background: #f7f7f7;
   color: #666;
+}
+
+/* 안전하게 box-sizing 보정 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 </style>
