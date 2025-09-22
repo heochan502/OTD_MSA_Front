@@ -2,8 +2,11 @@
 import { ref, computed, watch, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { join } from '@/services/user/userService'
+import axios from '@/services/httpRequester';
 
 const router = useRouter()
+
+const basePath = import.meta.env.VITE_BASE_URL;
 
 // 현재 단계 (1: 이메일인증, 2: 약관동의, 3: 계정정보, 4: 추가정보, 5: 설문조사, 6: 완료)
 const currentStep = ref(1)
@@ -199,7 +202,7 @@ const sendVerificationEmail = async () => {
   
   isLoading.value = true
   try {
-    const response = await fetch('/api/OTD/email/send-verification', {
+    const response = await fetch(`${basePath}/api/OTD/email/send-verification`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: email.value })
@@ -225,7 +228,7 @@ const verifyEmailCode = async () => {
   
   isLoading.value = true
   try {
-    const response = await fetch('/api/OTD/email/verify-code', {
+    const response = await fetch(`${basePath}/api/OTD/email/verify-code`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 

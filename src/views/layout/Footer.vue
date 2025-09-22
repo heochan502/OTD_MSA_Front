@@ -110,7 +110,7 @@ const isActive = computed(() => route.path === "/");
       >
     </div>
     <div>
-      <img class="image" src="/otd/image/main/fixed-bottom.png" />
+      <img class="image" src="/image/main/fixed-bottom.png" />
     </div>
   </nav>
 </template>
