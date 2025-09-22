@@ -1,11 +1,12 @@
 import axios from '@/services/httpRequester';
 
-const path = '/user';
+const basePath = import.meta.env.VITE_BASE_URL; 
+const path = '/otd/api/user';
 
 // 인증 관련
-export const join = (data) => axios.post(`${path}/join`, data);
+export const join = (data) => axios.post(`${basePath}${path}/join`, data);
 
-export const login = (data) => axios.post(`${path}/login`, data);
+export const login = (data) => axios.post(`${basePath}${path}/login`, data);
 
 export const logout = () => axios.post(`${path}/logout`);
 
