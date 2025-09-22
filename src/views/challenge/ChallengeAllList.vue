@@ -26,28 +26,6 @@ onMounted(async () => {
 
 <template>
   <div class="wrap">
-    <!-- 일일 미션 -->
-    <div class="daily-mission">
-      <div class="first-title">일일 미션</div>
-      <Swiper
-        :modules="[Autoplay]"
-        :slides-per-view="2"
-        :space-between="15"
-        loop
-        :autoplay="{ delay: 3000, disableOnInteraction: false }"
-      >
-        <SwiperSlide v-for="challenge in state.dailyMission">
-          <ChallengeCard
-            class="challenge-card"
-            :id="challenge.id"
-            :image="challenge.image"
-            :name="challenge.name"
-            :reward="challenge.reward"
-          ></ChallengeCard>
-        </SwiperSlide>
-      </Swiper>
-    </div>
-
     <!-- 주간 챌린지 -->
     <div class="weekly-challenge">
       <div class="first-title">주간 챌린지</div>
@@ -58,7 +36,10 @@ onMounted(async () => {
         loop
         :autoplay="{ delay: 3000, disableOnInteraction: false }"
       >
-        <SwiperSlide v-for="challenge in state.weeklyChallenge" :key="challenge.id">
+        <SwiperSlide
+          v-for="challenge in state.weeklyChallenge"
+          :key="challenge.id"
+        >
           <ChallengeCard
             class="challenge-card"
             :id="challenge.id"
@@ -105,7 +86,10 @@ onMounted(async () => {
           loop
           :autoplay="{ delay: 5000, disableOnInteraction: false }"
         >
-          <SwiperSlide v-for="challenge in state.personalChallenge" :key="challenge.id">
+          <SwiperSlide
+            v-for="challenge in state.personalChallenge"
+            :key="challenge.id"
+          >
             <ChallengeCard
               class="challenge-card"
               :id="challenge.id"
