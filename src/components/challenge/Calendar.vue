@@ -11,7 +11,7 @@ const props = defineProps({
 const emit = defineEmits(['click-date', 'reminder-date']);
 
 const dayOfWeek = ['일', '월', '화', '수', '목', '금', '토'];
- 
+
 const calendarMatrix = ref([]);
 
 const today = new Date();
@@ -118,7 +118,7 @@ const todayColor = (date) => {
   border-radius: 20px;
   border: #dedede solid 1px;
   max-width: 310px;
-  height: 248px;
+  // height: 248px;
   background-color: #fff;
   padding: 20px 20px 17px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
