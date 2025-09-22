@@ -633,7 +633,7 @@ const modalContent = {
               <div class="profile-image">
                 <img 
                   v-if="additionalInfo.pic" 
-                  :src="profileImageUrl(additionalInfo.pic)" 
+                  :src="URL.createObjectURL(additionalInfo.pic)" 
                   alt="Profile" 
                   class="profile-img" 
                 />
