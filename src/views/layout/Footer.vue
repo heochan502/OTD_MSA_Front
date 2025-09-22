@@ -15,8 +15,8 @@ const isActive = computed(() => route.path === "/");
           class="d-flex"
           :src="
             isActive
-              ? '/otd/image/navigator_img/home-s.png'
-              : '/otd/image/navigator_img/home.png'
+              ? '/image/navigator_img/home-s.png'
+              : '/image/navigator_img/home.png'
           "
           alt="홈화면"
         />
@@ -32,8 +32,8 @@ const isActive = computed(() => route.path === "/");
         <img
           :src="
             route.path.startsWith('/exercise/main')
-              ? '/otd/image/navigator_img/exercise-s.png'
-              : '/otd/image/navigator_img/exercise.png'
+              ? '/image/navigator_img/exercise-s.png'
+              : '/image/navigator_img/exercise.png'
           "
           alt="운동"
         />
@@ -49,8 +49,8 @@ const isActive = computed(() => route.path === "/");
         <img
           :src="
             route.path.startsWith('/meal')
-              ? '/otd/image/navigator_img/food-s.png'
-              : '/otd/image/navigator_img/food.png'
+              ? '/image/navigator_img/food-s.png'
+              : '/image/navigator_img/food.png'
           "
           alt="식단"
         />
@@ -66,8 +66,8 @@ const isActive = computed(() => route.path === "/");
         <img
           :src="
             route.path.startsWith('/challenge')
-              ? '/otd/image/navigator_img/chellenge-s.png'
-              : '/otd/image/navigator_img/chellenge.png'
+              ? '/image/navigator_img/chellenge-s.png'
+              : '/image/navigator_img/chellenge.png'
           "
           alt="챌린지"
         />
@@ -83,8 +83,8 @@ const isActive = computed(() => route.path === "/");
         <img
           :src="
             route.path.startsWith('/community')
-              ? '/otd/image/navigator_img/community-s.png'
-              : '/otd/image/navigator_img/community.png'
+              ? '/image/navigator_img/community-s.png'
+              : '/image/navigator_img/community.png'
           "
           alt="커뮤니티"
         />
@@ -101,8 +101,8 @@ const isActive = computed(() => route.path === "/");
         <img
           :src="
             route.path.startsWith('/test')
-              ? '/otd/image/navigator_img/user-s.png'
-              : '/otd/image/navigator_img/user.png'
+              ? '/image/navigator_img/user-s.png'
+              : '/image/navigator_img/user.png'
           "
           alt="내정보"
         />
@@ -110,7 +110,7 @@ const isActive = computed(() => route.path === "/");
       >
     </div>
     <div>
-      <img class="image" src="/otd/image/main/fixed-bottom.png" />
+      <img class="image" src="/image/main/fixed-bottom.png" />
     </div>
   </nav>
 </template>
