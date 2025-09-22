@@ -99,8 +99,6 @@ const labels = weeklyLogs.value.map((item) =>
 // Chart.js 데이터셋
 const chartData = computed(
   () => (
-    console.log('min 데이터:', minValue.value),
-    console.log('max 데이터:', maxValue.value),
     {
       labels: labels,
       datasets: [
@@ -133,22 +131,10 @@ const chartData = computed(
   )
 );
 
-// y축 최대 최소 값 설정
-const minValue = computed(() => {
-  const nums = (weeklyData.value ?? []).filter(
-    (v) => v != null && !Number.isNaN(v)
-  );
-  return nums.length ? Math.min(...nums) : 0;
-});
-const maxValue = computed(() => {
-  const nums = (weeklyData.value ?? []).filter(
-    (v) => v != null && !Number.isNaN(v)
-  );
-  return nums.length ? Math.max(...nums) : 10;
-});
 
 // Chart.js 옵션
 const chartOptions = {
+ 
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
@@ -157,30 +143,25 @@ const chartOptions = {
     },
     // 툴팁
     tooltip: {
-      callbacks: {
-        label: (context) => {
-          const field = props.fields.find((f) => f.key === props.selectedField);
-          const unit = field?.unit || '';
-          if (context.parsed.y === 0) {
-            return '기록없음';
-          }
-          return `${context.parsed.y} ${unit}`;
+        // 아래 tooltip.enabled=false 와 충돌나지 않도록 여기서만 설정하거나, 아래 것을 제거하세요.
+        enabled: true,
+        callbacks: {
+          label: (context) => {
+            const field = props.fields.find((f) => f.key === props.selectedField);
+            const unit = field?.unit || "";
+            if (context.parsed.y === 0) return "기록없음";
+            return `${context.parsed.y} ${unit}`;
+          },
         },
       },
-    },
     datalabels: {
-      display: true,
-      align: 'top',
-      anchor: 'end',
-      color: '#f1c40f', // 글씨 색상
-      font: {
-        size: 10,
+        display: true,
+        align: "top",
+        anchor: "end",
+        color: "#f1c40f",
+        font: { size: 10 },
+        formatter: (value) => (value === 0 ? "" : value),
       },
-      formatter: (value) => {
-        if (value === 0) return '';
-        return value;
-      },
-    },
   },
   legend: {
     display: false,
@@ -201,8 +182,9 @@ const chartOptions = {
     y: {
       display: false,
       grid: { display: false },
-      min: minValue.value - minValue.value * 0.1, // 최소값보다 약간 작게 설정, null일 때 0
-      max: maxValue.value + maxValue.value * 0.1, // 최대값보다 약간 크게 설정, null일 때 10
+      grace: '20%',  // 위·아래 20% 여유
+      // min: minValue.value - minValue.value * 0.1, // 최소값보다 약간 작게 설정, null일 때 0
+      // max: maxValue.value + maxValue.value * 0.41, // 최대값보다 약간 크게 설정, null일 때 10
     },
   },
 };
@@ -219,7 +201,7 @@ watch(
 </script>
 
 <template>
-  <v-card class="chart">
+  <v-card class="chart otd-border otd-shadow otd-box-style">
     <Line
       ref="chartRef"
       :data="chartData"

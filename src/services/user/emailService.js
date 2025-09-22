@@ -1,6 +1,7 @@
 import axios from '@/services/httpRequester';
 
-const path = '/email';
+
+const path = `${import.meta.env.VITE_BASE_URL}/email`;
 
 // 이메일 인증관련
 export const sendEmailVerification = (data) =>
