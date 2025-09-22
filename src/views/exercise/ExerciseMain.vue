@@ -1,40 +1,45 @@
 <script setup>
-import { ref } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
 import ExerciseRecordList from "@/components/exercise/ExerciseRecordList.vue";
 import BodyCompositionSummary from "@/components/exercise/BodyCompositionSummary.vue";
 import WeeklyCalendar from "@/components/exercise/WeeklyCalendar.vue";
+import { getExerciseRecordList } from "@/services/exercise/exerciseService";
+
 import btnAdd from "/image/exercise/btn_add_grey.png";
 
 const exerciseRecordStore = useExerciseRecordStore();
 const selectedDate = ref(new Date());
 
 const onDateClick = async (date) => {
+  exerciseRecordStore.clearDailyRecords();
   selectedDate.value = date;
   // date 는 JS Date 객체 (컴포넌트에서 toDate()로 emit)
   // console.log(date);
+
   const params = reactive({
     page: 1,
-    row_per_page: 2,
-    type: daily,
-    date: date.toISOString().slice(0, 10), // YYYY-MM-DD 형태
+    row_per_page: 3,
+    type: "daily",
+    date: date, // YYYY-MM-DD 형태
     memberId: 1,
   });
+
   const res = await getExerciseRecordList(params);
-  exerciseRecordStore.today = res.data;
+  exerciseRecordStore.records = res.data;
+  console.log(exerciseRecordStore.dailyRecords);
 };
+onMounted(() => {
+  exerciseRecordStore.fetchExercises();
+});
 
 const nowDate = new Date();
-console.log(nowDate);
 </script>
 
 <template>
   <div class="wrap content_wrap">
     <div class="weekly_calendar">
-      <WeeklyCalendar
-        :record-date="exerciseRecordStore.today"
-        @click-date="onDateClick"
-      />
+      <WeeklyCalendar @click-date="onDateClick" />
     </div>
     <div class="exercise_report">
       <div class="subtitle ga-1">

@@ -1,6 +1,6 @@
-import axios from '@/services/httpRequester';
+import axios from "@/services/httpRequester";
 
-const BASE_URL = '/exercise_record';
+const BASE_URL = "/exercise_record";
 
 // 운동 기록하기
 export const saveExerciseRecord = (formData) => {
@@ -24,5 +24,5 @@ export const deleteExerciseRecord = (recordId) => {
 
 // 운동종목가져오기
 export const getExercise = () => {
-  return axios.get('/exercise').catch((e) => e.response);
+  return axios.get("/exercise").catch((e) => e.response);
 };

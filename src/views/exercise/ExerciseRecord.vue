@@ -1,4 +1,5 @@
 <script setup>
+import { reactive } from "vue";
 import ExerciseRecordList from "@/components/exercise/ExerciseRecordList.vue";
 
 const params = reactive({

@@ -8,7 +8,7 @@ export const useExerciseRecordStore = defineStore("exerciseRecord", {
   state: () => ({
     exerciseList: [],
     loaded: false,
-    today: [], // 오늘 기록
+    dailyRecords: [], // 오늘 기록
     yesterday: [], // 어제 기록
     recordList: [], // 페이징처리한 리스트
     records: [],
@@ -46,11 +46,12 @@ export const useExerciseRecordStore = defineStore("exerciseRecord", {
       this.addToday(todayRecords);
       this.addYesterDay(yesterdayRecords);
     },
-    clearRecordList() {
-      this.recordList = [];
+
+    addDailyRecords(list) {
+      this.dailyRecords = [...list];
     },
-    addToday(list) {
-      this.today = [...list];
+    clearDailyRecords() {
+      this.dailyRecords = [];
     },
 
     addYesterDay(list) {

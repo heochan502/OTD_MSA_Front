@@ -18,7 +18,6 @@ const props = defineProps({
   },
 });
 
-
 // @click
 const goDetail = (exerciseRecordId) => {
   router.push(`/exercise/record/${exerciseRecordId}`);
@@ -34,7 +33,13 @@ const goDetail = (exerciseRecordId) => {
   <div>
     <ul class="d-flex flex-column ga-2 p-0">
       <li
-        v-for="item in exerciseRecordStore.today"
+        v-if="exerciseRecordStore.records.length < 1"
+        class="list_item otd-box-style"
+      >
+        오늘도 운동에 도전하세요!
+      </li>
+      <li
+        v-for="item in exerciseRecordStore.records"
         :key="item.exerciseRecordId"
         class="list_item otd-box-style"
       >
@@ -45,11 +50,10 @@ const goDetail = (exerciseRecordId) => {
                 ?.exerciseName
             }}
           </span>
-          <span v-if="item.distance === null">{{
-            calcDuration(item.startAt, item.endAt)
-          }}</span>
-
-          <span>{{ item.distance }}km</span>
+          <span v-if="item.distance === null"
+            >{{ calcDuration(item.startAt, item.endAt) }}분</span
+          >
+          <span v-else>{{ item.distance }}km</span>
         </div>
         <div class="d-flex align-center ga-2">
           <span class="otd-body-3">{{ formatTimeKR(item.startAt) }}</span>
