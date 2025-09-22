@@ -4,7 +4,7 @@ import { reactive, onMounted, ref } from 'vue';
 import {
   getMapChallenge,
   postChallenge,
-} from '@/services/challenge/ChallengeService';
+} from '@/services/challenge/challengeService';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Autoplay } from 'swiper/modules';
 import 'swiper/css/autoplay';

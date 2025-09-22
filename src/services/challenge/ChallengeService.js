@@ -1,6 +1,6 @@
-import axios from "@/services/httpRequester";
+import axios from '@/services/httpRequester';
 
-const BASE_URL = "challenge";
+const BASE_URL = 'challenge';
 
 export const getAll = () => {
   return axios.get(`${BASE_URL}/list`).catch((e) => e.response);

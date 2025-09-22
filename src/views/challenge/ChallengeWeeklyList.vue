@@ -4,7 +4,7 @@ import { reactive, onMounted, ref } from 'vue';
 import {
   getChallenge,
   postChallenge,
-} from '@/services/challenge/ChallengeService';
+} from '@/services/challenge/challengeService';
 
 const dialog = ref(false);
 const successDialog = ref(false);

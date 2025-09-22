@@ -1,10 +1,10 @@
 <script setup>
-import RankingCard from "@/components/challenge/RankingCard.vue";
-import { reactive, onMounted, ref } from "vue";
-import Progress from "@/components/challenge/Progress.vue";
-import { getRank, putSuccess } from "@/services/challenge/ChallengeService";
-import { useChallengeStore } from "../../stores/challenge/challengeStore";
-import { useHeaderStore } from "@/stores/challenge/headerStore";
+import RankingCard from '@/components/challenge/RankingCard.vue';
+import { reactive, onMounted, ref } from 'vue';
+import Progress from '@/components/challenge/Progress.vue';
+import { getRank, putSuccess } from '@/services/challenge/challengeService';
+import { useChallengeStore } from '../../stores/challenge/challengeStore';
+import { useHeaderStore } from '@/stores/challenge/headerStore';
 const props = defineProps({
   id: Number,
   name: String,
@@ -18,16 +18,25 @@ const state = reactive({
   progress: {},
   aroundRanking: [],
   topRanking: [],
-  activeTab: "around",
+  activeTab: 'around',
 });
 const aroundRankingList = () => {
-  state.activeTab = "around";
+  state.activeTab = 'around';
 };
 const topRankingList = () => {
-  state.activeTab = "top";
+  state.activeTab = 'top';
 };
-const ment = ref("null");
-const recordGap = ref("");
+const ment = ref('null');
+const recordGap = ref('');
+
+const unitMent = () => {
+  switch (state.progress.unit) {
+    case 'km':
+      return ' 달렸어요!';
+    case ('분', '개'):
+      return ' 했어요!';
+  }
+};
 
 const gap = () => {
   const myRank = state.progress.myRank;
@@ -44,13 +53,20 @@ const gap = () => {
     ? Number(state.aroundRanking[myIdx + 1].totalRecord)
     : null;
 
+  const formatGap = (value) => {
+    if (state.progress.unit === 'km') {
+      return value.toFixed(1);
+    } else {
+      return Math.round(value);
+    }
+  };
   if (myRank === 1 && afterMe !== null) {
     // 1등일 때 → 아래사람과 비교
-    recordGap.value = (myTotalRecord - afterMe).toFixed(1);
+    recordGap.value = formatGap(myTotalRecord - afterMe);
     ment.value = `2위와 ${recordGap.value}${state.progress.unit} 차이!`;
   } else if (beforeMe !== null) {
     // 위사람과 비교
-    recordGap.value = (beforeMe - myTotalRecord).toFixed(1);
+    recordGap.value = formatGap(beforeMe - myTotalRecord);
     ment.value = `${recordGap.value}${state.progress.unit}만 더 하면 ${
       myRank - 1
     }위!`;
@@ -65,13 +81,12 @@ onMounted(async () => {
   state.progress = res.data;
   state.aroundRanking = res.data.aroundRanking;
   state.topRanking = res.data.topRanking;
-  console.log("per res.data", res.data);
+  console.log('per res.data', res.data);
   headerStore.setDetailName(res.data.name);
   gap();
-
   if (state.progress.percent >= 100 && res.data.success == false) {
     await putSuccess(res.data.cpId);
-    console.log("목표 성공");
+    console.log('목표 성공');
   }
 });
 </script>
@@ -83,13 +98,11 @@ onMounted(async () => {
       <div class="otd-category">
         {{
           state.progress.totalRecord == 0
-            ? "아직 기록이 없어요ㅠㅠ"
-            : "현재 " + state.progress.formattedTotalRecord + " 달렸어요!"
+            ? '아직 기록이 없어요ㅠㅠ'
+            : '현재 ' + state.progress.formattedTotalRecord + unitMent()
         }}
       </div>
-      <div class="otd-body-3">
-        목표 {{ state.progress.goal + state.progress.unit }}
-      </div>
+      <div class="otd-body-3">목표 {{ state.progress.formattedGoal }}</div>
     </div>
     <Progress
       class="otd-top-margin"
