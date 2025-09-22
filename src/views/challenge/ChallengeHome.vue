@@ -66,7 +66,7 @@ onMounted(async () => {
   state.missionComplete = res.data.missionComplete;
   state.success = res.data.success;
   challengeStore.state.progressChallenge = res.data;
-  totalXp.value = res.data.user.level;
+  totalXp.value = res.data.user.xp;
   console.log('res', res.data);
   setMissionState();
 });

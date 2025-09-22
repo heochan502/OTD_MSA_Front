@@ -2,16 +2,14 @@
 import { ref, onMounted, watch } from 'vue';
 
 const props = defineProps({
-  reminderDate: {
+  recordDate: {
     type: Array,
     default: () => [],
   },
-  usePage: { type: String, default: 'home' },
 });
-const emit = defineEmits(['click-date', 'reminder-date']);
 
 const dayOfWeek = ['일', '월', '화', '수', '목', '금', '토'];
- 
+
 const calendarMatrix = ref([]);
 
 const today = new Date();
@@ -22,6 +20,15 @@ const month = today.getMonth() + 1;
 
 const lastDate = new Date(year, month, 0).getDate();
 const startIdx = new Date(year, month - 1, 1).getDay();
+
+// props 데이터가 바뀔 때마다 캘린더 다시 그림
+watch(
+  () => props.recordDate,
+  (data) => {
+    if (!data || data.length === 0) return;
+    makeCalendar();
+  }
+);
 
 // 캘린더 그리기 로직
 const makeCalendar = () => {
@@ -34,6 +41,8 @@ const makeCalendar = () => {
   const prevMonthDate = new Date(year, month + 1, 0).getDate();
   console.log('prev', prevMonthDate);
 
+  console.log('record-date', props.recordDate);
+
   for (let i = 0; i < 6; i++) {
     const row = [];
     for (let k = 0; k < 7; k++) {
@@ -41,7 +50,8 @@ const makeCalendar = () => {
         const prevDate = prevMonthDate - startIdx + k + 1;
         row.push({ date: prevDate, type: 'other' });
       } else if (date <= lastDate) {
-        row.push({ date });
+        const hasRecord = props.recordDate.includes(date);
+        row.push({ date, hasRecord });
         date++;
       } else {
         row.push({ date: nextDate, type: 'other' });
@@ -60,15 +70,6 @@ const makeCalendar = () => {
 onMounted(() => {
   makeCalendar();
 });
-// console.log('calendar', calendarMatrix);
-
-// watch(
-//   () => props.reminderDate,
-//   () => {
-//     makeCalendar();
-//   },
-//   { immediate: true, deep: true }
-// );
 
 // 오늘 날짜 색 표시
 const todayColor = (date) => {
@@ -100,8 +101,7 @@ const todayColor = (date) => {
         class="day-cell"
         :class="{
           'today-color': todayColor(dayOfMonth.date),
-          'reminder-color': dayOfMonth.hasReminder,
-          empty: !dayOfMonth.date,
+          'record-color': dayOfMonth.hasRecord,
           'sunday-color': index % 7 === 0 && dayOfMonth.type !== 'other',
           'other-color': dayOfMonth.type === 'other',
         }"
@@ -118,7 +118,6 @@ const todayColor = (date) => {
   border-radius: 20px;
   border: #dedede solid 1px;
   max-width: 310px;
-  height: 248px;
   background-color: #fff;
   padding: 20px 20px 17px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -153,25 +152,19 @@ const todayColor = (date) => {
     font-weight: bold;
     font-size: 15px;
     border-radius: 50%;
-    cursor: pointer;
-    // margin: 8px;
-
-    &.reminder-color {
-      background-color: #bfeaff;
-    }
-    &.today-color {
-      color: steelblue;
-    }
-    &.sunday-color {
-      color: tomato;
-    }
-    &.empty {
-      background: none;
-      cursor: default;
-    }
-    &.other-color {
-      color: #989898;
-    }
+    margin: 2px 4px;
+  }
+  .record-color {
+    border: 2px solid #00D5DF;
+  }
+  .today-color {
+    color: steelblue;
+  }
+  .sunday-color {
+    color: tomato;
+  }
+  .other-color {
+    color: #989898;
   }
 }
 </style>
