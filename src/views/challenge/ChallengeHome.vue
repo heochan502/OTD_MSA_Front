@@ -1,10 +1,13 @@
 <script setup>
-import { onMounted, reactive } from 'vue';
+import { onMounted, reactive, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import {
+  getSelectedAll,
+  postMissionRecord,
+} from '@/services/challenge/challengeService';
 import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 import { useChallengeStore } from '@/stores/challenge/challengeStore';
 import Progress from '@/components/challenge/Progress.vue';
-import { getSelectedAll } from '@/services/challenge/challengeService';
 
 const challengeStore = useChallengeStore();
 
@@ -18,6 +21,9 @@ const state = reactive({
   competitionChallenge: [],
   personalChallenge: [],
   dailyMission: [],
+  user: {},
+  missionComplete: [],
+  success: 0,
 });
 
 const toChallengeList = () => {
@@ -51,70 +57,121 @@ const detail = (id, type) => {
 };
 
 onMounted(async () => {
-  console.log('date', year, month);
   const res = await getSelectedAll(1, year, month);
   state.weeklyChallenge = res.data.weeklyChallenge;
   state.competitionChallenge = res.data.competitionChallenge;
   state.personalChallenge = res.data.personalChallenge;
   state.dailyMission = res.data.dailyMission;
+  state.user = res.data.user;
+  state.missionComplete = res.data.missionComplete;
+  state.success = res.data.success;
   challengeStore.state.progressChallenge = res.data;
-  console.log('data', res.data);
+  totalXp.value = res.data.user.level;
+  console.log('res', res.data);
+  setMissionState();
 });
+
+const totalXp = ref(0);
+const totalLevel = computed(() => Math.trunc(totalXp.value / 100));
+const leftXp = computed(() => totalXp.value % 100);
+const leftLevel = computed(
+  () => setTargetLevel(totalLevel.value) - totalLevel.value
+);
+
+// const setTargetLevel = (level) => {
+//   if (level < 5) {
+//     return 5;
+//   } else if (level < 10) {
+//     return 10;
+//   } else if (level < 15) {
+//     return 15;
+//   }
+//   return 20;
+// };
+const setTargetLevel = (level) => Math.ceil((level + 1) / 5) * 5;
+
+const missionDone = ref([]);
+
+const setMissionState = () => {
+  const completedIds = state.missionComplete.map((m) => `${m.cdId}`);
+  missionDone.value = state.dailyMission.map((mission) => ({
+    ...mission,
+    done: completedIds.includes(mission.cdId),
+  }));
+  console.log('ids', completedIds);
+  console.log('missionDone', missionDone);
+};
+
+// 로그인 제대로 되면 수정(userId 안보냄)
+const completeMission = async (userId, mission) => {
+  if (mission.done) {
+    return;
+  } else {
+    mission.done = true;
+    await postMissionRecord(userId, mission.cdId);
+  }
+};
+
+const FILE_URL = import.meta.env.VITE_BASE_URL;
+const BASE_URL = import.meta.env.BASE_URL;
 </script>
 
 <template>
   <div class="wrap">
     <!-- 내정보 -->
     <div>
-      <div>내 정보</div>
+      <div class="first-title">내 정보</div>
       <div>
         <div>티어 이미지</div>
         <div>
-          <span>6레벨 Silver</span>
-          <span>승급까지 2레벨 남았어요!</span>
+          <span>{{ totalLevel }}레벨</span><span>silver</span>
+          <span>승급까지 {{ leftLevel }}레벨 남았어요!</span>
         </div>
-        <Progress></Progress>
+        <Progress :indata-progress="leftXp" bar-type="xp"></Progress>
       </div>
       <div>
         <div>
           <img src="" alt="" />
           <span>보유한 포인트</span>
-          <span>5,000P</span>
+          <span>{{ Number(state.user?.point).toLocaleString() }}P</span>
         </div>
         <div>
           <img src="" alt="" />
           <span>성공한 챌린지</span>
-          <span>5개</span>
+          <span>{{ state.success }}개</span>
         </div>
       </div>
     </div>
-    <div>
-      <div>일일 미션</div>
-      <div>
-        <div>
-          <img src="" alt="" />
-          <span>아침에 일어나서 물 한 잔</span>
-          <span>5P</span>
-          <input type="checkbox" />
-        </div>
-        <div>
-          <img src="" alt="" />
-          <span>가벼운 스트레칭 5분</span>
-          <span>5P</span>
-          <input type="checkbox" />
-        </div>
-        <div>
-          <img src="" alt="" />
-          <span>명상 1분</span>
-          <span>5P</span>
-          <input type="checkbox" />
+    <div class="daily">
+      <div class="title">일일 미션</div>
+      <div class="mission-box">
+        <div
+          v-for="mission in missionDone"
+          @click="completeMission(state.user.userId, mission)"
+          class="mission-card otd-list-box-style"
+          :class="{ 'mission-done': mission.done }"
+        >
+          <img
+            :src="`${FILE_URL}${mission.cdImage}`"
+            :alt="`${mission.cdName}`"
+            class="mission-image"
+          />
+          <span>{{ mission.cdName }}</span
+          ><span>{{ mission.cdReward }}P</span>
+          <img
+            :src="`${BASE_URL}image/challenge/challenge_mission_${
+              mission.done ? 'checked' : 'box'
+            }.png`"
+            alt="checkbox"
+            class="img"
+          />
         </div>
       </div>
     </div>
     <!-- 월간 챌린지 -->
     <div>
       <div class="monthly">
-        <div class="first-title">진행중인 월간 챌린지</div>
+        <div class="title">진행중인 월간 챌린지</div>
         <div class="route-list" @click="toChallengeList">
           > 미션 / 챌린지 목록 보기
         </div>
@@ -210,6 +267,33 @@ onMounted(async () => {
 </template>
 
 <style lang="scss" scoped>
+.daily {
+  .mission-box {
+    width: 351px;
+    height: 170px;
+    .mission-card {
+      margin-bottom: 10px;
+      width: 311px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      gap: 15px;
+      cursor: pointer;
+      .mission-image {
+        width: 25px;
+      }
+      .img {
+        width: 25px;
+      }
+    }
+    .mission-done {
+      pointer-events: none;
+      cursor: default;
+      opacity: 0.5;
+    }
+  }
+}
 .monthly {
   display: flex;
   justify-content: space-between;

@@ -21,9 +21,11 @@ const state = reactive({
   activeTab: 'around',
 });
 const aroundRankingList = () => {
+  console.log('around');
   state.activeTab = 'around';
 };
 const topRankingList = () => {
+  console.log('top');
   state.activeTab = 'top';
 };
 const ment = ref('null');
