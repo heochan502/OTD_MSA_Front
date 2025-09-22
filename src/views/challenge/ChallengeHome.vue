@@ -68,6 +68,7 @@ onMounted(async () => {
   challengeStore.state.progressChallenge = res.data;
   totalXp.value = res.data.user.level;
   console.log('res', res.data);
+  setMissionState();
 });
 
 const totalXp = ref(0);
@@ -89,18 +90,30 @@ const leftLevel = computed(
 // };
 const setTargetLevel = (level) => Math.ceil((level + 1) / 5) * 5;
 
-// const setMissionState = () => {
-//   const missionDone = state.dailyMission.forEach(() => {
-//     if(state.dailyMission.includes(state.missionComplete.cdId))
-//   });
-// }
-// const missionDone = ref(false);
+const missionDone = ref([]);
 
-// const completeMission = async (userId, cdId) => {
-//   console.log('mission', userId, cdId);
+const setMissionState = () => {
+  const completedIds = state.missionComplete.map((m) => `${m.cdId}`);
+  missionDone.value = state.dailyMission.map((mission) => ({
+    ...mission,
+    done: completedIds.includes(mission.cdId),
+  }));
+  console.log('ids', completedIds);
+  console.log('missionDone', missionDone);
+};
 
-//   const res = await postMissionRecord(userId, cdId);
-// };
+// 로그인 제대로 되면 수정(userId 안보냄)
+const completeMission = async (userId, mission) => {
+  if (mission.done) {
+    return;
+  } else {
+    mission.done = true;
+    await postMissionRecord(userId, mission.cdId);
+  }
+};
+
+const FILE_URL = import.meta.env.VITE_BASE_URL;
+const BASE_URL = import.meta.env.BASE_URL;
 </script>
 
 <template>
@@ -133,17 +146,25 @@ const setTargetLevel = (level) => Math.ceil((level + 1) / 5) * 5;
       <div class="title">일일 미션</div>
       <div class="mission-box">
         <div
-          v-for="mission in state.dailyMission"
-          @click="completeMission(state.user.userId, mission.cdId)"
+          v-for="mission in missionDone"
+          @click="completeMission(state.user.userId, mission)"
           class="mission-card otd-list-box-style"
+          :class="{ 'mission-done': mission.done }"
         >
           <img
-            :src="`${mission.cdImage}`"
+            :src="`${FILE_URL}${mission.cdImage}`"
             :alt="`${mission.cdName}`"
             class="mission-image"
           />
           <span>{{ mission.cdName }}</span
           ><span>{{ mission.cdReward }}P</span>
+          <img
+            :src="`${BASE_URL}image/challenge/challenge_mission_${
+              mission.done ? 'checked' : 'box'
+            }.png`"
+            alt="checkbox"
+            class="img"
+          />
         </div>
       </div>
     </div>
@@ -258,9 +279,18 @@ const setTargetLevel = (level) => Math.ceil((level + 1) / 5) * 5;
       align-items: center;
       justify-content: space-around;
       gap: 15px;
+      cursor: pointer;
       .mission-image {
         width: 25px;
       }
+      .img {
+        width: 25px;
+      }
+    }
+    .mission-done {
+      pointer-events: none;
+      cursor: default;
+      opacity: 0.5;
     }
   }
 }

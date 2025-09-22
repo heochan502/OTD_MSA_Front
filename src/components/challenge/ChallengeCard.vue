@@ -10,11 +10,12 @@ const props = defineProps({
 });
 const router = useRouter();
 const route = useRoute();
+const FILE_URL = import.meta.env.VITE_BASE_URL;
 </script>
 
 <template>
   <div class="challenge-card">
-    <img :src="`${props.image}`" :alt="`${props.name}`" class="challenge-img" />
+    <img :src="`${FILE_URL}${props.image}`" :alt="`${props.name}`" class="challenge-img" />
     <div class="point-box">
       <img src="/image/main/point.png" alt="point" class="point" />
       <span class="point-text">{{ `${props.reward}P` }}</span>

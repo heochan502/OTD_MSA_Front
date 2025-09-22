@@ -44,6 +44,6 @@ export const putSuccess = (cpId) => {
 
 export const postMissionRecord = (userId, cdId) => {
   return axios
-    .post(`${baseURL}/record/mission`, { userId, cdId })
+    .post(`${BASE_URL}/record/mission`, { userId, cdId })
     .catch((e) => e.response);
 };
