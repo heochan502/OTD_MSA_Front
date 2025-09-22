@@ -7,6 +7,19 @@ import vueDevTools from 'vite-plugin-vue-devtools';
 
 // https://vite.dev/config/
 export default defineConfig({
+  // server: {
+  //   proxy: {
+  //     '/api': {
+  //       target: 'http://localhost:8080',
+  //       changeOrigin: true,
+  //     },
+  //     //커뮤니티에서 정적 파일도 백엔드로 프록시 하기위한 코드
+  //     '/files': {
+  //       target: 'http://localhost:8080',
+  //       changeOrigin: true,
+  //     },
+  //   },
+  // },
   plugins: [
     vue(),
     // vueDevTools(),
@@ -17,4 +30,6 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  base:'/otd/', // GitHub Pages 배포 시 경로 설정
 });
+  

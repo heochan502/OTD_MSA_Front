@@ -11,7 +11,7 @@ const props = defineProps({
 const emit = defineEmits(['click-date', 'reminder-date']);
 
 const dayOfWeek = ['일', '월', '화', '수', '목', '금', '토'];
-
+ 
 const calendarMatrix = ref([]);
 
 const today = new Date();
@@ -117,11 +117,10 @@ const todayColor = (date) => {
   margin: 0 auto;
   border-radius: 20px;
   border: #dedede solid 1px;
-  margin-top: 70px;
   max-width: 310px;
-  height: auto;
+  height: 248px;
   background-color: #fff;
-  padding: 20px 23px 17px;
+  padding: 20px 20px 17px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   .calendar-title {
     display: flex;
@@ -147,7 +146,7 @@ const todayColor = (date) => {
   }
 
   .day-cell {
-    aspect-ratio: 1 / 1;
+    height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -155,7 +154,7 @@ const todayColor = (date) => {
     font-size: 15px;
     border-radius: 50%;
     cursor: pointer;
-    margin: 8px;
+    // margin: 8px;
 
     &.reminder-color {
       background-color: #bfeaff;

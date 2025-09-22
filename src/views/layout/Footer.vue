@@ -1,10 +1,10 @@
 <script setup>
-import { useRouter, useRoute } from 'vue-router';
-import { computed } from 'vue';
-import test from '@/components/test.vue';
+import { useRouter, useRoute } from "vue-router";
+import { computed } from "vue";
+
 
 const route = useRoute();
-const isActive = computed(() => route.path === '/');
+const isActive = computed(() => route.path === "/");
 </script>
 
 <template>
@@ -15,8 +15,8 @@ const isActive = computed(() => route.path === '/');
           class="d-flex"
           :src="
             isActive
-              ? '/image/navigator_img/home-s.png'
-              : '/image/navigator_img/home.png'
+              ? '/otd/image/navigator_img/home-s.png'
+              : '/otd/image/navigator_img/home.png'
           "
           alt="홈화면"
         />
@@ -25,15 +25,15 @@ const isActive = computed(() => route.path === '/');
     </div>
     <div class="nav_container">
       <router-link
-        to="/test"
+        to="/exercise/main"
         class="nav-menu"
-        :class="{ active: route.path.startsWith('/test') }"
+        :class="{ active: route.path.startsWith('/exercise/main') }"
       >
         <img
           :src="
-            route.path.startsWith('/test')
-              ? '/image/navigator_img/exercise-s.png'
-              : '/image/navigator_img/exercise.png'
+            route.path.startsWith('/exercise/main')
+              ? '/otd/image/navigator_img/exercise-s.png'
+              : '/otd/image/navigator_img/exercise.png'
           "
           alt="운동"
         />
@@ -49,8 +49,8 @@ const isActive = computed(() => route.path === '/');
         <img
           :src="
             route.path.startsWith('/meal')
-              ? '/image/navigator_img/food-s.png'
-              : '/image/navigator_img/food.png'
+              ? '/otd/image/navigator_img/food-s.png'
+              : '/otd/image/navigator_img/food.png'
           "
           alt="식단"
         />
@@ -66,8 +66,8 @@ const isActive = computed(() => route.path === '/');
         <img
           :src="
             route.path.startsWith('/challenge')
-              ? '/image/navigator_img/chellenge-s.png'
-              : '/image/navigator_img/chellenge.png'
+              ? '/otd/image/navigator_img/chellenge-s.png'
+              : '/otd/image/navigator_img/chellenge.png'
           "
           alt="챌린지"
         />
@@ -83,8 +83,8 @@ const isActive = computed(() => route.path === '/');
         <img
           :src="
             route.path.startsWith('/community')
-              ? '/image/navigator_img/community-s.png'
-              : '/image/navigator_img/community.png'
+              ? '/otd/image/navigator_img/community-s.png'
+              : '/otd/image/navigator_img/community.png'
           "
           alt="커뮤니티"
         />
@@ -94,15 +94,15 @@ const isActive = computed(() => route.path === '/');
 
     <div class="nav_container">
       <router-link
-        to="/test"
+        to="/user/profile"
         class="nav-menu"
-        :class="{ active: route.path.startsWith('/test') }"
+        :class="{ active: route.path.startsWith('/user/profile') }"
       >
         <img
           :src="
             route.path.startsWith('/test')
-              ? '/image/navigator_img/user-s.png'
-              : '/image/navigator_img/user.png'
+              ? '/otd/image/navigator_img/user-s.png'
+              : '/otd/image/navigator_img/user.png'
           "
           alt="내정보"
         />
@@ -110,7 +110,7 @@ const isActive = computed(() => route.path === '/');
       >
     </div>
     <div>
-      <img class="image" src="/image/main/fixed-bottom.png" />
+      <img class="image" src="/otd/image/main/fixed-bottom.png" />
     </div>
   </nav>
 </template>

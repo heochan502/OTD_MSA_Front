@@ -9,18 +9,23 @@ import Community from '@/views/community/CommunityView.vue';
 import CategoryFeedView from '@/views/community/categories/CategoryFeedView.vue';
 import PostDetailView from '@/views/community/PostDetailView.vue';
 // 챌린지
+
 import ChallengeHome from '@/views/challenge/ChallengeHome.vue';
 import ChallengeAllList from '@/views/challenge/ChallengeAllList.vue';
 import ChallengeWeeklyList from '@/views/challenge/ChallengeWeeklyList.vue';
 import ChallengeCompetitionList from '@/views/challenge/ChallengeMonthlyList.vue';
+import ChallengePer from '@/views/challenge/ChallengePer.vue';
+import ChallengeDay from '@/views/challenge/ChallengeDay.vue';
 
-import CommunityCategory from '@/components/community/CommunityCategory.vue';
-
-
-import Login from '@/views/user/Login.vue'
-import Join from '@/views/user/Join.vue'
-import PassCallback from '@/views/auth/PassCallback.vue' 
-import Oauth2 from '@/views/auth/OAuth2Handler.vue'
+import Login from '@/views/user/Login.vue';
+import Join from '@/views/user/Join.vue';
+import Profile from "@/views/user/Profile.vue";
+import Signal from "@/views/user/Signal.vue";
+import Inquiry from "@/views/user/Inquiry.vue";
+import Frequently from "@/views/user/Frequently.vue"
+import ModifiProfile from "@/views/user/ModifiProfile.vue"
+import Term from "@/views/user/Term.vue"
+import Oauth2 from '@/views/auth/OAuth2Handler.vue';
 
 import PayApproval from '@/views/pay/PayApproval.vue';
 import PayCancel from '@/views/pay/PayCancel.vue';
@@ -32,6 +37,12 @@ import PointShop from '@/components/pointshop/PointShop.vue';
 
 //식단
 import MealMainView from '@/views/meal/MealMainView.vue';
+
+// 운동
+import ExerciseMain from '@/views/exercise/ExerciseMain.vue';
+import ExerciseRecord from '@/views/exercise/ExerciseRecord.vue';
+import ExerciseRecordForm from '@/views/exercise/ExerciseRecordForm.vue';
+import ExerciseRecordDetail from '@/views/exercise/ExerciseRecordDetail.vue';
 
 import MealDetailView from '@/views/meal/MealDetailView.vue';
 
@@ -80,7 +91,7 @@ const router = createRouter({
     {
       path: '/test',
       name: 'Test',
-      component: () => import('@/components/test.vue'), 
+      component: () => import('@/components/test.vue'),
       meta: { headerType: 'title', title: '테스트', showUserPanel: false },
     },
     {
@@ -94,6 +105,17 @@ const router = createRouter({
       name: 'ChallengeAllList',
       component: ChallengeAllList,
       meta: { headerType: 'title', title: '챌린지 목록', showUserPanel: false },
+    },
+    {
+      path: '/challenge/dailylist',
+      name: 'ChallengedailyList',
+      component: ChallengeWeeklyList,
+      meta: {
+        headerType: 'title',
+        title: '일일 미션 목록',
+
+        showUserPanel: false,
+      },
     },
     {
       path: '/challenge/weeklylist',
@@ -127,16 +149,73 @@ const router = createRouter({
     },
     { path: '/user/login', name: 'login', component: Login },
     {
+      path: '/challenge/detail/per/:id',
+      name: 'ChallengePer',
+      component: ChallengePer,
+      props: (route) => ({
+        id: Number(route.params.id),
+        name: route.params.name,
+      }),
+      meta: {
+        headerType: 'title',
+        title: '',
+        showUserPanel: false,
+      },
+    },
+    {
+      path: '/challenge/detail/day/:id',
+      name: 'ChallengeDay',
+      component: ChallengeDay,
+      props: (route) => ({
+        id: Number(route.params.id),
+        name: route.params.name,
+      }),
+      meta: {
+        headerType: 'title',
+        title: '',
+
+        showUserPanel: false,
+      },
+    },
+
+    { path: "/user/login", 
+      name: "login", 
+      component: Login 
+    },
+    {
       path: '/user/join',
       name: 'join',
       component: Join,
     },
     {
-
-      path: '/auth/pass/callback',
-      name: 'PassCallback',
-      component: PassCallback,
-
+      path: "/user/profile",
+      name: "profile",
+      component: Profile,
+    },
+    {
+      path: "/user/signal",
+      name: "signal",
+      component: Signal,
+    },
+    {
+      path: "/user/inquiry",
+      name: "inquiry",
+      component: Inquiry,
+    },
+    {
+      path: "/user/frequently",
+      name: "frequently",
+      component: Frequently,
+    },
+    {
+      path: "/user/modifiProfile",
+      name: "modifiProfile",
+      component: ModifiProfile,
+    },
+    {
+      path: "/user/term",
+      name: "term",
+      component: Term,
     },
     {
       path: '/fe/redirect',
@@ -174,6 +253,30 @@ const router = createRouter({
       name: 'MealMainView',
       component: MealMainView,
       meta: { headerType: 'title', title: '식단', showUserPanel: false },
+    },
+    {
+      path: '/exercise/main',
+      name: 'ExerciseMain',
+      component: ExerciseMain,
+      meta: { headerType: 'title', title: '운동', showUserPanel: false },
+    },
+    {
+      path: '/exercise/record',
+      name: 'ExerciseRecord',
+      component: ExerciseRecord,
+      meta: { headerType: 'title', title: '이달의 기록', showUserPanel: false },
+    },
+    {
+      path: '/exercise/record_form',
+      name: 'ExerciseRecordForm',
+      component: ExerciseRecordForm,
+      meta: { headerType: 'title', title: '기록 추가', showUserPanel: false },
+    },
+    {
+      path: '/exercise/record/:exerciseRecordId',
+      name: 'ExerciseRecordDeatil',
+      component: ExerciseRecordDetail,
+      meta: { headerType: 'title', title: '운동 기록', showUserPanel: false },
     },
     {
       path: '/meal/detail',
@@ -222,6 +325,7 @@ const router = createRouter({
 //     //로그아웃 상태에서 /user/login, /user/join 경로가 아닌 경우
 //     return { path: '/user/login' };
 //   }
-// });
+// }
+// );
 
 export default router;
