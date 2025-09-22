@@ -19,7 +19,12 @@ import ChallengeDay from '@/views/challenge/ChallengeDay.vue';
 
 import Login from '@/views/user/Login.vue';
 import Join from '@/views/user/Join.vue';
-import PassCallback from '@/views/auth/PassCallback.vue';
+import Profile from "@/views/user/Profile.vue";
+import Signal from "@/views/user/Signal.vue";
+import Inquiry from "@/views/user/Inquiry.vue";
+import Frequently from "@/views/user/Frequently.vue"
+import ModifiProfile from "@/views/user/ModifiProfile.vue"
+import Term from "@/views/user/Term.vue"
 import Oauth2 from '@/views/auth/OAuth2Handler.vue';
 
 import PayApproval from '@/views/pay/PayApproval.vue';
@@ -173,16 +178,44 @@ const router = createRouter({
       },
     },
 
-    { path: '/user/login', name: 'login', component: Login },
+    { path: "/user/login", 
+      name: "login", 
+      component: Login 
+    },
     {
       path: '/user/join',
       name: 'join',
       component: Join,
     },
     {
-      path: '/auth/pass/callback',
-      name: 'PassCallback',
-      component: PassCallback,
+      path: "/user/profile",
+      name: "profile",
+      component: Profile,
+    },
+    {
+      path: "/user/signal",
+      name: "signal",
+      component: Signal,
+    },
+    {
+      path: "/user/inquiry",
+      name: "inquiry",
+      component: Inquiry,
+    },
+    {
+      path: "/user/frequently",
+      name: "frequently",
+      component: Frequently,
+    },
+    {
+      path: "/user/modifiProfile",
+      name: "modifiProfile",
+      component: ModifiProfile,
+    },
+    {
+      path: "/user/term",
+      name: "term",
+      component: Term,
     },
     {
       path: '/fe/redirect',
