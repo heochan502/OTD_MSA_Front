@@ -1,10 +1,10 @@
 <script setup>
 import { onMounted, reactive } from 'vue';
 import { useRouter } from 'vue-router';
-import { getSelectedAll } from '@/services/challenge/ChallengeService';
 import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 import { useChallengeStore } from '@/stores/challenge/challengeStore';
 import Progress from '@/components/challenge/Progress.vue';
+import { getSelectedAll } from '@/services/challenge/challengeService';
 
 const challengeStore = useChallengeStore();
 
@@ -225,6 +225,7 @@ onMounted(async () => {
   font-weight: bold;
 }
 .title {
+  margin-top: 15px;
   margin-bottom: 15px;
   font-size: 20px;
   font-weight: bold;
@@ -240,7 +241,7 @@ onMounted(async () => {
 }
 .empty-card {
   display: flex;
-  margin-bottom: 15px;
+  // margin-bottom: 15px;
   width: 168px;
   height: 121px;
   border-radius: 10px;

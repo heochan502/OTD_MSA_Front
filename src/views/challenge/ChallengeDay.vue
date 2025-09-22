@@ -2,7 +2,7 @@
 import Calendar from '@/components/challenge/Calendar.vue';
 import { onMounted, ref, reactive } from 'vue';
 import { useChallengeStore } from '@/stores/challenge/challengeStore';
-import { getDay } from '@/services/challenge/ChallengeService';
+import { getDay } from '@/services/challenge/challengeService';
 import RewardCard from '@/components/challenge/RewardCard.vue';
 import { useRoute } from 'vue-router';
 import { useHeaderStore } from '@/stores/challenge/headerStore';
