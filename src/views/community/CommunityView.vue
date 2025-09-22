@@ -16,10 +16,10 @@ onMounted(() => {
 });
 
 const categories = [
-  { key: 'free', label: '자유수다', icon: '/image/community/free.png' },
-  { key: 'diet', label: '다이어트', icon: '/image/community/diet.png' },
-  { key: 'work', label: '운동', icon: '/image/community/workout.png' },
-  { key: 'love', label: '연애', icon: '/image/community/love.png' },
+  { key: 'free', label: '자유수다', icon: '/otd/image/community/free.png' },
+  { key: 'diet', label: '다이어트', icon: '/otd/image/community/diet.png' },
+  { key: 'work', label: '운동', icon: '/otd/image/community/workout.png' },
+  { key: 'love', label: '연애', icon: '/otd/image/community/love.png' },
 ];
 
 const searchVal = ref('');
