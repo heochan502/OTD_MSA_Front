@@ -398,6 +398,14 @@ onMounted(() => {
 
           <div class="modal-actions">
             <button
+              type="button"
+              @click="closePasswordModal"
+              class="cancel-btn"
+              :disabled="isChangingPassword"
+            >
+              취소
+            </button>
+            <button
               type="submit"
               class="submit-btn"
               :disabled="!canSubmitPassword || isChangingPassword"
