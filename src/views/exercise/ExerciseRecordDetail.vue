@@ -1,8 +1,7 @@
 <script setup>
-import WeeklyDatePick from '@/components/exercise/WeeklyDatePick.vue';
-import WeeklyChart from '@/components/exercise/WeeklyChart.vue';
-import { template } from 'lodash';
-import { ref } from 'vue';
+import WeeklyCalendar from "@/components/exercise/WeeklyCalendar.vue";
+
+import { ref } from "vue";
 
 const hasDistance = false;
 </script>
@@ -11,23 +10,13 @@ const hasDistance = false;
   <div class="wrap otd-body-1">
     <!-- 상단 주간 달력 -->
     <div class="weekly_calendar">
-      <div class="d-flex align-center ga-2">
-        <!-- 캘린더 아이콘 -->
-        <img
-          src="\public\image\main\calender.png"
-          alt="캘린더 아이콘"
-          class="calendar_icon"
-        />
-        <!-- 현재 년월 -->
-        <span class="otd-subtitle-1">{{ '2025년 9월' }}</span>
-      </div>
-      <WeeklyDatePick />
+      <WeeklyCalendar />
     </div>
     <!-- 운동 기록 -->
     <div class="content_wrap">
       <div class="subtitle">
         <span class="otd-subtitle-1">달리기</span>
-        <img src="\public\image\main\btn_trash.png" class="btn_delete" />
+        <img src="\image\exercise\btn_trash.png" class="btn_delete" />
       </div>
       <div class="content_main otd-top-margin">
         <div class="content_effort otd-box-style">
