@@ -41,3 +41,7 @@ export const getDay = (cdId, req) => {
 export const putSuccess = (cpId) => {
   return axios.put(`${BASE_URL}/success`, { cpId }).catch((e) => e.response);
 };
+
+export const postChallenge = (params) => {
+  return axios.post(`${BASE_URL}/add`, params).catch((e) => e.response);
+};
