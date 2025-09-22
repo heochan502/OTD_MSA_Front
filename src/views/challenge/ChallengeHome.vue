@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 import {
   getSelectedAll,
   postMissionRecord,
-} from '@/services/challenge/ChallengeService';
+} from '@/services/challenge/challengeService';
 import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 import { useChallengeStore } from '@/stores/challenge/challengeStore';
 import Progress from '@/components/challenge/Progress.vue';
@@ -309,6 +309,7 @@ const BASE_URL = import.meta.env.BASE_URL;
   font-weight: bold;
 }
 .title {
+  margin-top: 15px;
   margin-bottom: 15px;
   font-size: 20px;
   font-weight: bold;
@@ -324,7 +325,7 @@ const BASE_URL = import.meta.env.BASE_URL;
 }
 .empty-card {
   display: flex;
-  margin-bottom: 15px;
+  // margin-bottom: 15px;
   width: 168px;
   height: 121px;
   border-radius: 10px;

@@ -60,7 +60,7 @@ const getBorderColor = (rank) => {
         {{ props.rankingDetail.formattedTotalRecord }}
       </div>
       <img
-        src="/public/image/challenge/me.png"
+        src="/image/challenge/me.png"
         alt="myRank"
         v-if="props.isMe"
         class="me-image"

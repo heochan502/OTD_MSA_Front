@@ -47,3 +47,7 @@ export const postMissionRecord = (userId, cdId) => {
     .post(`${BASE_URL}/record/mission`, { userId, cdId })
     .catch((e) => e.response);
 };
+
+export const postChallenge = (params) => {
+  return axios.post(`${BASE_URL}/add`, params).catch((e) => e.response);
+};
