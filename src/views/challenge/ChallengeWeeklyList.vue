@@ -1,12 +1,13 @@
 <script setup>
-import ChallengeCard from "@/components/challenge/ChallengeCard.vue";
-import { reactive, onMounted, ref } from "vue";
+import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
+import { reactive, onMounted, ref } from 'vue';
 import {
   getChallenge,
   postChallenge,
-} from "@/services/challenge/ChallengeService";
+} from '@/services/challenge/ChallengeService';
 
 const dialog = ref(false);
+const successDialog = ref(false);
 const state = reactive({
   challengeList: [],
   selectedChallenge: null,
@@ -22,16 +23,26 @@ const confirmYes = async () => {
     cdId: state.selectedChallenge.id,
     type: state.selectedChallenge.type,
   };
-  await postChallenge(params);
+  const res = await postChallenge(params);
+
+  if (res && res.status === 200) {
+    // 성공하면 저장 완료 모달 열기
+    successDialog.value = true;
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+  } else {
+    alert('저장에 실패했습니다. 다시 시도해주세요.');
+  }
 };
 onMounted(async () => {
   const type = history.state.type;
   const year = history.state.year;
   const month = history.state.month;
 
-  console.log("type", type);
+  console.log('type', type);
   const res = await getChallenge(1, year, month, type);
-  console.log("resdata", res.data);
+  console.log('resdata', res.data);
   state.challengeList = res.data;
 });
 </script>
@@ -69,6 +80,22 @@ onMounted(async () => {
         <v-spacer />
         <v-btn color="dark" text @click="dialog = false">아니오</v-btn>
         <v-btn color="primary" text @click="confirmYes()">네</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <!-- 저장완료시 모달 -->
+  <v-dialog v-model="successDialog" max-width="380" min-height="100">
+    <v-card>
+      <v-card-title class="text-h8">저장 완료</v-card-title>
+      <v-card-text>
+        {{
+          state.selectedChallenge?.name + ' 챌린지가 성공적으로 저장되었습니다!'
+        }}
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <v-btn color="primary" text @click="successDialog = false">확인</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

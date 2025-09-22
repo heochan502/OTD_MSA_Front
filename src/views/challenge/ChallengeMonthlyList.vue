@@ -1,13 +1,13 @@
 <script setup>
-import ChallengeCard from "@/components/challenge/ChallengeCard.vue";
-import { reactive, onMounted, ref } from "vue";
+import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
+import { reactive, onMounted, ref } from 'vue';
 import {
   getMapChallenge,
   postChallenge,
-} from "@/services/challenge/ChallengeService";
-import { Swiper, SwiperSlide } from "swiper/vue";
-import { Autoplay } from "swiper/modules";
-import "swiper/css/autoplay";
+} from '@/services/challenge/ChallengeService';
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import { Autoplay } from 'swiper/modules';
+import 'swiper/css/autoplay';
 
 const dialog = ref(false);
 const successDialog = ref(false);
@@ -32,23 +32,23 @@ const confirmYes = async () => {
   const res = await postChallenge(params);
 
   if (res && res.status === 200) {
-    // ✅ 성공하면 저장 완료 모달 열기
+    // 성공하면 저장 완료 모달 열기
     successDialog.value = true;
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
   } else {
-    alert("저장에 실패했습니다. 다시 시도해주세요.");
+    alert('저장에 실패했습니다. 다시 시도해주세요.');
   }
-  setTimeout(() => {
-    window.location.reload();
-  }, 1000);
 };
 onMounted(async () => {
   const type = history.state.type;
   const year = history.state.year;
   const month = history.state.month;
 
-  console.log("type", type);
+  console.log('type', type);
   const res = await getMapChallenge(1, year, month, type);
-  console.log("monthdata", res.data);
+  console.log('monthdata', res.data);
   state.ChallengeList = res.data;
 });
 </script>
@@ -107,7 +107,7 @@ onMounted(async () => {
       <v-card-title class="text-h8">저장 완료</v-card-title>
       <v-card-text>
         {{
-          state.selectedChallenge?.name + " 챌린지가 성공적으로 저장되었습니다!"
+          state.selectedChallenge?.name + ' 챌린지가 성공적으로 저장되었습니다!'
         }}
       </v-card-text>
       <v-card-actions>
