@@ -1,7 +1,23 @@
 <script setup>
-import { useRouter } from "vue-router";
+import { onMounted, reactive } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { getExerciseRecordList } from "@/services/exercise/exerciseService";
+import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
+import { calcDuration } from "@/utils/exerciseUtils";
+import { getDateString, formatTimeKR } from "@/utils/dateTimeUtils";
 
 const router = useRouter();
+const route = useRoute();
+const exerciseRecordStore = useExerciseRecordStore();
+const todayStr = getDateString();
+
+const props = defineProps({
+  records: {
+    type: Array,
+    default: () => [],
+  },
+});
+
 
 // @click
 const goDetail = (exerciseRecordId) => {
@@ -15,34 +31,33 @@ const goDetail = (exerciseRecordId) => {
     <!-- <운동기록> -->
   </div>
   <!-- <리스트> -->
-  <div class="otd-top-margin">
+  <div>
     <ul class="d-flex flex-column ga-2 p-0">
-      <li class="list_item otd-box-style">
+      <li
+        v-for="item in exerciseRecordStore.today"
+        :key="item.exerciseRecordId"
+        class="list_item otd-box-style"
+      >
         <div class="d-flex flex-column otd-body-1">
-          <span>운동명</span>
-          <span>운동시간 || 거리</span>
+          <span>
+            {{
+              exerciseRecordStore.exerciseList[item.exerciseId - 1]
+                ?.exerciseName
+            }}
+          </span>
+          <span v-if="item.distance === null">{{
+            calcDuration(item.startAt, item.endAt)
+          }}</span>
+
+          <span>{{ item.distance }}km</span>
         </div>
         <div class="d-flex align-center ga-2">
-          <span class="otd-body-3">운동시작시간</span>
+          <span class="otd-body-3">{{ formatTimeKR(item.startAt) }}</span>
           <img
             class="btn_more"
-            src="\public\image\main\btn_more.png"
+            src="\image\exercise\btn_more.png"
             alt="상세보기 버튼"
             @click.prevent="goDetail(1)"
-          />
-        </div>
-      </li>
-      <li class="list_item otd-box-style">
-        <div class="d-flex flex-column otd-body-1">
-          <span>운동명</span>
-          <span>운동시간 || 거리</span>
-        </div>
-        <div class="d-flex align-center ga-2">
-          <span class="otd-body-3">운동시작시간</span>
-          <img
-            class="btn_more"
-            src="\public\image\main\btn_more.png"
-            alt="더보기 버튼"
           />
         </div>
       </li>

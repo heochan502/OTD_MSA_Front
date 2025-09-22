@@ -1,7 +1,6 @@
-import axios from 'axios';
+import axios from '@/services/httpRequester';
 
 // 공통 prefix
-axios.defaults.baseURL = '/api/OTD/';
 const COMMUNITY_BASE = 'community/';
 
 // 게시글 목록 조회

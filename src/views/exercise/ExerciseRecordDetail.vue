@@ -1,7 +1,6 @@
 <script setup>
-import WeeklyDatePick from "@/components/exercise/WeeklyDatePick.vue";
-import WeeklyChart from "@/components/exercise/WeeklyChart.vue";
-import { template } from "lodash";
+import WeeklyCalendar from "@/components/exercise/WeeklyCalendar.vue";
+
 import { ref } from "vue";
 
 const hasDistance = false;
@@ -11,35 +10,25 @@ const hasDistance = false;
   <div class="wrap otd-body-1">
     <!-- 상단 주간 달력 -->
     <div class="weekly_calendar">
-      <div class="d-flex align-center ga-2">
-        <!-- 캘린더 아이콘 -->
-        <img
-          src="\public\image\main\calender.png"
-          alt="캘린더 아이콘"
-          class="calendar_icon"
-        />
-        <!-- 현재 년월 -->
-        <span class="otd-subtitle-1">{{ "2025년 9월" }}</span>
-      </div>
-      <WeeklyDatePick />
+      <WeeklyCalendar />
     </div>
     <!-- 운동 기록 -->
     <div class="content_wrap">
       <div class="subtitle">
         <span class="otd-subtitle-1">달리기</span>
-        <img src="\public\image\main\btn_trash.png" class="btn_delete" />
+        <img src="\image\exercise\btn_trash.png" class="btn_delete" />
       </div>
       <div class="content_main otd-top-margin">
         <div class="content_effort otd-box-style">
           <span>운동 강도</span>
-          <span class="emoji">{{ "😓" }}</span>
-          <span class="otd-subtitle-2">{{ "어려움" }}</span>
+          <span class="emoji">{{ '😓' }}</span>
+          <span class="otd-subtitle-2">{{ '어려움' }}</span>
         </div>
         <div class="content_detail otd-box-style">
           <div class="item_wrap mb-3">
             <div class="item">
               <span>시작 시간</span>
-              <span class="otd-subtitle-2">{{ 16 }}시{{ "00" }}분</span>
+              <span class="otd-subtitle-2">{{ 16 }}시{{ '00' }}분</span>
             </div>
             <div class="item">
               <span>운동 시간</span>
@@ -49,11 +38,11 @@ const hasDistance = false;
           <div class="item_wrap">
             <div class="item">
               <span>킬로칼로리</span>
-              <span class="otd-subtitle-2">{{ "223" }}kcal</span>
+              <span class="otd-subtitle-2">{{ '223' }}kcal</span>
             </div>
             <div v-if="hasDistance" class="item">
               <span>{{ 거리 }}</span>
-              <span class="otd-subtitle-2">{{ "16시 00분" }}</span>
+              <span class="otd-subtitle-2">{{ '16시 00분' }}</span>
             </div>
           </div>
         </div>
@@ -64,11 +53,11 @@ const hasDistance = false;
         <span class="otd-subtitle-1">주간 운동 시간</span>
       </div>
       <div>
-        <WeeklyChart
-          :selectedDate="`2025-09-17`"
+        <!-- <WeeklyChart
+          :selectedDate="2025 - 09 - 17"
           :logs="0"
           label="exerciseDuration"
-        />
+        /> -->
       </div>
     </div>
   </div>

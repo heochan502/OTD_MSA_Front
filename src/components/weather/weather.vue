@@ -9,7 +9,6 @@ navigator.permissions.query({ name: 'geolocation' }).then((result) => {
 });
 
 async function fetchWeather(nx, ny) {
-  console.log('test');
   const serviceKey =
     'fte7et4WjQ2QQTSP51SJ6VZ%2FXA3aDUYv054aZFUsGdrVOKFJxQnmrKJGh%2Box%2FcnwsvpeJmLazXr4je1K01Uoow%3D%3D';
   let baseDate;
@@ -43,8 +42,7 @@ async function fetchWeather(nx, ny) {
   }
   baseTime = hour.toString().padStart(2, '0') + '30';
 
-  console.log('baseDate:', baseDate);
-  console.log('baseTime:', baseTime);
+  console.log('baseDate:', baseDate, 'baseTime:', baseTime);
 
   const url =
     `https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst` +
@@ -55,7 +53,7 @@ async function fetchWeather(nx, ny) {
 
   const res = await fetch(url);
   const data = await res.json();
-  console.log('data', data);
+  console.log('weather data : ', data.response.body.items);
 
   if (data.response?.body?.items?.item) {
     data.response.body.items.item.forEach((el) => {
@@ -66,7 +64,6 @@ async function fetchWeather(nx, ny) {
 }
 
 onMounted(() => {
-  console.log('onmounted');
   if ('geolocation' in navigator) {
     navigator.geolocation.getCurrentPosition(
       (pos) => {

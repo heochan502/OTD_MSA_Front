@@ -113,14 +113,15 @@ function onSubmitSuccess() {
 
     <!-- 오버레이 -->
     <div v-if="showOverlay" class="overlay-full" @click.self="closeOverlay">
-      <div class="picker-floating">
+      <!-- 카테고리 선택 버튼은 composeStep === 'pick' 일때만 보이게 -->
+      <div v-if="composeStep === 'pick'" class="picker-floating">
         <button class="pill" @click="onPickCategory('free')">자유수다</button>
         <button class="pill" @click="onPickCategory('diet')">다이어트</button>
         <button class="pill" @click="onPickCategory('work')">운동</button>
         <button class="pill" @click="onPickCategory('love')">연애</button>
-        <button class="pill pill-cancel" @click="closeOverlay">취소</button>
       </div>
 
+      <!-- 작성하기 폼은 composeStep === 'form' 일때만 -->
       <ComposeForm
         v-if="composeStep === 'form'"
         :category="selectedCategory"
