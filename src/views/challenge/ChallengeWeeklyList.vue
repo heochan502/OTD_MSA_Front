@@ -36,11 +36,9 @@ const confirmYes = async () => {
 };
 onMounted(async () => {
   const type = history.state.type;
-  const year = history.state.year;
-  const month = history.state.month;
 
   console.log('type', type);
-  const res = await getChallengeList(year, month, type);
+  const res = await getChallenge(type);
   console.log('resdata', res.data);
   state.challengeList = res.data;
 });

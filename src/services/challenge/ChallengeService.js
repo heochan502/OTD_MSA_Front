@@ -6,36 +6,36 @@ export const getAll = () => {
   return axios.get(`${BASE_URL}/list`).catch((e) => e.response);
 };
 
-export const getSelectedAll = (year, month) => {
+export const getSelectedAll = () => {
+  return axios.get(`${BASE_URL}/selected`).catch((e) => e.response);
+};
+
+export const getChallenge = (type) => {
   return axios
-    .get(`${BASE_URL}/selected`, { params: { year, month } })
+    .get(`${BASE_URL}/addlist`, { params: { type } })
     .catch((e) => e.response);
 };
 
-export const getChallengeList = (year, month, type) => {
+export const getChallengeList = (type) => {
   return axios
-    .get(`${BASE_URL}/addlist`, { params: {year, month, type } })
+    .get(`${BASE_URL}/addlist`, { params: { type } })
     .catch((e) => e.response);
 };
 
-export const getCompetitionList = (year, month, type) => {
+export const getCompetitionList = (type) => {
   return axios
     .get(`${BASE_URL}/addcompetitionlist`, {
-      params: {year, month, type },
+      params: { type },
     })
     .catch((e) => e.response);
 };
 
-export const getRank = (cdId, req) => {
-  return axios
-    .get(`${BASE_URL}/detail/per/${cdId}`, { params: req })
-    .catch((e) => e.response);
+export const getRank = (cdId) => {
+  return axios.get(`${BASE_URL}/detail/per/${cdId}`).catch((e) => e.response);
 };
 
-export const getDay = (cdId, req) => {
-  return axios
-    .get(`${BASE_URL}/detail/day/${cdId}`, { params: req })
-    .catch((e) => e.response);
+export const getDay = (cdId) => {
+  return axios.get(`${BASE_URL}/detail/day/${cdId}`).catch((e) => e.response);
 };
 
 export const putSuccess = (cpId) => {
@@ -44,7 +44,7 @@ export const putSuccess = (cpId) => {
 
 export const postMissionRecord = (cdId) => {
   return axios
-    .post(`${BASE_URL}/record/mission`, {cdId })
+    .post(`${BASE_URL}/record/mission`, { cdId })
     .catch((e) => e.response);
 };
 

@@ -12,7 +12,7 @@ import 'swiper/css/autoplay';
 const dialog = ref(false);
 const successDialog = ref(false);
 const state = reactive({
-  ChallengeList: [],
+  challengeList: [],
   selectedChallenge: null,
 });
 const openDialog = (challenge) => {
@@ -42,19 +42,17 @@ const confirmYes = async () => {
 };
 onMounted(async () => {
   const type = history.state.type;
-  const year = history.state.year;
-  const month = history.state.month;
 
   console.log('type', type);
-  const res = await getCompetitionList(year, month, type);
+  const res = await getMapChallenge(type);
   console.log('monthdata', res.data);
-  state.ChallengeList = res.data;
+  state.challengeList = res.data;
 });
 </script>
 
 <template>
   <div class="wrap">
-    <div v-for="(list, category) in state.ChallengeList" :key="category">
+    <div v-for="(list, category) in state.challengeList" :key="category">
       <div class="otd-category">{{ `${category}` }}</div>
       <Swiper
         :modules="[Autoplay]"

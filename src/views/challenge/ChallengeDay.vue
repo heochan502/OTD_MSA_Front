@@ -1,7 +1,6 @@
 <script setup>
 import Calendar from '@/components/challenge/Calendar.vue';
-import { onMounted, ref, reactive } from 'vue';
-import { useChallengeStore } from '@/stores/challenge/challengeStore';
+import { onMounted, reactive } from 'vue';
 import { getDay } from '@/services/challenge/challengeService';
 import RewardCard from '@/components/challenge/RewardCard.vue';
 import { useRoute } from 'vue-router';
@@ -11,10 +10,6 @@ const props = defineProps({
   id: Number,
   name: String,
 });
-
-const challengeStore = useChallengeStore();
-const year = challengeStore.state.year;
-const month = challengeStore.state.month;
 const state = reactive({
   progress: {},
   recDate: [],
@@ -23,9 +18,8 @@ const route = useRoute();
 const headerStore = useHeaderStore();
 
 onMounted(async () => {
-  const req = { year: year, month: month };
   const cdId = props.id;
-  const res = await getDay(cdId, req);
+  const res = await getDay(cdId);
   state.progress = res.data;
   state.recDate = res.data.recDate;
   console.log(res.data);
