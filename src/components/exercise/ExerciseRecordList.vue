@@ -4,7 +4,11 @@ import { useRouter, useRoute } from "vue-router";
 import { getExerciseRecordList } from "@/services/exercise/exerciseService";
 import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
 import { calcDuration } from "@/utils/exerciseUtils";
-import { getDateString, formatTimeKR } from "@/utils/dateTimeUtils";
+import {
+  getDateString,
+  formatTimeKR,
+  formatDateKR,
+} from "@/utils/dateTimeUtils";
 
 const router = useRouter();
 const route = useRoute();
@@ -56,7 +60,10 @@ const goDetail = (exerciseRecordId) => {
           <span v-else>{{ item.distance }}km</span>
         </div>
         <div class="d-flex align-center ga-2">
-          <span class="otd-body-3">{{ formatTimeKR(item.startAt) }}</span>
+          <div class="d-flex flex-column align-end">
+            <span class="otd-body-3">{{ formatTimeKR(item.startAt) }}</span>
+            <span class="otd-caption">{{ formatDateKR(item.startAt) }}</span>
+          </div>
           <img
             class="btn_more"
             src="\image\exercise\btn_more.png"

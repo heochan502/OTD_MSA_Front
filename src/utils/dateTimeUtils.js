@@ -17,7 +17,7 @@ export const formatDateKR = (dateStr) => {
   return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
 };
 
-// 날짜 포맷 함수 'YYYY년 MM월 DD일'
+// 날짜 포맷 함수 'YYYY년 MM월'
 export const formatDateYearMonthKR = (dateStr) => {
   const date = new Date(dateStr);
   return `${date.getFullYear()}년 ${date.getMonth() + 1}월`;

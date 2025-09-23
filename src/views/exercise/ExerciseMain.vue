@@ -27,7 +27,7 @@ const onDateClick = async (date) => {
 
   const params = reactive({
     page: 1,
-    row_per_page: 3,
+    row_per_page: 2,
     type: "daily",
     date: date, // YYYY-MM-DD 형태
     memberId: 1,
