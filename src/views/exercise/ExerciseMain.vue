@@ -6,15 +6,17 @@ import ExerciseRecordList from "@/components/exercise/ExerciseRecordList.vue";
 import BodyCompositionSummary from "@/components/exercise/BodyCompositionSummary.vue";
 import WeeklyCalendar from "@/components/exercise/WeeklyCalendar.vue";
 import { getExerciseRecordList } from "@/services/exercise/exerciseService";
-import { formatDateYearMonthISO } from "@/utils/dateTimeUtils";
+import { formatDateISO, formatDateYearMonthISO } from "@/utils/dateTimeUtils";
 import btnAdd from "/image/exercise/btn_add_grey.png";
 
 const exerciseRecordStore = useExerciseRecordStore();
-const selectedDate = ref(new Date());
+const selectedDate = ref(formatDateISO(new Date()));
 const monthly = formatDateYearMonthISO(selectedDate.value);
 
-onMounted(() => {
-  exerciseRecordStore.fetchExercises();
+onMounted(async () => {
+  await exerciseRecordStore.fetchExercises();
+
+  onDateClick(selectedDate.value);
 });
 
 // @click
