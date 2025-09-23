@@ -19,10 +19,10 @@ export const useExerciseRecordStore = defineStore("exerciseRecord", {
   }),
   actions: {
     async fetchExercises() {
-      if (this.loaded) return;
+      // if (this.loaded) return;
       const res = await getExercise();
       this.exerciseList = res.data;
-      this.loaded = true;
+      // this.loaded = true;
     },
 
     addRecords(list) {

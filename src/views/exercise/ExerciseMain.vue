@@ -9,7 +9,6 @@ import { getExerciseRecordList } from "@/services/exercise/exerciseService";
 import { formatDateYearMonthISO } from "@/utils/dateTimeUtils";
 import btnAdd from "/image/exercise/btn_add_grey.png";
 
-
 const exerciseRecordStore = useExerciseRecordStore();
 const selectedDate = ref(new Date());
 const monthly = formatDateYearMonthISO(selectedDate.value);
