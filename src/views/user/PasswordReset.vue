@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { sendPasswordResetCode, verifyPasswordResetCode, resetPassword } from '@/services/userService'
 
@@ -45,7 +45,7 @@ const passwordsMatch = computed(() => {
 
 const hasLetter = computed(() => /[A-Za-z]/.test(newPassword.value))
 const hasNumber = computed(() => /\d/.test(newPassword.value))
-const hasSpecial = computed(() => /[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?]/.test(newPassword.value))
+const hasSpecial = computed(() => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword.value))
 const hasMinLength = computed(() => newPassword.value.length >= 10)
 
 const canSubmitPassword = computed(() => {
@@ -333,7 +333,10 @@ onUnmounted(() => {
                 required
                 :disabled="isLoading"
                 class="form-input"
+<<<<<<< HEAD
                 pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':\"\\|,.>\/?]).{10,}$"
+=======
+>>>>>>> 85524d2 (로그인)
                 title="영문자, 숫자, 특수기호로 구성되며 10자 이상이어야 합니다."
                 autocomplete="new-password"
               />
