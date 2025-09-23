@@ -12,8 +12,7 @@ export const logout = () => axios.post(`${path}/logout`);
 export const reissue = (data) => axios.post(`${path}/reissue`, data);
 
 // 프로필 관련
-export const getUserProfile = (params) =>
-  axios.get(`${path}/profile`, { params });
+export const getUserProfile = () => axios.get(`${path}/profile`);
 
 export const patchUserProfilePic = (data) =>
   axios.patch(`${path}/profile/pic`, data);

@@ -2,7 +2,7 @@
 import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 import { reactive, onMounted, ref } from 'vue';
 import {
-  getMapChallenge,
+  getCompetitonList,
   postChallenge,
 } from '@/services/challenge/challengeService';
 import { Swiper, SwiperSlide } from 'swiper/vue';
@@ -44,7 +44,7 @@ onMounted(async () => {
   const type = history.state.type;
 
   console.log('type', type);
-  const res = await getMapChallenge(type);
+  const res = await getCompetitonList(type);
   console.log('monthdata', res.data);
   state.challengeList = res.data;
 });
