@@ -1,6 +1,5 @@
 <script setup>
 import { onMounted, reactive } from 'vue';
-import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 import { getAll } from '@/services/challenge/challengeService';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Autoplay } from 'swiper/modules';
