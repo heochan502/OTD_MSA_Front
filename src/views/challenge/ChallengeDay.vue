@@ -65,7 +65,7 @@ onMounted(async () => {
   position: relative;
   background-color: #ffe864;
   border-radius: 10px;
-  height: 288px;
+  height: 300px;
   align-items: center;
   justify-content: center;
   .calendar {

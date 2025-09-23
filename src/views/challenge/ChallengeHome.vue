@@ -57,7 +57,7 @@ const detail = (id, type) => {
 };
 
 onMounted(async () => {
-  const res = await getSelectedAll(1, year, month);
+  const res = await getSelectedAll(year, month);
   state.weeklyChallenge = res.data.weeklyChallenge;
   state.competitionChallenge = res.data.competitionChallenge;
   state.personalChallenge = res.data.personalChallenge;
@@ -109,6 +109,7 @@ const completeMission = async (userId, mission) => {
   } else {
     mission.done = true;
     await postMissionRecord(userId, mission.cdId);
+    window.location.reload();
   }
 };
 
@@ -132,12 +133,12 @@ const BASE_URL = import.meta.env.BASE_URL;
       <div>
         <div>
           <img src="" alt="" />
-          <span>보유한 포인트</span>
+          <span>보유한 포인트 </span>
           <span>{{ Number(state.user?.point).toLocaleString() }}P</span>
         </div>
         <div>
           <img src="" alt="" />
-          <span>성공한 챌린지</span>
+          <span>성공한 챌린지 </span>
           <span>{{ state.success }}개</span>
         </div>
       </div>
