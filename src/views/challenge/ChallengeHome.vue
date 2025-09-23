@@ -60,6 +60,7 @@ onMounted(async () => {
   state.user = res.data.user;
   state.missionComplete = res.data.missionComplete;
   state.success = res.data.success;
+  
   challengeStore.state.progressChallenge = res.data;
   totalXp.value = res.data.user.xp;
   console.log('res', res.data);
@@ -88,7 +89,7 @@ const setTargetLevel = (level) => Math.ceil((level + 1) / 5) * 5;
 const missionDone = ref([]);
 
 const setMissionState = () => {
-  const completedIds = state.missionComplete.map((m) => m.cdId);
+  const completedIds = state.missionComplete.map((m) => `${m.cdId}`);
   missionDone.value = state.dailyMission.map((mission) => ({
     ...mission,
     done: completedIds.includes(mission.cdId),

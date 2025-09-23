@@ -8,7 +8,9 @@ import {
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Autoplay } from 'swiper/modules';
 import 'swiper/css/autoplay';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 const dialog = ref(false);
 const successDialog = ref(false);
 const state = reactive({
@@ -33,18 +35,27 @@ const confirmYes = async () => {
   if (res && res.status === 200) {
     // 성공하면 저장 완료 모달 열기
     successDialog.value = true;
-    setTimeout(() => {
-      window.location.reload();
-    }, 1000);
   } else {
     alert('저장에 실패했습니다. 다시 시도해주세요.');
   }
 };
+
+const comeBackHome = () => {
+  router.push({ name: 'ChallengeHome' });
+};
+
+const comeBackList = () => {
+  dialog.value = false;
+  setTimeout(() => {
+    window.location.reload();
+  }, 1000);
+};
+
 onMounted(async () => {
   const type = history.state.type;
 
   console.log('type', type);
-  const res = await getMapChallenge(type);
+  const res = await getCompetitionList(type);
   console.log('monthdata', res.data);
   state.challengeList = res.data;
 });
@@ -92,7 +103,7 @@ onMounted(async () => {
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn color="dark" text @click="dialog = false">아니오</v-btn>
+        <v-btn color="dark" text @click="">아니오</v-btn>
         <v-btn color="primary" text @click="confirmYes()">네</v-btn>
       </v-card-actions>
     </v-card>
@@ -104,12 +115,14 @@ onMounted(async () => {
       <v-card-title class="text-h8">저장 완료</v-card-title>
       <v-card-text>
         {{
-          state.selectedChallenge?.name + ' 챌린지가 성공적으로 저장되었습니다!'
+          state.selectedChallenge?.name +
+          ' 챌린지가 성공적으로 저장되었습니다! 홈 화면으로 돌아가시겠습니까?'
         }}
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn color="primary" text @click="successDialog = false">확인</v-btn>
+        <v-btn color="dark" text @click="comeBackList()">아니오</v-btn>
+        <v-btn color="primary" text @click="comeBackHome()">네</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
