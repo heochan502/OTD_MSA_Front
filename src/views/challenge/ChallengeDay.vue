@@ -23,7 +23,7 @@ const route = useRoute();
 const headerStore = useHeaderStore();
 
 onMounted(async () => {
-  const req = { userId: 1, year: year, month: month };
+  const req = { year: year, month: month };
   const cdId = props.id;
   const res = await getDay(cdId, req);
   state.progress = res.data;

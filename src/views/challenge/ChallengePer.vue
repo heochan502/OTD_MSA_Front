@@ -79,7 +79,7 @@ const gap = () => {
   }
 };
 onMounted(async () => {
-  const req = { userId: 1, year: year, month: month };
+  const req = { year: year, month: month };
   const cdId = props.id;
   const res = await getRank(cdId, req);
   state.progress = res.data;

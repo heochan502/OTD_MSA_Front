@@ -2,7 +2,7 @@
 import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 import { reactive, onMounted, ref } from 'vue';
 import {
-  getChallenge,
+  getChallengeList,
   postChallenge,
 } from '@/services/challenge/challengeService';
 
@@ -19,7 +19,6 @@ const openDialog = (challenge) => {
 const confirmYes = async () => {
   dialog.value = false;
   const params = {
-    userId: 1,
     cdId: state.selectedChallenge.id,
     type: state.selectedChallenge.type,
   };
@@ -41,7 +40,7 @@ onMounted(async () => {
   const month = history.state.month;
 
   console.log('type', type);
-  const res = await getChallenge(1, year, month, type);
+  const res = await getChallengeList(year, month, type);
   console.log('resdata', res.data);
   state.challengeList = res.data;
 });

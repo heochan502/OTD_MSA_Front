@@ -93,12 +93,12 @@ const setTargetLevel = (level) => Math.ceil((level + 1) / 5) * 5;
 const missionDone = ref([]);
 
 const setMissionState = () => {
-  const completedIds = state.missionComplete.map((m) => `${m.cdId}`);
+  const completedIds = state.missionComplete.map((m) => m.cdId);
   missionDone.value = state.dailyMission.map((mission) => ({
     ...mission,
     done: completedIds.includes(mission.cdId),
   }));
-  console.log('ids', completedIds);
+  console.log('completedIds', completedIds);
   console.log('missionDone', missionDone);
 };
 

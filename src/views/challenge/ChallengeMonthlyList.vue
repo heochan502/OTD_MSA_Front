@@ -2,7 +2,7 @@
 import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 import { reactive, onMounted, ref } from 'vue';
 import {
-  getMapChallenge,
+  getCompetitionList,
   postChallenge,
 } from '@/services/challenge/challengeService';
 import { Swiper, SwiperSlide } from 'swiper/vue';
@@ -24,7 +24,6 @@ const confirmYes = async () => {
   dialog.value = false;
   console.log(state.selectedChallenge.id);
   const params = {
-    userId: 1,
     cdId: state.selectedChallenge.id,
     type: state.selectedChallenge.type,
   };
@@ -47,7 +46,7 @@ onMounted(async () => {
   const month = history.state.month;
 
   console.log('type', type);
-  const res = await getMapChallenge(1, year, month, type);
+  const res = await getCompetitionList(year, month, type);
   console.log('monthdata', res.data);
   state.ChallengeList = res.data;
 });

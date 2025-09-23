@@ -12,16 +12,16 @@ export const getSelectedAll = (year, month) => {
     .catch((e) => e.response);
 };
 
-export const getChallenge = (userId, year, month, type) => {
+export const getChallengeList = (year, month, type) => {
   return axios
-    .get(`${BASE_URL}/addlist`, { params: { userId, year, month, type } })
+    .get(`${BASE_URL}/addlist`, { params: {year, month, type } })
     .catch((e) => e.response);
 };
 
-export const getMapChallenge = (userId, year, month, type) => {
+export const getCompetitionList = (year, month, type) => {
   return axios
     .get(`${BASE_URL}/addcompetitionlist`, {
-      params: { userId, year, month, type },
+      params: {year, month, type },
     })
     .catch((e) => e.response);
 };
@@ -42,9 +42,9 @@ export const putSuccess = (cpId) => {
   return axios.put(`${BASE_URL}/success`, { cpId }).catch((e) => e.response);
 };
 
-export const postMissionRecord = (userId, cdId) => {
+export const postMissionRecord = (cdId) => {
   return axios
-    .post(`${BASE_URL}/record/mission`, { userId, cdId })
+    .post(`${BASE_URL}/record/mission`, {cdId })
     .catch((e) => e.response);
 };
 
