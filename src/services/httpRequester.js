@@ -55,5 +55,5 @@ axios.interceptors.response.use(
     return Promise.reject(err);
   }
 );
-console.log('Axios BaseURL:', axios.defaults.baseURL);
+// console.log("Axios BaseURL:", axios.defaults.baseURL);
 export default axios;
