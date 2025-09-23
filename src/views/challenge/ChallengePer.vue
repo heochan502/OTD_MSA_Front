@@ -35,7 +35,9 @@ const unitMent = () => {
   switch (state.progress.unit) {
     case 'km':
       return ' 달렸어요!';
-    case ('분', '개'):
+    case '분':
+      return ' 진행 했어요!';
+    case '개':
       return ' 했어요!';
   }
 };
