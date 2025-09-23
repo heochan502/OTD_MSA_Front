@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 
 // 환경별 baseURL (dev → localhost:8080, prod → greenart.n-e.kr/otd-api)
 axios.defaults.baseURL = `${import.meta.env.VITE_BASE_URL}/api/OTD`;
@@ -26,5 +26,5 @@ axios.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
-console.log('Axios BaseURL:', axios.defaults.baseURL);
+// console.log("Axios BaseURL:", axios.defaults.baseURL);
 export default axios;

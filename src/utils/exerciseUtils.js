@@ -1,5 +1,3 @@
-
-
 // 운동 리포트 관련 함수
 export function filterExerciseLogsByDate(logs, dateStr) {
   return logs.filter((log) => log.startAt.startsWith(dateStr));
@@ -14,10 +12,9 @@ export function calcEffortAvg(logs) {
   return Math.round(sum / (logs.length || 1));
 }
 
-
-
 // 운동소요시간 계산
-export const calcDuration = (startAt, endAt) => { // 운동 시작시점과 종료시점 받아옴
+export const calcDuration = (startAt, endAt) => {
+  // 운동 시작시점과 종료시점 받아옴
   if (!startAt || !endAt) return 0;
 
   // Date 객체로 변환
@@ -33,6 +30,3 @@ export const calcDuration = (startAt, endAt) => { // 운동 시작시점과 종�
 
   return diffMinutes;
 };
-
-
-
