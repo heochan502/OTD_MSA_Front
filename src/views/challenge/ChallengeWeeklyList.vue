@@ -19,7 +19,6 @@ const openDialog = (challenge) => {
 const confirmYes = async () => {
   dialog.value = false;
   const params = {
-    userId: 1,
     cdId: state.selectedChallenge.id,
     type: state.selectedChallenge.type,
   };
@@ -37,11 +36,9 @@ const confirmYes = async () => {
 };
 onMounted(async () => {
   const type = history.state.type;
-  const year = history.state.year;
-  const month = history.state.month;
 
   console.log('type', type);
-  const res = await getChallenge(1, year, month, type);
+  const res = await getChallenge(type);
   console.log('resdata', res.data);
   state.challengeList = res.data;
 });

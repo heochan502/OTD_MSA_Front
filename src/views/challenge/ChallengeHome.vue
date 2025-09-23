@@ -13,9 +13,6 @@ const challengeStore = useChallengeStore();
 
 const router = useRouter();
 
-const year = challengeStore.state.year;
-const month = challengeStore.state.month;
-
 const state = reactive({
   weeklyChallenge: [],
   competitionChallenge: [],
@@ -34,8 +31,6 @@ const toList = async (type) => {
   router.push({
     name: `Challenge${type}List`,
     state: {
-      year,
-      month,
       type,
     },
   });
@@ -57,7 +52,7 @@ const detail = (id, type) => {
 };
 
 onMounted(async () => {
-  const res = await getSelectedAll(year, month);
+  const res = await getSelectedAll();
   state.weeklyChallenge = res.data.weeklyChallenge;
   state.competitionChallenge = res.data.competitionChallenge;
   state.personalChallenge = res.data.personalChallenge;
@@ -103,12 +98,12 @@ const setMissionState = () => {
 };
 
 // 로그인 제대로 되면 수정(userId 안보냄)
-const completeMission = async (userId, mission) => {
+const completeMission = async (mission) => {
   if (mission.done) {
     return;
   } else {
     mission.done = true;
-    await postMissionRecord(userId, mission.cdId);
+    await postMissionRecord(mission.cdId);
     window.location.reload();
   }
 };
@@ -148,7 +143,7 @@ const BASE_URL = import.meta.env.BASE_URL;
       <div class="mission-box">
         <div
           v-for="mission in missionDone"
-          @click="completeMission(state.user.userId, mission)"
+          @click="completeMission(mission)"
           class="mission-card otd-list-box-style"
           :class="{ 'mission-done': mission.done }"
         >
