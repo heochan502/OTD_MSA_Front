@@ -1,11 +1,41 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, reactive } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+
+import { getFood } from '@/services/meal/mealService';
 
 const router = useRouter();
 const route = useRoute();
-const keyword = ref('');
+const keyword = ref(null);
 const selected = ref([]);
+
+const items = reactive({
+  foodList: [],
+});
+
+const searchFoodName = async (keyword) => {
+  // console.log("이게왜", searchFood);
+
+  const res = await getFood(keyword);
+
+  // console.log(" 이름 : ", res);
+  // 데이터 넣는곳
+  if (Array.isArray(res)) {
+    // null이 아닐떄만 아래 실행
+    if (searchFood.foodName) {
+      // console.log('널확인 ', searchFood.foodName);
+
+      items.foodList = res.map((item) => ({
+        foodDbId: item.foodDbId,
+        foodName: item.foodName,
+        calorie: item.calorie,
+      }));
+    }
+    else{
+      return null;}
+    // console.log('아이템', items);
+  }
+};
 
 // 예시 음식 데이터
 const foods = [
@@ -31,12 +61,48 @@ const goRecord = () => {
     // state: { foods: selected.value }  // 필요하면 상태로 함께 전달
   });
 };
+const menuOpen = ref(false);
+//데이터 입력 받고 정리 하는곳
+const itemList = ref([]);
+// 음식이름 드랍박스용
+const foodNameBox = ref(null);
+
+const onFoodNameInput = async () => {
+  searchFood.foodName = '';
+  // items.foodList = [];
+  await forceOpenDropdown();
+};
+
+const forceOpenDropdown = () => {
+  setTimeout(() => {
+    nameBox.value.isMenuActive = true;
+  }, 50);
+};
 </script>
 
 <template>
   <div class="wrap">
-    <span class="otd-category">무슨 음식을 먹었나요?</span>
-    <input v-model="keyword" placeholder="음식명 입력" class="search-input" />
+    <span class="otd-title ">무슨 음식을 먹었나요?</span>
+    <!-- <input v-model="keyword" placeholder="음식명 입력" class="search-input otd-border " /> -->
+  
+    <v-combobox
+    placeholder="음식명 입력"  
+  class="search-input otd-top-margin"
+  v-model="keyword"
+  v-model:menu="menuOpen"          
+  :items="items.foodList"
+  item-title="foodName"           
+  item-value="foodDbId"
+  variant="outlined"               
+  rounded="xl"                     
+  density="comfortable"       
+  clearable 
+  @keyup.enter.prevent="searchFoodName()"
+>
+  <template #append-inner>
+    <v-icon class="mr-2" @click="searchFoodName()">mdi-magnify</v-icon>
+  </template>
+</v-combobox>
 
     <div class="food-list otd-top-margin">
       <div
@@ -61,21 +127,17 @@ const goRecord = () => {
 </template>
 
 <style scoped>
-.search-input {
-  width: 100%;
-  padding: 10px;
-  border-radius: 12px;
-  border: 1px solid #ccc;
-  margin: 12px 0;
-}
+
 .food-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  
 }
 .food-item {
   display: flex;
   justify-content: space-between;
+  height: 81px;
   background: #fff;
   padding: 12px;
   border-radius: 12px;
@@ -90,4 +152,41 @@ const goRecord = () => {
   padding: 12px;
   border-radius: 12px;
 }
+
+
+/* 콤보 박스 설정 */
+/* 둥근 필 & 연한 테두리 *//* 기본 모양: 둥근 + 흰 배경, 이중 테두리 금지(여기서 border 주지 않음!) */
+.search-input :deep(.v-field) {
+  border-radius: 9999px !important;
+  background: #fff !important;
+  height: 56px;
+  align-items: center;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* 🔸 노치 제거: 왼쪽에 서있는 세로선 원인 */
+.search-input :deep(.v-field__outline__notch) {
+  width: 0 !important;
+  border: 0 !important;
+}
+
+/* 외곽선 색/두께 */
+.search-input :deep(.v-field--variant-outlined .v-field__outline__start),
+.search-input :deep(.v-field--variant-outlined .v-field__outline__end) {
+  border-color: #e0e0e0 !important;
+
+}
+
+/* 포커스 시 */
+.search-input :deep(.v-field--focused .v-field__outline__start),
+.search-input :deep(.v-field--focused .v-field__outline__end) {
+  border-color: #bdbdbd !important;
+}
+
+/* 높이/패딩 & 플레이스홀더 */
+.search-input :deep(.v-field__input) { min-height: 44px; padding: 0 12px; }
+.search-input :deep(input::placeholder) { color: #9e9e9e !important; opacity: 1; }
+
+/* 아이콘 은은하게 */
+.search-input :deep(.v-field__append-inner .v-icon) { opacity: .7; }
 </style>
