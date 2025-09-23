@@ -10,11 +10,18 @@ axios.defaults.withCredentials = true;
 // });
 
 // 요청 인터셉터에서 토큰 자동 추가
+// axios.interceptors.request.use(
+//   (config) => {
+//     const token = localStorage.getItem('accessToken'); // JWT 토큰
+//     console.log('Request token:', token); // 디버깅
+//     if (token) config.headers.Authorization = `Bearer ${token}`;
+//     return config;
+//   },
+//   (error) => Promise.reject(error)
+// );
 axios.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("accessToken"); // JWT 토큰
-    // console.log("Request token:", token); // 디버깅
-    if (token) config.headers.Authorization = `Bearer ${token}`;
+    // 쿠키 자동 전송만 사용
     return config;
   },
   (error) => Promise.reject(error)
