@@ -13,8 +13,18 @@ export const getExerciseRecordList = (params) => {
 };
 
 // 운동기록 상세조회
-export const getExerciseRecordDetail = (recordId) => {
-  return axios.get(`${BASE_URL}/${recordId}`).catch((e) => e.response);
+// export const getExerciseRecordDetail = (recordId, params) => {
+//   return axios
+//     .get(`${BASE_URL}/${recordId}`, { params })
+//     .catch((e) => e.response);
+// };
+export const getExerciseRecordDetail = (recordId, params) => {
+  return axios
+    .get(
+      `${BASE_URL}/${recordId}`,
+      { params } // 쿼리 파라미터
+    )
+    .catch((e) => e.response);
 };
 
 // 운동기록삭제
