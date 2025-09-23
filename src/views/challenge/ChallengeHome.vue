@@ -125,16 +125,20 @@ const BASE_URL = import.meta.env.BASE_URL;
         </div>
         <Progress :indata-progress="leftXp" bar-type="xp"></Progress>
       </div>
-      <div>
-        <div>
-          <img src="" alt="" />
-          <span>보유한 포인트 </span>
-          <span>{{ Number(state.user?.point).toLocaleString() }}P</span>
+      <div class="sub-wrap">
+        <div class="point-wrap otd-list-box-style">
+          <img class="image" src="/image/main/point.png" alt="포인트" />
+          <div class="box otd-body-2">
+            <span>보유한 포인트 </span>
+            <span>{{ Number(state.user?.point).toLocaleString() }}P</span>
+          </div>
         </div>
-        <div>
-          <img src="" alt="" />
-          <span>성공한 챌린지 </span>
-          <span>{{ state.success }}개</span>
+        <div class="success-challenge otd-list-box-style">
+          <img class="image" src="" alt="" />
+          <div class="box otd-body-2">
+            <span>성공한 챌린지 </span>
+            <span>{{ state.success }}개</span>
+          </div>
         </div>
       </div>
     </div>
@@ -214,7 +218,7 @@ const BASE_URL = import.meta.env.BASE_URL;
           <div
             v-for="n in Math.max(0, 2 - state.personalChallenge.length)"
             :key="'d-' + n"
-            class="empty-card"
+            class="empty-card otd-list-box-style"
             @click="toList('personal')"
           >
             <span
@@ -332,5 +336,27 @@ const BASE_URL = import.meta.env.BASE_URL;
   align-items: center;
   justify-content: center;
   text-align: center;
+}
+.sub-wrap {
+  display: flex;
+  justify-content: space-between;
+}
+.point-wrap,
+.success-challenge {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  width: 168px;
+  height: 68px;
+  .image {
+    width: 30px;
+  }
+  .box {
+    font-weight: 500;
+    display: flex;
+    flex-direction: column;
+  }
 }
 </style>
