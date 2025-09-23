@@ -57,7 +57,7 @@ const detail = (id, type) => {
 };
 
 onMounted(async () => {
-  const res = await getSelectedAll(1, year, month);
+  const res = await getSelectedAll(year, month);
   state.weeklyChallenge = res.data.weeklyChallenge;
   state.competitionChallenge = res.data.competitionChallenge;
   state.personalChallenge = res.data.personalChallenge;
