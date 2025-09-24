@@ -21,8 +21,8 @@ const getBorderColor = (rank) => {
 <template>
   <div>
     <div
-      class="box otd-box-style otd-border"
-      :class="{ 'my-rank': isMe && props.rankingDetail.rank > 3 }"
+      class="box otd-list-box-style otd-border"
+      :class="{ 'my-rank': isMe }"
       :style="
         !isMe || props.rankingDetail.rank < 3
           ? { border: '2px solid ' + getBorderColor(props.rankingDetail.rank) }
@@ -60,7 +60,7 @@ const getBorderColor = (rank) => {
         {{ props.rankingDetail.formattedTotalRecord }}
       </div>
       <img
-        src="/public/image/challenge/me.png"
+        src="/image/challenge/me.png"
         alt="myRank"
         v-if="props.isMe"
         class="me-image"

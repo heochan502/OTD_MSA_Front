@@ -9,6 +9,10 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
+  barType: {
+    type: String,
+    default: '',
+  },
 });
 
 const targetValue = ref(0);
@@ -35,12 +39,15 @@ const animateProgress = (target) => {
       current = target;
       clearInterval(interval);
     }
-    if (current % 1 == 0) {
+    if (props.barType === 'xp') {
+      displayValue.value = Math.trunc(current);
+    } else if (current % 1 == 0) {
       displayValue.value = current;
     } else {
       displayValue.value = current.toFixed(1);
     }
   }, stepTime);
+
 };
 
 defineExpose({
@@ -52,7 +59,8 @@ defineExpose({
   <div class="progress">
     <div class="progress-bar" :style="{ width: targetValue + '%' }"></div>
     <div class="progress-num">
-      <span v-if="route.name !== 'Home'">{{ displayValue }}%</span>
+      <span v-if="props.barType === 'xp'">{{ displayValue }}xp</span>
+      <span v-else-if="route.name !== 'Home'">{{ displayValue }}%</span>
     </div>
   </div>
 </template>
