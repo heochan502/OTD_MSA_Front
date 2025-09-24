@@ -46,7 +46,6 @@ const headerTitle = computed(() => {
 const handleClick= ()=>{
   console.log("알람 클릭");
 }
-
 </script>
 
 <template>
