@@ -1,11 +1,9 @@
 <script setup>
-import { ref, computed, watch, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { join } from '@/services/user/userService';
-import axios from '@/services/httpRequester';
+import { ref, computed, watch, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { join, checkUidDuplicate } from '@/services/user/userService'
 
-const router = useRouter();
-
+const router = useRouter()
 const basePath = import.meta.env.VITE_BASE_URL;
 
 // 현재 단계 (1: 이메일인증, 2: 약관동의, 3: 계정정보, 4: 추가정보, 5: 설문조사, 6: 완료)
@@ -27,14 +25,37 @@ const agreements = ref({
   marketing: false,
 });
 
-// 3단계: 계정 정보
+// 3단계: 계정 정보 (개선된 검증 시스템)
 const accountInfo = ref({
   uid: '',
   upw: '',
-  confirmPassword: '',
-});
-const showPassword = ref(false);
-const showConfirmPassword = ref(false);
+  confirmPassword: ''
+})
+
+// 계정 정보 검증 상태
+const validation = ref({
+  uid: {
+    isValid: true,
+    message: '',
+    touched: false,
+    checked: false,
+    available: false,
+  },
+  upw: {
+    isValid: true,
+    message: '',
+    touched: false,
+  },
+  confirmPassword: {
+    isValid: true,
+    message: '',
+    touched: false,
+  }
+})
+
+const showPassword = ref(false)
+const showConfirmPassword = ref(false)
+const generalError = ref('')
 
 // 4단계: 추가 정보
 const additionalInfo = ref({
@@ -121,17 +142,167 @@ onUnmounted(() => {
   }
 });
 
-// 비밀번호 유효성 검사
-const passwordValidation = computed(() => {
-  const upw = accountInfo.value.upw;
+// 아이디 유효성 검사 함수
+const validateMemberId = (uid) => {
+  if (!uid.trim()) {
+    return { isValid: false, message: '아이디를 입력해주세요.' }
+  }
+  if (uid.trim().length < 4) {
+    return { isValid: false, message: '아이디는 4자 이상이어야 합니다.' }
+  }
+  if (uid.trim().length > 20) {
+    return { isValid: false, message: '아이디는 최대 20자까지 입력 가능합니다.' }
+  }
+  const idRegex = /^[a-zA-Z0-9_]+$/
+  if (!idRegex.test(uid.trim())) {
+    return { isValid: false, message: '아이디는 영문, 숫자, 언더스코어(_)만 사용 가능합니다.' }
+  }
+  return { isValid: true, message: '' }
+}
+
+// 비밀번호 유효성 검사 함수
+const validatePassword = (password) => {
+  if (!password) {
+    return { isValid: false, message: '비밀번호를 입력해주세요.' }
+  }
+  if (password.length < 8) {
+    return { isValid: false, message: '비밀번호는 8자 이상이어야 합니다.' }
+  }
+  if (password.length > 20) {
+    return { isValid: false, message: '비밀번호는 최대 20자까지 입력 가능합니다.' }
+  }
+  return { isValid: true, message: '' }
+}
+
+// 비밀번호 확인 유효성 검사 함수
+const validatePasswordConfirm = (password, passwordConfirm) => {
+  if (!passwordConfirm) {
+    return { isValid: false, message: '비밀번호 확인을 입력해주세요.' }
+  }
+  if (password !== passwordConfirm) {
+    return { isValid: false, message: '비밀번호가 일치하지 않습니다.' }
+  }
+  return { isValid: true, message: '비밀번호가 일치합니다.' }
+}
+
+// 필드 유효성 검사
+const validateField = (field, value) => {
+  let result
+  
+  switch (field) {
+    case 'uid':
+      result = validateMemberId(value)
+      break
+    case 'upw':
+      result = validatePassword(value)
+      break
+    case 'confirmPassword':
+      result = validatePasswordConfirm(accountInfo.value.upw, value)
+      break
+    default:
+      result = { isValid: true, message: '' }
+  }
+  
+  validation.value[field] = {
+    ...validation.value[field],
+    isValid: result.isValid,
+    message: result.message,
+  }
+}
+
+// 필드 터치 처리
+const handleFieldTouch = (field) => {
+  validation.value[field].touched = true
+  validateField(field, accountInfo.value[field])
+}
+
+// 비밀번호 일치 상태
+const passwordMatchStatus = computed(() => {
+  if (!accountInfo.value.upw || !accountInfo.value.confirmPassword) {
+    return { show: false, isMatch: false, message: '' }
+  }
+  
+  const isMatch = accountInfo.value.upw === accountInfo.value.confirmPassword
   return {
-    length: upw.length >= 10,
-    letter: /[A-Za-z]/.test(upw),
-    number: /\d/.test(upw),
-    special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(upw),
-    match: upw === accountInfo.value.confirmPassword && upw !== '',
-  };
-});
+    show: true,
+    isMatch,
+    message: isMatch ? '비밀번호가 일치합니다.' : '비밀번호가 일치하지 않습니다.',
+  }
+})
+
+// 아이디 중복 검사
+const checkIdDuplicate = async () => {
+  const trimmedId = accountInfo.value.uid.trim()
+  
+  if (!trimmedId) {
+    return
+  }
+  
+  const validationResult = validateMemberId(trimmedId)
+  if (!validationResult.isValid) {
+    validation.value.uid.touched = true
+    validation.value.uid.isValid = false
+    validation.value.uid.message = validationResult.message
+    return
+  }
+  
+  try {
+  isLoading.value = true
+  const response = await checkUidDuplicate(trimmedId)
+  
+  validation.value.uid.checked = true
+  validation.value.uid.available = response.data.result.isAvailable
+  
+  if (response.data.result.isAvailable) {
+    validation.value.uid.message = '사용 가능한 아이디입니다.'
+    validation.value.uid.isValid = true
+  } else {
+    validation.value.uid.message = '이미 사용중인 아이디입니다.'
+    validation.value.uid.isValid = false
+  }
+} catch (error) {
+  console.error('아이디 중복 검사 오류:', error)
+  generalError.value = '중복 확인 중 오류가 발생했습니다.'
+  setTimeout(() => (generalError.value = ''), 3000)
+} finally {
+  isLoading.value = false
+}
+}
+
+// 아이디 변경 시 중복검사 상태 초기화
+const resetIdValidation = () => {
+  validation.value.uid.checked = false
+  validation.value.uid.available = false
+  if (validation.value.uid.touched && validation.value.uid.message.includes('사용')) {
+    validation.value.uid.message = ''
+  }
+}
+
+// 워처 설정
+watch(() => accountInfo.value.uid, (newValue) => {
+  if (validation.value.uid.touched) {
+    validateField('uid', newValue)
+  }
+  resetIdValidation()
+})
+
+watch(() => accountInfo.value.upw, (newValue) => {
+  if (validation.value.upw.touched) {
+    validateField('upw', newValue)
+  }
+  if (validation.value.confirmPassword.touched) {
+    validateField('confirmPassword', accountInfo.value.confirmPassword)
+  }
+})
+
+watch(() => accountInfo.value.confirmPassword, (newValue) => {
+  if (newValue) {
+    validation.value.confirmPassword.touched = true
+  }
+  if (validation.value.confirmPassword.touched) {
+    validateField('confirmPassword', newValue)
+  }
+})
 
 // 설문 완료 여부
 const isSurveyCompleted = computed(() => {
@@ -172,19 +343,16 @@ const getFitnessRank = computed(() => {
 // 다음 단계 진행 가능 여부
 const canProceedToNext = computed(() => {
   switch (currentStep.value) {
-    case 1:
-      return isEmailVerified.value;
-    case 2:
-      return agreements.value.service && agreements.value.privacy;
-    case 3:
-      return (
-        accountInfo.value.uid &&
-        passwordValidation.value.length &&
-        passwordValidation.value.letter &&
-        passwordValidation.value.number &&
-        passwordValidation.value.special &&
-        passwordValidation.value.match
-      );
+    case 1: return isEmailVerified.value
+    case 2: return agreements.value.service && agreements.value.privacy
+    case 3: 
+      return accountInfo.value.uid && 
+             validation.value.uid.isValid &&
+             validation.value.uid.checked &&
+             validation.value.uid.available &&
+             validation.value.upw.isValid &&
+             validation.value.confirmPassword.isValid &&
+             passwordMatchStatus.value.isMatch
     case 4:
       return (
         additionalInfo.value.name &&
@@ -281,7 +449,15 @@ const handleAgreementChange = (type) => {
       agreements.value.marketing;
     agreements.value.all = allSelected;
   }
-};
+}
+
+// 프로필 이미지 업로드 처리
+const handleFileChange = (event) => {
+  const file = event.target.files[0]
+  if (file) {
+    additionalInfo.value.pic = file
+  }
+}
 
 const profileImageUrl = computed(() => {
   if (!additionalInfo.value.pic) return null;
@@ -293,25 +469,8 @@ const profileImageUrl = computed(() => {
   } catch (error) {
     console.error('이미지 URL 생성 오류:', error);
   }
-  return null;
-});
-const handleFileUpload = (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  // 파일 검증
-  if (!file.type.startsWith('image/')) {
-    alert('이미지 파일만 업로드 가능합니다.');
-    return;
-  }
-
-  if (file.size > 5 * 1024 * 1024) {
-    alert('파일 크기는 5MB 이하만 가능합니다.');
-    return;
-  }
-
-  additionalInfo.value.pic = file;
-};
+  return null
+})
 
 // 설문 옵션 선택
 const selectOption = (questionId, optionValue) => {
@@ -353,8 +512,8 @@ const submitJoin = async () => {
       nickname: additionalInfo.value.nickname,
       roles: ['유저'],
       surveyAnswers: calculateSurveyScore.value,
-    };
-
+    }
+    
     // JSON 데이터 추가
     formData.append(
       'req',
@@ -410,14 +569,7 @@ const modalContent = {
   <div class="signup-container">
     <!-- Header -->
     <div class="header">
-      <button
-        v-if="currentStep > 1 && currentStep <= 5"
-        @click="handlePrevious"
-        class="back-button"
-      >
-        ←
-      </button>
-      <h1 class="title"><span class="title-gray">One</span>ToDay</h1>
+  
     </div>
 
     <!-- Progress Indicator -->
@@ -561,191 +713,174 @@ const modalContent = {
         </div>
       </div>
 
-      <!-- Step 3: 계정 정보 -->
+      <!-- Step 3: 계정 정보 (개선된 검증 시스템) -->
       <div v-if="currentStep === 3" class="step-container">
         <h2 class="step-title">아이디 비밀번호 입력</h2>
-
+        
+        <!-- 일반 에러 메시지 -->
+        <div v-if="generalError" class="error-message">
+          <div class="message-icon">⚠</div>
+          <div>{{ generalError }}</div>
+        </div>
+        
         <div class="form-group">
-          <input
-            type="text"
-            placeholder="아이디"
-            v-model="accountInfo.uid"
-            class="input-field"
-          />
-
-          <div class="input-wrapper">
-            <input
-              :type="showPassword ? 'text' : 'password'"
-              placeholder="비밀번호"
-              v-model="accountInfo.upw"
-              class="input-field-with-icon"
-            />
-            <button
-              type="button"
-              @click="showPassword = !showPassword"
-              class="input-icon-button"
-            >
-              <svg
-                v-if="!showPassword"
-                class="icon-sm"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+          <!-- 아이디 입력 및 중복검사 -->
+          <div class="form-group">
+            <label for="uid">아이디 *</label>
+            <div class="input-wrapper">
+              <input
+                type="text"
+                id="uid"
+                placeholder="아이디를 입력해 주세요 (4자 이상)"
+                v-model="accountInfo.uid"
+                :class="{
+                  'input-field-with-button': true,
+                  error: validation.uid.touched && !validation.uid.isValid,
+                  success: validation.uid.touched && validation.uid.isValid && validation.uid.available,
+                }"
+                @blur="handleFieldTouch('uid')"
+                @input="validation.uid.touched && validateField('uid', accountInfo.uid)"
+              />
+              <button
+                type="button"
+                class="btn-small"
+                @click="checkIdDuplicate"
+                :disabled="isLoading"
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                />
-              </svg>
-              <svg
-                v-else
-                class="icon-sm"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
-                />
-              </svg>
-            </button>
-          </div>
-
-          <div class="input-wrapper">
-            <input
-              :type="showConfirmPassword ? 'text' : 'password'"
-              placeholder="비밀번호 확인"
-              v-model="accountInfo.confirmPassword"
-              class="input-field-with-icon"
-            />
-            <button
-              type="button"
-              @click="showConfirmPassword = !showConfirmPassword"
-              class="input-icon-button"
-            >
-              <svg
-                v-if="!showConfirmPassword"
-                class="icon-sm"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                />
-              </svg>
-              <svg
-                v-else
-                class="icon-sm"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
-                />
-              </svg>
-            </button>
-          </div>
-
-          <!-- 비밀번호 유효성 검사 -->
-          <div class="validation-list">
-            <div
-              :class="['validation-item', { valid: passwordValidation.length }]"
-            >
-              <span class="validation-icon">{{
-                passwordValidation.length ? '✓' : '✗'
-              }}</span>
-              <span>10자 이상</span>
+                <span v-if="isLoading">확인중...</span>
+                <span v-else>중복확인</span>
+              </button>
             </div>
             <div
-              :class="['validation-item', { valid: passwordValidation.letter }]"
-            >
-              <span class="validation-icon">{{
-                passwordValidation.letter ? '✓' : '✗'
-              }}</span>
-              <span>영문자 포함</span>
-            </div>
-            <div
-              :class="['validation-item', { valid: passwordValidation.number }]"
-            >
-              <span class="validation-icon">{{
-                passwordValidation.number ? '✓' : '✗'
-              }}</span>
-              <span>숫자 포함</span>
-            </div>
-            <div
+              v-if="validation.uid.touched && validation.uid.message"
               :class="[
-                'validation-item',
-                { valid: passwordValidation.special },
+                'field-message',
+                validation.uid.isValid && validation.uid.available ? 'field-success' : 'field-error'
               ]"
             >
-              <span class="validation-icon">{{
-                passwordValidation.special ? '✓' : '✗'
-              }}</span>
-              <span>특수문자 포함</span>
+              {{ validation.uid.message }}
+            </div>
+          </div>
+
+          <!-- 비밀번호 입력 -->
+          <div class="form-group">
+            <label for="upw">비밀번호 *</label>
+            <div class="input-wrapper">
+              <input
+                :type="showPassword ? 'text' : 'password'"
+                id="upw"
+                placeholder="비밀번호를 입력해주세요(10자 이상)"
+                v-model="accountInfo.upw"
+                :class="{
+                  'input-field-with-icon': true,
+                  error: validation.upw.touched && !validation.upw.isValid,
+                  success: validation.upw.touched && validation.upw.isValid && accountInfo.upw,
+                }"
+                @blur="handleFieldTouch('upw')"
+                @input="validation.upw.touched && validateField('upw', accountInfo.upw)"
+              />
+              <button
+                type="button"
+                @click="showPassword = !showPassword"
+                class="input-icon-button"
+              >
+                <svg v-if="!showPassword" class="icon-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+                <svg v-else class="icon-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"/>
+                </svg>
+              </button>
             </div>
             <div
-              :class="['validation-item', { valid: passwordValidation.match }]"
+              v-if="validation.upw.touched && validation.upw.message"
+              :class="[
+                'field-message',
+                validation.upw.isValid ? 'field-success' : 'field-error'
+              ]"
             >
-              <span class="validation-icon">{{
-                passwordValidation.match ? '✓' : '✗'
-              }}</span>
-              <span>비밀번호 일치</span>
+              {{ validation.upw.message }}
+            </div>
+            <p>비밀번호는 영문자, 숫자, 특수기호로 구성되며 10자 이상이어야 합니다.</p>
+          </div>
+
+          <!-- 비밀번호 확인 -->
+          <div class="form-group">
+            <label for="confirmPassword">비밀번호 확인 *</label>
+            <div class="input-wrapper">
+              <input
+                :type="showConfirmPassword ? 'text' : 'password'"
+                id="confirmPassword"
+                placeholder="비밀번호를 한번더 확인해주세요"
+                v-model="accountInfo.confirmPassword"
+                :class="{
+                  'input-field-with-icon': true,
+                  error: accountInfo.confirmPassword && !passwordMatchStatus.isMatch,
+                  success: passwordMatchStatus.show && passwordMatchStatus.isMatch,
+                }"
+                @blur="handleFieldTouch('confirmPassword')"
+                @input="() => {
+                  if (accountInfo.confirmPassword) {
+                    validation.confirmPassword.touched = true;
+                    validateField('confirmPassword', accountInfo.confirmPassword);
+                  }
+                }"
+              />
+              <button
+                type="button"
+                @click="showConfirmPassword = !showConfirmPassword"
+                class="input-icon-button"
+              >
+                <svg v-if="!showConfirmPassword" class="icon-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+                <svg v-else class="icon-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"/>
+                </svg>
+              </button>
+            </div>
+
+            <div
+              v-if="passwordMatchStatus.show"
+              :class="[
+                'field-message',
+                'password-match-message',
+                passwordMatchStatus.isMatch ? 'field-success' : 'field-error'
+              ]"
+            >
+              {{ passwordMatchStatus.message }}
             </div>
           </div>
         </div>
       </div>
 
       <!-- Step 4: 추가 정보 -->
-      <div v-if="currentStep === 4" class="step-container">
-        <h2 class="step-title">추가정보를 입력해주세요</h2>
+<div v-if="currentStep === 4" class="step-container">
+  <h2 class="step-title">추가정보를 입력해주세요</h2>
 
-        <div class="form-group">
-          <!-- 프로필 이미지 -->
-          <div class="profile-image-container">
-            <div class="profile-image-wrapper">
-              <div class="profile-image">
-                <img
-                  v-if="additionalInfo.pic"
-                  :src="URL.createObjectURL(additionalInfo.pic)"
-                  alt="Profile"
-                  class="profile-img"
-                />
-                <div v-else class="profile-placeholder"></div>
-              </div>
-              <input
-                type="file"
-                accept="image/*"
-                @change="handleFileUpload"
-                class="file-input"
-              />
-              <div class="camera-button">+</div>
-            </div>
-          </div>
+  <div class="form-group">
+    <!-- 프로필 이미지 -->
+    <div class="profile-image-container">
+      <div class="profile-image-wrapper">
+        <div class="profile-image">
+          <img
+            v-if="profileImageUrl"
+            :src="profileImageUrl"
+            alt="Profile"
+            class="profile-img"
+          />
+          <div v-else class="profile-placeholder"></div>
+        </div>
+        <input
+          type="file"
+          accept="image/*"
+          @change="handleFileChange"
+          class="file-input"
+        />
+      </div>
+    </div>
 
           <input
             type="text"
@@ -755,7 +890,7 @@ const modalContent = {
           />
 
           <input
-            type="date"
+            type="text"
             placeholder="생년월일"
             v-model="additionalInfo.birthDate"
             class="input-field"
@@ -763,7 +898,7 @@ const modalContent = {
 
           <input
             type="tel"
-            placeholder="휴대폰번호 (010-1234-5678)"
+            placeholder="휴대폰번호"
             v-model="additionalInfo.phone"
             class="input-field"
           />
@@ -885,9 +1020,7 @@ const modalContent = {
 
 .signup-container {
   min-height: 100vh;
-  background-color: #f9fafb;
-  display: flex;
-  flex-direction: column;
+  background-color: #ffffff;
 }
 
 .header {
@@ -952,12 +1085,11 @@ const modalContent = {
 }
 
 .progress-dot.active {
-  background-color: #10b981;
+  background-color: #00D5DF;
 }
 
 .content {
-  flex: 1;
-  padding: 1.5rem 1rem;
+  padding: 1.5rem 20px;
 }
 
 .step-container {
@@ -975,7 +1107,7 @@ const modalContent = {
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.5rem;
 }
 
 .input-field {
@@ -1000,6 +1132,8 @@ const modalContent = {
 
 .input-wrapper {
   position: relative;
+  display: flex;
+  gap: 8px;
 }
 
 .input-field-with-icon {
@@ -1011,10 +1145,34 @@ const modalContent = {
   transition: all 0.2s;
 }
 
-.input-field-with-icon:focus {
+.input-field-with-button {
+  flex: 1;
+  padding: 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.input-field-with-icon:focus,
+.input-field-with-button:focus {
   outline: none;
   border-color: #10b981;
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.input-field-with-icon.error,
+.input-field-with-button.error {
+  border-color: #dc2626;
+  background-color: #fef2f2;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.input-field-with-icon.success,
+.input-field-with-button.success {
+  border-color: #16a34a;
+  background-color: #f0fdf4;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
 }
 
 .input-icon-button {
@@ -1037,7 +1195,6 @@ const modalContent = {
 }
 
 .btn {
-  padding: 1rem;
   border-radius: 0.5rem;
   font-weight: 500;
   font-size: 1rem;
@@ -1045,6 +1202,7 @@ const modalContent = {
   transition: all 0.2s;
   border: none;
   width: 100%;
+  height: 55px;
 }
 
 .btn:disabled {
@@ -1052,12 +1210,12 @@ const modalContent = {
 }
 
 .btn-primary {
-  background-color: #10b981;
+  background-color: #393E46;
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: #059669;
+  background-color: #303030;
 }
 
 .btn-primary:disabled {
@@ -1065,12 +1223,13 @@ const modalContent = {
 }
 
 .btn-secondary {
-  background-color: #3b82f6;
+  background-color: #393E46;
   color: white;
+  gap: 3px;
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background-color: #2563eb;
+  background-color: #303030;
 }
 
 .btn-secondary:disabled {
@@ -1078,7 +1237,6 @@ const modalContent = {
 }
 
 .btn-outline {
-  flex: 1;
   background-color: white;
   color: #374151;
   border: 1px solid #d1d5db;
@@ -1091,20 +1249,6 @@ const modalContent = {
 .btn-outline:disabled {
   background-color: #f3f4f6;
   color: #9ca3af;
-}
-
-.btn-dark {
-  flex: 1;
-  background-color: #374151;
-  color: white;
-}
-
-.btn-dark:hover:not(:disabled) {
-  background-color: #111827;
-}
-
-.btn-dark:disabled {
-  background-color: #d1d5db;
 }
 
 .btn-start {
@@ -1125,10 +1269,72 @@ const modalContent = {
   transform: translateY(-1px);
 }
 
+.btn-small {
+  flex-shrink: 0;
+  padding: 0 16px;
+  background: #555;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  min-width: 80px;
+  height: 55px;
+}
+
+.btn-small:hover:not(:disabled) {
+  background: #333;
+}
+
+.btn-small:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #999;
+}
+
 .success-message {
   color: #10b981;
   text-align: center;
   font-weight: 500;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+}
+
+.message-icon {
+  margin-right: 8px;
+  font-weight: bold;
+}
+
+.field-message {
+  font-size: 12px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.field-error {
+  color: #dc2626;
+}
+
+.field-success {
+  color: #16a34a;
+}
+
+.password-match-message {
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 .agreement-all {
@@ -1161,7 +1367,7 @@ const modalContent = {
 .checkbox {
   width: 1.25rem;
   height: 1.25rem;
-  accent-color: #10b981;
+  accent-color: #ffffff;
 }
 
 .checkbox-text {
@@ -1183,32 +1389,6 @@ const modalContent = {
 
 .view-button:hover {
   color: #374151;
-}
-
-.validation-list {
-  font-size: 0.875rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.validation-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #6b7280;
-}
-
-.validation-item.valid {
-  color: #10b981;
-}
-
-.validation-item .icon-xs.valid {
-  color: #10b981;
-}
-
-.validation-item .icon-xs:not(.valid) {
-  color: #d1d5db;
 }
 
 .profile-image-container {
@@ -1238,14 +1418,6 @@ const modalContent = {
   object-fit: cover;
 }
 
-.camera-button {
-  position: absolute;
-  bottom: -0.5rem;
-  right: -0.5rem;
-  background-color: #10b981;
-  border-radius: 50%;
-  padding: 0.5rem;
-}
 
 /* 설문조사 스타일 */
 .questions-container {
@@ -1363,9 +1535,9 @@ const modalContent = {
 }
 
 .bottom-buttons {
+  display: flex;
   background-color: white;
   padding: 1rem;
-  display: flex;
   gap: 0.75rem;
 }
 
@@ -1406,11 +1578,6 @@ const modalContent = {
   color: #6b7280;
 }
 
-.modal-button {
-  width: 100%;
-  padding: 0.5rem 0;
-}
-
 .text-gray-400 {
   color: #9ca3af;
 }
@@ -1423,7 +1590,6 @@ const modalContent = {
 @media (max-width: 600px) {
   .step-container {
     max-width: 100%;
-    padding: 0 10px;
   }
 
   .question-header {
