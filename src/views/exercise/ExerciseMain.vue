@@ -30,10 +30,14 @@ const onDateClick = async (date) => {
     row_per_page: 2,
     type: "daily",
     date: date, // YYYY-MM-DD 형태
-    memberId: 1,
+    userId: 1,
   });
 
   const res = await getExerciseRecordList(params);
+  if (res === undefined || res.status !== 200) {
+    alert(`에러발생? ${res.status}`);
+    return;
+  }
   exerciseRecordStore.records = res.data;
 };
 </script>
@@ -41,7 +45,7 @@ const onDateClick = async (date) => {
 <template>
   <div class="wrap content_wrap">
     <div class="weekly_calendar">
-      <WeeklyCalendar @click-date="onDateClick" />
+      <WeeklyCalendar :recordDate="selectedDate" @click-date="onDateClick" />
     </div>
     <div class="exercise_report">
       <div class="subtitle ga-1">

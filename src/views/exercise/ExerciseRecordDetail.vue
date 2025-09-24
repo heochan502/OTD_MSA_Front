@@ -1,21 +1,89 @@
 <script setup>
 import WeeklyCalendar from "@/components/exercise/WeeklyCalendar.vue";
-import { onMounted, reactive, computed } from "vue";
+import { onMounted, reactive, computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { getExerciseRecordDetail } from "@/services/exercise/exerciseService";
-import { formatTimeKR } from "@/utils/dateTimeUtils";
+import {
+  getExerciseRecordDetail,
+  getExerciseRecordList,
+} from "@/services/exercise/exerciseService";
+import { formatTimeKR, formatDateISO } from "@/utils/dateTimeUtils";
 import { calcDuration } from "@/utils/exerciseUtils";
 import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
 import effortLevels from "@/assets/effortLevels.json";
 
 const route = useRoute();
 const exerciseRecordStore = useExerciseRecordStore();
+const selectedDate = ref();
+const selectionItems = ref([]); // 모달에 보여질 운동 기록들
+const confirmDialog = ref(false); // 모달 열림 여부
+
 const state = reactive({
   record: {},
 });
-onMounted(() => {
-  getData();
+const currentRecordDate = computed(() => {
+  if (!state.record?.startAt) return null;
+  return new Date(state.record.startAt); // JS Date 객체로 변환
 });
+
+const recordId = route.params.exerciseRecordId;
+const userId = 1;
+
+onMounted(() => {
+  getData(recordId);
+});
+
+// 운동 불러오기
+const getData = async (recordId) => {
+  if (!recordId) return;
+
+  const res = await getExerciseRecordDetail(recordId, { userId });
+
+  if (res === undefined || res.status !== 200) {
+    alert(`에러발생? ${res.status}`);
+    return;
+  }
+
+  state.record = res.data;
+};
+
+const onDateClick = async (date) => {
+  // 날짜를 선택한 날 기록이 2개 이상이면 모달창을 띄우고 선택한 운동기록을 화면에 보여지게 하기
+
+  exerciseRecordStore.clearRecords();
+  selectedDate.value = date;
+  // date 는 JS Date 객체 (컴포넌트에서 toDate()로 emit)
+
+  const params = {
+    page: 1,
+    row_per_page: 2,
+    type: "daily",
+    date: date, // YYYY-MM-DD 형태
+    userId: 1,
+  };
+
+  const res = await getExerciseRecordList(params);
+  if (res === undefined || res.status !== 200) {
+    alert(`에러발생? ${res.status}`);
+    return;
+  }
+  exerciseRecordStore.records = res.data;
+
+  if (exerciseRecordStore.records.length === 0) {
+    alert("기록이 없습니다");
+  } else if (exerciseRecordStore.records.length === 1) {
+    getData(exerciseRecordStore.records.exerciseRecordId);
+  } else {
+    selectionItems.value = exerciseRecordStore.records;
+    confirmDialog.value = true;
+  }
+};
+
+// 모달에서 선택된 기록
+const selectRecord = (record) => {
+  confirmDialog.value = false;
+  getData(record.exerciseRecordId);
+};
+
 // 선택된 운동
 const selectedExercise = computed(() => {
   if (!state.record.exerciseId) return 0;
@@ -33,30 +101,21 @@ const hasDistance = computed(() => {
 const hasReps = computed(() => {
   return selectedExercise.value ? selectedExercise.value.hasReps : 0; // 1 또는 0 그대로 반환
 });
+
+// 운동 소요시간
 const duration = computed(() =>
   calcDuration(state.record.startAt, state.record.endAt)
 );
-const recordId = route.params.exerciseRecordId;
-const memberId = 1;
-const getData = async () => {
-  if (!recordId) return;
-
-  const res = await getExerciseRecordDetail(recordId, { memberId });
-
-  if (res === undefined || res.status !== 200) {
-    alert(`에러발생? ${res.status}`);
-    return;
-  }
-
-  state.record = res.data;
-};
 </script>
 
 <template>
   <div class="wrap otd-body-1">
     <!-- 상단 주간 달력 -->
     <div class="weekly_calendar">
-      <WeeklyCalendar />
+      <WeeklyCalendar
+        :recordDate="formatDateISO(currentRecordDate)"
+        @click-date="onDateClick"
+      />
     </div>
     <!-- 운동 기록 -->
     <div class="content_wrap">
@@ -119,6 +178,42 @@ const getData = async () => {
       </div>
     </div>
   </div>
+
+  <!-- 모달창 -->
+  <v-dialog v-model="confirmDialog" max-width="380" min-height="100">
+    <v-card>
+      <v-card-title> 운동 기록 선택 </v-card-title>
+
+      <v-card-text>
+        <v-list>
+          <v-list-item
+            v-for="item in selectionItems"
+            :key="item.exerciseRecordId"
+          >
+            <div>
+              <div class="otd-subtitle-2">
+                {{
+                  exerciseRecordStore.exerciseList.find(
+                    (e) => e.exerciseId === item.exerciseId
+                  )?.exerciseName || "운동명 없음"
+                }}
+              </div>
+              <div class="otd-body-1">
+                {{ calcDuration(item.startAt, item.endAt) }}분
+              </div>
+            </div>
+
+            <v-btn color="primary" @click="selectRecord(item)"> 보기 </v-btn>
+          </v-list-item>
+        </v-list>
+      </v-card-text>
+
+      <v-card-actions>
+        <v-spacer />
+        <v-btn @click="confirmDialog = false">닫기</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <style lang="scss" scoped>
