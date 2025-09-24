@@ -2,7 +2,7 @@
 import { ref, reactive, onMounted } from "vue";
 import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
 import ExerciseRecordList from "@/components/exercise/ExerciseRecordList.vue";
-import BodyCompositionSummary from "@/components/exercise/BodyCompositionSummary.vue";
+import BodyCompositionSummary from "@/components/BodyComposition/BodyCompositionSummary.vue";
 import WeeklyCalendar from "@/components/exercise/WeeklyCalendar.vue";
 import { getExerciseRecordList } from "@/services/exercise/exerciseService";
 import { formatDateISO, formatDateYearMonthISO } from "@/utils/dateTimeUtils";
