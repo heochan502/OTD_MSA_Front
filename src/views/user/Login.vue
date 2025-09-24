@@ -8,8 +8,8 @@ import { checkValidation } from '@/utils/validation';
 const router = useRouter();
 
 const authentication = useAuthenticationStore();
-//const beBaseUrl = import.meta.env.VITE_BASE_URL;
-const beBaseUrl = import.meta.env.VITE_API_URL;
+const beBaseUrl = import.meta.env.VITE_BASE_URL;
+// const beBaseUrl = import.meta.env.VITE_API_URL;
 const feBaseUrl = window.location.origin;
 const redirectUrl = `${feBaseUrl}/fe/redirect`;
 
@@ -22,13 +22,15 @@ const state = reactive({
 
 const submit = async () => {
   //유효성 체크
-  if (checkValidation()) { return; }
-  
+  if (checkValidation()) {
+    return;
+  }
+
   try {
     console.log('전송할 데이터:', state.form); // 디버깅용
     const res = await login(state.form);
-    console.log('Login.vue - submit() - res: ', res);
-    
+    console.log('Login.vue - submit() - res: ', res.data);
+
     if (res.status === 200) {
       const signedUser = res.data.result;
       console.log('signedUser:', signedUser);
@@ -60,7 +62,8 @@ const submit = async () => {
             v-model="state.form.uid"
             not-null-message="아이디는 필수로 입력하셔야 합니다."
             regexp="^[A-Za-z0-9_]{4,50}$"
-            regexp-message="아이디는 영어, 숫자, 언더바로만 구성되어야 하며 4~50자까지 작성할 수 있습니다." />
+            regexp-message="아이디는 영어, 숫자, 언더바로만 구성되어야 하며 4~50자까지 작성할 수 있습니다."
+          />
           <label for="uid">아이디</label>
         </div>
         <!-- 비밀번호 입력 -->
@@ -74,7 +77,8 @@ const submit = async () => {
             autocomplete="off"
             not-null-message="비밀번호는 필수로 입력하셔야 합니다."
             regexp="^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':\&quot;\\|,.<>\/?])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':\&quot;\\|,.<>\/?]{10,}$"
-            regexp-message="비밀번호는 영문자, 숫자, 특수기호로 구성되며 10자 이상이어야 합니다." />
+            regexp-message="비밀번호는 영문자, 숫자, 특수기호로 구성되며 10자 이상이어야 합니다."
+          />
           <label for="upw">비밀번호</label>
         </div>
         <button type="submit" class="buttonlogin">로그인</button>
@@ -84,10 +88,20 @@ const submit = async () => {
       </div>
       <!-- API 로그인 -->
       <div class="mb-3">
-        <span class="naver"><a :href="`${beBaseUrl}/oauth2/authorization/naver?redirect_uri=${redirectUrl}`">네이버</a></span>        
-        <span class="kakao"><a :href="`${beBaseUrl}/oauth2/authorization/kakao?redirect_uri=${redirectUrl}`">카카오</a></span>      
+        <span class="naver"
+          ><a
+            :href="`${beBaseUrl}/oauth2/authorization/naver?redirect_uri=${redirectUrl}`"
+            >네이버</a
+          ></span
+        >
+        <span class="kakao"
+          ><a
+            :href="`${beBaseUrl}/oauth2/authorization/kakao?redirect_uri=${redirectUrl}`"
+            >카카오</a
+          ></span
+        >
       </div>
-      
+
       <div class="additional-links">
         <div class="link-row">
           <a href="#" class="link">아이디 찾기</a>
@@ -109,10 +123,10 @@ const submit = async () => {
   width: 100%;
   font-size: 16px;
   padding-top: 10px;
-  padding-bottom:  10px;
+  padding-bottom: 10px;
   padding-left: 0.5rem;
   padding-right: 0.5rem;
-  background-color: #393E46;
+  background-color: #393e46;
   color: white;
   border: none;
   border-radius: 10px;
@@ -125,10 +139,10 @@ const submit = async () => {
   width: 100%;
   font-size: 16px;
   padding-top: 10px;
-  padding-bottom:  10px;
+  padding-bottom: 10px;
   padding-left: 0.5rem;
   padding-right: 0.5rem;
-  background-color: #E6E6E6;
+  background-color: #e6e6e6;
   color: white;
   border: none;
   border-radius: 10px;
@@ -139,7 +153,7 @@ const submit = async () => {
 }
 
 .button:hover {
-  background-color: #E6E6E6;
+  background-color: #e6e6e6;
   color: white;
   text-decoration: none;
 }
@@ -153,7 +167,6 @@ const submit = async () => {
   padding-bottom: 10px;
 }
 .inputa {
-  
   font-size: 20px;
   padding-top: 10px;
   padding-left: 10px;
@@ -166,10 +179,10 @@ const submit = async () => {
   width: 100%;
   font-size: 16px;
   padding-top: 10px;
-  padding-bottom:  10px;
+  padding-bottom: 10px;
   padding-left: 0.5rem;
   padding-right: 0.5rem;
-  background-color: #FBE900;
+  background-color: #fbe900;
   color: white;
   border: none;
   border-radius: 10px;
@@ -182,10 +195,10 @@ const submit = async () => {
   width: 100%;
   font-size: 16px;
   padding-top: 10px;
-  padding-bottom:  10px;
+  padding-bottom: 10px;
   padding-left: 0.5rem;
   padding-right: 0.5rem;
-  background-color: #03C75A;
+  background-color: #03c75a;
   color: white;
   border: none;
   border-radius: 10px;
@@ -198,6 +211,4 @@ const submit = async () => {
 .additional-links {
   text-align: center;
 }
-
-
 </style>

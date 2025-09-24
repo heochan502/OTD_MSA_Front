@@ -8,9 +8,10 @@ import {
 import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 import { useChallengeStore } from '@/stores/challenge/challengeStore';
 import Progress from '@/components/challenge/Progress.vue';
+import { useAuthenticationStore } from '@/stores/user/authentication';
 
 const challengeStore = useChallengeStore();
-
+const authentication = useAuthenticationStore();
 const router = useRouter();
 
 const state = reactive({
@@ -21,6 +22,7 @@ const state = reactive({
   user: {},
   missionComplete: [],
   success: 0,
+  tier: '',
 });
 
 const toChallengeList = () => {
@@ -62,6 +64,7 @@ onMounted(async () => {
   state.success = res.data.success;
   challengeStore.state.progressChallenge = res.data;
   totalXp.value = res.data.user.xp;
+  state.tier = authentication.state.signedUser.challengeRole;
   console.log('res', res.data);
   setMissionState();
 });
@@ -93,8 +96,8 @@ const setMissionState = () => {
     ...mission,
     done: completedIds.includes(mission.cdId),
   }));
-  console.log('ids', completedIds);
-  console.log('missionDone', missionDone);
+  // console.log('ids', completedIds);
+  // console.log('missionDone', missionDone);
 };
 
 // 로그인 제대로 되면 수정(userId 안보냄)
@@ -104,7 +107,24 @@ const completeMission = async (mission) => {
   } else {
     mission.done = true;
     await postMissionRecord(mission.cdId);
-    window.location.reload();
+    authentication.setPoint(
+      authentication.state.signedUser.point + mission.cdReward
+    );
+    state.user.point = authentication.state.signedUser.point;
+    // window.location.reload();
+  }
+};
+
+const levelMent = () => {
+  switch (state.tier) {
+    case '다이아':
+      return '다이아처럼 빤짝빤짝 !';
+    case '골드':
+      return `다이아까지 ${leftLevel} 남았어요!`;
+    case '실버':
+      return `골드까지 ${leftLevel} 남았어요!`;
+    case '브론즈':
+      return `실버까지 ${leftLevel} 남았어요!`;
   }
 };
 
@@ -120,8 +140,8 @@ const BASE_URL = import.meta.env.BASE_URL;
       <div>
         <div>티어 이미지</div>
         <div>
-          <span>{{ totalLevel }}레벨</span><span>silver</span>
-          <span>승급까지 {{ leftLevel }}레벨 남았어요!</span>
+          <span>{{ totalLevel }}레벨</span><span>{{ state.tier }}</span>
+          <span>{{ ' ' + levelMent() }}</span>
         </div>
         <Progress :indata-progress="leftXp" bar-type="xp"></Progress>
       </div>
@@ -134,7 +154,11 @@ const BASE_URL = import.meta.env.BASE_URL;
           </div>
         </div>
         <div class="success-challenge otd-list-box-style">
-          <img class="image" src="" alt="" />
+          <img
+            class="image"
+            src="/image/challenge/success-challenge.png"
+            alt=""
+          />
           <div class="box otd-body-2">
             <span>성공한 챌린지 </span>
             <span>{{ state.success }}개</span>

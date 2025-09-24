@@ -1,18 +1,19 @@
 <script setup>
-import {useRoute, useRouter} from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { computed, onMounted, ref } from 'vue';
 import weather from '@/components/weather/weather.vue';
-import { getUserProfile } from '@/services/user/userService';
 import { useHeaderStore } from '@/stores/challenge/headerStore';
+import { useAuthenticationStore } from '@/stores/user/authentication';
 
 const route = useRoute();
-const router = useRouter();
 const headerStore = useHeaderStore();
-const userInfo = ref({
-  nickName: '',
-  userPoint: 0,
-  pic: '',
-})
+const authentication = useAuthenticationStore();
+const userInfo = computed(() => ({
+  nickName: authentication.state.signedUser.nickName,
+  userPoint: authentication.state.signedUser.point,
+  pic: authentication.state.signedUser.pic,
+  xp: authentication.state.signedUser.xp,
+}));
 
 const categoryLabelMap = {
   free:'자유수다',
@@ -48,17 +49,6 @@ const handleClick= ()=>{
   console.log("알람 클릭");
 }
 
-onMounted(async () => {
-  const res = await getUserProfile();
-  const result = res.data.result;
-  console.log(result);
-  userInfo.value = {
-    nickName: result.nickName === null ? result.name : result.nickName,
-    userPoint: result.point,
-    pic: result.pic
-  }
-})
-
 </script>
 
 <template>
@@ -88,7 +78,7 @@ onMounted(async () => {
       <img class="avatar" src="/image/main/test.png" alt="프로필"></img>
       <div class="info">
         <weather/>
-        <span class="  otd-title ">{{userInfo.nickName}} 님</span>
+        <span class="otd-title">{{userInfo.nickName}} 님</span>
       </div>  
     </div>
     <div class="point otd-body-1">
@@ -155,6 +145,7 @@ onMounted(async () => {
   justify-content:end;
   font-size: 12px;
   row-gap: 5px;
+  margin-left: 15px;
 }
 
 .top-header {
