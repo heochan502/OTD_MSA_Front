@@ -1,6 +1,5 @@
 <script setup>
 import { onMounted, reactive } from 'vue';
-import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 import { getAll } from '@/services/challenge/challengeService';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Autoplay } from 'swiper/modules';
@@ -48,7 +47,7 @@ onMounted(async () => {
             :name="challenge.name"
             :goal="challenge.goal"
             :unit="challenge.unit"
-            :exp="challenge.exp"
+            :exp="challenge.xp"
             :reward="challenge.reward"
           ></FlippableChallengeCard>
         </SwiperSlide>
@@ -77,7 +76,7 @@ onMounted(async () => {
               :name="challenge.name"
               :goal="challenge.goal"
               :unit="challenge.unit"
-              :exp="challenge.exp"
+              :exp="challenge.xp"
               :reward="challenge.reward"
             ></FlippableChallengeCard>
           </SwiperSlide>
@@ -104,7 +103,7 @@ onMounted(async () => {
               :name="challenge.name"
               :goal="challenge.goal"
               :unit="challenge.unit"
-              :exp="challenge.exp"
+              :exp="challenge.xp"
               :reward="challenge.reward"
             ></FlippableChallengeCard>
           </SwiperSlide>

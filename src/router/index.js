@@ -303,25 +303,25 @@ const router = createRouter({
 //로그인 하지 않아도 이용할 수 있는 Path들
 const unSignedPathList = ['/user/login', '/user/join', '/fe/redirect'];
 
-// //navigation guard
-// router.beforeEach((to, from) => {
-//   console.log('to.path:', `"${to.path}"`);
-//   const authentcationStore = useAuthenticationStore();
-//   const isUnsignedPath = unSignedPathList.some((path) =>
-//     to.path.startsWith(path)
-//   );
+//navigation guard
+router.beforeEach((to, from) => {
+  console.log('to.path:', `"${to.path}"`);
+  const authentcationStore = useAuthenticationStore();
+  const isUnsignedPath = unSignedPathList.some((path) =>
+    to.path.startsWith(path)
+  );
 
-//   if (unSignedPathList.includes(to.path) && authentcationStore.state.isSigned) {
-//     //로그인 상태에서 /user/login, /user/join 경로로 이동하려고 하면
-//     return { path: '/' };
-//   } else if (
-//     !authentcationStore.state.isSigned &&
-//     !unSignedPathList.includes(to.path)
-//   ) {
-//     console.log('로그아웃 상태에서 접근 불가 경로');
-//     //로그아웃 상태에서 /user/login, /user/join 경로가 아닌 경우
-//     return { path: '/user/login' };
-//   }
-// });
+  if (unSignedPathList.includes(to.path) && authentcationStore.state.isSigned) {
+    //로그인 상태에서 /user/login, /user/join 경로로 이동하려고 하면
+    return { path: '/' };
+  } else if (
+    !authentcationStore.state.isSigned &&
+    !unSignedPathList.includes(to.path)
+  ) {
+    console.log('로그아웃 상태에서 접근 불가 경로');
+    //로그아웃 상태에서 /user/login, /user/join 경로가 아닌 경우
+    return { path: '/user/login' };
+  }
+});
 
 export default router;

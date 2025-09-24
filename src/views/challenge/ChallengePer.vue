@@ -3,16 +3,12 @@ import RankingCard from '@/components/challenge/RankingCard.vue';
 import { reactive, onMounted, ref } from 'vue';
 import Progress from '@/components/challenge/Progress.vue';
 import { getRank, putSuccess } from '@/services/challenge/challengeService';
-import { useChallengeStore } from '../../stores/challenge/challengeStore';
 import { useHeaderStore } from '@/stores/challenge/headerStore';
 const props = defineProps({
   id: Number,
   name: String,
 });
-const challengeStore = useChallengeStore();
 const headerStore = useHeaderStore();
-const year = challengeStore.state.year;
-const month = challengeStore.state.month;
 
 const state = reactive({
   progress: {},
@@ -35,7 +31,9 @@ const unitMent = () => {
   switch (state.progress.unit) {
     case 'km':
       return ' 달렸어요!';
-    case ('분', '개'):
+    case '분':
+      return ' 진행 했어요!';
+    case '개':
       return ' 했어요!';
   }
 };
@@ -57,7 +55,7 @@ const gap = () => {
 
   const formatGap = (value) => {
     if (state.progress.unit === 'km') {
-      return value.toFixed(1);
+      return Number.isInteger(value) ? value.toString() : value.toFixed(1);
     } else {
       return Math.round(value);
     }
@@ -77,9 +75,8 @@ const gap = () => {
   }
 };
 onMounted(async () => {
-  const req = { userId: 1, year: year, month: month };
   const cdId = props.id;
-  const res = await getRank(cdId, req);
+  const res = await getRank(cdId);
   state.progress = res.data;
   state.aroundRanking = res.data.aroundRanking;
   state.topRanking = res.data.topRanking;
@@ -100,7 +97,7 @@ onMounted(async () => {
       <div class="otd-category">
         {{
           state.progress.totalRecord == 0
-            ? '아직 기록이 없어요ㅠㅠ'
+            ? '아직 기록이 없어요😅'
             : '현재 ' + state.progress.formattedTotalRecord + unitMent()
         }}
       </div>

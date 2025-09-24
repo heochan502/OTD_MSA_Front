@@ -1,6 +1,9 @@
 import { defineStore } from "pinia";
 import { reactive } from "vue";
-import { getExercise } from "@/services/exercise/exerciseService";
+import {
+  getExercise,
+  getExerciseRecordList,
+} from "@/services/exercise/exerciseService";
 import { filterExerciseLogsByDate } from "@/utils/exerciseUtils";
 import { getDateString, getYesterdayDateString } from "@/utils/dateTimeUtils";
 
@@ -8,7 +11,7 @@ export const useExerciseRecordStore = defineStore("exerciseRecord", {
   state: () => ({
     exerciseList: [],
     loaded: false,
-    today: [], // 오늘 기록
+    dailyRecords: [], // 오늘 기록
     yesterday: [], // 어제 기록
     recordList: [], // 페이징처리한 리스트
     records: [],
@@ -16,10 +19,17 @@ export const useExerciseRecordStore = defineStore("exerciseRecord", {
   }),
   actions: {
     async fetchExercises() {
-      if (this.loaded) return;
+      // if (this.loaded) return;
       const res = await getExercise();
       this.exerciseList = res.data;
-      this.loaded = true;
+      // this.loaded = true;
+    },
+
+    addRecords(list) {
+      this.records = [...list];
+    },
+    clearRecords() {
+      this.records = [];
     },
 
     addCalendarDate(list) {
@@ -45,12 +55,6 @@ export const useExerciseRecordStore = defineStore("exerciseRecord", {
 
       this.addToday(todayRecords);
       this.addYesterDay(yesterdayRecords);
-    },
-    clearRecordList() {
-      this.recordList = [];
-    },
-    addToday(list) {
-      this.today = [...list];
     },
 
     addYesterDay(list) {
