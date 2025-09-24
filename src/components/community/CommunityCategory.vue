@@ -11,7 +11,7 @@ function clickCategory(key) {
 </script>
 
 <template>
-  <div class="category-scroll">
+  <div class="category-wrap">
     <div
       v-for="c in categories"
       :key="c.key"
@@ -26,26 +26,27 @@ function clickCategory(key) {
 </template>
 
 <style scoped>
-.category-scroll {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  padding-bottom: 4px;
+/* 4등분 그리드 + 좌우 대칭 패딩 → 가로 스크롤 제거 */
+.category-wrap {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 0px;
 }
 
+/* 카드(정사각형) 크기 업 */
 .category-chip {
-  min-width: 72px;
-  height: 72px;
+  aspect-ratio: 1 / 1; /* 정사각형 */
   background: #ffffff;
-  border-radius: 14px;
+  border-radius: 16px;
   box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.08),
     -6px -6px 12px rgba(255, 255, 255, 0.9);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  row-gap: 6px;
-  padding: 6px 10px;
+  row-gap: 2px;
+  padding: 8px 10px;
   cursor: pointer;
   border: 1px solid transparent;
 }
@@ -55,14 +56,19 @@ function clickCategory(key) {
     -3px -3px 8px rgba(255, 255, 255, 0.9);
 }
 
+/* 이모티콘 더 크게 */
 .category-chip img {
-  width: 28px;
-  height: 28px;
+  width: 40px;
+  height: 40px;
   object-fit: contain;
 }
+
+/* 라벨도 살짝 키움 */
 .label {
   font-size: 12px;
   font-weight: 600;
-  color: #5a5a5a;
+  color: #4d4d4d;
+  line-height: 1.1;
+  text-align: center;
 }
 </style>

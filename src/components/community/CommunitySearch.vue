@@ -25,6 +25,7 @@ function onInput(e) {
     emit('update:modelValue', v);
   }
 }
+
 function onSubmit() {
   emit('submit', keyword.value);
 }
@@ -51,9 +52,9 @@ function onSubmit() {
   gap: 8px;
   background: #fff;
   border-radius: 14px;
-  padding: 10px 12px;
-  border: 1px solid #e8ebef; /* 미세 테두리 */
-  box-shadow: 0 2px 8px rgba(17, 24, 39, 0.05); /* 얕은 그림자 */
+  padding: 0px 10px;
+  border: 1px solid #e8ebef;
+  box-shadow: 0 2px 8px rgba(17, 24, 39, 0.05);
 }
 .search-input {
   flex: 1;

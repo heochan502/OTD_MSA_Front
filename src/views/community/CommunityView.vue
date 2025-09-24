@@ -7,7 +7,6 @@ import PopularList from '@/components/community/PopularList.vue';
 import ComposeForm from '@/components/community/ComposeForm.vue';
 import { useCommunityStore } from '@/stores/community/community';
 
-/* 아이콘 (src/assets/img/community) */
 import iconFree from '@/assets/img/community/free.png';
 import iconDiet from '@/assets/img/community/diet.png';
 import iconWork from '@/assets/img/community/workout.png';
@@ -28,6 +27,7 @@ const categories = [
 ];
 
 const searchVal = ref('');
+
 const allPosts = computed(() =>
   ['free', 'diet', 'work', 'love'].flatMap((k) => store.list(k))
 );
@@ -36,7 +36,7 @@ const TOP_N = 3;
 const popularTop = computed(() =>
   allPosts.value
     .filter((p) =>
-      query.value ? p.title.toLowerCase().includes(query.value) : true
+      query.value ? (p.title ?? '').toLowerCase().includes(query.value) : true
     )
     .slice()
     .sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0))
@@ -45,7 +45,17 @@ const popularTop = computed(() =>
 
 const handleSelectCategory = (key) =>
   router.push({ name: 'CommunityCategory', params: { category: key } });
-const handleSearchSubmit = (q) => (searchVal.value = q);
+
+// 🔎 돋보기 클릭/엔터 → 카테고리 화면으로 이동 + 검색어 전달(q)
+function handleSearchSubmit(q) {
+  searchVal.value = q;
+  router.push({
+    name: 'CommunityCategory',
+    params: { category: 'free' }, // 기본 탭 자유수다로 열기(원하면 변경)
+    query: { q },
+  });
+}
+
 const handleClickPost = (post) =>
   router.push({ name: 'CommunityPost', params: { id: String(post.id) } });
 
@@ -73,13 +83,12 @@ function onSubmitSuccess() {
 </script>
 
 <template>
-  <!-- ✅ 전역 .wrap 과 충돌하지 않도록 클래스명 변경 -->
   <div class="cv-wrap">
     <section :class="['community-page', { blurred: showOverlay }]">
-      <!-- 상단 카드 (검색 + 글쓰기 + 카테고리) -->
       <div class="section-card top-card">
         <div class="head-row">
           <div class="search-line">
+            <!-- ✅ 입력 변화는 v-model로 받아 인기글 필터링, 제출은 라우팅 -->
             <CommunitySearch
               v-model="searchVal"
               class="search-flex"
@@ -119,7 +128,7 @@ function onSubmitSuccess() {
       </div>
     </section>
 
-    <!-- 오버레이 -->
+    <!-- 글쓰기 플로팅 오버레이 -->
     <div v-if="showOverlay" class="overlay-full" @click.self="closeOverlay">
       <div v-if="composeStep === 'pick'" class="picker-floating">
         <button class="pill" @click="onPickCategory('free')">자유수다</button>
@@ -139,23 +148,14 @@ function onSubmitSuccess() {
 </template>
 
 <style scoped>
-/* ===== 전역 중앙정렬의 영향 무효화 =====
-   #app이 flex 중앙정렬이라도, 이 안쪽 컨테이너는
-   스스로 폭을 가지고 좌우 대칭 패딩으로 가운데 배치 */
 .cv-wrap {
-  /* 전역 .wrap margin(30px 20px) 무시 */
   margin: 0 !important;
-
-  /* 전역 부모가 align-items:center 여도 너비를 꽉 채우게 */
   align-self: stretch;
-
   width: 100%;
   min-height: 100%;
   background: #f4f6f8;
   overflow-x: hidden;
 }
-
-/* 본문 컨테이너: 가운데 정렬 & 대칭 패딩 */
 .community-page {
   width: 100%;
   max-width: 420px;
@@ -173,7 +173,6 @@ function onSubmitSuccess() {
   opacity: 0.6;
 }
 
-/* 카드 공통 */
 .section-card {
   background: #fff;
   border-radius: 18px;
@@ -189,15 +188,13 @@ function onSubmitSuccess() {
   padding: 10px;
 }
 
-/* 타이틀(좌우 마진 0으로 비대칭 방지) */
 .section-title {
-  margin: 8px 0 4px !important;
+  margin: 4px 0 0px !important;
   font-size: 16px;
   font-weight: 700;
   color: #1f2937;
 }
 
-/* 검색 줄 */
 .head-row {
   display: flex;
   flex-direction: column;
@@ -225,7 +222,6 @@ function onSubmitSuccess() {
   cursor: pointer;
 }
 
-/* 카테고리 */
 .cat-wrap {
   margin-top: 8px;
 }
@@ -237,7 +233,7 @@ function onSubmitSuccess() {
   margin: 0;
 }
 
-/* 오버레이 */
+/* 글쓰기 오버레이 */
 .overlay-full {
   position: fixed;
   top: 50%;
@@ -277,7 +273,6 @@ function onSubmitSuccess() {
   color: #666;
 }
 
-/* 안전하게 box-sizing 보정 */
 *,
 *::before,
 *::after {
