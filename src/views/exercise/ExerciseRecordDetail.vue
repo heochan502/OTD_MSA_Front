@@ -1,15 +1,21 @@
 <script setup>
-import WeeklyCalendar from "@/components/exercise/WeeklyCalendar.vue";
-import { onMounted, reactive, computed, ref } from "vue";
+import { onMounted, reactive, computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import dayjs from "dayjs";
+import isoWeek from "dayjs/plugin/isoWeek";
+import effortLevels from "@/assets/effortLevels.json";
+import WeeklyCalendar from "@/components/exercise/WeeklyCalendar.vue";
+import WeeklyChart from "@/components/exercise/WeeklyCalendar.vue";
 import {
   getExerciseRecordDetail,
   getExerciseRecordList,
+  getExerciseRecordWeekly,
 } from "@/services/exercise/exerciseService";
 import { formatTimeKR, formatDateISO } from "@/utils/dateTimeUtils";
 import { calcDuration } from "@/utils/exerciseUtils";
 import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
-import effortLevels from "@/assets/effortLevels.json";
+
+dayjs.extend(isoWeek);
 
 const route = useRoute();
 const exerciseRecordStore = useExerciseRecordStore();
@@ -19,11 +25,35 @@ const confirmDialog = ref(false); // 모달 열림 여부
 
 const state = reactive({
   record: {},
+  weeklyRecords: [],
 });
 const currentRecordDate = computed(() => {
   if (!state.record?.startAt) return null;
   return new Date(state.record.startAt); // JS Date 객체로 변환
 });
+
+// 선택된 운동
+const selectedExercise = computed(() => {
+  if (!state.record.exerciseId) return 0;
+  return exerciseRecordStore.exerciseList.find(
+    (e) => e.exerciseId === state.record.exerciseId
+  );
+});
+
+// 거리기반운동 여부
+const hasDistance = computed(() => {
+  return selectedExercise.value ? selectedExercise.value.hasDistance : 0; // 1 또는 0 그대로 반환
+});
+
+// 반복횟수기반운동 여부
+const hasReps = computed(() => {
+  return selectedExercise.value ? selectedExercise.value.hasReps : 0; // 1 또는 0 그대로 반환
+});
+
+// 운동 소요시간
+const duration = computed(() =>
+  calcDuration(state.record.startAt, state.record.endAt)
+);
 
 const recordId = route.params.exerciseRecordId;
 const userId = 1;
@@ -84,27 +114,24 @@ const selectRecord = (record) => {
   getData(record.exerciseRecordId);
 };
 
-// 선택된 운동
-const selectedExercise = computed(() => {
-  if (!state.record.exerciseId) return 0;
-  return exerciseRecordStore.exerciseList.find(
-    (e) => e.exerciseId === state.record.exerciseId
-  );
-});
+watch(
+  () => state.record.startAt,
+  async (newStartAt) => {
+    if (!newStartAt) return;
 
-// 거리기반운동 여부
-const hasDistance = computed(() => {
-  return selectedExercise.value ? selectedExercise.value.hasDistance : 0; // 1 또는 0 그대로 반환
-});
+    const base = dayjs(newStartAt);
+    const params = {
+      userId,
+      startOfWeek: base.startOf("isoWeek").format("YYYY-MM-DDTHH:mm:ss"),
+      endOfWeek: base.endOf("isoWeek").format("YYYY-MM-DDTHH:mm:ss"),
+    };
 
-// 반복횟수기반운동 여부
-const hasReps = computed(() => {
-  return selectedExercise.value ? selectedExercise.value.hasReps : 0; // 1 또는 0 그대로 반환
-});
-
-// 운동 소요시간
-const duration = computed(() =>
-  calcDuration(state.record.startAt, state.record.endAt)
+    console.log(params);
+    const res = await getExerciseRecordWeekly(params);
+    if (res?.status === 200) {
+      state.weeklyRecords = res.data;
+    }
+  }
 );
 </script>
 
@@ -171,9 +198,9 @@ const duration = computed(() =>
       </div>
       <div>
         <!-- <WeeklyChart
-          :selectedDate="2025 - 09 - 17"
-          :logs="0"
-          label="exerciseDuration"
+          :selectedDate="selectedDate"
+          :records="state.weeklyRecords"
+          label="duration"
         /> -->
       </div>
     </div>
@@ -198,9 +225,7 @@ const duration = computed(() =>
                   )?.exerciseName || "운동명 없음"
                 }}
               </div>
-              <div class="otd-body-1">
-                {{ calcDuration(item.startAt, item.endAt) }}분
-              </div>
+              <div class="otd-body-1">{{ duration }}분</div>
             </div>
 
             <v-btn color="primary" @click="selectRecord(item)"> 보기 </v-btn>

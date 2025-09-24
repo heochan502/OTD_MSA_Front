@@ -1,6 +1,5 @@
 <script setup>
 import { ref, reactive, onMounted } from "vue";
-import { useRouter } from "vue-router";
 import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
 import ExerciseRecordList from "@/components/exercise/ExerciseRecordList.vue";
 import BodyCompositionSummary from "@/components/exercise/BodyCompositionSummary.vue";

@@ -12,6 +12,11 @@ export const getExerciseRecordList = (params) => {
   return axios.get(`${BASE_URL}/list`, { params }).catch((e) => e.response);
 };
 
+// 운동기록 주간 조회
+export const getExerciseRecordWeekly = (params) => {
+  return axios.get(`${BASE_URL}/weekly`, { params }).catch((e) => e.response);
+};
+
 // 운동기록 상세조회
 // export const getExerciseRecordDetail = (recordId, params) => {
 //   return axios

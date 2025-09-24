@@ -5,7 +5,6 @@ import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
 import ExerciseRecordList from "@/components/exercise/ExerciseRecordList.vue";
 import { getExerciseRecordList } from "@/services/exercise/exerciseService";
 import { formatDateYearMonthKR } from "@/utils/dateTimeUtils";
-import { result } from "lodash";
 
 const route = useRoute();
 const exerciseRecordStore = useExerciseRecordStore();
@@ -20,7 +19,7 @@ onMounted(async () => {
     row_per_page: 10,
     type: "monthly",
     date: date,
-    memberId: 1,
+    userId: 1,
   };
 
   const res = await getExerciseRecordList(params);
