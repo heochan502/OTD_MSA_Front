@@ -5,19 +5,19 @@ import router from '@/router'
 export const useAuthenticationStore = defineStore(
     "authentication", 
     () => {
-        const state = reactive({            
-            signedUser: {
-                userId: 0,
-                nickName: '',
-                pic: null
-            },            
+        const state = reactive({
+            signedUser: { userId: 0, nickName: '', pic: null },
+            accessToken: null,
+            refreshToken: null,
             isSigned: false
-        });
+          })
 
-        const setSignedUser = signedUser => {
+          const setSignedUser = ({ user, accessToken, refreshToken }) => {
             state.isSigned = true;
-            state.signedUser = signedUser                       
-        }
+            state.signedUser = user;
+            state.accessToken = accessToken;
+            state.refreshToken = refreshToken;
+          }
 
         const setSigndUserPic = pic => {
             state.signedUser.pic = pic;
@@ -25,8 +25,10 @@ export const useAuthenticationStore = defineStore(
 
         const logout = async () => {
             console.log('logout 처리')
-            state.isSigned = false;
-            state.signedUser = null;            
+            state.signedUser = { userId: 0, nickName: '', pic: null };
+            state.accessToken = null;
+            state.refreshToken = null;
+            state.isSigned = false;          
             await router.push('/user/login')
         }
 
