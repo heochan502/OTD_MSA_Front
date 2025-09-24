@@ -10,48 +10,24 @@ const isLoggingOut = ref(false);
 
 console.log(authStore.state.signedUser);
 
-// 유저 정보 계산된 속성
-const userInfo = computed(() => ({
-  nickName: authStore.state.signedUser?.nickName || '게스트',
-  email: authStore.state.signedUser?.email || '로그인이 필요합니다',
-  point: authStore.state.signedUser?.point || 0,
-  profileImage: authStore.state.signedUser?.pic || '/default-avatar.png'
-}));
+const userInfo = computed(() => {
+  const pic = authStore.state.signedUser?.pic
+  return {
+    nickName: authStore.state.signedUser?.nickName || '게스트',
+    email: authStore.state.signedUser?.email || '로그인이 필요합니다',
+    point: authStore.state.signedUser?.point || 0,
+    profileImage: pic
+      ? `${import.meta.env.VITE_API_URL}/uploads/${pic}`
+      : '/default-avatar.png'
+  }
+})
 // 로그아웃 버튼 클릭 시
 const logoutAccount = async () => {
-  if (isLoggingOut.value) return; // 중복 클릭 방지
-  
-  const confirmLogout = confirm('정말 로그아웃 하시겠습니까?');
-  if (!confirmLogout) return;
-  
-  isLoggingOut.value = true;
-  
-  try {
-    const token = localStorage.getItem('accessToken');
-    console.log('토큰 상태:', token ? '존재' : '없음');
-    
-    if (!token) {
-      // 토큰이 없으면 바로 로컬 로그아웃만
-      await authStore.logout();
-      await router.push('/user/login');
-      return;
-    }
-    
-    if (authStore.state.isSigned) {
-      await logout(); // 서버 로그아웃
-      await authStore.logout(); // Pinia 상태 초기화
-      console.log('로그아웃 완료');
-      await router.push('/user/login');
-    }
-  } catch (error) {
-    console.error('로그아웃 중 오류:', error);
-    alert('로그아웃 중 오류가 발생했습니다. 다시 시도해주세요.');
-    // 서버 오류가 발생해도 로컬 상태는 초기화
-    await authStore.logout();
-    await router.push('/user/login');
-  } finally {
-    isLoggingOut.value = false;
-  }
+  if (!confirm('로그아웃 하시겠습니까?')) return;
+  const res = await logout();
+  if (res === undefined || res.status !== 200) return;
+  counter.setLoggedIn(false);
+  router.push('/user/login');
 };
 
 // 포인트 포맷팅
@@ -66,8 +42,8 @@ const formatPoint = (point) => {
     <div class="profile-section">
       <router-link to="/user/ModifiProfile" class="profile-header">
         <div class="profile-image">
-          <img :src="userInfo.pic" :alt="userInfo.nickName" />
-        </div>
+  <img :src="userInfo.profileImage" :alt="userInfo.nickName" />
+</div>
         <div class="profile-info">
           <h2 class="nickname">{{ userInfo.nickName }}</h2>
           <p class="email">{{ userInfo.email }}</p>

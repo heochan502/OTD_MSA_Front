@@ -40,7 +40,7 @@ axios.interceptors.response.use(
       console.log('err.response : ', err.response);
       const authenticationStore = useAuthenticationStore();
       if (err.config.url === '/user/reissue' && err.response.status === 500) {
-        authenticationStore.signOut();
+        authenticationStore.logout();
       } else if (
         err.response.status === 401 &&
         authenticationStore.state.isSigned

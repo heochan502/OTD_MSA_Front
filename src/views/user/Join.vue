@@ -857,31 +857,30 @@ const modalContent = {
       </div>
 
       <!-- Step 4: 추가 정보 -->
-      <div v-if="currentStep === 4" class="step-container">
-        <h2 class="step-title">추가정보를 입력해주세요</h2>
+<div v-if="currentStep === 4" class="step-container">
+  <h2 class="step-title">추가정보를 입력해주세요</h2>
 
-        <div class="form-group">
-          <!-- 프로필 이미지 -->
-          <div class="profile-image-container">
-            <div class="profile-image-wrapper">
-              <div class="profile-image">
-                <img
-                  v-if="additionalInfo.pic"
-                  :src="URL.createObjectURL(additionalInfo.pic)"
-                  alt="Profile"
-                  class="profile-img"
-                />
-                <div v-else class="profile-placeholder"></div>
-              </div>
-              <input
-                type="file"
-                accept="image/*"
-                @change="handleFileChange"
-                class="file-input"
-              />
-              <div class="camera-button">+</div>
-            </div>
-          </div>
+  <div class="form-group">
+    <!-- 프로필 이미지 -->
+    <div class="profile-image-container">
+      <div class="profile-image-wrapper">
+        <div class="profile-image">
+          <img
+            v-if="profileImageUrl"
+            :src="profileImageUrl"
+            alt="Profile"
+            class="profile-img"
+          />
+          <div v-else class="profile-placeholder"></div>
+        </div>
+        <input
+          type="file"
+          accept="image/*"
+          @change="handleFileChange"
+          class="file-input"
+        />
+      </div>
+    </div>
 
           <input
             type="text"
@@ -1419,14 +1418,6 @@ const modalContent = {
   object-fit: cover;
 }
 
-.camera-button {
-  position: absolute;
-  bottom: -0.5rem;
-  right: -0.5rem;
-  background-color: #10b981;
-  border-radius: 50%;
-  padding: 0.5rem;
-}
 
 /* 설문조사 스타일 */
 .questions-container {
