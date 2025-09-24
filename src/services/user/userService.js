@@ -1,6 +1,6 @@
 import axios from '@/services/httpRequester';
 
-const path = '/user';
+const path = `/user`;
 
 // 인증 관련
 export const join = (data) => axios.post(`${path}/join`, data);

@@ -23,7 +23,7 @@ const today = dayjs();
 const currentDate = ref(today);
 
 // 이번 주의 "일요일"을 시작으로 설정
-const weekStart = ref(today.startOf("week")); // 기본은 일요일 시작
+const weekStart = ref(today.startOf("isoWeek")); // 월요일 시작
 
 // 한 주(7일) 배열
 const weekDays = computed(() =>
@@ -42,22 +42,29 @@ const isSelected = (day) => day.isSame(currentDate.value, "day");
 
 const selectDate = (day) => {
   currentDate.value = day;
-  emit("click-date", day.toDate());
+  emit("click-date", day.format("YYYY-MM-DD"));
 };
 
-
+// @click
+const goNow = () => {
+  currentDate.value = today; // 현재 날짜
+  weekStart.value = today.startOf("isoWeek"); // 이번 주 시작일 갱신
+  emit("click-date", today.format("YYYY-MM-DD"));
+};
 </script>
 
 <template>
   <div class="d-flex align-center ga-2">
-    <img
-      src="\image\exercise\calender.png"
-      alt="캘린더 아이콘"
-      class="calendar_icon"
-    />
-    <span class="otd-subtitle-1">{{ currentDate.format("YYYY년 M월") }}</span>
+    <div class="d-flex align-center ga-2">
+      <img
+        src="\image\exercise\calender.png"
+        alt="캘린더 아이콘"
+        class="calendar_icon"
+      />
+      <span class="otd-subtitle-1">{{ currentDate.format("YYYY년 M월") }}</span>
+    </div>
+    <div class="btn_now otd-body-3" @click.prevent="goNow">오늘</div>
   </div>
-
   <div class="weekly-calendar otd-body-1">
     <button class="btn" @click="goPrevWeek">
       <img src="\image\exercise\btn_prev.png" alt="" width="10" />
@@ -88,6 +95,9 @@ const selectDate = (day) => {
 .calendar_icon {
   width: 18px;
   height: 18px;
+}
+.btn_now {
+  cursor: pointer;
 }
 .weekly-calendar {
   display: flex;
