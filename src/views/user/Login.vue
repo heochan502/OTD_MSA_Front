@@ -87,13 +87,12 @@ const submit = async () => {
         <router-link class="buttonjoin" to="/user/join">회원가입</router-link>
       </div>
       <!-- API 로그인 -->
-      <div class="mb-3">
+      <div class="API">
         <span class="naver"
           ><a
             :href="`${beBaseUrl}/oauth2/authorization/naver?redirect_uri=${redirectUrl}`"
-            >네이버</a
-          ></span
-        >
+            >네이버</a>
+          </span>
         <span class="kakao"
           ><a
             :href="`${beBaseUrl}/oauth2/authorization/kakao?redirect_uri=${redirectUrl}`"
@@ -117,6 +116,7 @@ const submit = async () => {
 .container {
   max-width: 576px;
   padding: 0px;
+  
 }
 
 .buttonlogin {
@@ -171,27 +171,9 @@ const submit = async () => {
   padding-top: 10px;
   padding-left: 10px;
 }
-.mb-3 {
-  text-align: center;
-}
+
 
 .naver {
-  width: 100%;
-  font-size: 16px;
-  padding-top: 10px;
-  padding-bottom: 10px;
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-  background-color: #fbe900;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-}
-.kakao {
   width: 100%;
   font-size: 16px;
   padding-top: 10px;
@@ -206,9 +188,31 @@ const submit = async () => {
   text-align: center;
   text-decoration: none;
   display: inline-block;
+
+}
+.kakao {
+  width: 100%;
+  font-size: 16px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  background-color: #fbe900;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+
 }
 
 .additional-links {
+  text-align: center;
+}
+.API {
+  padding-bottom: 20px;
   text-align: center;
 }
 </style>

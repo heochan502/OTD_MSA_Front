@@ -6,13 +6,12 @@ import { reissue } from './user/userService';
 axios.defaults.baseURL = `${import.meta.env.VITE_BASE_URL}/api/OTD`;
 axios.defaults.withCredentials = true;
 
-const BASE_URL = import.meta.env.VITE_BASE_URL;
 // const httpService = axios.create({
 //   baseURL: 'http://localhost:8080/api/OTD',
 //   headers: { 'Content-Type': 'application/json' },
 // });
 
-// 요청 인터셉터에서 토큰 자동 추가
+// //요청 인터셉터에서 토큰 자동 추가
 // axios.interceptors.request.use(
 //   (config) => {
 //     const token = localStorage.getItem('accessToken'); // JWT 토큰
@@ -38,10 +37,7 @@ axios.interceptors.response.use(
     if (err.response) {
       console.log('err.response : ', err.response);
       const authenticationStore = useAuthenticationStore();
-      if (
-        err.config.url === `${BASE_URL}/user/reissue` &&
-        err.response.status === 500
-      ) {
+      if (err.config.url === '/user/reissue' && err.response.status === 500) {
         authenticationStore.signOut();
       } else if (
         err.response.status === 401 &&

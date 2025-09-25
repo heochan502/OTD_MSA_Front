@@ -28,5 +28,6 @@ export const checkNicknameDuplicate = (nickname) =>
 export const checkDuplicateUser = (data) =>
   axios.post(`${path}/check-duplicate`, data);
 
+
 // 비밀번호 관련
 export const changePassword = (data) => axios.patch(`${path}/password`, data);
