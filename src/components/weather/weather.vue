@@ -5,7 +5,7 @@ import { trans } from '@/utils/geoTrans.js';
 const temp = ref(null);
 const humidity = ref(null);
 navigator.permissions.query({ name: 'geolocation' }).then((result) => {
-  console.log('위치 권한 상태:', result.state); // granted / denied / prompt
+  // console.log('위치 권한 상태:', result.state); // granted / denied / prompt
 });
 
 async function fetchWeather(nx, ny) {
@@ -42,8 +42,6 @@ async function fetchWeather(nx, ny) {
   }
   baseTime = hour.toString().padStart(2, '0') + '30';
 
-  console.log('baseDate:', baseDate, 'baseTime:', baseTime);
-
   const url =
     `https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst` +
     `?serviceKey=${serviceKey}` +
@@ -53,7 +51,6 @@ async function fetchWeather(nx, ny) {
 
   const res = await fetch(url);
   const data = await res.json();
-  console.log('weather data : ', data.response.body.items);
 
   if (data.response?.body?.items?.item) {
     data.response.body.items.item.forEach((el) => {
@@ -68,14 +65,12 @@ onMounted(() => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const grid = trans('toXY', pos.coords.latitude, pos.coords.longitude);
-        console.log('GPS 기반 nx, ny:', grid.nx, grid.ny);
         fetchWeather(grid.nx, grid.ny);
       },
       async () => {
         const res = await fetch('https://ipapi.co/json/');
         const data = await res.json();
         const grid = trans('toXY', data.latitude, data.longitude);
-        console.log('IP 기반 nx, ny:', grid.nx, grid.ny);
         fetchWeather(grid.nx, grid.ny);
       }
     );
@@ -86,7 +81,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <p class="otd-body-3">오늘 날씨는 🌡️ {{ temp }}℃ 💧 {{ humidity }}%</p>
+  <span class="otd-body-3">오늘 날씨는 🌡️ {{ temp }}℃ 💧 {{ humidity }}%</span>
 </template>
 
 <style lang="scss" scoped></style>

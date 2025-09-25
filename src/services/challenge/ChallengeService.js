@@ -10,13 +10,13 @@ export const getSelectedAll = () => {
   return axios.get(`${BASE_URL}/selected`).catch((e) => e.response);
 };
 
-export const getChallenge = (type) => {
+export const getChallengeList = (type) => {
   return axios
     .get(`${BASE_URL}/addlist`, { params: { type } })
     .catch((e) => e.response);
 };
 
-export const getMapChallenge = (type) => {
+export const getCompetitonList = (type) => {
   return axios
     .get(`${BASE_URL}/addcompetitionlist`, {
       params: { type },

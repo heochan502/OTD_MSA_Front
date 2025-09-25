@@ -9,6 +9,8 @@ const router = useRouter();
 
 const authentication = useAuthenticationStore();
 const beBaseUrl = import.meta.env.VITE_BASE_URL;
+// const beBaseUrl = import.meta.env.VITE_API_URL;
+
 const feBaseUrl = window.location.origin;
 const redirectUrl = `${feBaseUrl}/fe/redirect`;
 
@@ -28,13 +30,8 @@ const submit = async () => {
   try {
     console.log('전송할 데이터:', state.form);
     const res = await login(state.form);
-    console.log('Login.vue - submit() - res: ', res);
-    
 
-    console.log('응답 데이터:', JSON.stringify(res.data.result, null, 2));
-    console.log('accessToken:', res.data.result.accessToken);
-    console.log('refreshToken:', res.data.result.refreshToken);
- 
+    console.log('Login.vue - submit() - res: ', res);    
 
     if (res.status === 200) {
       const signedUser = res.data.result;
@@ -91,6 +88,14 @@ const submit = async () => {
         <router-link class="buttonjoin" to="/user/join">회원가입</router-link>
       </div>
       <!-- API 로그인 -->
+
+      <div class="mb-3">
+        <span class="naver"
+          ><a
+            :href="`${beBaseUrl}/oauth2/authorization/naver?redirect_uri=${redirectUrl}`"
+            >네이버</a
+          ></span
+        >
       <div class="API">
         <span class="naver"
           ><a
@@ -184,7 +189,7 @@ const submit = async () => {
   padding-bottom: 10px;
   padding-left: 0.5rem;
   padding-right: 0.5rem;
-  background-color: #03c75a;
+  background-color: #fbe900;
   color: white;
   border: none;
   border-radius: 10px;
@@ -201,7 +206,7 @@ const submit = async () => {
   padding-bottom: 10px;
   padding-left: 0.5rem;
   padding-right: 0.5rem;
-  background-color: #fbe900;
+  background-color: #03c75a;
   color: white;
   border: none;
   border-radius: 10px;
