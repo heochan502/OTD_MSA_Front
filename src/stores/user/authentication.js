@@ -1,6 +1,6 @@
 import { reactive } from 'vue'
 import { defineStore } from 'pinia'
-import router from '@/router'
+
 
 export const useAuthenticationStore = defineStore(
     "authentication", 
