@@ -1,3 +1,4 @@
+
 import { reactive } from 'vue';
 import { defineStore } from 'pinia';
 import router from '@/router';
@@ -26,15 +27,20 @@ export const useAuthenticationStore = defineStore(
       state.signedUser.pic = pic;
     };
 
+
     const setPoint = (point) => {
       state.signedUser.point = point;
     };
-    const logout = async () => {
-      console.log('logout 처리');
-      state.signedUser = { userId: 0, nickName: '', pic: null };
-      state.isSigned = false;
-      await router.push('/user/login');
-    };
+
+        const logout = async () => {
+            console.log('logout 처리')
+            state.signedUser = { userId: 0, nickName: '', pic: null };
+            state.accessToken = null;
+            state.refreshToken = null;
+            state.isSigned = false;      
+        }
+
+
 
     return { state, setSignedUser, setSigndUserPic, setPoint, logout };
   },

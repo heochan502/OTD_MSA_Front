@@ -1,7 +1,7 @@
 <script setup>
-import { ref, computed, watch, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { join, checkUidDuplicate } from '@/services/user/userService';
+import { ref, computed, watch, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { join, checkUidDuplicate } from '@/services/user/userService'
 
 const router = useRouter();
 const basePath = import.meta.env.VITE_BASE_URL;
@@ -25,7 +25,7 @@ const agreements = ref({
   marketing: false,
 });
 
-// 3단계: 계정 정보 (개선된 검증 시스템)
+// 3단계: 계정 정보 
 const accountInfo = ref({
   uid: '',
   upw: '',
@@ -50,8 +50,8 @@ const validation = ref({
     isValid: true,
     message: '',
     touched: false,
-  },
-});
+  }
+})
 
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
@@ -163,8 +163,8 @@ const validateMemberId = (uid) => {
       message: '아이디는 영문, 숫자, 언더스코어(_)만 사용 가능합니다.',
     };
   }
-  return { isValid: true, message: '' };
-};
+  return { isValid: true, message: '' }
+}
 
 // 비밀번호 유효성 검사 함수
 const validatePassword = (password) => {
@@ -172,7 +172,7 @@ const validatePassword = (password) => {
     return { isValid: false, message: '비밀번호를 입력해주세요.' };
   }
   if (password.length < 8) {
-    return { isValid: false, message: '비밀번호는 8자 이상이어야 합니다.' };
+    return { isValid: false, message: '비밀번호는 8자 이상이어야 합니다.' }
   }
   if (password.length > 20) {
     return {
@@ -180,8 +180,8 @@ const validatePassword = (password) => {
       message: '비밀번호는 최대 20자까지 입력 가능합니다.',
     };
   }
-  return { isValid: true, message: '' };
-};
+  return { isValid: true, message: '' }
+}
 
 // 비밀번호 확인 유효성 검사 함수
 const validatePasswordConfirm = (password, passwordConfirm) => {
@@ -290,7 +290,7 @@ const resetIdValidation = () => {
   ) {
     validation.value.uid.message = '';
   }
-};
+}
 
 // 워처 설정
 watch(
@@ -303,17 +303,14 @@ watch(
   }
 );
 
-watch(
-  () => accountInfo.value.upw,
-  (newValue) => {
-    if (validation.value.upw.touched) {
-      validateField('upw', newValue);
-    }
-    if (validation.value.confirmPassword.touched) {
-      validateField('confirmPassword', accountInfo.value.confirmPassword);
-    }
+watch(() => accountInfo.value.upw, (newValue) => {
+  if (validation.value.upw.touched) {
+    validateField('upw', newValue)
   }
-);
+  if (validation.value.confirmPassword.touched) {
+    validateField('confirmPassword', accountInfo.value.confirmPassword)
+  }
+})
 
 watch(
   () => accountInfo.value.confirmPassword,
@@ -381,13 +378,16 @@ const canProceedToNext = computed(() => {
         passwordMatchStatus.value.isMatch
       );
     case 4:
-      return (
-        additionalInfo.value.name &&
-        additionalInfo.value.birthDate &&
-        additionalInfo.value.phone &&
-        additionalInfo.value.gender &&
-        additionalInfo.value.nickname
-      );
+  return (
+    additionalInfo.value.name &&
+    additionalInfo.value.birthDate &&
+    additionalInfo.value.phone &&
+    additionalInfo.value.gender &&
+    additionalInfo.value.nickname &&
+    validation.value.nickname.isValid &&     
+    validation.value.nickname.checked &&    
+    validation.value.nickname.available     
+  );
     case 5:
       return isSurveyCompleted.value;
     default:
@@ -525,9 +525,6 @@ const submitJoin = async () => {
   isLoading.value = true;
 
   try {
-    const formData = new FormData();
-
-    // 회원가입 데이터
     const joinData = {
       uid: accountInfo.value.uid,
       upw: accountInfo.value.upw,
@@ -537,10 +534,10 @@ const submitJoin = async () => {
       phone: additionalInfo.value.phone,
       gender: additionalInfo.value.gender,
       nickname: additionalInfo.value.nickname,
-      roles: ['사용자'],
+      roles: ['유저'],
       surveyAnswers: calculateSurveyScore.value,
-    };
-
+    }
+    
     // JSON 데이터 추가
     formData.append(
       'req',
@@ -554,22 +551,38 @@ const submitJoin = async () => {
       formData.append('pic', additionalInfo.value.pic);
     }
 
+    console.log('FormData entries:');
+    for (let pair of formData.entries()) {
+      console.log(pair[0], pair[1]);
+    }
+
     await join(formData);
 
     alert('회원가입이 완료되었습니다!');
     router.push('/user/login');
   } catch (error) {
-    console.error('회원가입 오류:', error);
+    console.error('회원가입 상세 오류:', error);
+    console.error('오류 응답:', error.response);
+    console.error('오류 요청:', error.request);
+    console.error('오류 메시지:', error.message);
 
+    let errorMessage = '회원가입에 실패했습니다.';
+    
     if (error.response) {
-      const message =
-        error.response.data?.message || '회원가입에 실패했습니다.';
-      alert(message);
+      // 서버에서 응답을 받았지만 오류 상태
+      const serverMessage = error.response.data?.message || error.response.data?.error;
+      errorMessage = serverMessage || `서버 오류 (${error.response.status}): ${error.response.statusText}`;
+      console.error('서버 응답 데이터:', error.response.data);
     } else if (error.request) {
-      alert('네트워크 오류가 발생했습니다.');
+      // 요청을 보냈지만 응답을 받지 못함
+      errorMessage = '서버와 통신할 수 없습니다. 네트워크 연결을 확인해주세요.';
+      console.error('요청 정보:', error.request);
     } else {
-      alert('회원가입 처리 중 오류가 발생했습니다.');
+      // 요청 설정 중에 오류 발생
+      errorMessage = `요청 처리 중 오류: ${error.message}`;
     }
+    
+    alert(errorMessage);
   } finally {
     isLoading.value = false;
   }
@@ -797,7 +810,7 @@ const modalContent = {
 
           <!-- 비밀번호 입력 -->
           <div class="form-group">
-            <label for="upw">비밀번호 *</label>
+            <label for="upw"></label>
             <div class="input-wrapper">
               <input
                 :type="showPassword ? 'text' : 'password'"
@@ -868,15 +881,12 @@ const modalContent = {
             >
               {{ validation.upw.message }}
             </div>
-            <p>
-              비밀번호는 영문자, 숫자, 특수기호로 구성되며 10자 이상이어야
-              합니다.
-            </p>
+            <p>비밀번호는 영문자, 숫자, 특수기호로 구성되며 10자 이상이어야 합니다.</p>
           </div>
 
           <!-- 비밀번호 확인 -->
           <div class="form-group">
-            <label for="confirmPassword">비밀번호 확인 *</label>
+            <label for="confirmPassword"></label>
             <div class="input-wrapper">
               <input
                 :type="showConfirmPassword ? 'text' : 'password'"
@@ -1012,12 +1022,43 @@ const modalContent = {
             <option value="F">여성</option>
           </select>
 
-          <input
-            type="text"
-            placeholder="닉네임"
-            v-model="additionalInfo.nickname"
-            class="input-field"
-          />
+         <!-- 닉네임 입력 및 중복검사 -->
+<div class="form-group">
+  <label for="nickname"></label>
+  <div class="input-wrapper">
+    <input
+      type="text"
+      id="nickname"
+      placeholder="닉네임을 입력해 주세요 (2~10자)"
+      v-model="additionalInfo.nickname"
+      :class="{
+        'input-field-with-button': true,
+        error: validation.nickname.touched && !validation.nickname.isValid,
+        success: validation.nickname.touched && validation.nickname.isValid && validation.nickname.available,
+      }"
+      @blur="validation.nickname.touched = true"
+      maxlength="10"
+    />
+    <button
+      type="button"
+      class="btn-small"
+      @click="checkNicknameDuplicateAction"
+      :disabled="isLoading"
+    >
+      <span v-if="isLoading">확인중...</span>
+      <span v-else>중복확인</span>
+    </button>
+  </div>
+  <div
+    v-if="validation.nickname.touched && validation.nickname.message"
+    :class="[
+      'field-message',
+      validation.nickname.isValid && validation.nickname.available ? 'field-success' : 'field-error'
+    ]"
+  >
+    {{ validation.nickname.message }}
+  </div>
+</div>
         </div>
       </div>
 

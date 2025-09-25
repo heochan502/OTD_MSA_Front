@@ -26,10 +26,9 @@ const logoutAccount = async () => {
   if (!confirm('로그아웃 하시겠습니까?')) return;
   const res = await logout();
   if (res === undefined || res.status !== 200) return;
-  counter.setLoggedIn(false);
+  authStore.logout();
   router.push('/user/login');
 };
-
 // 포인트 포맷팅
 const formatPoint = (point) => {
   return point?.toLocaleString() || '0';
@@ -37,6 +36,17 @@ const formatPoint = (point) => {
 </script>
 
 <template>
+  <div>
+    <div>
+      <a>프로필사진</a>
+      <a>{{ authStore.state.signedUser?.nickName || '사용자' }}</a>
+      <a>이메일</a>
+    </div>
+    <div><a>내가 쓴 게시글</a><a>나의 좋아요</a><a>내가 쓴 댓글</a></div>
+  </div>
+  <div>
+    <a>내포인트</a><a>{{ authStore.state.signedUser.point }}P</a>
+  </div>
   <div class="profile-container">
     <!-- 프로필 섹션 -->
     <div class="profile-section">
@@ -198,7 +208,6 @@ const formatPoint = (point) => {
   margin: 0 0 16px 0;
   color: #333;
 }
-
 .activity-section {
   margin-bottom: 30px;
 

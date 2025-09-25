@@ -2,10 +2,14 @@ import axios from 'axios';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { reissue } from './user/userService';
 
+import { useMessageModalStore } from '@/stores/messageModal';
+
+
 // 환경별 baseURL (dev → localhost:8080, prod → greenart.n-e.kr/otd-api)
 axios.defaults.baseURL = `${import.meta.env.VITE_BASE_URL}/api/OTD`;
 axios.defaults.withCredentials = true;
 
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 // const httpService = axios.create({
 //   baseURL: 'http://localhost:8080/api/OTD',
 //   headers: { 'Content-Type': 'application/json' },
@@ -37,21 +41,25 @@ axios.interceptors.response.use(
     if (err.response) {
       console.log('err.response : ', err.response);
       const authenticationStore = useAuthenticationStore();
-      if (err.config.url === '/user/reissue' && err.response.status === 500) {
-        authenticationStore.signOut();
-      } else if (
-        err.response.status === 401 &&
-        authenticationStore.state.isSigned
+      if (
+        err.config.url === `${BASE_URL}/user/reissue` &&
+        err.response.status === 500
       ) {
+        authenticationStore.signOut();
+      } else if (err.response.status === 403 && authenticationStore.state.isSigned) {
         //401 UnAuthorized 에러인데 FE 로그인 처리 되어 있다면
-        try {
-          await reissue(); //AccessToken 재발행 시도
-          // 중단된 요청을(에러난 요청)을 토큰 갱신 후 재요청
-          return await axios.request(err.config);
-        } catch (reErr) {
-          console.error('Reissue 실패:', reErr);
-          authenticationStore.signOut();
-        }
+
+
+        await reissue(); //AccessToken 재발행 시도
+
+        // 중단된 요청을(에러난 요청)을 토큰 갱신 후 재요청
+        return await axios.request(err.config);
+      } else {
+        const message = err.response.data?.message
+          ? err.response.data?.message
+          : err.response.data;
+        const messageModalStore = useMessageModalStore();
+        messageModalStore.setMessage(message);
       }
     }
     return Promise.reject(err);
