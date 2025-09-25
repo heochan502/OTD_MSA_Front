@@ -59,7 +59,7 @@ const onTopIconClick = (i) => {
 <template>
   <div class="meal-cards">
     <div
-      class="meal-card"
+      class="meal-card otd-shadow"
       v-for="(item, index) in mealInfo"
       :key="item.meal_day"
     >
@@ -143,12 +143,11 @@ const onTopIconClick = (i) => {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  width: 170px;
+  width: 168px;
   height: 125px;
   background: #fff;
   padding: 15px;
   border-radius: 12px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
   font-weight: 500;
   font-size: 14px;
   color: #303030;

@@ -1,17 +1,19 @@
 <script setup>
-import {useRoute, useRouter} from 'vue-router'
-import { computed, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router'
+import { computed, onMounted, ref } from 'vue';
 import weather from '@/components/weather/weather.vue';
 import { useHeaderStore } from '@/stores/challenge/headerStore';
+import { useAuthenticationStore } from '@/stores/user/authentication';
 
 const route = useRoute();
-const router = useRouter();
 const headerStore = useHeaderStore();
-const userInfo = {
-  name : '보노보노',
-  nickName: '뭘보노',
-  userPoint: 10000,
-}
+const authentication = useAuthenticationStore();
+const userInfo = computed(() => ({
+  nickName: authentication.state.signedUser.nickName,
+  userPoint: authentication.state.signedUser.point,
+  pic: authentication.state.signedUser.pic,
+  xp: authentication.state.signedUser.xp,
+}));
 
 const categoryLabelMap = {
   free:'자유수다',
@@ -76,16 +78,18 @@ const handleClick= ()=>{
       <img class="avatar" src="/image/main/test.png" alt="프로필"></img>
       <div class="info">
         <weather/>
-        <span class="  otd-title ">행키 님</span>
+        <span class="otd-title">{{userInfo.nickName}} 님</span>
       </div>  
     </div>
-      <div class="point otd-body-1">
-        <router-link to="/pointshop" class="pointShop" :class="{active : route.path.startsWith('/pointshop')}">
+    <div class="point otd-body-1">
+      <router-link to="/pointshop" class="pointShop" :class="{active : route.path.startsWith('/pointshop')}">
+        <div class="point-wrap">
         <img class="point-img" src="/image/main/point.png" alt="포인트"/>
-        <span >{{ `${userInfo.userPoint.toLocaleString()}` }} </span>
-        </router-link>
-    </div>    
-  </div> 
+        <span >{{ userInfo.userPoint}} </span>
+        </div>
+      </router-link>
+    </div>
+  </div>
 
 </template>
 
@@ -107,7 +111,11 @@ const handleClick= ()=>{
   width: 20px;
   height: 20px;
 }
-
+.point-wrap{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .otd-logo {
   width: 40%;  
 }
@@ -137,6 +145,7 @@ const handleClick= ()=>{
   justify-content:end;
   font-size: 12px;
   row-gap: 5px;
+  margin-left: 15px;
 }
 
 .top-header {
@@ -154,7 +163,7 @@ const handleClick= ()=>{
 }
 
 .user {
-  padding: 20px 20px 0px 20px;
+  margin: 20px;
   display: flex;
   align-items: center;
   

@@ -1,40 +1,47 @@
 <script setup>
-import { ref } from "vue";
+import { ref, reactive, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
 import ExerciseRecordList from "@/components/exercise/ExerciseRecordList.vue";
 import BodyCompositionSummary from "@/components/exercise/BodyCompositionSummary.vue";
 import WeeklyCalendar from "@/components/exercise/WeeklyCalendar.vue";
+import { getExerciseRecordList } from "@/services/exercise/exerciseService";
+import { formatDateISO, formatDateYearMonthISO } from "@/utils/dateTimeUtils";
 import btnAdd from "/image/exercise/btn_add_grey.png";
 
 const exerciseRecordStore = useExerciseRecordStore();
-const selectedDate = ref(new Date());
+const selectedDate = ref(formatDateISO(new Date()));
+const monthly = formatDateYearMonthISO(selectedDate.value);
 
+onMounted(async () => {
+  await exerciseRecordStore.fetchExercises();
+
+  onDateClick(selectedDate.value);
+});
+
+// @click
 const onDateClick = async (date) => {
+  exerciseRecordStore.clearRecords();
   selectedDate.value = date;
   // date 는 JS Date 객체 (컴포넌트에서 toDate()로 emit)
-  // console.log(date);
+
   const params = reactive({
     page: 1,
     row_per_page: 2,
-    type: daily,
-    date: date.toISOString().slice(0, 10), // YYYY-MM-DD 형태
+    type: "daily",
+    date: date, // YYYY-MM-DD 형태
     memberId: 1,
   });
-  const res = await getExerciseRecordList(params);
-  exerciseRecordStore.today = res.data;
-};
 
-const nowDate = new Date();
-console.log(nowDate);
+  const res = await getExerciseRecordList(params);
+  exerciseRecordStore.records = res.data;
+};
 </script>
 
 <template>
   <div class="wrap content_wrap">
     <div class="weekly_calendar">
-      <WeeklyCalendar
-        :record-date="exerciseRecordStore.today"
-        @click-date="onDateClick"
-      />
+      <WeeklyCalendar @click-date="onDateClick" />
     </div>
     <div class="exercise_report">
       <div class="subtitle ga-1">
@@ -45,7 +52,14 @@ console.log(nowDate);
           </router-link>
         </div>
         <div>
-          <router-link to="/exercise/record">
+          <router-link
+            :to="{
+              path: '/exercise/record',
+              query: {
+                date: monthly,
+              },
+            }"
+          >
             <span class="otd-body-2">더보기</span>
           </router-link>
         </div>
