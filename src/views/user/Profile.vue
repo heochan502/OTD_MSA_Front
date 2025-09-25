@@ -26,7 +26,7 @@ const logoutAccount = async () => {
   if (!confirm('로그아웃 하시겠습니까?')) return;
   const res = await logout();
   if (res === undefined || res.status !== 200) return;
-  counter.setLoggedIn(false);
+  authStore.logout();
   router.push('/user/login');
 };
 
