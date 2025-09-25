@@ -5,9 +5,10 @@ import {  getSelectedAll,  postMissionRecord,} from '@/services/challenge/challe
 import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 import { useChallengeStore } from '@/stores/challenge/challengeStore.js';
 import Progress from '@/components/challenge/Progress.vue';
+import { useAuthenticationStore } from '@/stores/user/authentication';
 
 const challengeStore = useChallengeStore();
-
+const authentication = useAuthenticationStore();
 const router = useRouter();
 
 const state = reactive({
@@ -18,6 +19,7 @@ const state = reactive({
   user: {},
   missionComplete: [],
   success: 0,
+  tier: '',
 });
 
 const toChallengeList = () => {
@@ -59,6 +61,7 @@ onMounted(async () => {
   state.success = res.data.success;
   challengeStore.state.progressChallenge = res.data;
   totalXp.value = res.data.user.xp;
+  state.tier = authentication.state.signedUser.challengeRole;
   console.log('res', res.data);
   setMissionState();
   console.log("로그 데이터",state );
@@ -91,8 +94,8 @@ const setMissionState = () => {
     ...mission,
     done: completedIds.includes(mission.cdId),
   }));
-  console.log('ids', completedIds);
-  console.log('missionDone', missionDone);
+  // console.log('ids', completedIds);
+  // console.log('missionDone', missionDone);
 };
 
 // 로그인 제대로 되면 수정(userId 안보냄)
@@ -102,7 +105,24 @@ const completeMission = async (mission) => {
   } else {
     mission.done = true;
     await postMissionRecord(mission.cdId);
-    window.location.reload();
+    authentication.setPoint(
+      authentication.state.signedUser.point + mission.cdReward
+    );
+    state.user.point = authentication.state.signedUser.point;
+    // window.location.reload();
+  }
+};
+
+const levelMent = () => {
+  switch (state.tier) {
+    case '다이아':
+      return '다이아처럼 빤짝빤짝 !';
+    case '골드':
+      return `다이아까지 ${leftLevel} 남았어요!`;
+    case '실버':
+      return `골드까지 ${leftLevel} 남았어요!`;
+    case '브론즈':
+      return `실버까지 ${leftLevel} 남았어요!`;
   }
 };
 
@@ -118,21 +138,29 @@ const BASE_URL = import.meta.env.BASE_URL;
       <div>
         <div>티어 이미지</div>
         <div>
-          <span>{{ totalLevel }}레벨</span><span>silver</span>
-          <span>승급까지 {{ leftLevel }}레벨 남았어요!</span>
+          <span>{{ totalLevel }}레벨</span><span>{{ state.tier }}</span>
+          <span>{{ ' ' + levelMent() }}</span>
         </div>
         <Progress :indata-progress="leftXp" bar-type="xp"></Progress>
       </div>
-      <div>
-        <div>
-          <img src="" alt="" />
-          <span>보유한 포인트 </span>
-          <span>{{ Number(state.user?.point).toLocaleString() }}P</span>
+      <div class="sub-wrap">
+        <div class="point-wrap otd-list-box-style">
+          <img class="image" src="/image/main/point.png" alt="포인트" />
+          <div class="box otd-body-2">
+            <span>보유한 포인트 </span>
+            <span>{{ Number(state.user?.point).toLocaleString() }}P</span>
+          </div>
         </div>
-        <div>
-          <img src="" alt="" />
-          <span>성공한 챌린지 </span>
-          <span>{{ state.success }}개</span>
+        <div class="success-challenge otd-list-box-style">
+          <img
+            class="image"
+            src="/image/challenge/success-challenge.png"
+            alt=""
+          />
+          <div class="box otd-body-2">
+            <span>성공한 챌린지 </span>
+            <span>{{ state.success }}개</span>
+          </div>
         </div>
       </div>
     </div>
@@ -212,7 +240,7 @@ const BASE_URL = import.meta.env.BASE_URL;
           <div
             v-for="n in Math.max(0, 2 - state.personalChallenge.length)"
             :key="'d-' + n"
-            class="empty-card"
+            class="empty-card otd-list-box-style"
             @click="toList('personal')"
           >
             <span
@@ -330,5 +358,27 @@ const BASE_URL = import.meta.env.BASE_URL;
   align-items: center;
   justify-content: center;
   text-align: center;
+}
+.sub-wrap {
+  display: flex;
+  justify-content: space-between;
+}
+.point-wrap,
+.success-challenge {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  width: 168px;
+  height: 68px;
+  .image {
+    width: 30px;
+  }
+  .box {
+    font-weight: 500;
+    display: flex;
+    flex-direction: column;
+  }
 }
 </style>
