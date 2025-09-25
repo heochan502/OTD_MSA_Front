@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import {
   getSelectedAll,
   postMissionRecord,
+  settlement,
 } from '@/services/challenge/challengeService';
 import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 import { useChallengeStore } from '@/stores/challenge/challengeStore';
@@ -60,7 +61,7 @@ onMounted(async () => {
   state.user = res.data.user;
   state.missionComplete = res.data.missionComplete;
   state.success = res.data.success;
-  
+
   challengeStore.state.progressChallenge = res.data;
   totalXp.value = res.data.user.xp;
   console.log('res', res.data);
@@ -111,11 +112,22 @@ const completeMission = async (mission) => {
 
 const FILE_URL = import.meta.env.VITE_BASE_URL;
 const BASE_URL = import.meta.env.BASE_URL;
+
+const settlementButton = async () => {
+  const params = {
+    startDate: '2025-09-01',
+    endDate: '2025-09-28',
+    type: 'weekly',
+  };
+  const res = await settlement(params);
+  console.log(res);
+};
 </script>
 
 <template>
   <div class="wrap">
     <!-- 내정보 -->
+    <div @click="settlementButton()">월간 정산</div>
     <div>
       <div class="first-title">내 정보</div>
       <div>

@@ -51,3 +51,7 @@ export const postMissionRecord = (cdId) => {
 export const postChallenge = (params) => {
   return axios.post(`${BASE_URL}/add`, params).catch((e) => e.response);
 };
+
+export const settlement = (params) => {
+  return axios.post(`${BASE_URL}/settlement`, params).catch((e) => e.response);
+};
