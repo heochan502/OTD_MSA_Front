@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { reissue } from './user/userService';
