@@ -2,32 +2,37 @@
 import { useRouter } from 'vue-router';
 import { logout } from '@/services/user/userService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
+import { ref, computed } from 'vue';
+
 const router = useRouter();
 const authStore = useAuthenticationStore();
+const isLoggingOut = ref(false);
 
+console.log(authStore.state.signedUser);
+
+const userInfo = computed(() => {
+  const pic = authStore.state.signedUser?.pic
+  return {
+    nickName: authStore.state.signedUser?.nickName || '게스트',
+    email: authStore.state.signedUser?.email || '로그인이 필요합니다',
+    point: authStore.state.signedUser?.point || 0,
+    profileImage: pic
+      ? `${import.meta.env.VITE_API_URL}/uploads/${pic}`
+      : '/default-avatar.png'
+  }
+})
 // 로그아웃 버튼 클릭 시
 const logoutAccount = async () => {
-  try {
-    const token = localStorage.getItem('accessToken');
-    console.log('토큰 상태:', token ? '존재' : '없음');
 
-    if (!token) {
-      // 토큰이 없으면 바로 로컬 로그아웃만
-      await authStore.logout();
-      return;
-    }
-    if (authStore.state.isSigned) {
-      await logout(); // 서버 로그아웃
-      await authStore.logout(); // Pinia 상태 초기화
-      console.log('로그아웃 완료');
-      await router.push('/user/login');
-    }
-  } catch (error) {
-    console.error('로그아웃 중 오류:', error);
-    alert('로그아웃 실패. 서버 상태를 확인하세요.');
-    // 서버 오류가 발생해도 로컬 상태는 초기화
-    await authStore.logout();
-  }
+  if (!confirm('로그아웃 하시겠습니까?')) return;
+  const res = await logout();
+  if (res === undefined || res.status !== 200) return;
+  authStore.logout();
+  router.push('/user/login');
+};
+// 포인트 포맷팅
+const formatPoint = (point) => {
+  return point?.toLocaleString() || '0';
 };
 </script>
 
@@ -41,32 +46,394 @@ const logoutAccount = async () => {
     <div><a>내가 쓴 게시글</a><a>나의 좋아요</a><a>내가 쓴 댓글</a></div>
     <div>
       <a>내포인트</a><a>{{ authStore.state.signedUser.point }}P</a>
+  <div class="profile-container">
+    <!-- 프로필 섹션 -->
+    <div class="profile-section">
+      <router-link to="/user/ModifiProfile" class="profile-header">
+        <div class="profile-image">
+  <img :src="userInfo.profileImage" :alt="userInfo.nickName" />
+</div>
+        <div class="profile-info">
+          <h2 class="nickname">{{ userInfo.nickName }}</h2>
+          <p class="email">{{ userInfo.email }}</p>
+        </div> 
+      </router-link>
     </div>
-    <div>
-      <a>포인트 기록</a>
-      <a>30k 러닝 챌린지</a><a>+ 30p</a><a>2025.10.20</a>
+
+    <!-- 활동 섹션 -->
+    <div class="activity-section">
+      <h3 class="section-title">나의 활동</h3>
+      <div class="activity-grid">
+        <router-link to="/user/posts" class="activity-item">
+          <div class="activity-icon">📝</div>
+          <span>내가 쓴 게시글</span>
+        </router-link>
+        <router-link to="/user/likes" class="activity-item">
+          <div class="activity-icon">❤️</div>
+          <span>나의 좋아요</span>
+        </router-link>
+        <router-link to="/user/comments" class="activity-item">
+          <div class="activity-icon">💬</div>
+          <span>내가 쓴 댓글</span>
+        </router-link>
+      </div>
     </div>
-    <div>
-      <router-link to="/user/signal">알림 설정하기</router-link>
+
+    <!-- 포인트 섹션 -->
+    <div class="point-section">
+      <div class="point-header">
+        <h3 class="section-title">포인트</h3>
+        <div class="point-value">{{ formatPoint(userInfo.point) }}P</div>
+      </div>
+      
+      <!-- 포인트 기록 -->
+      <div class="point-history">
+        <h4 class="history-title">최근 포인트 기록</h4>
+        <div class="history-item">
+          <div class="history-description">30k 러닝 챌린지</div>
+          <div class="history-points positive">+30P</div>
+          <div class="history-date">2025.10.20</div>
+        </div>
+        <!-- 더 많은 기록들을 위한 공간 -->
+        <router-link to="/user/point-history" class="view-all-link">
+          모든 포인트 기록 보기 →
+        </router-link>
+      </div>
     </div>
-    <div>
-      <router-link to="/user/inquiry">1:1 문의하기</router-link>
-      <router-link to="/user/frequently">자주 묻는 질문</router-link>
+
+    <!-- 설정 섹션 -->
+    <div class="settings-section">
+      <h3 class="section-title">설정</h3>
+      <div class="settings-list">
+        <router-link to="/user/signal" class="settings-item">
+          <div class="settings-icon">🔔</div>
+          <span>알림 설정</span>
+          <div class="arrow">›</div>
+        </router-link>
+      </div>
     </div>
-    <div>
-      <router-link to="/user/term">약관 및 보안</router-link>
-      <a class="auth" @click="logoutAccount">로그아웃</a>
+
+    <!-- 고객센터 섹션 -->
+    <div class="support-section">
+      <h3 class="section-title">고객센터</h3>
+      <div class="support-list">
+        <router-link to="/user/inquiry" class="support-item">
+          <div class="support-icon">💬</div>
+          <span>1:1 문의하기</span>
+          <div class="arrow">›</div>
+        </router-link>
+        <router-link to="/user/frequently" class="support-item">
+          <div class="support-icon">❓</div>
+          <span>자주 묻는 질문</span>
+          <div class="arrow">›</div>
+        </router-link>
+      </div>
+    </div>
+
+    <!-- 약관 및 로그아웃 섹션 -->
+    <div class="footer-section">
+      <router-link to="/user/term" class="footer-link">약관 및 보안</router-link>
+      <button 
+        class="logout-btn" 
+        @click="logoutAccount"
+        :disabled="isLoggingOut"
+      >
+        {{ isLoggingOut ? '로그아웃 중...' : '로그아웃' }}
+      </button>
     </div>
   </div>
 </template>
 
 <style scoped lang="scss">
-.auth {
-  cursor: pointer;
-  color: blue;
-  text-decoration: underline;
+.profile-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #fff;
+  min-height: 100vh;
+}
+
+.profile-section {
+  margin-bottom: 30px;
+  
+  .profile-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 16px;
+    color: white;
+    
+    .profile-image {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+    
+    .profile-info {
+      flex: 1;
+      
+      .nickname {
+        font-size: 24px;
+        font-weight: bold;
+        margin: 0 0 8px 0;
+        color: #393E46;
+      }
+      
+      .email {
+        font-size: 14px;
+        opacity: 0.9;
+        margin: 0;
+        color: #393E46;
+      }
+    }
+  }
+}
+
+.section-title {
+  font-size: 18px;
   font-weight: bold;
-  margin-top: 10px;
-  display: inline-block;
+  margin: 0 0 16px 0;
+  color: #333;
+}
+.activity-section {
+  margin-bottom: 30px;
+  
+  .activity-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    
+    .activity-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 12px;
+      background: #f8f9fa;
+      border-radius: 12px;
+      text-decoration: none;
+      color: #333;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background: #e9ecef;
+        transform: translateY(-2px);
+      }
+      
+      .activity-icon {
+        font-size: 24px;
+        margin-bottom: 8px;
+      }
+      
+      span {
+        font-size: 14px;
+        text-align: center;
+      }
+    }
+  }
+}
+
+.point-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #fff8e1;
+  border-radius: 16px;
+  border: 1px solid #ffd54f;
+  
+  .point-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    
+    .point-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #f57c00;
+    }
+  }
+  
+  .point-history {
+    .history-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #666;
+    }
+    
+    .history-item {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #fff3c4;
+      
+      .history-description {
+        font-weight: 500;
+      }
+      
+      .history-points {
+        font-weight: bold;
+        
+        &.positive {
+          color: #2e7d32;
+        }
+        
+        &.negative {
+          color: #d32f2f;
+        }
+      }
+      
+      .history-date {
+        color: #666;
+        font-size: 14px;
+      }
+    }
+    
+    .view-all-link {
+      display: block;
+      text-align: center;
+      margin-top: 16px;
+      color: #f57c00;
+      text-decoration: none;
+      font-weight: 500;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.settings-section,
+.support-section {
+  margin-bottom: 30px;
+  
+  .settings-list,
+  .support-list {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+    overflow: hidden;
+    
+    .settings-item,
+    .support-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      text-decoration: none;
+      color: #333;
+      border-bottom: 1px solid #f0f0f0;
+      transition: background 0.2s ease;
+      
+      &:hover {
+        background: #f8f9fa;
+      }
+      
+      &:last-child {
+        border-bottom: none;
+      }
+      
+      .settings-icon,
+      .support-icon {
+        font-size: 20px;
+      }
+      
+      span {
+        flex: 1;
+        font-weight: 500;
+      }
+      
+      .arrow {
+        font-size: 18px;
+        color: #ccc;
+      }
+    }
+  }
+}
+
+.footer-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+  
+  .footer-link {
+    color: #666;
+    text-decoration: none;
+    font-size: 14px;
+    
+    &:hover {
+      color: #333;
+      text-decoration: underline;
+    }
+  }
+  
+  .logout-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover:not(:disabled) {
+      background: #c82333;
+      transform: translateY(-1px);
+    }
+    
+    &:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+      transform: none;
+    }
+  }
+}
+
+// 반응형 디자인
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 16px;
+  }
+  
+  .activity-grid {
+    grid-template-columns: 1fr;
+    
+    .activity-item {
+      flex-direction: row;
+      text-align: left;
+      
+      .activity-icon {
+        margin-bottom: 0;
+        margin-right: 12px;
+      }
+    }
+  }
+  
+  .history-item {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    text-align: left;
+    
+    .history-date {
+      order: -1;
+      font-size: 12px;
+    }
+  }
 }
 </style>
+
