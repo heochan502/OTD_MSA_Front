@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useCommunityStore } from '@/stores/community/community';
 import PostCard from '@/components/community/PostCard.vue';
+import Toast from '@/components/community/Toast.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -14,10 +15,14 @@ const TABS = [
   { key: 'work', label: '운동' },
   { key: 'love', label: '연애' },
 ];
-const activeKey = ref(route.params.category ?? 'free');
+const activeKey = ref(
+  typeof route.params.category === 'string' ? route.params.category : 'free'
+);
 
 const PAGE_SIZE = 10;
 const loaded = ref(PAGE_SIZE);
+
+// 스토어에 쌓인 서버 응답을 카테고리로 필터링
 const baseList = computed(() => store.list(activeKey.value));
 const items = computed(() => baseList.value.slice(0, loaded.value));
 const hasMore = computed(() => loaded.value < baseList.value.length);
@@ -35,16 +40,36 @@ function observe() {
   );
   if (sentinel.value) io.observe(sentinel.value);
 }
-onMounted(() => observe());
+
+onMounted(async () => {
+  // ★ 최초 로드 시에도 categoryKey 전달
+  await store.loadPosts(1, PAGE_SIZE, activeKey.value);
+  observe();
+
+  // 작성 성공 플래그 감지 → 토스트
+  if (route.query.posted === '1') {
+    showPostedToast();
+    // 쿼리 제거(뒤로가기 시 토스트 재표시 방지)
+    router.replace({
+      name: 'CommunityCategory',
+      params: { category: activeKey.value },
+    });
+  }
+});
+
 onBeforeUnmount(() => io && io.disconnect());
 
+// 탭 전환 시: 라우팅 + categoryKey로 재조회
 function selectTab(k) {
   if (activeKey.value !== k) {
     activeKey.value = k;
     loaded.value = PAGE_SIZE;
     router.replace({ name: 'CommunityCategory', params: { category: k } });
+    store.loadPosts(1, PAGE_SIZE, k); // ★ 전달
   }
 }
+
+// 라우트 파라미터 변경 시에도 재조회
 watch(
   () => route.params.category,
   (v) => {
@@ -52,6 +77,7 @@ watch(
     if (TABS.some((t) => t.key === k)) {
       activeKey.value = k;
       loaded.value = PAGE_SIZE;
+      store.loadPosts(1, PAGE_SIZE, k); // ★ 전달
     }
   }
 );
@@ -60,6 +86,15 @@ const openDetail = (p) =>
   router.push({ name: 'CommunityPost', params: { id: String(p.id) } });
 const goWrite = (category) =>
   router.push({ name: 'CommunityWrite', params: { category } });
+
+// ----- Toast 상태 -----
+const toastOpen = ref(false);
+const toastMessage = ref('');
+function showPostedToast() {
+  toastMessage.value = '게시글이 등록되었습니다.';
+  toastOpen.value = true;
+  setTimeout(() => (toastOpen.value = false), 1600);
+}
 </script>
 
 <template>
@@ -99,6 +134,8 @@ const goWrite = (category) =>
           </div>
         </div>
       </div>
+
+      <Toast :open="toastOpen" :message="toastMessage" />
     </section>
   </div>
 </template>
@@ -110,7 +147,7 @@ const goWrite = (category) =>
   align-self: stretch;
   width: 100%;
   min-height: 100%;
-  background: #f4f6f8; /* 메인과 동일한 배경 */
+  background: #f4f6f8;
   overflow-x: hidden;
 }
 
@@ -146,7 +183,7 @@ const goWrite = (category) =>
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding: 2px; /* 좌우 균형 */
+  padding: 2px;
 }
 .tab {
   height: 34px;
@@ -160,7 +197,7 @@ const goWrite = (category) =>
   box-shadow: 0 3px 8px rgba(17, 24, 39, 0.05);
 }
 .tab.active {
-  background: #393e46; /* 메인과 통일된 강조색 */
+  background: #393e46;
   color: #fff;
   border-color: transparent;
 }
@@ -170,7 +207,7 @@ const goWrite = (category) =>
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 6px; /* 카드와 패널 사이 공간 */
+  padding: 6px;
 }
 .card-btn {
   padding: 0;
@@ -178,7 +215,6 @@ const goWrite = (category) =>
   background: transparent;
   text-align: left;
 }
-/* PostCard 자체 그림자가 강하면 패널 안에서 과해 보일 수 있어 톤 다운 */
 :deep(.post-card),
 :deep(.v-card),
 :deep(.card) {

@@ -20,9 +20,14 @@ const store = useCommunityStore();
 const title = ref('');
 const content = ref('');
 const files = ref([]);
+const submitting = ref(false);
+const errorMsg = ref('');
 
 const canSubmit = computed(
-  () => title.value.trim().length >= 2 && content.value.trim().length >= 10
+  () =>
+    title.value.trim().length >= 2 &&
+    content.value.trim().length >= 10 &&
+    !submitting.value
 );
 
 const pickerOpen = ref(false);
@@ -37,20 +42,31 @@ function chooseCategory(key) {
   emit('update:category', key);
   pickerOpen.value = false;
 }
-
 function onFileChange(e) {
   files.value = Array.from(e.target.files || []);
 }
 
 async function submit() {
-  // 실사용 시 FormData 구성/전송
-  // const fd = new FormData()
-  // fd.append('category', props.category)
-  // fd.append('title', title.value)
-  // fd.append('content', content.value)
-  // files.value.forEach(f => fd.append('files', f))
-  // await store.createNewPost(fd)
-  emit('submitted');
+  if (!canSubmit.value) return;
+  submitting.value = true;
+  errorMsg.value = '';
+  try {
+    const payload = {
+      categoryKey: props.category,
+      title: title.value.trim(),
+      content: content.value.trim(),
+    };
+    await store.createNewPost(payload);
+    emit('submitted', { categoryKey: props.category });
+  } catch (e) {
+    console.error('[ComposeForm] createNewPost failed:', e);
+    errorMsg.value =
+      e?.response?.data?.message ||
+      e?.message ||
+      '게시글 저장 중 오류가 발생했습니다.';
+  } finally {
+    submitting.value = false;
+  }
 }
 </script>
 
@@ -63,7 +79,6 @@ async function submit() {
     </div>
 
     <div class="meta">
-      <!-- 배지 클릭 → 아래로 토글 -->
       <button class="badge" type="button" @click="togglePicker">
         {{ categoryLabel }}
         <span class="chev">{{ pickerOpen ? '▲' : '▼' }}</span>
@@ -71,7 +86,6 @@ async function submit() {
       <span class="date">{{ new Date().toLocaleDateString() }}</span>
     </div>
 
-    <!-- Vuetify 스타일: slide-y-transition + chip들 -->
     <v-slide-y-transition>
       <v-sheet
         v-if="pickerOpen"
@@ -114,7 +128,12 @@ async function submit() {
       <div class="plus">＋</div>
     </div>
 
-    <button class="submit" :disabled="!canSubmit" @click="submit">
+    <button
+      class="submit"
+      type="button"
+      :disabled="!canSubmit || submitting"
+      @click="submit"
+    >
       게시글 등록
     </button>
     <button class="ghost" @click="emit('cancel')">취소</button>
@@ -122,6 +141,11 @@ async function submit() {
 </template>
 
 <style scoped>
+.err {
+  margin-top: 8px;
+  color: #c24040;
+  font-size: 13px;
+}
 .form-card {
   width: 100%;
   max-width: 380px;
@@ -142,8 +166,6 @@ async function submit() {
     opacity: 1;
   }
 }
-
-/* 헤더 */
 .header {
   display: flex;
   align-items: center;
@@ -162,8 +184,6 @@ async function submit() {
   font-weight: 800;
   color: #07c5cf;
 }
-
-/* 메타/배지 */
 .meta {
   display: flex;
   justify-content: space-between;
@@ -190,17 +210,10 @@ async function submit() {
   color: #7a7a7a;
   font-size: 12px;
 }
-
-/* Vuetify 토글 영역 */
-.picker {
-  /* v-sheet */
-}
 .chips {
   display: flex;
   flex-wrap: wrap;
 }
-
-/* 입력 */
 .label {
   display: block;
   margin: 8px 0 6px;
@@ -219,8 +232,6 @@ async function submit() {
 .textarea {
   resize: vertical;
 }
-
-/* 업로더 */
 .uploader {
   position: relative;
   height: 84px;
@@ -242,8 +253,6 @@ async function submit() {
   font-size: 32px;
   color: #bdbdbd;
 }
-
-/* 버튼 */
 .submit {
   width: 100%;
   padding: 14px;
