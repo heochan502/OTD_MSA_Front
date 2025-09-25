@@ -41,12 +41,7 @@ export const useAuthenticationStore = defineStore(
             state.isSigned = false;      
         }
 
-    const logout = async () => {
-      console.log('logout 처리');
-      state.isSigned = false;
-      state.signedUser = null;
-      await router.push('/user/login');
-    };
+
 
     return { state, setSignedUser, setSigndUserPic, setPoint, logout };
   },
