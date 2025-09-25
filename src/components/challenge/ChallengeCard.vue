@@ -1,6 +1,6 @@
 <script setup>
 import { defineProps } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useAuthenticationStore } from '@/stores/user/authentication';
 
 const props = defineProps({
   id: Number,
@@ -8,9 +8,15 @@ const props = defineProps({
   name: String,
   reward: Number,
 });
-const router = useRouter();
-const route = useRoute();
+const auth = useAuthenticationStore();
+const tier = auth.state.signedUser.challengeRole;
 const FILE_URL = import.meta.env.VITE_BASE_URL;
+
+const lock = {
+  브론즈: 'url(/image/challenge/lock-silver)',
+  실버: 'url(/image/challenge/lock-gold)',
+  골드: 'url(/image/challenge/lock-diamond)',
+};
 </script>
 
 <template>
