@@ -9,7 +9,7 @@ export const getAll = () => {
 export const getSelectedAll = () => {
   return axios.get(`${BASE_URL}/selected`).catch((e) => e.response);
 };
-
+ 
 export const getChallengeList = (type) => {
   return axios
     .get(`${BASE_URL}/addlist`, { params: { type } })
