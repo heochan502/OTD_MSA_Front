@@ -28,8 +28,9 @@ const searchFoodName = async (keyword) => {
       items.foodList = res.map((item) => ({
         foodDbId: item.foodDbId,
         foodName: item.foodName,
-        calorie: item.calorie,
-      }));
+        calorie: item.kcal,
+      }  ));
+      console.log('음식확인 ', items.foodList);
     } else {
       return null;
     }
@@ -50,17 +51,7 @@ const toggleSelect = (food) => {
   else selected.value.splice(idx, 1);
 };
 
-// ✅ 확정 버튼 → 식단 메인으로 이동
-const goRecord = () => {
-  router.push({
-    name: 'MealMainView', // 라우트 이름 그대로 사용
-    query: {
-      meal: route.query.meal || '', // 어떤 끼니에서 왔는지(옵션)
-      recorded: '1', // 기록 완료 신호(옵션)
-    },
-    // state: { foods: selected.value }  // 필요하면 상태로 함께 전달
-  });
-};
+
 const menuOpen = ref(false);
 //데이터 입력 받고 정리 하는곳
 const itemList = ref([]);
@@ -77,6 +68,19 @@ const forceOpenDropdown = () => {
   setTimeout(() => {
     nameBox.value.isMenuActive = true;
   }, 50);
+};
+
+
+// ✅ 확정 버튼 → 식단 메인으로 이동
+const goRecord = () => {
+  router.push({
+    name: 'MealMainView', // 라우트 이름 그대로 사용
+    query: {
+      meal: route.query.meal || '', // 어떤 끼니에서 왔는지(옵션)
+      recorded: '1', // 기록 완료 신호(옵션)
+    },
+    // state: { foods: selected.value }  // 필요하면 상태로 함께 전달
+  });
 };
 </script>
 

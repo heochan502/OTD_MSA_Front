@@ -3,21 +3,26 @@ import { useRouter } from 'vue-router';
 
 const props = defineProps({
   post: { type: Object, required: true },
-  badge: { type: String, default: '' }, // '인기' 등
-  clickable: { type: Boolean, default: true }, // 클릭 시 상세 이동할지
+  badge: { type: String, default: '' },
+  clickable: { type: Boolean, default: true },
   routeName: { type: String, default: 'CommunityPost' },
-  routeParamKey: { type: String, default: 'id' }, // /:id or /:postId
-  idKey: { type: String, default: 'postId' }, // 데이터 식별자 키
+  routeParamKey: { type: String, default: 'id' },
+  idKey: { type: String, default: 'postId' },
+  thumbnailKey: { type: String, default: 'thumbnail' },
+  thumbnailUrl: { type: String, default: '' },
 });
 
 const emit = defineEmits(['click']);
 const router = useRouter();
 
 const getId = (p) => p?.[props.idKey] ?? p?.id ?? p?.postId;
-const getAuthor = (p) => p?.author ?? p?.writer?.nickName ?? '익명';
+const getAuthor = (p) =>
+  p?.author ?? p?.writer?.nickName ?? p?.nickName ?? '익명';
 const getTime = (p) => p?.time ?? p?.createdAt ?? '';
-const getLikes = (p) => p?.likes ?? p?.like ?? 0;
-const getComments = (p) => p?.comments ?? 0;
+const getLikes = (p) => p?.likes ?? p?.like ?? p?.likeCount ?? 0;
+const getComments = (p) => p?.comments ?? p?.commentCount ?? 0;
+const getThumb = (p) =>
+  props.thumbnailUrl || p?.[props.thumbnailKey] || p?.thumb || p?.image;
 
 function open() {
   if (!props.clickable) return emit('click', props.post);
@@ -39,51 +44,101 @@ function open() {
     @keydown.enter.prevent="open"
     @keydown.space.prevent="open"
   >
-    <div class="meta">
+    <!-- 왼쪽 상단: 작성자/시간 -->
+    <header class="meta">
       <span class="avatar" aria-hidden="true"></span>
       <div class="meta-text">
-        <div class="author-row">
-          <span class="author">{{ getAuthor(post) }}</span>
-          <span class="time" v-if="getTime(post)">· {{ getTime(post) }}</span>
-        </div>
+        <div class="author">{{ getAuthor(post) }}</div>
+        <div class="time" v-if="getTime(post)">{{ getTime(post) }}</div>
         <div class="badge" v-if="badge">{{ badge }}</div>
       </div>
-      <div class="right-skel" aria-hidden="true"></div>
-    </div>
+    </header>
 
+    <!-- 왼쪽 중단: 제목 -->
     <h3 class="title">{{ post.title }}</h3>
 
-    <div class="stats">
+    <!-- 왼쪽 하단: 통계 -->
+    <footer class="stats">
       <span class="like">❤️ {{ getLikes(post) }}</span>
       <span class="comment">💬 {{ getComments(post) }}</span>
-    </div>
+    </footer>
+
+    <!-- 오른쪽: 썸네일(없어도 칸은 보이게) -->
+    <figure class="thumb" v-if="getThumb(post)">
+      <img :src="getThumb(post)" alt="" loading="lazy" decoding="async" />
+    </figure>
+    <div class="thumb thumb--skeleton" v-else aria-hidden="true"></div>
   </article>
 </template>
 
 <style scoped>
+/* 카드 컨테이너: 폭/오버플로우 방지 */
 .card {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden; /* 🔹 튀어나오는 것 방지 */
   background: #fff;
-  border-radius: 20px;
-  box-shadow: var(--shadow-md);
-  padding: 12px 14px;
-  display: flex;
-  flex-direction: column;
-  row-gap: 8px;
-  cursor: pointer; /* ← 클릭 가능 표시 */
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  padding: 10px 12px; /* 🔹 패딩 축소 */
+  margin: 8px 10px; /* 🔹 카드 간격 축소 */
+  display: grid;
+  grid-template-columns: 1fr 92px; /* 🔹 썸네일 너비 축소 (기존 112px) */
+  grid-template-rows: auto auto auto;
+  grid-template-areas:
+    'meta   thumb'
+    'title  thumb'
+    'stats  thumb';
+  column-gap: 10px; /* 🔹 간격 축소 */
+  row-gap: 6px;
+  cursor: pointer;
   outline: none;
 }
 .card:focus-visible {
-  box-shadow: 0 0 0 2px var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary, #26c6da);
 }
 
+/* 오른쪽 썸네일: 높이 축소 + 알약형 유지 */
+.thumb {
+  grid-area: thumb;
+  align-self: center;
+  width: 100%;
+  height: 78px; /* 🔹 세로 확 줄임 (필요시 72~84px로 조절) */
+  border-radius: 14px; /* 알약 */
+  overflow: hidden;
+  background: #f1f1f1;
+}
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.thumb--skeleton {
+  background: linear-gradient(90deg, #f1f1f1 0%, #ececec 50%, #f1f1f1 100%);
+  background-size: 200% 100%;
+  animation: shine 1.2s infinite linear;
+}
+@keyframes shine {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* 메타: 닉네임 아래 시간 줄바꿈 유지, 폰트/간격 축소 */
 .meta {
+  grid-area: meta;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 .avatar {
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background: #eaeaea;
   box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.06);
@@ -92,45 +147,70 @@ function open() {
   flex: 1;
   min-width: 0;
 }
-.author-row {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  font-size: 12px;
-}
 .author {
-  color: var(--color-typo-secondary);
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
+  color: #333;
+  line-height: 1.2;
 }
 .time {
-  color: var(--color-typo-caption);
+  display: block;
+  margin-top: 1px;
+  font-size: 10.5px;
+  color: #8b8b8b;
+  line-height: 1.1;
 }
 .badge {
   display: inline-block;
-  margin-top: 2px;
+  margin-top: 4px;
   background: #ffedcf;
   color: #ff9f1c;
   border-radius: 8px;
-  padding: 2px 8px;
-  font-size: 11px;
+  padding: 1px 6px;
+  font-size: 10px;
   font-weight: 700;
 }
-.right-skel {
-  width: 74px;
-  height: 44px;
-  border-radius: 999px;
-  background: #ececec;
-  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.06);
-}
+
+/* 제목: 두 줄까지만 표시 (높이 제어) */
 .title {
-  font-size: var(--fs-body-1);
-  font-weight: var(--fw-bold);
-  color: var(--color-typo-primary);
+  grid-area: title;
+  font-size: 14px; /* 🔹 살짝 축소 */
+  font-weight: 700;
+  color: #2b2b2b;
+  line-height: 1.28;
+  margin-right: 2px;
+
+  display: -webkit-box; /* 🔹 라인 클램프 */
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
+
+/* 통계: 폰트/간격 축소 */
 .stats {
+  grid-area: stats;
   display: flex;
-  gap: 12px;
-  color: var(--color-typo-secondary);
-  font-size: 12px;
+  gap: 10px;
+  color: #8b8b8b;
+  font-size: 11.5px;
+}
+
+/* 살짝 넓은 화면에서만 약간 키우기 */
+@media (min-width: 420px) {
+  .card {
+    grid-template-columns: 1fr 104px;
+    padding: 12px 14px;
+  }
+  .thumb {
+    height: 88px;
+  }
+}
+@media (min-width: 520px) {
+  .card {
+    grid-template-columns: 1fr 120px;
+  }
+  .thumb {
+    height: 96px;
+  }
 }
 </style>

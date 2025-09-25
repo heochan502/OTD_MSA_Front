@@ -11,7 +11,6 @@ import { ref, watch, onMounted } from 'vue';
 </template>
 
 <style>
-
 .layout {
   width: 390px; /* 아이폰 12 기준 */
   height: 805px;

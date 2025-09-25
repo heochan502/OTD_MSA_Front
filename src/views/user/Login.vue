@@ -8,7 +8,9 @@ import { checkValidation } from '@/utils/validation';
 const router = useRouter();
 
 const authentication = useAuthenticationStore();
-const beBaseUrl = import.meta.env.VITE_API_URL;
+const beBaseUrl = import.meta.env.VITE_BASE_URL;
+// const beBaseUrl = import.meta.env.VITE_API_URL;
+
 const feBaseUrl = window.location.origin;
 const redirectUrl = `${feBaseUrl}/fe/redirect`;
 
@@ -26,9 +28,10 @@ const submit = async () => {
   }
 
   try {
-    console.log('전송할 데이터:', state.form); // 디버깅용
+    console.log('전송할 데이터:', state.form);
     const res = await login(state.form);
-    console.log('Login.vue - submit() - res: ', res);
+
+    console.log('Login.vue - submit() - res: ', res);    
 
     if (res.status === 200) {
       const signedUser = res.data.result;
@@ -40,7 +43,6 @@ const submit = async () => {
     console.error('로그인 오류:', error);
     console.error('오류 상세:', error.response?.data);
     console.error('요청 설정:', error.config);
-    // 사용자에게 오류 메시지 표시
     alert('로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.');
   }
 };
@@ -86,6 +88,14 @@ const submit = async () => {
         <router-link class="buttonjoin" to="/user/join">회원가입</router-link>
       </div>
       <!-- API 로그인 -->
+
+      <div class="mb-3">
+        <span class="naver"
+          ><a
+            :href="`${beBaseUrl}/oauth2/authorization/naver?redirect_uri=${redirectUrl}`"
+            >네이버</a
+          ></span
+        >
       <div class="API">
         <span class="naver"
           ><a
@@ -108,6 +118,7 @@ const submit = async () => {
         </div>
       </div>
     </div>
+  </div>
   </div>
 </template>
 
@@ -179,7 +190,7 @@ const submit = async () => {
   padding-bottom: 10px;
   padding-left: 0.5rem;
   padding-right: 0.5rem;
-  background-color: #03c75a;
+  background-color: #fbe900;
   color: white;
   border: none;
   border-radius: 10px;
@@ -196,7 +207,7 @@ const submit = async () => {
   padding-bottom: 10px;
   padding-left: 0.5rem;
   padding-right: 0.5rem;
-  background-color: #fbe900;
+  background-color: #03c75a;
   color: white;
   border: none;
   border-radius: 10px;
