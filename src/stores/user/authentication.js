@@ -1,6 +1,6 @@
 import { reactive } from 'vue'
 import { defineStore } from 'pinia'
-import router from '@/router'
+
 
 export const useAuthenticationStore = defineStore(
     "authentication", 
@@ -28,8 +28,7 @@ export const useAuthenticationStore = defineStore(
             state.signedUser = { userId: 0, nickName: '', pic: null };
             state.accessToken = null;
             state.refreshToken = null;
-            state.isSigned = false;          
-            await router.push('/user/login')
+            state.isSigned = false;      
         }
 
         return { state, setSignedUser, setSigndUserPic, logout };
