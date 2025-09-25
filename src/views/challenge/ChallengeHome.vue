@@ -5,7 +5,7 @@ import {
   getSelectedAll,
   postMissionRecord,
   settlement,
-} from '@/services/challenge/challengeService';
+} from '@/services/challenge/ChallengeService';
 import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 import { useChallengeStore } from '@/stores/challenge/challengeStore.js';
 import Progress from '@/components/challenge/Progress.vue';
