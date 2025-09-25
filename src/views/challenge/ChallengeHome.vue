@@ -1,12 +1,9 @@
 <script setup>
 import { onMounted, reactive, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import {
-  getSelectedAll,
-  postMissionRecord,
-} from '@/services/challenge/challengeService';
+import {  getSelectedAll,  postMissionRecord,} from '@/services/challenge/challengeService.js';
 import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
-import { useChallengeStore } from '@/stores/challenge/challengeStore';
+import { useChallengeStore } from '@/stores/challenge/challengeStore.js';
 import Progress from '@/components/challenge/Progress.vue';
 
 const challengeStore = useChallengeStore();
@@ -64,6 +61,7 @@ onMounted(async () => {
   totalXp.value = res.data.user.xp;
   console.log('res', res.data);
   setMissionState();
+  console.log("로그 데이터",state );
 });
 
 const totalXp = ref(0);
