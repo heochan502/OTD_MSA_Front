@@ -19,6 +19,7 @@ export const useAuthenticationStore = defineStore(
     });
 
     const setSignedUser = (signedUser) => {
+      console.log('setSignedUser', signedUser);
       state.isSigned = true;
       state.signedUser = signedUser;
     };

@@ -44,11 +44,6 @@ const today = new Date().toISOString().slice(0, 10);
 const todayData = computed(() => {
   return inbodyData.value.find((item) => item.dataTime === today);
 });
-// TODO: 실제 데이터 연동 시
-// onMounted(async () => {
-//   const { data } = await api.get('/diet/today'); // 예시
-//   mealInfo.value = data;
-// });
 
 const healthToggle = (index) => {
   for (let i = 0; i < healthInfo.value.length; i++) {
@@ -66,37 +61,6 @@ const healthToggle = (index) => {
     <div class="top-wrap">
       <section class="meal">
         <MealCard />
-        <!-- 
-      <span class="title-text">오늘의 식단</span>
-      <div class="meal-cards">
-        <div class="meal-card" v-for="(item, index) in mealInfo" :key="item.meal_day">
-          상단
-          <button class="meal-card-top d-flex justify-content-between">
-            <div class="d-flex flex-column">
-              <img class="meal-top-img" :src="item.img" :alt="item.meal_day" />
-              <span class="d-flex align-self-center otd-subtitle-1">{{ item.meal_day }}</span>
-            </div>
-            <div class="d-flex align-items-right">
-              <img class="meal-check-img" v-if="item.check" src="/image/main/check.png" alt="체크" />
-              <img class="meal-check-img" v-else src="/image/main/cross.png" alt="미체크" />
-            </div>
-          </button>
-
-          하단
-          <button class="meal-card-bottom">
-            <div v-if="item.kcal > 0">{{ item.kcal }} kcal</div>
-            <img v-else-if="item.kcal === 0 && item.check && item.meal_day !='간식'" src="/image/main/meal_check.png"
-              alt="단식 체크" @click="handleClick(index)" />
-            <img v-else-if="item.kcal === 0 && !item.check && item.meal_day !='간식'" src="/image/main/meal_default.png"
-              alt="단식 미체크" @click="handleClick(index)" />
-            <img class="snack" v-else-if="item.kcal === 0 && !item.check && item.meal_day ==='간식'"
-              src="/image/main/snack_default.png" @click="handleClick(index)" alt="간식" />
-            <img class="snack" v-else="item.meal_day === '간식'"  src="/image/main/snack_check.png"  @click="handleClick(index)" alt="간식" />
-
-          </button>
-
-        </div>
-      </div> -->
       </section>
     </div>
     <div class="wrap">

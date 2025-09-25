@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, reactive } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-
+import { debounce } from 'lodash';
 import { getFood } from '@/services/meal/mealService';
 
 const router = useRouter();
@@ -9,9 +9,44 @@ const route = useRoute();
 const keyword = ref(null);
 const selected = ref([]);
 
+// 카테고리용 드랍박스용
+const foodNameBox = ref({
+  isMenuActive: false,
+});
+
+// 음식 검색 결과 담는곳
 const items = reactive({
   foodList: [],
 });
+
+
+const changeText = debounce(() => {
+  // const searchFood = value;
+  // console.log('foodName change:', searchFood);
+  searchFoodName(keyword.value);
+}, 50);
+// 무조건 박스 표출하기위한 forceopendropdown
+const onFoodNameInput = async (value) => {
+  // value가 string이면 검색 입력
+  if (typeof value === "string") {
+    changeText(value);
+    forceOpenDropdown();
+  }
+
+  // value가 객체면 (리스트에서 선택) → selected에 추가
+  else if (typeof value === "object" && value !== null) {
+    selected.value.push(value);   //  음식 객체 저장
+    keyword.value = "";           //  검색창 비우기
+  }
+};
+// 다시 카테고리 눌렀을때 name 쪽 비워서 검색에 무리없게 만들기
+
+
+const forceOpenDropdown = () => {
+  setTimeout(() => {
+    foodNameBox.value.isMenuActive = true;
+  }, 50);
+};
 
 const searchFoodName = async (keyword) => {
   console.log('이게왜', keyword);
@@ -25,12 +60,18 @@ const searchFoodName = async (keyword) => {
     if (keyword) {
       // console.log('널확인 ', searchFood.foodName);
 
-      items.foodList = res.map((item) => ({
-        foodDbId: item.foodDbId,
-        foodName: item.foodName,
-        calorie: item.kcal,
-      }  ));
+      items.foodList = Array.from(
+        new Map(
+          res.map(item => [item.foodName.trim(), {
+            foodDbId: item.foodDbId,
+            foodName: item.foodName.trim(),
+            kcal: item.kcal,
+            amount: item.foodCapacity
+          }])
+        ).values() // foodName 기준으로 중복 제거 공백까지 포함 
+      );
       console.log('음식확인 ', items.foodList);
+     
     } else {
       return null;
     }
@@ -38,12 +79,27 @@ const searchFoodName = async (keyword) => {
   }
 };
 
-// 예시 음식 데이터
-const foods = [
-  { name: '초코빵', amount: '80g', kcal: 120 },
-  { name: '초코', amount: '10g', kcal: 40 },
-  { name: '초코비 초코우유', amount: '180ml', kcal: 170 },
-];
+
+// 목록 추가
+const onItemClick = (item) => {
+  // console.log('드롭다운에서 클릭된 시점 아이템:', items);
+  const foodInfo = item[0];
+
+  // console.log('드롭다운에서 클릭된 항목:', foodInfo);
+  if (!selected.value.some((item) => item.foodDbId === foodInfo.foodDbId)) {
+    selected.value.push({
+      foodDbId: foodInfo.foodDbId,
+      foodName: foodInfo.foodName,
+      kcal: foodInfo.kcal,
+      amount: foodInfo.amount,
+  
+    });
+  }
+  // console.log('배열에 넣는데:', itemList.value);
+};
+
+
+
 
 const toggleSelect = (food) => {
   const idx = selected.value.findIndex((f) => f.name === food.name);
@@ -55,20 +111,8 @@ const toggleSelect = (food) => {
 const menuOpen = ref(false);
 //데이터 입력 받고 정리 하는곳
 const itemList = ref([]);
-// 음식이름 드랍박스용
-const foodNameBox = ref(null);
 
-const onFoodNameInput = async () => {
-  searchFood.foodName = '';
-  // items.foodList = [];
-  await forceOpenDropdown();
-};
 
-const forceOpenDropdown = () => {
-  setTimeout(() => {
-    nameBox.value.isMenuActive = true;
-  }, 50);
-};
 
 
 // ✅ 확정 버튼 → 식단 메인으로 이동
@@ -89,41 +133,26 @@ const goRecord = () => {
     <span class="otd-title">무슨 음식을 먹었나요?</span>
     <!-- <input v-model="keyword" placeholder="음식명 입력" class="search-input otd-border " /> -->
 
-    <v-combobox
-      placeholder="음식명 입력"
-      class="search-input otd-top-margin"
-      v-model="keyword"
-      v-model:menu="menuOpen"
-      :items="items.foodList"
-      item-title="foodName"      
-      variant="outlined"
-      rounded="xl"
-      density="comfortable"
-      clearable
-      @keyup.enter.prevent="searchFoodName(keyword)"
-    >
+    <v-combobox placeholder="음식명 입력" class="search-input otd-top-margin"
+     v-model="keyword" v-model:menu="menuOpen"
+      :items="items.foodList" item-title="foodName" 
+      item-value="foodDbId" variant="outlined" rounded="xl"
+      density="comfortable" clearable
+       @update:model-value="onFoodNameInput"
+      @keyup.enter.prevent="searchFoodName(keyword)" @click:append="onItemClick(items.foodList)">
       <template #append-inner>
         <v-icon class="mr-2" @click="searchFoodName(keyword)">mdi-magnify</v-icon>
       </template>
     </v-combobox>
 
     <div class="food-list otd-top-margin">
-      <div
-        v-for="food in foods"
-        :key="food.name"
-        class="food-item"
-        @click="toggleSelect(food)"
-      >
-        <div class="otd-body-2">{{ food.name }} {{ food.amount }}</div>
+      <div v-for="food in selected" :key="food.foodDbId" class="food-item" @click="toggleSelect(food)">
+        <div class="otd-body-2">{{ food.foodName }} {{ food.amount }}</div>
         <span>{{ food.kcal }} kcal</span>
       </div>
     </div>
 
-    <button
-      class="otd-button confirm-btn"
-      :disabled="selected.length === 0"
-      @click="goRecord"
-    >
+    <button class="otd-button confirm-btn" :disabled="selected.length === 0" @click="goRecord">
       {{ selected.length }} 개 담았어요
     </button>
   </div>
@@ -135,6 +164,7 @@ const goRecord = () => {
   flex-direction: column;
   gap: 8px;
 }
+
 .food-item {
   display: flex;
   justify-content: space-between;
@@ -145,6 +175,7 @@ const goRecord = () => {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   cursor: pointer;
 }
+
 .confirm-btn {
   width: 100%;
   margin-top: 20px;
@@ -155,7 +186,8 @@ const goRecord = () => {
 }
 
 /* 콤보 박스 설정 */
-/* 둥근 필 & 연한 테두리 */ /* 기본 모양: 둥근 + 흰 배경, 이중 테두리 금지(여기서 border 주지 않음!) */
+/* 둥근 필 & 연한 테두리 */
+/* 기본 모양: 둥근 + 흰 배경, 이중 테두리 금지(여기서 border 주지 않음!) */
 .search-input :deep(.v-field) {
   border-radius: 9999px !important;
   background: #fff !important;
@@ -187,6 +219,7 @@ const goRecord = () => {
   min-height: 44px;
   padding: 0 12px;
 }
+
 .search-input :deep(input::placeholder) {
   color: #9e9e9e !important;
   opacity: 1;
