@@ -21,6 +21,43 @@ const profileImage = computed(() => {
     ? authStore.state.signedUser.pic
     : defaultProfile;
 });
+<<<<<<< HEAD
+
+onMounted(() => {
+  loadProfile();
+});
+
+const loadProfile = async () => {
+  if (!authStore.isLoggedIn) {
+    router.push('/user/login');
+    return;
+  }
+
+  try {
+    state.loading = true;
+    const res = await getUserProfile();
+    console.log("온데이터 : " ,res.data );
+    if (res && res.status === 200) {
+      const userData = res.data.result  
+      Object.assign(state.form, userData);
+      authStore.state.signedUser = userData 
+    }
+  } catch (error) {
+    console.error('Profile loading error:', error);
+    if (error.response && error.response.status === 401) {
+      authStore.logout(); 
+      router.push('/user/login');
+    } else {
+     
+      alert('프로필 정보를 불러오는데 실패했습니다.');
+    }
+  } finally {
+    state.loading = false;
+  }
+};
+
+=======
+>>>>>>> aa1910e1324aa8208a1cc17185063183905390a1
 const userInfo = computed(() => {
   return {
     nickName: authStore.state.signedUser?.nickName || '게스트',

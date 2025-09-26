@@ -44,7 +44,7 @@ axios.interceptors.response.use(
         err.response.status === 500
       ) {
         authenticationStore.signOut();
-      } else if (err.response.status === 403 && authenticationStore.state.isSigned) {
+      } else if (err.response.status === 401 && authenticationStore.state.isSigned) {
         //401 UnAuthorized 에러인데 FE 로그인 처리 되어 있다면
 
 
