@@ -1,770 +1,441 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { logout } from '@/services/user/userService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
-import {
-  getUserProfile,
-  patchUserProfilePic,
-  deleteUserProfilePic,
-  changePassword,
-} from '@/services/userService';
+import { ref, computed } from 'vue';
 
-// 스토어
+const router = useRouter();
 const authStore = useAuthenticationStore();
+const isLoggingOut = ref(false);
 
-// 반응형 데이터
-const isLoading = ref(true);
-const isUploading = ref(false);
-const isChangingPassword = ref(false);
-const error = ref('');
-const profileData = ref(null);
-const showPasswordModal = ref(false);
-const fileInput = ref(null);
+console.log(authStore.state.signedUser);
 
-// 비밀번호 변경 폼
-const passwordForm = ref({
-  currentPassword: '',
-  newPassword: '',
-  confirmPassword: '',
-});
-
-// 컴퓨티드
-const profileImageUrl = computed(() => {
-  if (profileData.value?.pic) {
-    return `http://localhost:8080/uploads/profile/${profileData.value.userId}/${profileData.value.pic}`;
-  }
-  return '/default-profile.png'; // 기본 프로필 이미지
-});
-
-const passwordsMatch = computed(() => {
-  return passwordForm.value.newPassword === passwordForm.value.confirmPassword;
-});
-
-const canSubmitPassword = computed(() => {
-  return (
-    passwordForm.value.currentPassword &&
-    passwordForm.value.newPassword &&
-    passwordForm.value.confirmPassword &&
-    passwordsMatch.value &&
-    passwordForm.value.newPassword.length >= 10
-  );
-});
-
-// 메서드
-const loadProfile = async () => {
-  isLoading.value = true;
-  error.value = '';
-
-  try {
-    const response = await getUserProfile({
-      profile_user_id: authStore.state.signedUser.userId,
-    });
-
-    if (response.data.resultCode === 1) {
-      profileData.value = response.data.resultData;
-    } else {
-      throw new Error(
-        response.data.message || '프로필 정보를 불러올 수 없습니다.'
-      );
-    }
-  } catch (err) {
-    console.error('프로필 로딩 에러:', err);
-    error.value =
-      err.message || '프로필 정보를 불러오는 중 오류가 발생했습니다.';
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-const refreshProfile = () => {
-  loadProfile();
-};
-
-const triggerFileInput = () => {
-  fileInput.value?.click();
-};
-
-const handleImageUpload = async (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  // 파일 크기 제한 (5MB)
-  if (file.size > 5 * 1024 * 1024) {
-    alert('파일 크기는 5MB 이하여야 합니다.');
-    return;
-  }
-
-  // 파일 타입 확인
-  if (!file.type.startsWith('image/')) {
-    alert('이미지 파일만 업로드 가능합니다.');
-    return;
-  }
-
-  isUploading.value = true;
-
-  try {
-    const formData = new FormData();
-    formData.append('pic', file);
-
-    const response = await patchUserProfilePic(formData);
-
-    if (response.data.resultCode === 1) {
-      // 스토어의 프로필 이미지 업데이트
-      authStore.setSigndUserPic(response.data.resultData);
-
-      // 프로필 데이터 새로고침
-      await loadProfile();
-
-      alert('프로필 이미지가 성공적으로 변경되었습니다.');
-    } else {
-      throw new Error(response.data.message || '이미지 업로드에 실패했습니다.');
-    }
-  } catch (err) {
-    console.error('이미지 업로드 에러:', err);
-    alert(err.message || '이미지 업로드 중 오류가 발생했습니다.');
-  } finally {
-    isUploading.value = false;
-    // 파일 인풋 초기화
-    if (fileInput.value) {
-      fileInput.value.value = '';
-    }
-  }
-};
-
-const deleteImage = async () => {
-  if (!confirm('프로필 이미지를 삭제하시겠습니까?')) {
-    return;
-  }
-
-  isUploading.value = true;
-
-  try {
-    const response = await deleteUserProfilePic();
-
-    if (response.data.resultCode === 1) {
-      // 스토어의 프로필 이미지 업데이트
-      authStore.setSigndUserPic(null);
-
-      // 프로필 데이터 새로고침
-      await loadProfile();
-
-      alert('프로필 이미지가 삭제되었습니다.');
-    } else {
-      throw new Error(response.data.message || '이미지 삭제에 실패했습니다.');
-    }
-  } catch (err) {
-    console.error('이미지 삭제 에러:', err);
-    alert(err.message || '이미지 삭제 중 오류가 발생했습니다.');
-  } finally {
-    isUploading.value = false;
-  }
-};
-
-const changePassword = async () => {
-  if (!canSubmitPassword.value) return;
-
-  isChangingPassword.value = true;
-
-  try {
-    const response = await changePassword(passwordForm.value);
-
-    if (response.data.resultCode === 1) {
-      alert('비밀번호가 성공적으로 변경되었습니다.');
-      closePasswordModal();
-    } else {
-      throw new Error(response.data.message || '비밀번호 변경에 실패했습니다.');
-    }
-  } catch (err) {
-    console.error('비밀번호 변경 에러:', err);
-    alert(err.message || '비밀번호 변경 중 오류가 발생했습니다.');
-  } finally {
-    isChangingPassword.value = false;
-  }
-};
-
-const closePasswordModal = () => {
-  showPasswordModal.value = false;
-  passwordForm.value = {
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
+const userInfo = computed(() => {
+  const pic = authStore.state.signedUser?.pic;
+  return {
+    nickName: authStore.state.signedUser?.nickName || '게스트',
+    email: authStore.state.signedUser?.email || '로그인이 필요합니다',
+    point: authStore.state.signedUser?.point || 0,
+    profileImage: pic
+      ? `${import.meta.env.VITE_API_URL}/uploads/${pic}`
+      : '/default-avatar.png',
   };
-};
-
-const handleImageError = (event) => {
-  event.target.src = '/default-profile.png';
-};
-
-// 포맷팅 함수들
-const formatPhoneNumber = (phone) => {
-  if (!phone) return '';
-  return phone.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
-};
-
-const formatBirthDate = (birthDate) => {
-  if (!birthDate) return '';
-  return new Date(birthDate).toLocaleDateString('ko-KR');
-};
-
-const formatGender = (gender) => {
-  const genderMap = { M: '남성', F: '여성', OTHER: '기타' };
-  return genderMap[gender] || gender;
-};
-
-const formatDate = (dateTime) => {
-  if (!dateTime) return '';
-  return new Date(dateTime).toLocaleString('ko-KR');
-};
-
-// 라이프사이클
-onMounted(() => {
-  loadProfile();
 });
+// 로그아웃 버튼 클릭 시
+const logoutAccount = async () => {
+  if (!confirm('로그아웃 하시겠습니까?')) return;
+  const res = await logout();
+  if (res === undefined || res.status !== 200) return;
+  authStore.logout();
+  router.push('/user/login');
+};
+// 포인트 포맷팅
+const formatPoint = (point) => {
+  return point?.toLocaleString() || '0';
+};
 </script>
 
 <template>
-  <div class="user-profile">
-    <div class="profile-header">
-      <h2>프로필 관리</h2>
+  <div>
+    <div>
+      <a>프로필사진</a>
+      <a>{{ authStore.state.signedUser?.nickName || '사용자' }}</a>
+      <a>이메일</a>
+    </div>
+    <div><a>내가 쓴 게시글</a><a>나의 좋아요</a><a>내가 쓴 댓글</a></div>
+  </div>
+  <div>
+    <a>내포인트</a><a>{{ authStore.state.signedUser.point }}P</a>
+  </div>
+  <div class="profile-container">
+    <!-- 프로필 섹션 -->
+    <div class="profile-section">
+      <router-link to="/user/ModifiProfile" class="profile-header">
+        <div class="profile-image">
+          <img :src="userInfo.profileImage" :alt="userInfo.nickName" />
+        </div>
+        <div class="profile-info">
+          <h2 class="nickname">{{ userInfo.nickName }}</h2>
+          <p class="email">{{ userInfo.email }}</p>
+        </div>
+      </router-link>
     </div>
 
-    <!-- 로딩 상태 -->
-    <div v-if="isLoading" class="loading">
-      <div class="spinner"></div>
-      <p>프로필 정보를 불러오는 중...</p>
-    </div>
-
-    <!-- 프로필 정보 -->
-    <div v-else-if="profileData" class="profile-content">
-      <!-- 프로필 이미지 섹션 -->
-      <div class="profile-image-section">
-        <div class="image-container">
-          <img
-            :src="profileImageUrl"
-            :alt="profileData.nickName + '의 프로필 이미지'"
-            class="profile-image"
-            @error="handleImageError"
-          />
-          <div class="image-overlay">
-            <button
-              @click="triggerFileInput"
-              class="change-image-btn"
-              :disabled="isUploading"
-            >
-              {{ isUploading ? '업로드 중...' : '이미지 변경' }}
-            </button>
-          </div>
-        </div>
-
-        <div class="image-controls">
-          <input
-            ref="fileInput"
-            type="file"
-            accept="image/*"
-            @change="handleImageUpload"
-            style="display: none"
-          />
-          <button
-            v-if="profileData.pic"
-            @click="deleteImage"
-            class="delete-btn"
-            :disabled="isUploading"
-          >
-            이미지 삭제
-          </button>
-        </div>
-      </div>
-
-      <!-- 사용자 정보 -->
-      <div class="profile-info">
-        <div class="info-group">
-          <label>사용자 ID</label>
-          <p>{{ profileData.userId }}</p>
-        </div>
-
-        <div class="info-group">
-          <label>아이디</label>
-          <p>{{ profileData.uid }}</p>
-        </div>
-
-        <div class="info-group">
-          <label>닉네임</label>
-          <p>{{ profileData.nickName || '설정되지 않음' }}</p>
-        </div>
-
-        <div class="info-group">
-          <label>이메일</label>
-          <p>{{ profileData.email }}</p>
-        </div>
-
-        <div class="info-group" v-if="profileData.phone">
-          <label>전화번호</label>
-          <p>{{ formatPhoneNumber(profileData.phone) }}</p>
-        </div>
-
-        <div class="info-group" v-if="profileData.birthDate">
-          <label>생년월일</label>
-          <p>{{ formatBirthDate(profileData.birthDate) }}</p>
-        </div>
-
-        <div class="info-group" v-if="profileData.gender">
-          <label>성별</label>
-          <p>{{ formatGender(profileData.gender) }}</p>
-        </div>
-
-        <div class="info-group">
-          <label>가입일</label>
-          <p>{{ formatDate(profileData.createdAt) }}</p>
-        </div>
-
-        <div class="info-group" v-if="profileData.lastLoginAt">
-          <label>최근 로그인</label>
-          <p>{{ formatDate(profileData.lastLoginAt) }}</p>
-        </div>
-      </div>
-
-      <!-- 액션 버튼들 -->
-      <div class="profile-actions">
-        <button @click="showPasswordModal = true" class="action-btn primary">
-          비밀번호 변경
-        </button>
-        <button @click="refreshProfile" class="action-btn secondary">
-          정보 새로고침
-        </button>
+    <!-- 활동 섹션 -->
+    <div class="activity-section">
+      <h3 class="section-title">나의 활동</h3>
+      <div class="activity-grid">
+        <router-link to="/user/posts" class="activity-item">
+          <div class="activity-icon">📝</div>
+          <span>내가 쓴 게시글</span>
+        </router-link>
+        <router-link to="/user/likes" class="activity-item">
+          <div class="activity-icon">❤️</div>
+          <span>나의 좋아요</span>
+        </router-link>
+        <router-link to="/user/comments" class="activity-item">
+          <div class="activity-icon">💬</div>
+          <span>내가 쓴 댓글</span>
+        </router-link>
       </div>
     </div>
 
-    <!-- 에러 상태 -->
-    <div v-else-if="error" class="error-state">
-      <p>{{ error }}</p>
-      <button @click="loadProfile" class="retry-btn">다시 시도</button>
+    <!-- 포인트 섹션 -->
+    <div class="point-section">
+      <div class="point-header">
+        <h3 class="section-title">포인트</h3>
+        <div class="point-value">{{ formatPoint(userInfo.point) }}P</div>
+      </div>
+
+      <!-- 포인트 기록 -->
+      <div class="point-history">
+        <h4 class="history-title">최근 포인트 기록</h4>
+        <div class="history-item">
+          <div class="history-description">30k 러닝 챌린지</div>
+          <div class="history-points positive">+30P</div>
+          <div class="history-date">2025.10.20</div>
+        </div>
+        <!-- 더 많은 기록들을 위한 공간 -->
+        <router-link to="/user/point-history" class="view-all-link">
+          모든 포인트 기록 보기 →
+        </router-link>
+      </div>
     </div>
 
-    <!-- 비밀번호 변경 모달 -->
-    <div
-      v-if="showPasswordModal"
-      class="modal-overlay"
-      @click="closePasswordModal"
-    >
-      <div class="modal-content" @click.stop>
-        <div class="modal-header">
-          <h3>비밀번호 변경</h3>
-          <button @click="closePasswordModal" class="close-btn">&times;</button>
-        </div>
-
-        <form @submit.prevent="changePassword" class="password-form">
-          <div class="form-group">
-            <label for="currentPassword">현재 비밀번호</label>
-            <input
-              id="currentPassword"
-              v-model="passwordForm.currentPassword"
-              type="password"
-              required
-              :disabled="isChangingPassword"
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="newPassword">새 비밀번호</label>
-            <input
-              id="newPassword"
-              v-model="passwordForm.newPassword"
-              type="password"
-              required
-              title="영문자, 숫자, 특수기호로 구성되며 10자 이상이어야 합니다."
-              :disabled="isChangingPassword"
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="confirmPassword">새 비밀번호 확인</label>
-            <input
-              id="confirmPassword"
-              v-model="passwordForm.confirmPassword"
-              type="password"
-              required
-              :disabled="isChangingPassword"
-            />
-            <small
-              v-if="
-                passwordForm.newPassword &&
-                passwordForm.confirmPassword &&
-                !passwordsMatch
-              "
-              class="error-text"
-            >
-              비밀번호가 일치하지 않습니다.
-            </small>
-          </div>
-
-          <div class="modal-actions">
-            <button
-              type="button"
-              @click="closePasswordModal"
-              class="cancel-btn"
-              :disabled="isChangingPassword"
-            >
-              취소
-            </button>
-            <button
-              type="submit"
-              class="submit-btn"
-              :disabled="!canSubmitPassword || isChangingPassword"
-            >
-              {{ isChangingPassword ? '변경 중...' : '변경하기' }}
-            </button>
-          </div>
-        </form>
+    <!-- 설정 섹션 -->
+    <div class="settings-section">
+      <h3 class="section-title">설정</h3>
+      <div class="settings-list">
+        <router-link to="/user/signal" class="settings-item">
+          <div class="settings-icon">🔔</div>
+          <span>알림 설정</span>
+          <div class="arrow">›</div>
+        </router-link>
       </div>
+    </div>
+
+    <!-- 고객센터 섹션 -->
+    <div class="support-section">
+      <h3 class="section-title">고객센터</h3>
+      <div class="support-list">
+        <router-link to="/user/inquiry" class="support-item">
+          <div class="support-icon">💬</div>
+          <span>1:1 문의하기</span>
+          <div class="arrow">›</div>
+        </router-link>
+        <router-link to="/user/frequently" class="support-item">
+          <div class="support-icon">❓</div>
+          <span>자주 묻는 질문</span>
+          <div class="arrow">›</div>
+        </router-link>
+      </div>
+    </div>
+
+    <!-- 약관 및 로그아웃 섹션 -->
+    <div class="footer-section">
+      <router-link to="/user/term" class="footer-link"
+        >약관 및 보안</router-link
+      >
+      <button
+        class="logout-btn"
+        @click="logoutAccount"
+        :disabled="isLoggingOut"
+      >
+        {{ isLoggingOut ? '로그아웃 중...' : '로그아웃' }}
+      </button>
     </div>
   </div>
 </template>
 
-<style scoped>
-.user-profile {
-  max-width: 800px;
+<style scoped lang="scss">
+.profile-container {
+  max-width: 600px;
   margin: 0 auto;
-  padding: 2rem;
-  background: white;
-  border-radius: 1rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  background: #fff;
+  min-height: 100vh;
 }
 
-.profile-header {
-  text-align: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #f0f0f0;
-}
+.profile-section {
+  margin-bottom: 30px;
 
-.profile-header h2 {
-  color: #333;
-  font-size: 1.8rem;
-  font-weight: 600;
-}
+  .profile-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 16px;
+    color: white;
 
-.loading {
-  text-align: center;
-  padding: 3rem;
-}
+    .profile-image {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid rgba(255, 255, 255, 0.3);
 
-.spinner {
-  width: 3rem;
-  height: 3rem;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #00d5df;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 1rem;
-}
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
 
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
+    .profile-info {
+      flex: 1;
+
+      .nickname {
+        font-size: 24px;
+        font-weight: bold;
+        margin: 0 0 8px 0;
+        color: #393e46;
+      }
+
+      .email {
+        font-size: 14px;
+        opacity: 0.9;
+        margin: 0;
+        color: #393e46;
+      }
+    }
   }
-  100% {
-    transform: rotate(360deg);
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0 0 16px 0;
+  color: #333;
+}
+.activity-section {
+  margin-bottom: 30px;
+
+  .activity-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+
+    .activity-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 12px;
+      background: #f8f9fa;
+      border-radius: 12px;
+      text-decoration: none;
+      color: #333;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: #e9ecef;
+        transform: translateY(-2px);
+      }
+
+      .activity-icon {
+        font-size: 24px;
+        margin-bottom: 8px;
+      }
+
+      span {
+        font-size: 14px;
+        text-align: center;
+      }
+    }
   }
 }
 
-.profile-content {
-  display: grid;
-  gap: 2rem;
+.point-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #fff8e1;
+  border-radius: 16px;
+  border: 1px solid #ffd54f;
+
+  .point-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+
+    .point-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #f57c00;
+    }
+  }
+
+  .point-history {
+    .history-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #666;
+    }
+
+    .history-item {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #fff3c4;
+
+      .history-description {
+        font-weight: 500;
+      }
+
+      .history-points {
+        font-weight: bold;
+
+        &.positive {
+          color: #2e7d32;
+        }
+
+        &.negative {
+          color: #d32f2f;
+        }
+      }
+
+      .history-date {
+        color: #666;
+        font-size: 14px;
+      }
+    }
+
+    .view-all-link {
+      display: block;
+      text-align: center;
+      margin-top: 16px;
+      color: #f57c00;
+      text-decoration: none;
+      font-weight: 500;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
 }
 
-.profile-image-section {
-  text-align: center;
+.settings-section,
+.support-section {
+  margin-bottom: 30px;
+
+  .settings-list,
+  .support-list {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+    overflow: hidden;
+
+    .settings-item,
+    .support-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      text-decoration: none;
+      color: #333;
+      border-bottom: 1px solid #f0f0f0;
+      transition: background 0.2s ease;
+
+      &:hover {
+        background: #f8f9fa;
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .settings-icon,
+      .support-icon {
+        font-size: 20px;
+      }
+
+      span {
+        flex: 1;
+        font-weight: 500;
+      }
+
+      .arrow {
+        font-size: 18px;
+        color: #ccc;
+      }
+    }
+  }
 }
 
-.image-container {
-  position: relative;
-  display: inline-block;
-  margin-bottom: 1rem;
-}
-
-.profile-image {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 4px solid #00d5df;
-  transition: opacity 0.3s;
-}
-
-.image-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  border-radius: 50%;
+.footer-section {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.3s;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+
+  .footer-link {
+    color: #666;
+    text-decoration: none;
+    font-size: 14px;
+
+    &:hover {
+      color: #333;
+      text-decoration: underline;
+    }
+  }
+
+  .logout-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+      background: #c82333;
+      transform: translateY(-1px);
+    }
+
+    &:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+      transform: none;
+    }
+  }
 }
 
-.image-container:hover .image-overlay {
-  opacity: 1;
-}
-
-.change-image-btn {
-  background: white;
-  color: #333;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.change-image-btn:hover:not(:disabled) {
-  background: #f0f0f0;
-}
-
-.change-image-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.image-controls {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-}
-
-.delete-btn {
-  background: #dc3545;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.delete-btn:hover:not(:disabled) {
-  background: #c82333;
-}
-
-.profile-info {
-  display: grid;
-  gap: 1rem;
-}
-
-.info-group {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  background: #f8f9fa;
-  border-radius: 0.5rem;
-}
-
-.info-group label {
-  font-weight: 600;
-  color: #666;
-  min-width: 100px;
-}
-
-.info-group p {
-  margin: 0;
-  color: #333;
-  text-align: right;
-}
-
-.profile-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  padding-top: 1rem;
-}
-
-.action-btn {
-  padding: 0.75rem 2rem;
-  border: none;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.action-btn.primary {
-  background: #00d5df;
-  color: white;
-}
-
-.action-btn.primary:hover {
-  background: #00bcc7;
-}
-
-.action-btn.secondary {
-  background: #6c757d;
-  color: white;
-}
-
-.action-btn.secondary:hover {
-  background: #5a6268;
-}
-
-.error-state {
-  text-align: center;
-  padding: 3rem;
-  color: #dc3545;
-}
-
-.retry-btn {
-  background: #00d5df;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  margin-top: 1rem;
-}
-
-/* 모달 스타일 */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background: white;
-  border-radius: 1rem;
-  width: 90%;
-  max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem;
-  border-bottom: 1px solid #e9ecef;
-}
-
-.modal-header h3 {
-  margin: 0;
-  color: #333;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: #666;
-}
-
-.password-form {
-  padding: 1.5rem;
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #333;
-}
-
-.form-group input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  transition: border-color 0.2s;
-}
-
-.form-group input:focus {
-  outline: none;
-  border-color: #00d5df;
-}
-
-.form-group input:disabled {
-  background: #f8f9fa;
-  opacity: 0.6;
-}
-
-.help-text {
-  font-size: 0.875rem;
-  color: #666;
-  margin-top: 0.25rem;
-  display: block;
-}
-
-.error-text {
-  font-size: 0.875rem;
-  color: #dc3545;
-  margin-top: 0.25rem;
-  display: block;
-}
-
-.modal-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: flex-end;
-  padding-top: 1rem;
-  border-top: 1px solid #e9ecef;
-}
-
-.cancel-btn {
-  background: #6c757d;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-}
-
-.submit-btn {
-  background: #00d5df;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-}
-
-.submit-btn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
-
+// 반응형 디자인
 @media (max-width: 768px) {
-  .user-profile {
-    margin: 1rem;
-    padding: 1rem;
+  .profile-container {
+    padding: 16px;
   }
 
-  .profile-actions {
-    flex-direction: column;
+  .activity-grid {
+    grid-template-columns: 1fr;
+
+    .activity-item {
+      flex-direction: row;
+      text-align: left;
+
+      .activity-icon {
+        margin-bottom: 0;
+        margin-right: 12px;
+      }
+    }
   }
 
-  .modal-content {
-    margin: 1rem;
-    width: calc(100% - 2rem);
-  }
+  .history-item {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    text-align: left;
 
-  .modal-actions {
-    flex-direction: column;
+    .history-date {
+      order: -1;
+      font-size: 12px;
+    }
   }
 }
 </style>

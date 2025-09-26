@@ -17,10 +17,26 @@ export const formatDateKR = (dateStr) => {
   return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
 };
 
+// 날짜 포맷 함수 'YYYY년 MM월'
+export const formatDateYearMonthKR = (dateStr) => {
+  const date = new Date(dateStr);
+  return `${date.getFullYear()}년 ${date.getMonth() + 1}월`;
+};
+
 // 날짜 포맷 함수 'YYYY-MM-DD'
 export const formatDateISO = (dateStr) => {
   const date = new Date(dateStr);
-  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+};
+// 날짜 포맷 함수 'YYYY-MM'
+export const formatDateYearMonthISO = (dateStr) => {
+  const date = new Date(dateStr);
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  return `${yyyy}-${mm}`;
 };
 
 // 시간 포맷 함수 'HH시 MM분'

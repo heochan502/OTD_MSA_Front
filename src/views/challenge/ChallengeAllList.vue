@@ -1,10 +1,10 @@
 <script setup>
 import { onMounted, reactive } from 'vue';
-import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
-import { getAll } from '@/services/challenge/ChallengeService';
+import { getAll } from '@/services/challenge/challengeService';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Autoplay } from 'swiper/modules';
 import 'swiper/css/autoplay';
+import FlippableChallengeCard from '@/components/challenge/FlippableChallengeCard.vue';
 
 const state = reactive({
   weeklyChallenge: [],
@@ -32,7 +32,7 @@ onMounted(async () => {
       <Swiper
         :modules="[Autoplay]"
         :slides-per-view="2"
-        :space-between="15"
+        :space-between="14"
         loop
         :autoplay="{ delay: 3000, disableOnInteraction: false }"
       >
@@ -40,13 +40,16 @@ onMounted(async () => {
           v-for="challenge in state.weeklyChallenge"
           :key="challenge.id"
         >
-          <ChallengeCard
+          <FlippableChallengeCard
             class="challenge-card"
             :id="challenge.id"
             :image="challenge.image"
             :name="challenge.name"
+            :goal="challenge.goal"
+            :unit="challenge.unit"
+            :exp="challenge.xp"
             :reward="challenge.reward"
-          ></ChallengeCard>
+          ></FlippableChallengeCard>
         </SwiperSlide>
       </Swiper>
     </div>
@@ -61,18 +64,21 @@ onMounted(async () => {
         <Swiper
           :modules="[Autoplay]"
           :slides-per-view="2"
-          :space-between="15"
+          :space-between="14"
           loop
           :autoplay="{ delay: 5000, disableOnInteraction: false }"
         >
           <SwiperSlide v-for="challenge in list" :key="challenge.id">
-            <ChallengeCard
+            <FlippableChallengeCard
               class="challenge-card"
               :id="challenge.id"
               :image="challenge.image"
               :name="challenge.name"
+              :goal="challenge.goal"
+              :unit="challenge.unit"
+              :exp="challenge.xp"
               :reward="challenge.reward"
-            ></ChallengeCard>
+            ></FlippableChallengeCard>
           </SwiperSlide>
         </Swiper>
       </div>
@@ -82,7 +88,7 @@ onMounted(async () => {
         <Swiper
           :modules="[Autoplay]"
           :slides-per-view="2"
-          :space-between="15"
+          :space-between="14"
           loop
           :autoplay="{ delay: 5000, disableOnInteraction: false }"
         >
@@ -90,13 +96,16 @@ onMounted(async () => {
             v-for="challenge in state.personalChallenge"
             :key="challenge.id"
           >
-            <ChallengeCard
+            <FlippableChallengeCard
               class="challenge-card"
               :id="challenge.id"
               :image="challenge.image"
               :name="challenge.name"
+              :goal="challenge.goal"
+              :unit="challenge.unit"
+              :exp="challenge.xp"
               :reward="challenge.reward"
-            ></ChallengeCard>
+            ></FlippableChallengeCard>
           </SwiperSlide>
         </Swiper>
       </div>
@@ -118,12 +127,13 @@ onMounted(async () => {
   font-weight: bold;
 }
 .title {
+  margin-top: 30px;
   margin-bottom: 15px;
   font-size: 20px;
   font-weight: bold;
 }
 .sub-title {
   font-size: 12px;
-  margin-bottom: 15px;
+  margin: 15px 0;
 }
 </style>
