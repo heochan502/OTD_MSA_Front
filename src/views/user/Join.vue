@@ -1,9 +1,9 @@
 <script setup>
 import { ref, computed, watch, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { join, checkUidDuplicate, checkNicknameDuplicate } from '@/services/user/userService'
+import { join, checkUidDuplicate } from '@/services/user/userService'
 
-const router = useRouter()
+const router = useRouter();
 const basePath = import.meta.env.VITE_BASE_URL;
 
 // 현재 단계 (1: 이메일인증, 2: 약관동의, 3: 계정정보, 4: 추가정보, 5: 설문조사, 6: 완료)
@@ -29,8 +29,8 @@ const agreements = ref({
 const accountInfo = ref({
   uid: '',
   upw: '',
-  confirmPassword: ''
-})
+  confirmPassword: '',
+});
 
 // 계정 정보 검증 상태
 const validation = ref({
@@ -50,19 +50,12 @@ const validation = ref({
     isValid: true,
     message: '',
     touched: false,
-  },
-  nickname: {
-    isValid: true,
-    message: '',
-    touched: false,
-    checked: false,
-    available: false,
   }
-});
+})
 
-const showPassword = ref(false)
-const showConfirmPassword = ref(false)
-const generalError = ref('')
+const showPassword = ref(false);
+const showConfirmPassword = ref(false);
+const generalError = ref('');
 
 // 4단계: 추가 정보
 const additionalInfo = ref({
@@ -152,17 +145,23 @@ onUnmounted(() => {
 // 아이디 유효성 검사 함수
 const validateMemberId = (uid) => {
   if (!uid.trim()) {
-    return { isValid: false, message: '아이디를 입력해주세요.' }
+    return { isValid: false, message: '아이디를 입력해주세요.' };
   }
   if (uid.trim().length < 4) {
-    return { isValid: false, message: '아이디는 4자 이상이어야 합니다.' }
+    return { isValid: false, message: '아이디는 4자 이상이어야 합니다.' };
   }
   if (uid.trim().length > 20) {
-    return { isValid: false, message: '아이디는 최대 20자까지 입력 가능합니다.' }
+    return {
+      isValid: false,
+      message: '아이디는 최대 20자까지 입력 가능합니다.',
+    };
   }
-  const idRegex = /^[a-zA-Z0-9_]+$/
+  const idRegex = /^[a-zA-Z0-9_]+$/;
   if (!idRegex.test(uid.trim())) {
-    return { isValid: false, message: '아이디는 영문, 숫자, 언더스코어(_)만 사용 가능합니다.' }
+    return {
+      isValid: false,
+      message: '아이디는 영문, 숫자, 언더스코어(_)만 사용 가능합니다.',
+    };
   }
   return { isValid: true, message: '' }
 }
@@ -182,135 +181,128 @@ const validateMemberNick = (nickname) => {
 // 비밀번호 유효성 검사 함수
 const validatePassword = (password) => {
   if (!password) {
-    return { isValid: false, message: '비밀번호를 입력해주세요.' }
+    return { isValid: false, message: '비밀번호를 입력해주세요.' };
   }
-  if (password.length < 10) {
-    return { isValid: false, message: '비밀번호는 10자 이상이어야 합니다.' }
+  if (password.length < 8) {
+    return { isValid: false, message: '비밀번호는 8자 이상이어야 합니다.' }
   }
   if (password.length > 20) {
-    return { isValid: false, message: '비밀번호는 최대 20자까지 입력 가능합니다.' }
+    return {
+      isValid: false,
+      message: '비밀번호는 최대 20자까지 입력 가능합니다.',
+    };
   }
-  
-  // 영어, 숫자, 특수문자 포함 검사
-  const hasEnglish = /[a-zA-Z]/.test(password)
-  const hasNumber = /[0-9]/.test(password)
-  const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
-  
-  if (!hasEnglish) {
-    return { isValid: false, message: '비밀번호는 영문을 포함해야 합니다.' }
-  }
-  if (!hasNumber) {
-    return { isValid: false, message: '비밀번호는 숫자를 포함해야 합니다.' }
-  }
-  if (!hasSpecial) {
-    return { isValid: false, message: '비밀번호는 특수문자를 포함해야 합니다.' }
-  }
-  
-  return { isValid: true, message: '사용 가능한 비밀번호입니다.' }
+  return { isValid: true, message: '' }
 }
+
 // 비밀번호 확인 유효성 검사 함수
 const validatePasswordConfirm = (password, passwordConfirm) => {
   if (!passwordConfirm) {
-    return { isValid: false, message: '비밀번호 확인을 입력해주세요.' }
+    return { isValid: false, message: '비밀번호 확인을 입력해주세요.' };
   }
   if (password !== passwordConfirm) {
-    return { isValid: false, message: '비밀번호가 일치하지 않습니다.' }
+    return { isValid: false, message: '비밀번호가 일치하지 않습니다.' };
   }
-  return { isValid: true, message: '비밀번호가 일치합니다.' }
-}
+  return { isValid: true, message: '비밀번호가 일치합니다.' };
+};
 
 // 필드 유효성 검사
 const validateField = (field, value) => {
-  let result
-  
+  let result;
+
   switch (field) {
     case 'uid':
-      result = validateMemberId(value)
-      break
+      result = validateMemberId(value);
+      break;
     case 'upw':
-      result = validatePassword(value)
-      break
+      result = validatePassword(value);
+      break;
     case 'confirmPassword':
-      result = validatePasswordConfirm(accountInfo.value.upw, value)
-      break
+      result = validatePasswordConfirm(accountInfo.value.upw, value);
+      break;
     default:
-      result = { isValid: true, message: '' }
+      result = { isValid: true, message: '' };
   }
-  
+
   validation.value[field] = {
     ...validation.value[field],
     isValid: result.isValid,
     message: result.message,
-  }
-}
+  };
+};
 
 // 필드 터치 처리
 const handleFieldTouch = (field) => {
-  validation.value[field].touched = true
-  validateField(field, accountInfo.value[field])
-}
+  validation.value[field].touched = true;
+  validateField(field, accountInfo.value[field]);
+};
 
 // 비밀번호 일치 상태
 const passwordMatchStatus = computed(() => {
   if (!accountInfo.value.upw || !accountInfo.value.confirmPassword) {
-    return { show: false, isMatch: false, message: '' }
+    return { show: false, isMatch: false, message: '' };
   }
-  
-  const isMatch = accountInfo.value.upw === accountInfo.value.confirmPassword
+
+  const isMatch = accountInfo.value.upw === accountInfo.value.confirmPassword;
   return {
     show: true,
     isMatch,
-    message: isMatch ? '비밀번호가 일치합니다.' : '비밀번호가 일치하지 않습니다.',
-  }
-})
+    message: isMatch
+      ? '비밀번호가 일치합니다.'
+      : '비밀번호가 일치하지 않습니다.',
+  };
+});
 
 // 아이디 중복 검사
 const checkIdDuplicate = async () => {
-  const trimmedId = accountInfo.value.uid.trim()
-  
+  const trimmedId = accountInfo.value.uid.trim();
+
   if (!trimmedId) {
-    return
+    return;
   }
-  
-  const validationResult = validateMemberId(trimmedId)
+
+  const validationResult = validateMemberId(trimmedId);
   if (!validationResult.isValid) {
-    validation.value.uid.touched = true
-    validation.value.uid.isValid = false
-    validation.value.uid.message = validationResult.message
-    return
+    validation.value.uid.touched = true;
+    validation.value.uid.isValid = false;
+    validation.value.uid.message = validationResult.message;
+    return;
   }
-  
+
   try {
-  isLoading.value = true
-  const response = await checkUidDuplicate(trimmedId)
-  
-  validation.value.uid.checked = true
-  validation.value.uid.available = response.data.result.isAvailable
-  
-  if (response.data.result.isAvailable) {
-    validation.value.uid.message = '사용 가능한 아이디입니다.'
-    validation.value.uid.isValid = true
-  } else {
-    validation.value.uid.message = '이미 사용중인 아이디입니다.'
-    validation.value.uid.isValid = false
+    isLoading.value = true;
+    const response = await checkUidDuplicate(trimmedId);
+
+    validation.value.uid.checked = true;
+    validation.value.uid.available = response.data.result.isAvailable;
+
+    if (response.data.result.isAvailable) {
+      validation.value.uid.message = '사용 가능한 아이디입니다.';
+      validation.value.uid.isValid = true;
+    } else {
+      validation.value.uid.message = '이미 사용중인 아이디입니다.';
+      validation.value.uid.isValid = false;
+    }
+  } catch (error) {
+    console.error('아이디 중복 검사 오류:', error);
+    generalError.value = '중복 확인 중 오류가 발생했습니다.';
+    setTimeout(() => (generalError.value = ''), 3000);
+  } finally {
+    isLoading.value = false;
   }
-} catch (error) {
-  console.error('아이디 중복 검사 오류:', error)
-  generalError.value = '중복 확인 중 오류가 발생했습니다.'
-  setTimeout(() => (generalError.value = ''), 3000)
-} finally {
-  isLoading.value = false
-}
-}
+};
 
 // 아이디 변경 시 중복검사 상태 초기화
 const resetIdValidation = () => {
-  validation.value.uid.checked = false
-  validation.value.uid.available = false
-  if (validation.value.uid.touched && validation.value.uid.message.includes('사용')) {
-    validation.value.uid.message = ''
+  validation.value.uid.checked = false;
+  validation.value.uid.available = false;
+  if (
+    validation.value.uid.touched &&
+    validation.value.uid.message.includes('사용')
+  ) {
+    validation.value.uid.message = '';
   }
-}
+};
 
 // 닉네임중복검사
 const checkNicknameDuplicateAction = async () => {
@@ -360,38 +352,33 @@ const resetNicknameValidation = () => {
 }
 
 // 워처 설정
-watch(() => accountInfo.value.uid, (newValue) => {
-  if (validation.value.uid.touched) {
-    validateField('uid', newValue)
+watch(
+  () => accountInfo.value.uid,
+  (newValue) => {
+    if (validation.value.uid.touched) {
+      validateField('uid', newValue);
+    }
+    resetIdValidation();
   }
-  resetIdValidation()
-})
+);
 
-watch(() => additionalInfo.value.nickname, (newValue) => { 
-  if (validation.value.nickname.touched) {
-    const result = validateMemberNick(newValue)
-    validation.value.nickname.isValid = result.isValid
-    validation.value.nickname.message = result.message
-  }
-  resetNicknameValidation()
-})
 watch(() => accountInfo.value.upw, (newValue) => {
   if (validation.value.upw.touched) {
     validateField('upw', newValue)
-  }
-  if (validation.value.confirmPassword.touched) {
-    validateField('confirmPassword', accountInfo.value.confirmPassword)
-  }
-})
+  }}
+);
 
-watch(() => accountInfo.value.confirmPassword, (newValue) => {
-  if (newValue) {
-    validation.value.confirmPassword.touched = true
+watch(
+  () => accountInfo.value.confirmPassword,
+  (newValue) => {
+    if (newValue) {
+      validation.value.confirmPassword.touched = true;
+    }
+    if (validation.value.confirmPassword.touched) {
+      validateField('confirmPassword', newValue);
+    }
   }
-  if (validation.value.confirmPassword.touched) {
-    validateField('confirmPassword', newValue)
-  }
-})
+);
 
 // 설문 완료 여부
 const isSurveyCompleted = computed(() => {
@@ -432,16 +419,20 @@ const getFitnessRank = computed(() => {
 // 다음 단계 진행 가능 여부
 const canProceedToNext = computed(() => {
   switch (currentStep.value) {
-    case 1: return isEmailVerified.value
-    case 2: return agreements.value.service && agreements.value.privacy
-    case 3: 
-      return accountInfo.value.uid && 
-             validation.value.uid.isValid &&
-             validation.value.uid.checked &&
-             validation.value.uid.available &&
-             validation.value.upw.isValid &&
-             validation.value.confirmPassword.isValid &&
-             passwordMatchStatus.value.isMatch
+    case 1:
+      return isEmailVerified.value;
+    case 2:
+      return agreements.value.service && agreements.value.privacy;
+    case 3:
+      return (
+        accountInfo.value.uid &&
+        validation.value.uid.isValid &&
+        validation.value.uid.checked &&
+        validation.value.uid.available &&
+        validation.value.upw.isValid &&
+        validation.value.confirmPassword.isValid &&
+        passwordMatchStatus.value.isMatch
+      );
     case 4:
   return (
     additionalInfo.value.name &&
@@ -541,15 +532,15 @@ const handleAgreementChange = (type) => {
       agreements.value.marketing;
     agreements.value.all = allSelected;
   }
-}
+};
 
 // 프로필 이미지 업로드 처리
 const handleFileChange = (event) => {
-  const file = event.target.files[0]
+  const file = event.target.files[0];
   if (file) {
-    additionalInfo.value.pic = file
+    additionalInfo.value.pic = file;
   }
-}
+};
 
 const profileImageUrl = computed(() => {
   if (!additionalInfo.value.pic) return null;
@@ -561,8 +552,8 @@ const profileImageUrl = computed(() => {
   } catch (error) {
     console.error('이미지 URL 생성 오류:', error);
   }
-  return null
-})
+  return null;
+});
 
 // 설문 옵션 선택
 const selectOption = (questionId, optionValue) => {
@@ -599,15 +590,11 @@ const submitJoin = async () => {
       phone: additionalInfo.value.phone,
       gender: additionalInfo.value.gender,
       nickname: additionalInfo.value.nickname,
-      roles: ['USER'],
+      roles: ['유저'],
       surveyAnswers: calculateSurveyScore.value,
     }
     
-    console.log('회원가입 데이터:', joinData); // joinData 정의 후에 로그 출력
-    
-
-    const formData = new FormData();
-    
+    // JSON 데이터 추가
     formData.append(
       'req',
       new Blob([JSON.stringify(joinData)], {
@@ -677,9 +664,7 @@ const modalContent = {
 <template>
   <div class="signup-container">
     <!-- Header -->
-    <div class="header">
-  
-    </div>
+    <div class="header"></div>
 
     <!-- Progress Indicator -->
     <div v-if="currentStep <= 5" class="progress-container">
@@ -825,13 +810,13 @@ const modalContent = {
       <!-- Step 3: 계정 정보 (개선된 검증 시스템) -->
       <div v-if="currentStep === 3" class="step-container">
         <h2 class="step-title">아이디 비밀번호 입력</h2>
-        
+
         <!-- 일반 에러 메시지 -->
         <div v-if="generalError" class="error-message">
           <div class="message-icon">⚠</div>
           <div>{{ generalError }}</div>
         </div>
-        
+
         <div class="form-group">
           <!-- 아이디 입력 및 중복검사 -->
           <div class="form-group">
@@ -845,10 +830,16 @@ const modalContent = {
                 :class="{
                   'input-field-with-button': true,
                   error: validation.uid.touched && !validation.uid.isValid,
-                  success: validation.uid.touched && validation.uid.isValid && validation.uid.available,
+                  success:
+                    validation.uid.touched &&
+                    validation.uid.isValid &&
+                    validation.uid.available,
                 }"
                 @blur="handleFieldTouch('uid')"
-                @input="validation.uid.touched && validateField('uid', accountInfo.uid)"
+                @input="
+                  validation.uid.touched &&
+                    validateField('uid', accountInfo.uid)
+                "
               />
               <button
                 type="button"
@@ -864,7 +855,9 @@ const modalContent = {
               v-if="validation.uid.touched && validation.uid.message"
               :class="[
                 'field-message',
-                validation.uid.isValid && validation.uid.available ? 'field-success' : 'field-error'
+                validation.uid.isValid && validation.uid.available
+                  ? 'field-success'
+                  : 'field-error',
               ]"
             >
               {{ validation.uid.message }}
@@ -883,22 +876,55 @@ const modalContent = {
                 :class="{
                   'input-field-with-icon': true,
                   error: validation.upw.touched && !validation.upw.isValid,
-                  success: validation.upw.touched && validation.upw.isValid && accountInfo.upw,
+                  success:
+                    validation.upw.touched &&
+                    validation.upw.isValid &&
+                    accountInfo.upw,
                 }"
                 @blur="handleFieldTouch('upw')"
-                @input="validation.upw.touched && validateField('upw', accountInfo.upw)"
+                @input="
+                  validation.upw.touched &&
+                    validateField('upw', accountInfo.upw)
+                "
               />
               <button
                 type="button"
                 @click="showPassword = !showPassword"
                 class="input-icon-button"
               >
-                <svg v-if="!showPassword" class="icon-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                <svg
+                  v-if="!showPassword"
+                  class="icon-sm"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                  />
                 </svg>
-                <svg v-else class="icon-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"/>
+                <svg
+                  v-else
+                  class="icon-sm"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
+                  />
                 </svg>
               </button>
             </div>
@@ -906,11 +932,12 @@ const modalContent = {
               v-if="validation.upw.touched && validation.upw.message"
               :class="[
                 'field-message',
-                validation.upw.isValid ? 'field-success' : 'field-error'
+                validation.upw.isValid ? 'field-success' : 'field-error',
               ]"
             >
               {{ validation.upw.message }}
             </div>
+            <p>비밀번호는 영문자, 숫자, 특수기호로 구성되며 10자 이상이어야 합니다.</p>
           </div>
 
           <!-- 비밀번호 확인 -->
@@ -924,28 +951,62 @@ const modalContent = {
                 v-model="accountInfo.confirmPassword"
                 :class="{
                   'input-field-with-icon': true,
-                  error: accountInfo.confirmPassword && !passwordMatchStatus.isMatch,
-                  success: passwordMatchStatus.show && passwordMatchStatus.isMatch,
+                  error:
+                    accountInfo.confirmPassword && !passwordMatchStatus.isMatch,
+                  success:
+                    passwordMatchStatus.show && passwordMatchStatus.isMatch,
                 }"
                 @blur="handleFieldTouch('confirmPassword')"
-                @input="() => {
-                  if (accountInfo.confirmPassword) {
-                    validation.confirmPassword.touched = true;
-                    validateField('confirmPassword', accountInfo.confirmPassword);
+                @input="
+                  () => {
+                    if (accountInfo.confirmPassword) {
+                      validation.confirmPassword.touched = true;
+                      validateField(
+                        'confirmPassword',
+                        accountInfo.confirmPassword
+                      );
+                    }
                   }
-                }"
+                "
               />
               <button
                 type="button"
                 @click="showConfirmPassword = !showConfirmPassword"
                 class="input-icon-button"
               >
-                <svg v-if="!showConfirmPassword" class="icon-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                <svg
+                  v-if="!showConfirmPassword"
+                  class="icon-sm"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                  />
                 </svg>
-                <svg v-else class="icon-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"/>
+                <svg
+                  v-else
+                  class="icon-sm"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
+                  />
                 </svg>
               </button>
             </div>
@@ -955,7 +1016,7 @@ const modalContent = {
               :class="[
                 'field-message',
                 'password-match-message',
-                passwordMatchStatus.isMatch ? 'field-success' : 'field-error'
+                passwordMatchStatus.isMatch ? 'field-success' : 'field-error',
               ]"
             >
               {{ passwordMatchStatus.message }}
@@ -965,30 +1026,30 @@ const modalContent = {
       </div>
 
       <!-- Step 4: 추가 정보 -->
-<div v-if="currentStep === 4" class="step-container">
-  <h2 class="step-title">추가정보를 입력해주세요</h2>
+      <div v-if="currentStep === 4" class="step-container">
+        <h2 class="step-title">추가정보를 입력해주세요</h2>
 
-  <div class="form-group">
-    <!-- 프로필 이미지 -->
-    <div class="profile-image-container">
-      <div class="profile-image-wrapper">
-        <div class="profile-image">
-          <img
-            v-if="profileImageUrl"
-            :src="profileImageUrl"
-            alt="Profile"
-            class="profile-img"
-          />
-          <div v-else class="profile-placeholder"></div>
-        </div>
-        <input
-          type="file"
-          accept="image/*"
-          @change="handleFileChange"
-          class="file-input"
-        />
-      </div>
-    </div>
+        <div class="form-group">
+          <!-- 프로필 이미지 -->
+          <div class="profile-image-container">
+            <div class="profile-image-wrapper">
+              <div class="profile-image">
+                <img
+                  v-if="profileImageUrl"
+                  :src="profileImageUrl"
+                  alt="Profile"
+                  class="profile-img"
+                />
+                <div v-else class="profile-placeholder"></div>
+              </div>
+              <input
+                type="file"
+                accept="image/*"
+                @change="handleFileChange"
+                class="file-input"
+              />
+            </div>
+          </div>
 
           <input
             type="text"
@@ -1224,7 +1285,7 @@ const modalContent = {
 }
 
 .progress-dot.active {
-  background-color: #00D5DF;
+  background-color: #00d5df;
 }
 
 .content {
@@ -1349,7 +1410,7 @@ const modalContent = {
 }
 
 .btn-primary {
-  background-color: #393E46;
+  background-color: #393e46;
   color: white;
 }
 
@@ -1362,7 +1423,7 @@ const modalContent = {
 }
 
 .btn-secondary {
-  background-color: #393E46;
+  background-color: #393e46;
   color: white;
   gap: 3px;
 }
@@ -1556,7 +1617,6 @@ const modalContent = {
   height: 100%;
   object-fit: cover;
 }
-
 
 /* 설문조사 스타일 */
 .questions-container {

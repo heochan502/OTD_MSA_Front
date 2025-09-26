@@ -1,6 +1,6 @@
 <script setup>
 import { defineProps } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useAuthenticationStore } from '@/stores/user/authentication';
 
 const props = defineProps({
   id: Number,
@@ -8,8 +8,8 @@ const props = defineProps({
   name: String,
   reward: Number,
 });
-const router = useRouter();
-const route = useRoute();
+const auth = useAuthenticationStore();
+const userTier = auth.state.signedUser.challengeRole;
 const FILE_URL = import.meta.env.VITE_BASE_URL;
 </script>
 
