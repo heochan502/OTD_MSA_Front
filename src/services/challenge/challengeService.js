@@ -10,13 +10,19 @@ export const getSelectedAll = () => {
   return axios.get(`${BASE_URL}/selected`).catch((e) => e.response);
 };
 
+export const getChallenge = (type) => {
+  return axios
+    .get(`${BASE_URL}/addlist`, { params: { type } })
+    .catch((e) => e.response);
+};
+
 export const getChallengeList = (type) => {
   return axios
     .get(`${BASE_URL}/addlist`, { params: { type } })
     .catch((e) => e.response);
 };
 
-export const getCompetitonList = (type) => {
+export const getCompetitionList = (type) => {
   return axios
     .get(`${BASE_URL}/addcompetitionlist`, {
       params: { type },
@@ -45,3 +51,7 @@ export const postMissionRecord = (cdId) => {
 export const postChallenge = (params) => {
   return axios.post(`${BASE_URL}/add`, params).catch((e) => e.response);
 };
+
+export const settlement = (params) => {
+  return axios.post(`${BASE_URL}/settlement`, params).catch(e => response)
+}

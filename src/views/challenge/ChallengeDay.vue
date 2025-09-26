@@ -5,6 +5,7 @@ import { getDay } from '@/services/challenge/challengeService';
 import RewardCard from '@/components/challenge/RewardCard.vue';
 import { useRoute } from 'vue-router';
 import { useHeaderStore } from '@/stores/challenge/headerStore';
+
 const props = defineProps({
   id: Number,
   name: String,
@@ -22,6 +23,7 @@ onMounted(async () => {
   state.progress = res.data;
   state.recDate = res.data.recDate;
   console.log(res.data);
+  console.log('redate', state.recDate);
   headerStore.setDetailName(res.data.name);
 });
 </script>
@@ -36,7 +38,7 @@ onMounted(async () => {
       <div class="otd-body-3">15일 성공시 {{ state.progress.reward }}p!</div>
     </div>
     <div class="calendar-wrap otd-top-margin">
-      <Calendar class="calendar"></Calendar>
+      <Calendar class="calendar" :record-date="state.recDate"></Calendar>
     </div>
     <div class="otd-category otd-top-margin">추가 리워드</div>
     <RewardCard />

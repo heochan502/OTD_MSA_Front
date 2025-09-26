@@ -8,12 +8,11 @@ import Home from '@/views/HomeView.vue';
 import Community from '@/views/community/CommunityView.vue';
 import CategoryFeedView from '@/views/community/categories/CategoryFeedView.vue';
 import PostDetailView from '@/views/community/PostDetailView.vue';
-// 챌린지
 
+// 챌린지
 import ChallengeHome from '@/views/challenge/ChallengeHome.vue';
 import ChallengeAllList from '@/views/challenge/ChallengeAllList.vue';
-import ChallengeWeeklyList from '@/views/challenge/ChallengeWeeklyList.vue';
-import ChallengeCompetitionList from '@/views/challenge/ChallengeMonthlyList.vue';
+import ChallengeCategoryList from '@/views/challenge/ChallengeCategoryList.vue';
 import ChallengePer from '@/views/challenge/ChallengePer.vue';
 import ChallengeDay from '@/views/challenge/ChallengeDay.vue';
 
@@ -106,21 +105,21 @@ const router = createRouter({
       component: ChallengeAllList,
       meta: { headerType: 'title', title: '챌린지 목록', showUserPanel: false },
     },
-    {
-      path: '/challenge/dailylist',
-      name: 'ChallengedailyList',
-      component: ChallengeWeeklyList,
-      meta: {
-        headerType: 'title',
-        title: '일일 미션 목록',
+    // {
+    //   path: '/challenge/dailylist',
+    //   name: 'ChallengedailyList',
+    //   component: ChallengeWeeklyList,
+    //   meta: {
+    //     headerType: 'title',
+    //     title: '일일 미션 목록',
 
-        showUserPanel: false,
-      },
-    },
+    //     showUserPanel: false,
+    //   },
+    // },
     {
       path: '/challenge/weeklylist',
       name: 'ChallengeweeklyList',
-      component: ChallengeWeeklyList,
+      component: ChallengeCategoryList,
       meta: {
         headerType: 'title',
         title: '주간 챌린지 목록',
@@ -130,7 +129,7 @@ const router = createRouter({
     {
       path: '/challenge/competitionlist',
       name: 'ChallengecompetitionList',
-      component: ChallengeCompetitionList,
+      component: ChallengeCategoryList,
       meta: {
         headerType: 'title',
         title: '월간 경쟁챌린지 목록',
@@ -140,7 +139,7 @@ const router = createRouter({
     {
       path: '/challenge/personallist',
       name: 'ChallengepersonalList',
-      component: ChallengeWeeklyList,
+      component: ChallengeCategoryList,
       meta: {
         headerType: 'title',
         title: '월간 개인챌린지 목록',
