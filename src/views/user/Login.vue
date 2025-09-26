@@ -89,13 +89,7 @@ const submit = async () => {
       </div>
       <!-- API 로그인 -->
 
-      <div class="mb-3">
-        <span class="naver"
-          ><a
-            :href="`${beBaseUrl}/oauth2/authorization/naver?redirect_uri=${redirectUrl}`"
-            >네이버</a
-          ></span
-        >
+      <div class="mb-3">       
       <div class="API">
         <span class="naver"
           ><a

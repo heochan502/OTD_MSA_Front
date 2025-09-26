@@ -9,16 +9,20 @@ const route = useRoute();
 const keyword = ref(null);
 const selected = ref([]);
 
-// 카테고리용 드랍박스용
-const foodNameBox = ref({
-  isMenuActive: false,
-});
+
+
+// // 바로 접근 가능
+// console.log(route.query.meal) 
+
+// // 카테고리용 드랍박스용
+// const foodNameBox = ref({
+//   isMenuActive: false,
+// });
 
 // 음식 검색 결과 담는곳
 const items = reactive({
   foodList: [],
 });
-
 
 const changeText = debounce(() => {
   // const searchFood = value;
@@ -28,25 +32,24 @@ const changeText = debounce(() => {
 // 무조건 박스 표출하기위한 forceopendropdown
 const onFoodNameInput = async (value) => {
   // value가 string이면 검색 입력
-  if (typeof value === "string") {
+  if (typeof value === 'string') {
     changeText(value);
-    forceOpenDropdown();
+    // forceOpenDropdown();
   }
 
   // value가 객체면 (리스트에서 선택) → selected에 추가
-  else if (typeof value === "object" && value !== null) {
-    selected.value.push(value);   //  음식 객체 저장
-    keyword.value = "";           //  검색창 비우기
+  else if (typeof value === 'object' && value !== null) {
+    selected.value.push(value); //  음식 객체 저장
+    keyword.value = ''; //  검색창 비우기
   }
 };
 // 다시 카테고리 눌렀을때 name 쪽 비워서 검색에 무리없게 만들기
 
-
-const forceOpenDropdown = () => {
-  setTimeout(() => {
-    foodNameBox.value.isMenuActive = true;
-  }, 50);
-};
+// const forceOpenDropdown = () => {
+//   setTimeout(() => {
+//     foodNameBox.value.isMenuActive = true;
+//   }, 50);
+// };
 
 const searchFoodName = async (keyword) => {
   console.log('이게왜', keyword);
@@ -59,19 +62,29 @@ const searchFoodName = async (keyword) => {
     // null이 아닐떄만 아래 실행
     if (keyword) {
       // console.log('널확인 ', searchFood.foodName);
+  
 
       items.foodList = Array.from(
         new Map(
-          res.map(item => [item.foodName.trim(), {
-            foodDbId: item.foodDbId,
-            foodName: item.foodName.trim(),
-            kcal: item.kcal,
-            amount: item.foodCapacity
-          }])
-        ).values() // foodName 기준으로 중복 제거 공백까지 포함 
+          res.map((item) => [
+            item.foodName.trim(),
+            {
+              foodDbId: item.foodDbId,
+              foodName: item.foodName.trim(),
+              kcal:  Math.floor(item.kcal *(item.foodCapacity/100)),
+               // 처음 가져오는건 식품기준 용량 이지만 이후는 사용자가 섭취량으로 인식하기 떄문에 amount로 설정
+              amount: item.foodCapacity,
+              flag: item.flag,
+              protein : item.protein,
+              carbohydrate : item.carbohydrate,
+              fat : item.fat,
+              sugar : item.sugar,
+              natrium: item.natrium
+            },
+          ])
+        ).values() // foodName 기준으로 중복 제거 공백까지 포함
       );
       console.log('음식확인 ', items.foodList);
-     
     } else {
       return null;
     }
@@ -79,41 +92,66 @@ const searchFoodName = async (keyword) => {
   }
 };
 
+// // 목록 추가
+// const onItemClick = (item) => {
+//   // console.log('드롭다운에서 클릭된 시점 아이템:', items);
+//   const foodInfo = item[0];
 
-// 목록 추가
-const onItemClick = (item) => {
-  // console.log('드롭다운에서 클릭된 시점 아이템:', items);
-  const foodInfo = item[0];
-
-  // console.log('드롭다운에서 클릭된 항목:', foodInfo);
-  if (!selected.value.some((item) => item.foodDbId === foodInfo.foodDbId)) {
-    selected.value.push({
-      foodDbId: foodInfo.foodDbId,
-      foodName: foodInfo.foodName,
-      kcal: foodInfo.kcal,
-      amount: foodInfo.amount,
-  
-    });
-  }
-  // console.log('배열에 넣는데:', itemList.value);
-};
-
-
-
+//   // console.log('드롭다운에서 클릭된 항목:', foodInfo);
+//   if (!selected.value.some((item) => item.foodDbId === foodInfo.foodDbId)) {
+//     selected.value.push({
+//       foodDbId: foodInfo.foodDbId,
+//       foodName: foodInfo.foodName,
+//       kcal: foodInfo.kcal,
+//       amount: foodInfo.foodCapacity,
+//       flag: foodInfo.flag,
+//       protein : foodInfo.protein,
+//       carbohydrate : foodInfo.carbohydrate,
+//       fat : foodInfo.fat,
+//       sugar : foodInfo.sugar,
+//       natrium: foodInfo.natrium,
+//       amount: foodInfo.amount,
+//     });
+//   }
+//   console.log('배열에 넣는데:', selected.value);
+// };
 
 const toggleSelect = (food) => {
-  const idx = selected.value.findIndex((f) => f.name === food.name);
-  if (idx === -1) selected.value.push(food);
-  else selected.value.splice(idx, 1);
-};
+  console.log("클릭중" , food);
 
+  const foodInfo = food;
+
+// console.log('드롭다운에서 클릭된 항목:', foodInfo);
+if (!selected.value.some((item) => item.foodDbId === foodInfo.foodDbId)) {
+  selected.value.push({
+    foodDbId: foodInfo.foodDbId,
+    foodName: foodInfo.foodName,
+    kcal: foodInfo.kcal,
+    amount: foodInfo.foodCapacity,
+    flag: foodInfo.flag,
+    protein : foodInfo.protein,
+    carbohydrate : foodInfo.carbohydrate,
+    fat : foodInfo.fat,
+    sugar : foodInfo.sugar,
+    natrium: foodInfo.natrium,
+    amount: foodInfo.amount,
+  });
+}
+else
+{
+  const idx = selected.value.findIndex((f) => f.foodDbId === food.foodDbId);
+  selected.value.splice(idx, 1);
+  console.log("같은거 클릭", idx);
+}
+console.log('배열에 넣는데:', selected.value);
+  // const idx = selected.value.findIndex((f) => f.name === food.name);
+  // if (idx === -1) selected.value.push(food);
+  // else selected.value.splice(idx, 1);  
+};
 
 const menuOpen = ref(false);
 //데이터 입력 받고 정리 하는곳
 const itemList = ref([]);
-
-
-
 
 // ✅ 확정 버튼 → 식단 메인으로 이동
 const goRecord = () => {
@@ -126,6 +164,13 @@ const goRecord = () => {
     // state: { foods: selected.value }  // 필요하면 상태로 함께 전달
   });
 };
+
+// 예시 음식 데이터
+const foods = [
+  { name: '초코빵', amount: '80g', kcal: 120 },
+  { name: '초코', amount: '10g', kcal: 40 },
+  { name: '초코비 초코우유', amount: '180ml', kcal: 170 },
+];
 </script>
 
 <template>
@@ -133,26 +178,39 @@ const goRecord = () => {
     <span class="otd-title">무슨 음식을 먹었나요?</span>
     <!-- <input v-model="keyword" placeholder="음식명 입력" class="search-input otd-border " /> -->
 
-    <v-combobox placeholder="음식명 입력" class="search-input otd-top-margin"
-     v-model="keyword" v-model:menu="menuOpen"
+    <v-text-field placeholder="음식명 입력" class="search-input otd-top-margin"
+     v-model="keyword" 
       :items="items.foodList" item-title="foodName" 
       item-value="foodDbId" variant="outlined" rounded="xl"
       density="comfortable" clearable
        @update:model-value="onFoodNameInput"
-      @keyup.enter.prevent="searchFoodName(keyword)" @click:append="onItemClick(items.foodList)">
+      @keyup.enter.prevent="searchFoodName(keyword)" >
       <template #append-inner>
         <v-icon class="mr-2" @click="searchFoodName(keyword)">mdi-magnify</v-icon>
       </template>
-    </v-combobox>
+    </v-text-field>
+    
 
     <div class="food-list otd-top-margin">
-      <div v-for="food in selected" :key="food.foodDbId" class="food-item" @click="toggleSelect(food)">
-        <div class="otd-body-2">{{ food.foodName }} {{ food.amount }}</div>
+      <div
+        v-for="food in items.foodList"
+        :key="food.foodDbId"
+        class="food-item"
+        @click="toggleSelect(food)"
+      >
+        <div class="otd-body-2 d-flex flex-column ">
+          <span>{{ food.foodName }}</span> 
+          <span> {{ food.amount }}</span>
+        </div>
         <span>{{ food.kcal }} kcal</span>
       </div>
     </div>
 
-    <button class="otd-button confirm-btn" :disabled="selected.length === 0" @click="goRecord">
+    <button
+      class="otd-button confirm-btn"
+      :disabled="selected.length === 0"
+      @click="goRecord"
+    >
       {{ selected.length }} 개 담았어요
     </button>
   </div>
