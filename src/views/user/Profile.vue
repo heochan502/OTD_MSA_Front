@@ -21,11 +21,6 @@ const profileImage = computed(() => {
     ? authStore.state.signedUser.pic
     : defaultProfile;
 });
-<<<<<<< HEAD
-
-onMounted(() => {
-  loadProfile();
-});
 
 const loadProfile = async () => {
   if (!authStore.isLoggedIn) {
@@ -56,8 +51,6 @@ const loadProfile = async () => {
   }
 };
 
-=======
->>>>>>> aa1910e1324aa8208a1cc17185063183905390a1
 const userInfo = computed(() => {
   return {
     nickName: authStore.state.signedUser?.nickName || '게스트',
