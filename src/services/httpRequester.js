@@ -1,13 +1,7 @@
 import axios from 'axios';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { reissue } from './user/userService';
-<<<<<<< HEAD
 import { useMessageModalStore } from '@/stores/messageModal';
-=======
-
-import { useMessageModalStore } from '@/stores/messageModal';
-
->>>>>>> 257a7edcf2dd94c3ad5c40e830567dddac621e4f
 
 // 환경별 baseURL (dev → localhost:8080, prod → greenart.n-e.kr/otd-api)
 axios.defaults.baseURL = `${import.meta.env.VITE_BASE_URL}/api/OTD`;
