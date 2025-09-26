@@ -1,9 +1,9 @@
 <script setup>
 import { useRouter } from 'vue-router';
-import { logout, getUserProfile } from '@/services/user/userService';
+import { logout } from '@/services/user/userService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
-import { ref, computed, reactive } from 'vue';
-import { onMounted } from 'vue';
+import { ref, computed } from 'vue';
+
 
 const router = useRouter();
 const authStore = useAuthenticationStore();
@@ -117,7 +117,7 @@ const formatPoint = (point) => {
     <div class="support-section">
       <h3 class="section-title">고객센터</h3>
       <div class="support-list">
-        <router-link to="/user/munhe" class="support-item">
+        <router-link to="/user/email/munhe" class="support-item">
           <div class="support-icon">💬</div>
           <span>1:1 문의하기</span>
           <div class="arrow">›</div>

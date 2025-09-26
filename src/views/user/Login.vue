@@ -111,6 +111,7 @@ const submit = async () => {
           ></span
         >
       </div>
+    </div>
 
       <div class="additional-links">
         <div class="link-row">

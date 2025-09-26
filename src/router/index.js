@@ -200,7 +200,7 @@ const router = createRouter({
       component: QnA,
     },
     {
-      path: '/user/munhe',
+      path: '/user/email/munhe',
       name: 'munhe',
       component: Munhe,
     },

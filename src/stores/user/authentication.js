@@ -1,4 +1,4 @@
-import { reactive } from 'vue';
+import { reactive, computed } from 'vue';
 import { defineStore } from 'pinia';
 import router from '@/router';
 
