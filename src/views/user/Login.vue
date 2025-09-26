@@ -118,7 +118,7 @@ const submit = async () => {
         <a href="#" class="link">비밀번호 찾기</a>
       </div>
     </div>
-  
+  </div>
 </template>
 
 <style scoped>
