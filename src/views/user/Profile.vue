@@ -1,8 +1,9 @@
 <script setup>
 import { useRouter } from 'vue-router';
-import { logout } from '@/services/user/userService';
+import { logout, getUserProfile } from '@/services/user/userService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
-import { ref, computed } from 'vue';
+import { ref, computed, reactive } from 'vue';
+import { onMounted } from 'vue';
 
 const router = useRouter();
 const authStore = useAuthenticationStore();
@@ -10,18 +11,59 @@ const isLoggingOut = ref(false);
 
 console.log(authStore.state.signedUser);
 
+const state = reactive({
+  form: {
+    userId: 0,
+    email: '',
+    nickName: '',
+    pic: null, 
+    point: 0,
+  },
+  loading: true,
+});
+
+onMounted(() => {
+  loadProfile();
+});
+
+const loadProfile = async () => {
+  if (!authStore.isLoggedIn) {
+    router.push('/user/login');
+    return;
+  }
+
+  try {
+    state.loading = true;
+    const res = await getUserProfile();
+
+    if (res && res.status === 200) {
+      const userData = res.data.result  
+      Object.assign(state.form, userData);
+      authStore.state.signedUser = userData 
+    }
+  } catch (error) {
+    console.error('Profile loading error:', error);
+    if (error.response && error.response.status === 401) {
+      authStore.logout(); 
+      router.push('/user/login');
+    } else {
+      alert('프로필 정보를 불러오는데 실패했습니다.');
+    }
+  } finally {
+    state.loading = false;
+  }
+};
+
 const userInfo = computed(() => {
   const pic = authStore.state.signedUser?.pic
   return {
     nickName: authStore.state.signedUser?.nickName || '게스트',
-    email: authStore.state.signedUser?.email || '로그인이 필요합니다',
+    email: authStore.state.signedUser?.email || '이메일을 불러올 수 없습니다',
     point: authStore.state.signedUser?.point || 0,
-    profileImage: pic
-      ? `${import.meta.env.VITE_API_URL}/uploads/${pic}`
-      : '/default-avatar.png'
+    hasProfileImage: !!pic,
+    profileImage: pic ? `${import.meta.env.VITE_BASE_URL}/uploads/${pic}` : null
   }
 })
-// 로그아웃 버튼 클릭 시
 const logoutAccount = async () => {
   if (!confirm('로그아웃 하시겠습니까?')) return;
   const res = await logout();
@@ -41,12 +83,20 @@ const formatPoint = (point) => {
     <!-- 프로필 섹션 -->
     <div class="profile-section">
       <router-link to="/user/ModifiProfile" class="profile-header">
-        <div class="profile-image">
-  <img :src="userInfo.profileImage" :alt="userInfo.nickName" />
-</div>
+       <div class="profile-image">
+    <img 
+      v-if="userInfo.hasProfileImage"
+      :src="userInfo.profileImage" 
+      :alt="userInfo.nickName"
+    />
+    <div v-else class="default-avatar">
+      <span>👤</span>
+    </div>
+  </div>
         <div class="profile-info">
           <h2 class="nickname">{{ userInfo.nickName }}</h2>
           <p class="email">{{ userInfo.email }}</p>
+          <div class="arrow">›</div>
         </div> 
       </router-link>
     </div>
@@ -108,12 +158,12 @@ const formatPoint = (point) => {
     <div class="support-section">
       <h3 class="section-title">고객센터</h3>
       <div class="support-list">
-        <router-link to="/user/inquiry" class="support-item">
+        <router-link to="/user/munhe" class="support-item">
           <div class="support-icon">💬</div>
           <span>1:1 문의하기</span>
           <div class="arrow">›</div>
         </router-link>
-        <router-link to="/user/frequently" class="support-item">
+        <router-link to="/user/qna" class="support-item">
           <div class="support-icon">❓</div>
           <span>자주 묻는 질문</span>
           <div class="arrow">›</div>
@@ -424,6 +474,36 @@ const formatPoint = (point) => {
     .history-date {
       order: -1;
       font-size: 12px;
+    }
+  }
+}
+.profile-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .default-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    
+    span {
+      font-size: 32px;
+      color: white;
     }
   }
 }

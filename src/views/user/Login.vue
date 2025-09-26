@@ -20,7 +20,6 @@ const state = reactive({
 });
 
 const submit = async () => {
-  //유효성 체크
   if (checkValidation()) {
     return;
   }
@@ -30,22 +29,40 @@ const submit = async () => {
     const res = await login(state.form);
     console.log('Login.vue - submit() - res: ', res);
     
-
     console.log('응답 데이터:', JSON.stringify(res.data.result, null, 2));
-    console.log('accessToken:', res.data.result.accessToken);
-    console.log('refreshToken:', res.data.result.refreshToken);
- 
 
     if (res.status === 200) {
-      const signedUser = res.data.result;
-      console.log('signedUser:', signedUser);
-      authentication.setSignedUser(signedUser);
+      const result = res.data.result;
+      
+     
+      console.log('result 전체:', result);
+      console.log('result의 키:', Object.keys(result));
+      
+   
+      const userData = {
+        user: {
+          userId: result.userId || result.id || 0,
+          nickName: result.nickName || result.nickname || result.name || '',
+          email: result.email || '',
+          pic: result.pic || result.profileImage || result.profile || null
+        },
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken
+      };
+      
+      console.log('구조화된 userData:', userData);
+      
+      // store 업데이트
+      authentication.setSignedUser(userData);
+      
+      // store 상태 확인
+      console.log('업데이트 후 store 상태:', authentication.state.signedUser);
+      
       await router.push('/');
     }
   } catch (error) {
     console.error('로그인 오류:', error);
     console.error('오류 상세:', error.response?.data);
-    console.error('요청 설정:', error.config);
     alert('로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.');
   }
 };
