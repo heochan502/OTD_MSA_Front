@@ -5,7 +5,7 @@ import {
   getSelectedAll,
   postMissionRecord,
   settlement,
-} from '@/services/challenge/ChallengeService';
+} from '@/services/challenge/challengeService';
 import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 import { useChallengeStore } from '@/stores/challenge/challengeStore.js';
 import Progress from '@/components/challenge/Progress.vue';
@@ -69,7 +69,7 @@ onMounted(async () => {
   state.tier = authentication.state.signedUser.challengeRole;
   console.log('res', res.data);
   setMissionState();
-  console.log("로그 데이터",state );
+  console.log('로그 데이터', state);
 });
 
 const totalXp = ref(0);
@@ -134,11 +134,12 @@ const levelMent = () => {
 const FILE_URL = import.meta.env.VITE_BASE_URL;
 const BASE_URL = import.meta.env.BASE_URL;
 
+// 정산 테스트용
 const settlementButton = async () => {
   const params = {
     startDate: '2025-09-01',
-    endDate: '2025-09-28',
-    type: 'weekly',
+    endDate: '2025-09-30',
+    type: 'competition',
   };
   const res = await settlement(params);
   console.log(res);
