@@ -10,7 +10,6 @@ const router = useRouter();
 const authentication = useAuthenticationStore();
 const beBaseUrl = import.meta.env.VITE_BASE_URL;
 
-
 const feBaseUrl = window.location.origin;
 const redirectUrl = `${feBaseUrl}/fe/redirect`;
 
@@ -30,36 +29,22 @@ const submit = async () => {
     console.log('전송할 데이터:', state.form);
     const res = await login(state.form);
     console.log('Login.vue - submit() - res: ', res);
-    
+
     console.log('응답 데이터:', JSON.stringify(res.data.result, null, 2));
 
     if (res.status === 200) {
       const result = res.data.result;
-      
-     
+
       console.log('result 전체:', result);
-      console.log('result의 키:', Object.keys(result));
-      
-   
-      const userData = {
-        user: {
-          userId: result.userId || result.id || 0,
-          nickName: result.nickName || result.nickname || result.name || '',
-          email: result.email || '',
-          pic: result.pic || result.profileImage || result.profile || null
-        },
-        accessToken: result.accessToken,
-        refreshToken: result.refreshToken
-      };
-      
-      console.log('구조화된 userData:', userData);
-      
+
+      console.log('구조화된 userData:', result);
+
       // store 업데이트
-      authentication.setSignedUser(userData);
-      
+      authentication.setSignedUser(result);
+
       // store 상태 확인
       console.log('업데이트 후 store 상태:', authentication.state.signedUser);
-      
+
       await router.push('/');
     }
   } catch (error) {
@@ -116,8 +101,9 @@ const submit = async () => {
         <span class="naver"
           ><a
             :href="`${beBaseUrl}/oauth2/authorization/naver?redirect_uri=${redirectUrl}`"
-            >네이버</a>
-          </span>
+            >네이버</a
+          >
+        </span>
         <span class="kakao"
           ><a
             :href="`${beBaseUrl}/oauth2/authorization/kakao?redirect_uri=${redirectUrl}`"
@@ -133,7 +119,7 @@ const submit = async () => {
           <a href="#" class="link">비밀번호 찾기</a>
         </div>
       </div>
-  </div>
+    </div>
   </div>
 </template>
 
@@ -141,7 +127,6 @@ const submit = async () => {
 .container {
   max-width: 576px;
   padding: 0px;
-  
 }
 
 .buttonlogin {
@@ -197,7 +182,6 @@ const submit = async () => {
   padding-left: 10px;
 }
 
-
 .naver {
   width: 100%;
   font-size: 16px;
@@ -213,7 +197,6 @@ const submit = async () => {
   text-align: center;
   text-decoration: none;
   display: inline-block;
-
 }
 .kakao {
   width: 100%;
@@ -230,7 +213,6 @@ const submit = async () => {
   text-align: center;
   text-decoration: none;
   display: inline-block;
-
 }
 
 .additional-links {

@@ -1,6 +1,9 @@
-import { reactive, computed } from 'vue';
+import { reactive } from 'vue';
 import { defineStore } from 'pinia';
+import router from '@/router';
 
+const DEFAULT_PROFILE = '/otd/image/main/default-profile.png';
+const FILE_URL = import.meta.env.VITE_BASE_URL;
 export const useAuthenticationStore = defineStore(
   'authentication',
   () => {
@@ -9,25 +12,23 @@ export const useAuthenticationStore = defineStore(
         userId: 0,
         nickName: '',
         email: '',
+        pic: DEFAULT_PROFILE,
         point: 0,
-        pic: null,
+        xp: 0,
+        challengeRole: '',
       },
-      accessToken: null,
-      refreshToken: null,
       isSigned: false,
     });
 
-    const setSignedUser = ({ user, accessToken, refreshToken }) => {
+    const setSignedUser = (signedUser) => {
       state.isSigned = true;
       state.signedUser = {
-        userId: user.userId || 0,
-        nickName: user.nickName || '',
-        email: user.email || '',
-        point: user.point || 0,
-        pic: user.pic || null,
+        ...signedUser,
+        pic:
+          signedUser.pic && signedUser.pic.trim() !== ''
+            ? `${FILE_URL}/profile/${signedUser.userId}/${signedUser.pic}`
+            : DEFAULT_PROFILE,
       };
-      state.accessToken = accessToken;
-      state.refreshToken = refreshToken;
     };
 
     const setSigndUserPic = (pic) => {
@@ -40,13 +41,7 @@ export const useAuthenticationStore = defineStore(
 
     const logout = async () => {
       console.log('logout 처리');
-      state.signedUser = {
-        userId: 0,
-        nickName: '',
-        email: '',
-        point: 0,
-        pic: null,
-      };
+      state.signedUser = { userId: 0, nickName: '', pic: DEFAULT_PROFILE };
       state.accessToken = null;
       state.refreshToken = null;
       state.isSigned = false;
@@ -57,11 +52,11 @@ export const useAuthenticationStore = defineStore(
       setSignedUser,
       setSigndUserPic,
       logout,
-
       isLoggedIn: computed(() => state.isSigned),
       userName: computed(() => state.signedUser?.nickName || ''),
       userId: computed(() => state.signedUser?.userId || 0),
       userPic: computed(() => state.signedUser?.pic || null),
+
     };
   },
   { persist: true }
