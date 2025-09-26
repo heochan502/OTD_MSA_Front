@@ -339,7 +339,7 @@ const BASE_URL = import.meta.env.BASE_URL;
 .monthly {
   display: flex;
   justify-content: space-between;
-  // align-items: center;
+  align-items: center;
   .route-list {
     margin-top: 10px;
     font-size: 12px;

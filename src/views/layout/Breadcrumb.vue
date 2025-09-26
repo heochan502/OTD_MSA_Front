@@ -4,6 +4,7 @@ import { computed, onMounted, } from 'vue';
 import weather from '@/components/weather/weather.vue';
 import { useHeaderStore } from '@/stores/challenge/headerStore';
 import { useAuthenticationStore } from '@/stores/user/authentication';
+import { reissue } from '@/services/user/userService';
 
 const route = useRoute();
 const headerStore = useHeaderStore();
@@ -51,9 +52,14 @@ const defaultProfile = '/otd/image/main/default-profile.png';
 const profileImage = computed(() => {
   return userInfo.value?.pic ? userInfo.value.pic : defaultProfile;
 });
-const handleClick= ()=>{
+const handleClick = async()=>{
   console.log("알람 클릭");
+  await reissue();
 }
+// 포인트 포맷팅
+const formatPoint = (point) => {
+  return point?.toLocaleString() || '0';
+};
 onMounted(() => {
   console.log('bread',userInfo.value)
 })
@@ -93,7 +99,7 @@ onMounted(() => {
       <router-link to="/pointshop" class="pointShop" :class="{active : route.path.startsWith('/pointshop')}">
         <div class="point-wrap">
         <img class="point-img" src="/image/main/point.png" alt="포인트"/>
-        <span >{{ userInfo.userPoint}} </span>
+        <span >{{ formatPoint(userInfo.userPoint)}} </span>
         </div>
       </router-link>
     </div>
