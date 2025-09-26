@@ -9,6 +9,8 @@ const router = useRouter();
 
 const authentication = useAuthenticationStore();
 const beBaseUrl = import.meta.env.VITE_BASE_URL;
+
+
 const feBaseUrl = window.location.origin;
 const redirectUrl = `${feBaseUrl}/fe/redirect`;
 
@@ -129,7 +131,7 @@ const submit = async () => {
           <a href="#" class="link">비밀번호 찾기</a>
         </div>
       </div>
-    </div>
+  </div>
   </div>
 </template>
 

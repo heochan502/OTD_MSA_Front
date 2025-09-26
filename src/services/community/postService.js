@@ -1,52 +1,43 @@
 import axios from '@/services/httpRequester';
 
-// 공통 prefix
-const COMMUNITY_BASE = 'community/';
+// httpRequester에서 baseURL = {VITE_BASE_URL}/api/OTD
+// → 여기서는 /community/posts 이하만 작성
+const BASE = '/community/posts';
 
-// 게시글 목록 조회
-export const fetchPosts = (page = 1, size = 10, searchText = '') => {
-  return axios.get(`${COMMUNITY_BASE}list`, {
-    params: { page, size, searchText },
+// X-MEMBER-ID 헤더 유틸
+const withUser = (userId, headers = {}) => ({
+  ...headers,
+  ...(userId ? { 'X-MEMBER-ID': String(userId) } : {}),
+});
+
+// 목록 조회 (서버 page=0 기준)
+export const fetchPosts = (page = 0, size = 10, categoryKey) => {
+  const params = { page, size };
+  if (categoryKey) params.categoryKey = categoryKey;
+  return axios.get(BASE, { params });
+};
+
+// 상세
+export const fetchPostById = (postId) => axios.get(`${BASE}/${postId}`);
+
+// JSON으로 게시글 생성 (FormData 아님)
+export const createPost = (payload, userId) =>
+  axios.post(`${BASE}`, payload, {
+    headers: withUser(userId, { 'Content-Type': 'application/json' }),
   });
-};
 
-// 게시글 상세 조회
-export const fetchPostById = (postId) => {
-  return axios.get(`${COMMUNITY_BASE}detail/${postId}`);
-};
-
-// 게시글 작성 (파일 포함 가능)
-export const createPost = (formData) => {
-  return axios.post(`${COMMUNITY_BASE}create`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+// 수정
+export const updatePost = (postId, payload, userId) =>
+  axios.put(`${BASE}/${postId}`, payload, {
+    headers: withUser(userId, { 'Content-Type': 'application/json' }),
   });
-};
 
-// 게시글 수정
-export const updatePost = (postId, formData) => {
-  return axios.put(`${COMMUNITY_BASE}update/${postId}`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+// 삭제
+export const deletePost = (postId, userId) =>
+  axios.delete(`${BASE}/${postId}`, { headers: withUser(userId) });
+
+// (서버에 있을 때만) 좋아요 토글 – 필요 없으면 제거해도 됨
+export const toggleLike = (postId, userId) =>
+  axios.post(`${BASE}/${postId}/likes/toggle`, null, {
+    headers: withUser(userId),
   });
-};
-
-// 게시글 삭제
-export const deletePost = (postId) => {
-  return axios.delete(`${COMMUNITY_BASE}delete/${postId}`);
-};
-
-// 게시글 검색 (별도 엔드포인트 있는 경우)
-export const searchPosts = (keyword, page = 1, size = 10) => {
-  return axios.get(`${COMMUNITY_BASE}search`, {
-    params: { keyword, page, size },
-  });
-};
-
-// 좋아요 토글
-export const toggleLike = (postId) => {
-  return axios.post(`${COMMUNITY_BASE}like/${postId}`);
-};
-
-// 인기 게시글 조회 (예: 상단 베스트글)
-export const fetchPopularPosts = () => {
-  return axios.get(`${COMMUNITY_BASE}popular`);
-};

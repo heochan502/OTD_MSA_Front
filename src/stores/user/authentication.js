@@ -30,9 +30,15 @@ export const useAuthenticationStore = defineStore(
             state.refreshToken = refreshToken;
         }
 
-        const setSigndUserPic = pic => {
-            state.signedUser.pic = pic;
-        }
+
+    const setSigndUserPic = (pic) => {
+      state.signedUser.pic = pic;
+    };
+
+
+    const setPoint = (point) => {
+      state.signedUser.point = point;
+    };
 
 
 
