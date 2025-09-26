@@ -28,7 +28,7 @@ const mealInfo = ref([
     meal_day: '저녁',
     kcal: 0,
     check: false,
-    recorded: false,
+    recorded: true,
     img: mealImg('dinner'),
   },
   {

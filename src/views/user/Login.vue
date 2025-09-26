@@ -110,6 +110,8 @@ const submit = async () => {
         <router-link class="buttonjoin" to="/user/join">회원가입</router-link>
       </div>
       <!-- API 로그인 -->
+
+      <div class="mb-3">       
       <div class="API">
         <span class="naver"
           ><a
