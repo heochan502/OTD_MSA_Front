@@ -1,7 +1,10 @@
 <script setup>
 import { onMounted, reactive, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import {  getSelectedAll,  postMissionRecord,} from '@/services/challenge/challengeService.js';
+import {
+  getSelectedAll,
+  postMissionRecord,
+} from '@/services/challenge/challengeService.js';
 import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 import { useChallengeStore } from '@/stores/challenge/challengeStore.js';
 import Progress from '@/components/challenge/Progress.vue';
@@ -29,7 +32,6 @@ const tierImg = {
   다이아: '/otd/image/challenge/diamond.png',
   default: '',
 };
-
 const myTierImg = computed(() => {
   const myTier = state.tier;
   return tierImg[`${myTier}`] || tierImg.default;
@@ -76,7 +78,7 @@ onMounted(async () => {
   state.tier = authentication.state.signedUser.challengeRole;
   console.log('res', res.data);
   setMissionState();
-  console.log("로그 데이터",state );
+  console.log('로그 데이터', state);
 });
 
 const totalXp = ref(0);

@@ -10,15 +10,22 @@ const isLoggingOut = ref(false);
 
 console.log(authStore.state.signedUser);
 
+const defaultProfile = '/otd/image/main/default-profile.png';
+// const BASE_URL = `home/green/download/profile/${userInfo.userId}`;
+
+// pic이 있으면 그걸 쓰고, 없으면 기본 이미지
+const profileImage = computed(() => {
+  return authStore.state.signedUser?.pic &&
+    authStore.state.signedUser.pic.trim() !== ''
+    ? authStore.state.signedUser.pic
+    : defaultProfile;
+});
 const userInfo = computed(() => {
-  const pic = authStore.state.signedUser?.pic;
   return {
     nickName: authStore.state.signedUser?.nickName || '게스트',
     email: authStore.state.signedUser?.email || '로그인이 필요합니다',
     point: authStore.state.signedUser?.point || 0,
-    profileImage: pic
-      ? `${import.meta.env.VITE_API_URL}/uploads/${pic}`
-      : '/default-avatar.png',
+    pic: authStore.state.signedUser?.pic,
   };
 });
 // 로그아웃 버튼 클릭 시
@@ -51,8 +58,8 @@ const formatPoint = (point) => {
     <!-- 프로필 섹션 -->
     <div class="profile-section">
       <router-link to="/user/ModifiProfile" class="profile-header">
-        <div class="profile-image">
-          <img :src="userInfo.profileImage" :alt="userInfo.nickName" />
+        <div class="profile-image otd-shadow">
+          <img :src="profileImage" :alt="userInfo.nickName" />
         </div>
         <div class="profile-info">
           <h2 class="nickname">{{ userInfo.nickName }}</h2>

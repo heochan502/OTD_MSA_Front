@@ -9,14 +9,8 @@ const props = defineProps({
   reward: Number,
 });
 const auth = useAuthenticationStore();
-const tier = auth.state.signedUser.challengeRole;
+const userTier = auth.state.signedUser.challengeRole;
 const FILE_URL = import.meta.env.VITE_BASE_URL;
-
-const lock = {
-  브론즈: 'url(/image/challenge/lock-silver)',
-  실버: 'url(/image/challenge/lock-gold)',
-  골드: 'url(/image/challenge/lock-diamond)',
-};
 </script>
 
 <template>

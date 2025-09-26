@@ -11,14 +11,43 @@ import 'swiper/css/autoplay';
 
 const dialog = ref(false);
 const successDialog = ref(false);
+const lockDialog = ref(false);
 const state = reactive({
   challengeList: [],
   selectedChallenge: null,
 });
+const BASE = import.meta.env.BASE_URL; // 보통 '/otd/' 들어옴
+
+const lockImg = (tier) => {
+  switch (tier) {
+    case '브론즈':
+      return `${BASE}image/challenge/lock.png`;
+    case '실버':
+      return `${BASE}image/challenge/lock-silver.png`;
+    case '골드':
+      return `${BASE}image/challenge/lock-gold.png`;
+    case '다이아':
+      return `${BASE}image/challenge/lock-diamond.png`;
+    default:
+      return `${BASE}image/challenge/lock.png`;
+  }
+};
+
 const openDialog = (challenge) => {
   state.selectedChallenge = challenge;
-  console.log(challenge);
+  console.log(challenge.tier);
   dialog.value = true;
+};
+const openLockedDialog = (challenge) => {
+  state.selectedChallenge = challenge;
+  lockDialog.value = true;
+};
+const handleClick = (challenge) => {
+  if (challenge.available) {
+    openDialog(challenge);
+  } else {
+    openLockedDialog(challenge);
+  }
 };
 const confirmYes = async () => {
   dialog.value = false;
@@ -45,8 +74,8 @@ onMounted(async () => {
 
   console.log('type', type);
   const res = await getCompetitonList(type);
-  console.log('monthdata', res.data);
   state.challengeList = res.data;
+  console.log('monthdata', state.challengeList);
 });
 </script>
 
@@ -62,15 +91,20 @@ onMounted(async () => {
         :autoplay="{ delay: 5000, disableOnInteraction: false }"
       >
         <SwiperSlide v-for="challenge in list">
-          <ChallengeCard
-            class="challenge-card"
-            :key="challenge.id"
-            :id="challenge.id"
-            :image="challenge.image"
-            :name="challenge.name"
-            :reward="challenge.reward"
-            @click="openDialog(challenge)"
-          ></ChallengeCard>
+          <div class="challenge-card-wrapper" @click="handleClick(challenge)">
+            <ChallengeCard
+              class="challenge-card"
+              :key="challenge.id"
+              :id="challenge.id"
+              :image="challenge.image"
+              :name="challenge.name"
+              :reward="challenge.reward"
+              :available="challenge.available"
+            ></ChallengeCard>
+            <div v-if="!challenge.available" class="overlay">
+              <img :src="lockImg(challenge.tier)" alt="잠금" class="lock" />
+            </div>
+          </div>
         </SwiperSlide>
       </Swiper>
     </div>
@@ -113,6 +147,21 @@ onMounted(async () => {
       </v-card-actions>
     </v-card>
   </v-dialog>
+
+  <!-- 잠금 상태 모달 -->
+  <v-dialog v-model="lockDialog" max-width="380" min-height="100">
+    <v-card>
+      <v-card-title class="text-h8">⚠️</v-card-title>
+      <v-card-text>
+        이 챌린지는 <strong>{{ state.selectedChallenge?.tier }}</strong> 등급
+        이상만 참여 가능합니다.
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <v-btn color="primary" text @click="lockDialog = false">확인</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <style scoped>
@@ -130,5 +179,21 @@ onMounted(async () => {
 }
 .challenge-info {
   margin-bottom: 8px;
+}
+.challenge-card-wrapper {
+  position: relative;
+}
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  border-radius: 10px;
+  align-items: center;
+  pointer-events: none; /* 클릭은 부모로 통과 */
+}
+.lock {
+  width: 100%;
+  border-radius: 10px;
 }
 </style>
