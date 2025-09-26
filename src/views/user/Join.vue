@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, watch, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { join, checkUidDuplicate, checkNicknameDuplicate } from '@/services/user/userService'
+import { join, checkUidDuplicate } from '@/services/user/userService'
 
 const router = useRouter();
 const basePath = import.meta.env.VITE_BASE_URL;
@@ -50,15 +50,8 @@ const validation = ref({
     isValid: true,
     message: '',
     touched: false,
-  },
-  nickname: {
-    isValid: true,
-    message: '',
-    touched: false,
-    checked: false,
-    available: false,
   }
-});
+})
 
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
@@ -190,8 +183,8 @@ const validatePassword = (password) => {
   if (!password) {
     return { isValid: false, message: '비밀번호를 입력해주세요.' };
   }
-  if (password.length < 10) {
-    return { isValid: false, message: '비밀번호는 10자 이상이어야 합니다.' }
+  if (password.length < 8) {
+    return { isValid: false, message: '비밀번호는 8자 이상이어야 합니다.' }
   }
   if (password.length > 20) {
     return {
@@ -199,24 +192,9 @@ const validatePassword = (password) => {
       message: '비밀번호는 최대 20자까지 입력 가능합니다.',
     };
   }
-  
-  // 영어, 숫자, 특수문자 포함 검사
-  const hasEnglish = /[a-zA-Z]/.test(password)
-  const hasNumber = /[0-9]/.test(password)
-  const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
-  
-  if (!hasEnglish) {
-    return { isValid: false, message: '비밀번호는 영문을 포함해야 합니다.' }
-  }
-  if (!hasNumber) {
-    return { isValid: false, message: '비밀번호는 숫자를 포함해야 합니다.' }
-  }
-  if (!hasSpecial) {
-    return { isValid: false, message: '비밀번호는 특수문자를 포함해야 합니다.' }
-  }
-  
-  return { isValid: true, message: '사용 가능한 비밀번호입니다.' }
+  return { isValid: true, message: '' }
 }
+
 // 비밀번호 확인 유효성 검사 함수
 const validatePasswordConfirm = (password, passwordConfirm) => {
   if (!passwordConfirm) {
@@ -384,14 +362,6 @@ watch(
   }
 );
 
-watch(() => additionalInfo.value.nickname, (newValue) => { 
-  if (validation.value.nickname.touched) {
-    const result = validateMemberNick(newValue)
-    validation.value.nickname.isValid = result.isValid
-    validation.value.nickname.message = result.message
-  }
-  resetNicknameValidation()
-})
 watch(() => accountInfo.value.upw, (newValue) => {
   if (validation.value.upw.touched) {
     validateField('upw', newValue)
@@ -620,15 +590,11 @@ const submitJoin = async () => {
       phone: additionalInfo.value.phone,
       gender: additionalInfo.value.gender,
       nickname: additionalInfo.value.nickname,
-      roles: ['USER'],
+      roles: ['유저'],
       surveyAnswers: calculateSurveyScore.value,
     }
     
-    console.log('회원가입 데이터:', joinData); // joinData 정의 후에 로그 출력
-    
-
-    const formData = new FormData();
-    
+    // JSON 데이터 추가
     formData.append(
       'req',
       new Blob([JSON.stringify(joinData)], {
@@ -971,6 +937,7 @@ const modalContent = {
             >
               {{ validation.upw.message }}
             </div>
+            <p>비밀번호는 영문자, 숫자, 특수기호로 구성되며 10자 이상이어야 합니다.</p>
           </div>
 
           <!-- 비밀번호 확인 -->

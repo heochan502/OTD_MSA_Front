@@ -20,8 +20,8 @@ import Login from '@/views/user/Login.vue';
 import Join from '@/views/user/Join.vue';
 import Profile from '@/views/user/Profile.vue';
 import Signal from '@/views/user/Signal.vue';
-import Inquiry from '@/views/user/Inquiry.vue';
-import Frequently from '@/views/user/Frequently.vue';
+import QnA from '@/views/user/QnA.vue';
+import Munhe from '@/views/user/Munhe.vue';
 import ModifiProfile from '@/views/user/ModifiProfile.vue';
 import Term from '@/views/user/Term.vue';
 import Oauth2 from '@/views/auth/OAuth2Handler.vue';
@@ -194,20 +194,21 @@ const router = createRouter({
       component: Signal,
     },
     {
-      path: '/user/inquiry',
-      name: 'inquiry',
-      component: Inquiry,
+      path: '/user/qna',
+      name: 'QnA',
+      component: QnA,
     },
     {
-      path: '/user/frequently',
-      name: 'frequently',
-      component: Frequently,
+      path: '/user/munhe',
+      name: 'munhe',
+      component: Munhe,
     },
     {
       path: '/user/modifiProfile',
       name: 'modifiProfile',
       component: ModifiProfile,
     },
+  
     {
       path: '/user/term',
       name: 'term',

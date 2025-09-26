@@ -20,12 +20,23 @@ const state = reactive({
   competitionChallenge: [],
   personalChallenge: [],
   dailyMission: [],
-  user: {},
+  user: { xp: 0, point: 0 },
   missionComplete: [],
   success: 0,
   tier: '',
 });
 
+const tierImg = {
+  브론즈: '/otd/image/challenge/bronze.png',
+  실버: '/otd/image/challenge/silver.png',
+  골드: '/otd/image/challenge/gold.png',
+  다이아: '/otd/image/challenge/diamond.png',
+  default: '',
+};
+const myTierImg = computed(() => {
+  const myTier = state.tier;
+  return tierImg[`${myTier}`] || tierImg.default;
+});
 const toChallengeList = () => {
   router.push('challenge/alllist');
 };
@@ -56,16 +67,16 @@ const detail = (id, type) => {
 
 onMounted(async () => {
   const res = await getSelectedAll();
-  state.weeklyChallenge = res.data.weeklyChallenge;
-  state.competitionChallenge = res.data.competitionChallenge;
-  state.personalChallenge = res.data.personalChallenge;
-  state.dailyMission = res.data.dailyMission;
-  state.user = res.data.user;
-  state.missionComplete = res.data.missionComplete;
+  state.weeklyChallenge = res.data.weeklyChallenge || [];
+  state.competitionChallenge = res.data.competitionChallenge || [];
+  state.personalChallenge = res.data.personalChallenge || [];
+  state.dailyMission = res.data.dailyMission || [];
+  state.user = res.data.user || { xp: 0, point: 0 };
+  state.missionComplete = res.data.missionComplete || [];
   state.success = res.data.success;
 
   challengeStore.state.progressChallenge = res.data;
-  totalXp.value = res.data.user.xp;
+  totalXp.value = res.data.user?.xp ?? 0;
   state.tier = authentication.state.signedUser.challengeRole;
   console.log('res', res.data);
   setMissionState();
@@ -123,11 +134,11 @@ const levelMent = () => {
     case '다이아':
       return '다이아처럼 빤짝빤짝 !';
     case '골드':
-      return `다이아까지 ${leftLevel} 남았어요!`;
+      return `다이아까지 Lv${leftLevel.value} 남았어요!`;
     case '실버':
-      return `골드까지 ${leftLevel} 남았어요!`;
+      return `골드까지 Lv${leftLevel.value} 남았어요!`;
     case '브론즈':
-      return `실버까지 ${leftLevel} 남았어요!`;
+      return `실버까지 Lv${leftLevel.value} 남았어요!`;
   }
 };
 
@@ -153,12 +164,18 @@ const settlementButton = async () => {
     <div>
       <div class="first-title">내 정보</div>
       <div>
-        <div>티어 이미지</div>
-        <div>
-          <span>{{ totalLevel }}레벨</span><span>{{ state.tier }}</span>
-          <span>{{ ' ' + levelMent() }}</span>
+        <div class="info">
+          <img :src="myTierImg" alt="tier" class="tier-img" />
+          <div class="info-right">
+            <span>Lv {{ totalLevel }}</span>
+            <span>{{ ' ' + levelMent() }}</span>
+            <Progress
+              class="progress"
+              :indata-progress="leftXp"
+              bar-type="xp"
+            ></Progress>
+          </div>
         </div>
-        <Progress :indata-progress="leftXp" bar-type="xp"></Progress>
       </div>
       <div class="sub-wrap">
         <div class="point-wrap otd-list-box-style">
@@ -396,6 +413,22 @@ const settlementButton = async () => {
     font-weight: 500;
     display: flex;
     flex-direction: column;
+  }
+}
+.info {
+  display: flex;
+  gap: 15px;
+  .tier-img {
+    width: 100px;
+  }
+  .info-right {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    .progress {
+      // width: 70%;
+    }
   }
 }
 </style>
