@@ -11,59 +11,25 @@ const isLoggingOut = ref(false);
 
 console.log(authStore.state.signedUser);
 
-const state = reactive({
-  form: {
-    userId: 0,
-    email: '',
-    nickName: '',
-    pic: null, 
-    point: 0,
-  },
-  loading: true,
+const defaultProfile = '/otd/image/main/default-profile.png';
+// const BASE_URL = `home/green/download/profile/${userInfo.userId}`;
+
+// pic이 있으면 그걸 쓰고, 없으면 기본 이미지
+const profileImage = computed(() => {
+  return authStore.state.signedUser?.pic &&
+    authStore.state.signedUser.pic.trim() !== ''
+    ? authStore.state.signedUser.pic
+    : defaultProfile;
 });
-
-onMounted(() => {
-  loadProfile();
-});
-
-const loadProfile = async () => {
-  if (!authStore.isLoggedIn) {
-    router.push('/user/login');
-    return;
-  }
-
-  try {
-    state.loading = true;
-    const res = await getUserProfile();
-
-    if (res && res.status === 200) {
-      const userData = res.data.result  
-      Object.assign(state.form, userData);
-      authStore.state.signedUser = userData 
-    }
-  } catch (error) {
-    console.error('Profile loading error:', error);
-    if (error.response && error.response.status === 401) {
-      authStore.logout(); 
-      router.push('/user/login');
-    } else {
-      alert('프로필 정보를 불러오는데 실패했습니다.');
-    }
-  } finally {
-    state.loading = false;
-  }
-};
-
 const userInfo = computed(() => {
-  const pic = authStore.state.signedUser?.pic
   return {
     nickName: authStore.state.signedUser?.nickName || '게스트',
     email: authStore.state.signedUser?.email || '이메일을 불러올 수 없습니다',
     point: authStore.state.signedUser?.point || 0,
-    hasProfileImage: !!pic,
-    profileImage: pic ? `${import.meta.env.VITE_BASE_URL}/uploads/${pic}` : null
-  }
-})
+    pic: authStore.state.signedUser?.pic,
+  };
+});
+// 로그아웃 버튼 클릭 시
 const logoutAccount = async () => {
   if (!confirm('로그아웃 하시겠습니까?')) return;
   const res = await logout();
@@ -83,16 +49,9 @@ const formatPoint = (point) => {
     <!-- 프로필 섹션 -->
     <div class="profile-section">
       <router-link to="/user/ModifiProfile" class="profile-header">
-       <div class="profile-image">
-    <img 
-      v-if="userInfo.hasProfileImage"
-      :src="userInfo.profileImage" 
-      :alt="userInfo.nickName"
-    />
-    <div v-else class="default-avatar">
-      <span>👤</span>
-    </div>
-  </div>
+        <div class="profile-image otd-shadow">
+          <img :src="profileImage" :alt="userInfo.nickName" />
+        </div>
         <div class="profile-info">
           <h2 class="nickname">{{ userInfo.nickName }}</h2>
           <p class="email">{{ userInfo.email }}</p>

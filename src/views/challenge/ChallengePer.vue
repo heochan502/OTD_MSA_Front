@@ -4,6 +4,7 @@ import { reactive, onMounted, ref } from 'vue';
 import Progress from '@/components/challenge/Progress.vue';
 import { getRank, putSuccess } from '@/services/challenge/challengeService';
 import { useHeaderStore } from '@/stores/challenge/headerStore';
+import { formatMinutesToHourMinute } from '@/utils/timeFormatter';
 const props = defineProps({
   id: Number,
   name: String,
@@ -63,13 +64,13 @@ const gap = () => {
   if (myRank === 1 && afterMe !== null) {
     // 1등일 때 → 아래사람과 비교
     recordGap.value = formatGap(myTotalRecord - afterMe);
-    ment.value = `2위와 ${recordGap.value}${state.progress.unit} 차이!`;
+    const formatHourTime = formatMinutesToHourMinute(recordGap.value);
+    ment.value = `2위와 ${formatHourTime} 차이!`;
   } else if (beforeMe !== null) {
     // 위사람과 비교
     recordGap.value = formatGap(beforeMe - myTotalRecord);
-    ment.value = `${recordGap.value}${state.progress.unit}만 더 하면 ${
-      myRank - 1
-    }위!`;
+    const formatHourTime = formatMinutesToHourMinute(recordGap.value);
+    ment.value = `${formatHourTime}만 더 하면 ${myRank - 1}위!`;
   } else {
     ment.value = `아직 비교할 상대가 없어요 😅`;
   }
