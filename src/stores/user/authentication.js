@@ -11,6 +11,7 @@ export const useAuthenticationStore = defineStore(
       signedUser: {
         userId: 0,
         nickName: '',
+        email: '',
         pic: DEFAULT_PROFILE,
         point: 0,
         xp: 0,
