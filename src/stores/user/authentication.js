@@ -42,8 +42,6 @@ export const useAuthenticationStore = defineStore(
     const logout = async () => {
       console.log('logout 처리');
       state.signedUser = { userId: 0, nickName: '', pic: DEFAULT_PROFILE };
-      state.accessToken = null;
-      state.refreshToken = null;
       state.isSigned = false;
     };
 
@@ -52,11 +50,7 @@ export const useAuthenticationStore = defineStore(
       setSignedUser,
       setSigndUserPic,
       logout,
-      isLoggedIn: computed(() => state.isSigned),
-      userName: computed(() => state.signedUser?.nickName || ''),
-      userId: computed(() => state.signedUser?.userId || 0),
-      userPic: computed(() => state.signedUser?.pic || null),
-
+      setPoint,
     };
   },
   { persist: true }

@@ -46,8 +46,6 @@ const headerTitle = computed(() => {
 })
 
 const defaultProfile = '/otd/image/main/default-profile.png';
-// const BASE_URL = `home/green/download/profile/${userInfo.userId}`;
-
 // pic이 있으면 그걸 쓰고, 없으면 기본 이미지
 const profileImage = computed(() => {
   return userInfo.value?.pic ? userInfo.value.pic : defaultProfile;
