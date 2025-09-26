@@ -111,7 +111,7 @@ const submit = async () => {
           ></span
         >
       </div>
-
+ </div>
       <div class="additional-links">
         <div class="link-row">
           <a href="#" class="link">아이디 찾기</a>
