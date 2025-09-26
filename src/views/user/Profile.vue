@@ -20,30 +20,6 @@ const profileImage = computed(() => {
     ? authStore.state.signedUser.pic
     : defaultProfile;
 });
-
-const loadProfile = async () => {
-  try {
-    state.loading = true;
-    const res = await getUserProfile();
-    console.log('온데이터 : ', res.data);
-    if (res && res.status === 200) {
-      const userData = res.data.result;
-      Object.assign(state.form, userData);
-      authStore.state.signedUser = userData;
-    }
-  } catch (error) {
-    console.error('Profile loading error:', error);
-    if (error.response && error.response.status === 401) {
-      authStore.logout();
-      router.push('/user/login');
-    } else {
-      alert('프로필 정보를 불러오는데 실패했습니다.');
-    }
-  } finally {
-    state.loading = false;
-  }
-};
-
 const userInfo = computed(() => {
   return {
     nickName: authStore.state.signedUser?.nickName || '게스트',
