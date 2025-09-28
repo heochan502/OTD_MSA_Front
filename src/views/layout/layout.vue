@@ -28,10 +28,14 @@ import Footer from './Footer.vue';
 }
 /* 공통 화면 좌우 여백 */
 .main-wrap {
-  overflow: scroll;
-  &::-webkit-scrollbar {
-    display: none;
-  }
+    // position: relative;
+      /* ✅ v-dialog 기준 */
+      flex: 1;
+    overflow: auto;  
+    /* 내부 스크롤 */
+    &::-webkit-scrollbar {
+      display: none;
+    }
 }
 .nav-footer {
   margin-top: auto;
