@@ -1,19 +1,32 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 
+import {useMealSelectedDayStore} from '@/stores/meal/mealStore.js'
+
+
+import dayjs from 'dayjs';
+
+import 'dayjs/locale/ko';
+
+dayjs.locale('ko');
+
+const selectedDay = useMealSelectedDayStore();
+
+
+
 // props: 외부에서 v-model로 날짜 제어 가능
 const props = defineProps({
   modelValue: { type: [String, Date], default: () => new Date() },
   // 오늘 기준 과거/미래 며칠 보여줄지 (총 길이 = before + 1 + after)
-  before: { type: Number, default: 30 },
-  after: { type: Number, default: 30 },
+  before: { type: Number, default: 365 },
+  after: { type: Number, default: 365 },
 });
 const emit = defineEmits(['update:modelValue', 'change']);
 
 const KOREAN_DOW = ['일', '월', '화', '수', '목', '금', '토'];
 
 // 날짜 유틸
-const toDate = (v) => (v instanceof Date ? v : new Date(v));
+const toDate = (value) => (value instanceof Date ? value : new Date(value));
 const fmt2 = (n) => String(n).padStart(2, '0');
 
 const today = computed(() => startOfDay(new Date()));
@@ -21,19 +34,19 @@ const selected = ref(startOfDay(toDate(props.modelValue)));
 
 watch(
   () => props.modelValue,
-  (v) => {
-    selected.value = startOfDay(toDate(v));
+  (value) => {
+    selected.value = startOfDay(toDate(value));
   }
 );
 
-function startOfDay(d) {
-  const x = new Date(d);
+function startOfDay(day) {
+  const x = new Date(day);
   x.setHours(0, 0, 0, 0);
   return x;
 }
-function addDays(d, n) {
-  const x = new Date(d);
-  x.setDate(x.getDate() + n);
+function addDays(day, now) {
+  const x = new Date(day);
+  x.setDate(x.getDate() + now);
   return startOfDay(x);
 }
 function isSame(d1, d2) {
@@ -43,8 +56,8 @@ function isSame(d1, d2) {
 const days = computed(() => {
   const arr = [];
   const base = today.value;
-  for (let i = -props.before; i <= props.after; i++) {
-    const dt = addDays(base, i);
+  for (let index = -props.before; index <= props.after; index++) {
+    const dt = addDays(base, index);
     const m = dt.getMonth() + 1;
     const day = dt.getDate();
     arr.push({
@@ -69,10 +82,18 @@ watch(days, syncIndex, { immediate: true });
 watch(selected, syncIndex);
 
 // 선택 처리
-function select(d) {
-  selected.value = d;
-  emit('update:modelValue', d);
-  emit('change', d);
+function select(day) {
+  // console.log("여기 : ", new dayjs(day).format('YYYY-MM-DD'));
+  // console.log("여기2 : ", selectedDay.selectedDay.setDay);
+  if (new dayjs(day).format('YYYY-MM-DD') === selectedDay.selectedDay.setDay)
+    {selected.value = new Date();  }
+
+  else{
+    selected.value = day;  }
+
+
+  emit('update:modelValue', day);
+  emit('change', day);
 }
 
 function onIndexChange(idx) {
@@ -91,8 +112,8 @@ function onIndexChange(idx) {
       @update:modelValue="onIndexChange"
     >
       <v-slide-group-item
-        v-for="(d, idx) in days"
-        :key="d.key"
+        v-for="(data, idx) in days"
+        :key="data.key"
         v-slot="{ isSelected, toggle, selectedClass, props }"
       >
         <button
@@ -102,14 +123,14 @@ function onIndexChange(idx) {
           @click="
             () => {
               toggle();
-              select(d.date);
+              select(data.date);
             }
           "
         >
           <!-- 상단 '9.5 금' 형태 -->
           <div class="d-flex flex-row align-center ga-1">
-            <span class="otd-category">{{ d.md }}</span>
-            <span class="day-badge otd-subtitle-2">{{ d.dow }}</span>
+            <span class="otd-category">{{ data.md }}</span>
+            <span class="day-badge otd-subtitle-2">{{ data.dow }}</span>
           </div>
         </button>
       </v-slide-group-item>

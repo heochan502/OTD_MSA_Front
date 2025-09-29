@@ -26,13 +26,13 @@ const todayWater = ref(0.0);
 const selectedDate = ref(new Date()) ;
 
 // 날짜 바뀔 때 라우터 쿼리 싱크 (선택)
-watch(selectedDate, (d) => {
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
+watch(selectedDate, (day) => {
+  const yyyy = day.getFullYear();
+  const mm = String(day.getMonth() + 1).padStart(2, '0');
+  const dd = String(day.getDate()).padStart(2, '0');
   selectedDay.selectedDay.setDay = `${yyyy}-${mm}-${dd}`;
   console.log(selectedDay.selectedDay.setDay);
-  router.replace({ query: { ...route.query, day: `${yyyy}-${mm}-${dd}` } });
+  router.replace({ query: { ...route.query}, day: `${yyyy}-${mm}-${dd}` });
 });
 
 
@@ -45,13 +45,13 @@ onMounted (async () => {
    
 <MealDateStrip
     v-model="selectedDate"
-    :before="60"
-    :after="60"
+    :before="365"
+    :after="365"
     @change="(d) => { /* d로 데이터 로드 등 */ }"
   />
 
 
-  <div class="wrap ">
+  <div class="wrap">
     <!-- 상단 요약 카드 -->
     <div class="otd-top-margin">
       <div

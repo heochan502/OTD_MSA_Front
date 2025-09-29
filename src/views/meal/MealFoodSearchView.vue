@@ -119,7 +119,7 @@ const displayKcal = (food) => selectedValue.value.get(food.foodDbId)?.kcal ?? fo
 
 //  바텀시트 상태 + 편집 대상(상세에서 조절)
 const sheetOpen = ref(false)
-const custom_food = ref ({
+const customFood = ref ({
   foodDbId: null,
   foodName: '',
   amount: 0,          // 사용자가 조절하는 값(ml/g)
@@ -143,16 +143,16 @@ const openSheet = (food) => {
     ...food,
     _kcalPer100: kcalPer100,
   }
-  // 이미 담아둔 값이 있으면 그 값으로 custom_food 채우기
+  // 이미 담아둔 값이 있으면 그 값으로 customFood 채우기
   const saved = selectedValue.value.get(food.foodDbId)
   if (saved) {
-    custom_food.value = {
+    customFood.value = {
       ...saved,
       _kcalPer100: kcalPer100, // 계산용 per100은 최신으로 유지
     }
   } else {
     // 없으면 원본 food로 채우기
-    custom_food.value = {
+    customFood.value = {
       ...food,
       _kcalPer100: kcalPer100,
     }
@@ -162,13 +162,13 @@ const openSheet = (food) => {
 
 // 양 변경 시 kcal 재계산
 const recalc = () => {
-  const result = (custom_food.value.amount || 0) / 100;
-  custom_food.value.kcal = Math.round((clickFood.value._kcalPer100 || 0) * result);
-  custom_food.value.protein = Math.round((clickFood.value.protein || 0) * result);
-  custom_food.value.carbohydrate = Math.round((clickFood.value.carbohydrate || 0) * result);
-  custom_food.value.fat = Math.round((clickFood.value.fat || 0) * result);
-  custom_food.value.sugar = Math.round((clickFood.value.sugar || 0) * result);
-  custom_food.value.natrium = Math.round((clickFood.value.natrium || 0) * result);
+  const result = (customFood.value.amount || 0) / 100;
+  customFood.value.kcal = Math.round((clickFood.value._kcalPer100 || 0) * result);
+  customFood.value.protein = Math.round((clickFood.value.protein || 0) * result);
+  customFood.value.carbohydrate = Math.round((clickFood.value.carbohydrate || 0) * result);
+  customFood.value.fat = Math.round((clickFood.value.fat || 0) * result);
+  customFood.value.sugar = Math.round((clickFood.value.sugar || 0) * result);
+  customFood.value.natrium = Math.round((clickFood.value.natrium || 0) * result);
 }
 // + / - 버튼
 const changeAmount = (delta) => {
@@ -179,27 +179,27 @@ const changeAmount = (delta) => {
 
 //  [목록에 담기]
 const addToList = () => {
-  const e = custom_food.value
-  const idx = selected.value.findIndex(v => v.foodDbId === e.foodDbId)
+  const modiFood = customFood.value
+  const idx = selected.value.findIndex(value => value.foodDbId === modiFood.foodDbId)
 
   const payload = {
-    foodDbId: e.foodDbId,
-    foodName: e.foodName,
-    amount: e.amount,
-    kcal: e.kcal,
-    flag: e.flag,
-    protein: e.protein,
-    carbohydrate: e.carbohydrate,
-    fat: e.fat,
-    sugar: e.sugar,
-    natrium: e.natrium,
+    foodDbId: modiFood.foodDbId,
+    foodName: modiFood.foodName,
+    amount: modiFood.amount,
+    kcal: modiFood.kcal,
+    flag: modiFood.flag,
+    protein: modiFood.protein,
+    carbohydrate: modiFood.carbohydrate,
+    fat: modiFood.fat,
+    sugar: modiFood.sugar,
+    natrium: modiFood.natrium,
   }
 
   if (idx === -1) selected.value.push(payload)
   else selected.value[idx] = payload
 
   // (선택) 리스트 표시값도 덮어쓰고 싶으면:
-  const target = items.foodList.find(f => f.foodDbId === e.foodDbId)
+  const target = items.foodList.find(f => f.foodDbId === modiFood.foodDbId)
   if (target) {
     // target.checked = true   // 이제 체크는 selected 기반이므로 불필요
     // target.amount  = e.amount
