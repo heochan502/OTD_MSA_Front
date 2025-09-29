@@ -1,291 +1,214 @@
 <script setup>
-import { onMounted, reactive } from 'vue';
-//import { getPointHistory } from '@/services/point/pointService';
+import { ref, onMounted } from 'vue';
+import { getPointHistory } from '@/services/user/userService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 
 const authStore = useAuthenticationStore();
+const data = ref(null);
+const loading = ref(true);
+const error = ref(null);
 
-const state = reactive({
-  loading: false,
-  error: null,
-  user: {
-    nickName: '',
-    totalPoint: 0
-  },
-  pointHistory: []
-});
-
-// 날짜 포맷팅
-const formatDate = (dateString) => {
-  if (!dateString) return '';
+const fetchData = async () => {
   try {
-    const date = new Date(dateString);
-    return date.toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  } catch (error) {
-    return '날짜 오류';
+    loading.value = true;
+    error.value = null;
+    
+    // Pinia store에서 userId 가져오기
+    const userId = authStore.state.signedUser.userId;
+    
+    console.log('가져온 userId:', userId);
+    
+    if (!userId || userId === 0) {
+      error.value = '로그인이 필요합니다.';
+      return;
+    }
+    
+    console.log('포인트 히스토리 조회 시작...');
+    const response = await getPointHistory(userId);
+    console.log('포인트 히스토리 응답:', response.data);
+    
+    data.value = response.data.data;
+    console.log('최종 데이터:', data.value);
+    
+  } catch (err) {
+    console.error('에러 발생:', err);
+    console.error('에러 응답:', err.response?.data);
+    
+    if (err.response?.status === 401) {
+      error.value = '로그인이 필요합니다.';
+    } else {
+      error.value = '데이터를 불러오는데 실패했습니다.';
+    }
+  } finally {
+    loading.value = false;
   }
 };
 
-// DB에서 포인트 내역 가져오기
-onMounted(async () => {
-  state.loading = true;
-  state.error = null;
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
 
-  try {
-    const res = await getPointHistory();
-    
-    if (!res || res.status !== 200) {
-      throw new Error('포인트 내역을 불러올 수 없습니다.');
-    }
-
-    console.log('point history data', res.data);
-
-    // DB에서 받은 데이터 구조에 맞게 설정
-    state.user = {
-      nickName: res.data.user?.nickName || '사용자',
-      totalPoint: res.data.user?.totalPoint || 0
-    };
-
-    // 전체 포인트 내역
-    state.pointHistory = res.data.pointHistory || [];
-
-  } catch (error) {
-    console.error('포인트 데이터 로드 실패:', error);
-    state.error = error.message || '데이터를 불러오는 중 오류가 발생했습니다.';
-  } finally {
-    state.loading = false;
-  }
+onMounted(() => {
+  fetchData();
 });
 </script>
 
 <template>
-  <div class="wrap">
-    <!-- 상단: 전체 포인트 -->
-    <div class="point-summary">
-      <div class="first-title">{{ userInfo.nickName }}님의 포인트</div>
-      <div class="total-point">
-        <span class="point-number">{{ state.user.totalPoint.toLocaleString('ko-KR') }}</span>
-        <span class="point-unit">P</span>
-      </div>
+  <div class="challenge-point-container">
+    <!-- 총 포인트 (항상 표시) -->
+    <div class="total-point">
+      <h2>총 포인트</h2>
+      <p class="point-value">{{ authStore.state.signedUser.point }}P</p>
     </div>
 
     <!-- 로딩 상태 -->
-    <div v-if="state.loading" class="loading-section">
-      <div class="spinner"></div>
-      <p>포인트 내역을 불러오고 있습니다...</p>
-    </div>
+    <div v-if="loading" class="loading">로딩 중...</div>
 
     <!-- 에러 상태 -->
-    <div v-else-if="state.error" class="error-section">
-      <p>{{ state.error }}</p>
-      <button @click="location.reload()" class="retry-btn">다시 시도</button>
-    </div>
+    <div v-else-if="error" class="error">{{ error }}</div>
 
-    <!-- 하단: 포인트 내역 리스트 -->
-    <div v-else>
-      <div class="title">포인트 적립 내역</div>
-      
-      <div v-if="state.pointHistory.length > 0" class="point-list">
-        <div
-          v-for="point in state.pointHistory"
-          :key="point.ch_id"
-          class="point-item"
+    <!-- 포인트 히스토리 리스트 -->
+    <div v-else-if="data" class="point-history">
+      <h3>포인트 내역</h3>
+      <ul v-if="data.pointHistory && data.pointHistory.length > 0" class="history-list">
+        <li 
+          v-for="item in data.pointHistory" 
+          :key="item.chId" 
+          class="history-item"
         >
-          <div class="point-info">
-            <div class="point-reason">{{ point.reason }}</div>
-            <div class="point-date">{{ formatDate(point.createdAt) }}</div>
+          <div class="item-info">
+            <span class="reason">{{ item.reason }}</span>
+            <span class="date">{{ formatDate(item.createdAt) }}</span>
           </div>
-          <div class="point-amount">+{{ point.point }}P</div>
-        </div>
-      </div>
-
-      <!-- 포인트 내역이 없을 때 -->
-      <div v-else class="empty-state">
-        <div class="empty-icon">💎</div>
-        <h3>아직 포인트 적립 내역이 없어요</h3>
-        <p>챌린지를 완료하고 포인트를 모아보세요!</p>
-      </div>
+          <span 
+            class="point" 
+            :class="item.point > 0 ? 'positive' : 'negative'"
+          >
+            {{ item.point > 0 ? '+' : '' }}{{ item.point }}P
+          </span>
+        </li>
+      </ul>
+      <p v-else class="no-data">포인트 내역이 없습니다.</p>
     </div>
+
+    <!-- 데이터 없음 -->
+    <div v-else class="no-data">데이터가 없습니다.</div>
   </div>
 </template>
 
-<style lang="scss" scoped>
-.wrap {
+<style scoped>
+.challenge-point-container {
+  max-width: 600px;
+  margin: 0 auto;
   padding: 20px;
-  background-color: #f8f9fa;
-  min-height: 100vh;
 }
 
-.first-title {
-  margin-bottom: 15px;
-  font-size: 20px;
-  font-weight: bold;
-  color: #333;
+.loading,
+.error,
+.no-data {
+  text-align: center;
+  padding: 40px;
+  font-size: 16px;
+  color: #666;
 }
 
-.title {
-  margin-top: 30px;
-  margin-bottom: 15px;
-  font-size: 20px;
-  font-weight: bold;
-  color: #333;
+.error {
+  color: #ef4444;
 }
 
-.point-summary {
+.total-point {
   background: #393e46;
-  border-radius: 15px;
-  padding: 10px;
-  margin-bottom: 25px;
   color: white;
+  padding: 30px;
+  border-radius: 15px;
   text-align: center;
-
-  .first-title {
-    color: rgba(255, 255, 255, 0.9);
-    margin-bottom: 15px;
-  }
-
-  .total-point {
-    .point-number {
-      font-size: 48px;
-      font-weight: bold;
-    }
-    .point-unit {
-      font-size: 32px;
-      margin-left: 8px;
-    }
-  }
+  margin-bottom: 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.loading-section, .error-section {
-  text-align: center;
-  padding: 40px 20px;
-  
-  .spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #3498db;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 20px;
-  }
-  
-  .retry-btn {
-    background: #007bff;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 10px;
-    
-    &:hover {
-      background: #0056b3;
-    }
-  }
+.total-point h2 {
+  margin: 0 0 10px 0;
+  font-size: 18px;
+  font-weight: normal;
+  opacity: 0.9;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.point-value {
+  margin: 0;
+  font-size: 48px;
+  font-weight: bold;
 }
 
-.point-list {
+.point-history {
   background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.point-item {
+.point-history h3 {
+  margin: 0 0 20px 0;
+  font-size: 20px;
+  color: #333;
+}
+
+.history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.history-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  padding: 15px;
   border-bottom: 1px solid #f0f0f0;
-  transition: background 0.2s ease;
-
-  &:last-child {
-    border-bottom: none;
-  }
-  
-  &:hover {
-    background: #f8f9fa;
-  }
-
-  .point-info {
-    flex: 1;
-    
-    .point-reason {
-      font-size: 16px;
-      color: #333;
-      font-weight: 500;
-      margin-bottom: 6px;
-    }
-    
-    .point-date {
-      font-size: 13px;
-      color: #999;
-    }
-  }
-
-  .point-amount {
-    color: #28a745;
-    font-weight: bold;
-    font-size: 20px;
-    white-space: nowrap;
-    margin-left: 15px;
-  }
+  transition: background-color 0.2s;
 }
 
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  color: #666;
-  background: white;
-  border-radius: 12px;
-
-  .empty-icon {
-    font-size: 64px;
-    margin-bottom: 20px;
-  }
-
-  h3 {
-    margin-bottom: 10px;
-    color: #333;
-  }
+.history-item:hover {
+  background-color: #f9fafb;
 }
 
-@media (max-width: 768px) {
-  .point-summary {
-    padding: 25px 20px;
-    
-    .total-point {
-      .point-number {
-        font-size: 36px;
-      }
-      .point-unit {
-        font-size: 24px;
-      }
-    }
-  }
-  
-  .point-item {
-    padding: 15px;
-    
-    .point-info .point-reason {
-      font-size: 14px;
-    }
-    
-    .point-amount {
-      font-size: 18px;
-    }
-  }
+.history-item:last-child {
+  border-bottom: none;
+}
+
+.item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.reason {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+.date {
+  font-size: 14px;
+  color: #999;
+}
+
+.point {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.point.positive {
+  color: #10b981;
+}
+
+.point.negative {
+  color: #ef4444;
 }
 </style>

@@ -46,7 +46,7 @@ axios.interceptors.response.use(
         authenticationStore.signOut();
       } else if (err.response.status === 403 && authenticationStore.state.isSigned) {
         //403 UnAuthorized 에러인데 FE 로그인 처리 되어 있다면
-        // console.log("실행되는거 맞냐");
+        console.log("실행되는거 맞냐");
 
         await reissue(); //AccessToken 재발행 시도
 
