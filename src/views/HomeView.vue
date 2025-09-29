@@ -8,6 +8,8 @@ import LineChart from '@/components/exercise/lineChart.vue';
 import MealCard from '@/components/meal/MealDayCards.vue';
 
 import BmiProg from '@/components/exercise/BmiProg.vue';
+import { getMyChallenge } from '@/services/challenge/challengeService';
+import { useRouter } from 'vue-router';
 
 import { getChallengeSettlementLog } from '@/services/challenge/challengeService';
 import ChallengeSettlementCard from '@/components/challenge/ChallengeSettlementCard.vue';
@@ -25,6 +27,7 @@ const challengeInfo = ref([
   { challenge_name: '운동시간 50시간', progress: 72 },
   { challenge_name: '일간 미션 ', progress: 100 },
 ]);
+const router = useRouter();
 
 const healthInfo = ref([
   { text: '체중(kg)', value: 70.5, check: true },
@@ -85,7 +88,15 @@ onMounted(async () => {
   await fetchMonthlySettlement(todayDate);
   await fetchWeeklySettlement(todayDate);
   console.log('state', state.monthlySettlementLog, state.weeklySettlementLog);
+  const challenge = await getMyChallenge();
+  challengeInfo.value = challenge.data;
+  console.log('homechallenge', challengeInfo.value);
 });
+
+const challengeHome = () => {
+  router.push('/challenge');
+};
+
 
 // 월간 정산 api호출
 const fetchMonthlySettlement = async (date) => {
@@ -211,23 +222,24 @@ const setWeeklyKey = (date) => {
             <div
               v-for="value in challengeInfo"
               class="d-flex justify-content-around align-items-center challenge-progress-container"
+              @click="challengeHome"
             >
               <span class="otd-body-3 space-span-start"
-                >{{ value.challenge_name }}
+                >{{ value.formatedName }}
               </span>
               <!-- 차트에 해당하는 데이터를 불러와서 그값을 뿌림-->
               <Progress
                 :class="{
                   'progress-chart': true,
-                  'progress-chart-high': value.progress > 70,
+                  'progress-chart-high': value.percent > 70,
                   'progress-chart-middle':
-                    value.progress > 30 && value.progress <= 70,
-                  'progress-chart-low': value.progress <= 30,
+                    value.percent > 30 && value.percent <= 70,
+                  'progress-chart-low': value.percent <= 30,
                 }"
-                :indata-progress="value.progress"
+                :indata-progress="value.percent"
               />
               <span class="otd-body-3 space-span-end"
-                >{{ value.progress }}%</span
+                >{{ value.percent }}%</span
               >
             </div>
           </div>
@@ -369,6 +381,7 @@ const setWeeklyKey = (date) => {
 } */
 .challenge-progress-container {
   margin-bottom: 4px;
+  cursor: pointer;
 }
 
 .challenge-progress {

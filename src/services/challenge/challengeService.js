@@ -61,3 +61,7 @@ export const getChallengeSettlementLog = (params) => {
     .get(`${BASE_URL}/settlement/log`, { params })
     .catch((e) => e.response);
 };
+
+export const getMyChallenge = () => {
+  return axios.get(`${BASE_URL}/home`).catch((e) => e.response);
+};
