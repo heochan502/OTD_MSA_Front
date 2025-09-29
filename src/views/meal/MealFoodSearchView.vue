@@ -5,9 +5,14 @@ import { debounce, flatMapDepth } from 'lodash';
 import { getFood } from '@/services/meal/mealService';
 import { checkDuplicateUser } from '@/services/user/userService';
 
+import {useMealSelectedDayStore} from '@/stores/meal/mealStore.js'
+
 
 import checkOn from '@/assets/img/meal/meal_search_check.png'
 import checkOff from '@/assets/img/meal/meal_search_default.png'
+
+
+const selectedDay = useMealSelectedDayStore();
 
 
 const router = useRouter();
@@ -55,7 +60,7 @@ const onFoodNameInput = async (value) => {
 
 const searchFoodName = async (keyword) => {
   console.log('이게왜', keyword);
-  console.log('시간:', route.query);
+  console.log('시간:', selectedDay.selectedDay.setDay);
   const res = await getFood(keyword);
 
   // console.log(" 이름 : ", res);
@@ -64,7 +69,7 @@ const searchFoodName = async (keyword) => {
     // null이 아닐떄만 아래 실행
     if (keyword) {
       // console.log('널확인 ', searchFood.foodName);
-  
+      
 
       items.foodList = Array.from(
         new Map(

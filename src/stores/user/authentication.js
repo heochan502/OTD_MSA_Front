@@ -39,9 +39,13 @@ export const useAuthenticationStore = defineStore(
       state.signedUser.point = point;
     };
 
+    const setChallengeRole = (challengeRole) => {
+      state.signedUser.challengeRole = challengeRole;
+    };
+
     const logout = async () => {
       console.log('logout 처리');
-      state.signedUser = { userId: 0, nickName: '', pic: DEFAULT_PROFILE }; 
+      state.signedUser = { userId: 0, nickName: '', pic: DEFAULT_PROFILE };
       state.isSigned = false;
     };
 
@@ -50,11 +54,8 @@ export const useAuthenticationStore = defineStore(
       setSignedUser,
       setSigndUserPic,
       logout,
-      isLoggedIn: computed(() => state.isSigned),
-      userName: computed(() => state.signedUser?.nickName || ''),
-      userId: computed(() => state.signedUser?.userId || 0),
-      userPic: computed(() => state.signedUser?.pic || null),
-
+      setPoint,
+      setChallengeRole,
     };
   },
   { persist: true }
