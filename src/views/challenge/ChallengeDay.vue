@@ -23,6 +23,10 @@ onMounted(async () => {
   console.log(res.data);
   console.log('redate', state.recDate);
   headerStore.setDetailName(res.data.name);
+  if (state.recDate.length >= 15) {
+    await putSuccess(res.data.cpId);
+    console.log('day success');
+  }
 });
 </script>
 

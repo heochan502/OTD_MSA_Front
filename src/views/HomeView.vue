@@ -8,15 +8,12 @@ import LineChart from '@/components/exercise/lineChart.vue';
 import MealCard from '@/components/meal/MealDayCards.vue';
 
 import BmiProg from '@/components/exercise/BmiProg.vue';
+import { getMyChallenge } from '@/services/challenge/challengeService';
+import { useRouter } from 'vue-router';
 
-const challengeInfo = ref([
-  { challenge_name: '달리기 30km', progress: 62 },
-  { challenge_name: '운동시간 60시간', progress: 82 },
-  { challenge_name: '팔굽혀 펴기 100개', progress: 22 },
-  { challenge_name: '운동시간 50시간', progress: 72 },
-  { challenge_name: '일간 미션 ', progress: 100 },
-]);
+const router = useRouter();
 
+const challengeInfo = ref([]);
 const healthInfo = ref([
   { text: '체중(kg)', value: 70.5, check: true },
   { text: '체지방률(%)', value: 15.3, check: false },
@@ -54,8 +51,14 @@ const healthToggle = (index) => {
     }
   }
 };
-
-onMounted(async () => {});
+const challengeHome = () => {
+  router.push('/challenge');
+};
+onMounted(async () => {
+  const challenge = await getMyChallenge();
+  challengeInfo.value = challenge.data;
+  console.log('homechallenge', challengeInfo.value);
+});
 </script>
 
 <template>
@@ -85,23 +88,24 @@ onMounted(async () => {});
             <div
               v-for="value in challengeInfo"
               class="d-flex justify-content-around align-items-center challenge-progress-container"
+              @click="challengeHome"
             >
               <span class="otd-body-3 space-span-start"
-                >{{ value.challenge_name }}
+                >{{ value.formatedName }}
               </span>
               <!-- 차트에 해당하는 데이터를 불러와서 그값을 뿌림-->
               <Progress
                 :class="{
                   'progress-chart': true,
-                  'progress-chart-high': value.progress > 70,
+                  'progress-chart-high': value.percent > 70,
                   'progress-chart-middle':
-                    value.progress > 30 && value.progress <= 70,
-                  'progress-chart-low': value.progress <= 30,
+                    value.percent > 30 && value.percent <= 70,
+                  'progress-chart-low': value.percent <= 30,
                 }"
-                :indata-progress="value.progress"
+                :indata-progress="value.percent"
               />
               <span class="otd-body-3 space-span-end"
-                >{{ value.progress }}%</span
+                >{{ value.percent }}%</span
               >
             </div>
           </div>
@@ -243,6 +247,7 @@ onMounted(async () => {});
 } */
 .challenge-progress-container {
   margin-bottom: 4px;
+  cursor: pointer;
 }
 
 .challenge-progress {
