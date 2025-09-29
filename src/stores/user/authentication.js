@@ -52,11 +52,7 @@ export const useAuthenticationStore = defineStore(
       setSignedUser,
       setSigndUserPic,
       logout,
-      isLoggedIn: computed(() => state.isSigned),
-      userName: computed(() => state.signedUser?.nickName || ''),
-      userId: computed(() => state.signedUser?.userId || 0),
-      userPic: computed(() => state.signedUser?.pic || null),
-
+      setPoint,
     };
   },
   { persist: true }
