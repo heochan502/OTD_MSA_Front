@@ -55,7 +55,7 @@ const onFoodNameInput = async (value) => {
 
 const searchFoodName = async (keyword) => {
   console.log('이게왜', keyword);
-
+  console.log('시간:', route.query);
   const res = await getFood(keyword);
 
   // console.log(" 이름 : ", res);
@@ -103,10 +103,11 @@ const selectedValue = computed(() => {
   return values
 })
 
-// 체크여부 & 표시값 헬퍼
-const isSelected = (id) => selectedValue.value.has(id)
-const displayAmount = (food) => selectedValue.value.get(food.foodDbId)?.amount ?? food.amount
-const displayKcal = (food) => selectedValue.value.get(food.foodDbId)?.kcal ?? food.kcal
+// 체크여부 & 표시값 헬퍼 함수
+//역할은 해당 키(key)가 Map 안에 존재하는지 확인하는 것.
+const isSelected = (id) => selectedValue.value.has(id);
+const displayAmount = (food) => selectedValue.value.get(food.foodDbId)?.amount ?? food.amount;
+const displayKcal = (food) => selectedValue.value.get(food.foodDbId)?.kcal ?? food.kcal;
 
 
 
@@ -235,8 +236,7 @@ else
   const idx = selected.value.findIndex((f) => f.foodDbId === food.foodDbId);
   food.checked = false;
   selected.value.splice(idx, 1);
-  console.log("같은거 클릭", idx);
-  
+  console.log("같은거 클릭", idx);  
 }
 console.log('배열에 넣는데:', selected.value);
   // const idx = selected.value.findIndex((f) => f.name === food.name);
@@ -337,7 +337,7 @@ const goRecord = () => {
       </template>
     </v-dialog> -->
     <v-dialog v-model="sheetOpen" transition="dialog-bottom-transition" :scrim="true" :persistent="true"
-      :contained="true" content-class="otd-sheet" scrim-class="otd-scrim">
+      :contained="true" content-class="otd-sheet" scrim-class="otd-scrim" @click:outside="sheetOpen = false">
       <div class="sheet-card">
         <!-- 핸들바 -->
         <div class="sheet-handle" />
