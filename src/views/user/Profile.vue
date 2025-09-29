@@ -95,7 +95,7 @@ const formatPoint = (point) => {
           <div class="history-date">2025.10.20</div>
         </div>
         <!-- 더 많은 기록들을 위한 공간 -->
-        <router-link to="/user/pointdetail" class="view-all-link">
+        <router-link to="/user/pointhistory" class="view-all-link">
           모든 포인트 기록 보기 →
         </router-link>
       </div>

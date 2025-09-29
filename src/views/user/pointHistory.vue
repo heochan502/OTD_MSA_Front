@@ -1,6 +1,9 @@
 <script setup>
 import { onMounted, reactive } from 'vue';
 //import { getPointHistory } from '@/services/point/pointService';
+import { useAuthenticationStore } from '@/stores/user/authentication';
+
+const authStore = useAuthenticationStore();
 
 const state = reactive({
   loading: false,
@@ -65,7 +68,7 @@ onMounted(async () => {
   <div class="wrap">
     <!-- 상단: 전체 포인트 -->
     <div class="point-summary">
-      <div class="first-title">{{ state.user.nickName }}님의 포인트</div>
+      <div class="first-title">{{ userInfo.nickName }}님의 포인트</div>
       <div class="total-point">
         <span class="point-number">{{ state.user.totalPoint.toLocaleString('ko-KR') }}</span>
         <span class="point-unit">P</span>
