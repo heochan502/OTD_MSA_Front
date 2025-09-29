@@ -2,7 +2,7 @@
 import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 import { reactive, onMounted, ref } from 'vue';
 import {
-  getChallenge,
+  getChallengeList,
   postChallenge,
 } from '@/services/challenge/challengeService';
 
@@ -38,7 +38,7 @@ onMounted(async () => {
   const type = history.state.type;
 
   console.log('type', type);
-  const res = await getChallenge(type);
+  const res = await getChallengeList(type);
   console.log('resdata', res.data);
   state.challengeList = res.data;
 });

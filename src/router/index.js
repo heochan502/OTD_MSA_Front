@@ -8,12 +8,11 @@ import Home from '@/views/HomeView.vue';
 import Community from '@/views/community/CommunityView.vue';
 import CategoryFeedView from '@/views/community/categories/CategoryFeedView.vue';
 import PostDetailView from '@/views/community/PostDetailView.vue';
-// 챌린지
 
+// 챌린지
 import ChallengeHome from '@/views/challenge/ChallengeHome.vue';
 import ChallengeAllList from '@/views/challenge/ChallengeAllList.vue';
-import ChallengeWeeklyList from '@/views/challenge/ChallengeWeeklyList.vue';
-import ChallengeCompetitionList from '@/views/challenge/ChallengeMonthlyList.vue';
+import ChallengeCategoryList from '@/views/challenge/ChallengeCategoryList.vue';
 import ChallengePer from '@/views/challenge/ChallengePer.vue';
 import ChallengeDay from '@/views/challenge/ChallengeDay.vue';
 
@@ -21,8 +20,8 @@ import Login from '@/views/user/Login.vue';
 import Join from '@/views/user/Join.vue';
 import Profile from '@/views/user/Profile.vue';
 import Signal from '@/views/user/Signal.vue';
-import Inquiry from '@/views/user/Inquiry.vue';
-import Frequently from '@/views/user/Frequently.vue';
+import QnA from '@/views/user/QnA.vue';
+import Munhe from '@/views/user/Munhe.vue';
 import ModifiProfile from '@/views/user/ModifiProfile.vue';
 import Term from '@/views/user/Term.vue';
 import Oauth2 from '@/views/auth/OAuth2Handler.vue';
@@ -106,21 +105,21 @@ const router = createRouter({
       component: ChallengeAllList,
       meta: { headerType: 'title', title: '챌린지 목록', showUserPanel: false },
     },
-    {
-      path: '/challenge/dailylist',
-      name: 'ChallengedailyList',
-      component: ChallengeWeeklyList,
-      meta: {
-        headerType: 'title',
-        title: '일일 미션 목록',
+    // {
+    //   path: '/challenge/dailylist',
+    //   name: 'ChallengedailyList',
+    //   component: ChallengeWeeklyList,
+    //   meta: {
+    //     headerType: 'title',
+    //     title: '일일 미션 목록',
 
-        showUserPanel: false,
-      },
-    },
+    //     showUserPanel: false,
+    //   },
+    // },
     {
       path: '/challenge/weeklylist',
       name: 'ChallengeweeklyList',
-      component: ChallengeWeeklyList,
+      component: ChallengeCategoryList,
       meta: {
         headerType: 'title',
         title: '주간 챌린지 목록',
@@ -130,7 +129,7 @@ const router = createRouter({
     {
       path: '/challenge/competitionlist',
       name: 'ChallengecompetitionList',
-      component: ChallengeCompetitionList,
+      component: ChallengeCategoryList,
       meta: {
         headerType: 'title',
         title: '월간 경쟁챌린지 목록',
@@ -140,7 +139,7 @@ const router = createRouter({
     {
       path: '/challenge/personallist',
       name: 'ChallengepersonalList',
-      component: ChallengeWeeklyList,
+      component: ChallengeCategoryList,
       meta: {
         headerType: 'title',
         title: '월간 개인챌린지 목록',
@@ -195,20 +194,21 @@ const router = createRouter({
       component: Signal,
     },
     {
-      path: '/user/inquiry',
-      name: 'inquiry',
-      component: Inquiry,
+      path: '/user/qna',
+      name: 'QnA',
+      component: QnA,
     },
     {
-      path: '/user/frequently',
-      name: 'frequently',
-      component: Frequently,
+      path: '/user/munhe',
+      name: 'munhe',
+      component: Munhe,
     },
     {
       path: '/user/modifiProfile',
       name: 'modifiProfile',
       component: ModifiProfile,
     },
+  
     {
       path: '/user/term',
       name: 'term',
@@ -300,7 +300,7 @@ const router = createRouter({
   ],
 });
 
-//로그인 하지 않아도 이용할 수 있는 Path들
+// 로그인 하지 않아도 이용할 수 있는 Path들
 const unSignedPathList = ['/user/login', '/user/join', '/fe/redirect'];
 
 //navigation guard

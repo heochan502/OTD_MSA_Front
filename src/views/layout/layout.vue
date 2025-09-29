@@ -10,7 +10,7 @@ import Footer from './Footer.vue';
       <Breadcrumb />
       <!--  상단 내용 -->
     </div>
-    <div class="main_margin">
+    <div class="main-wrap">
       <router-view />
     </div>
     <!-- <Content />    컨텐츠 내용 -->
@@ -27,11 +27,15 @@ import Footer from './Footer.vue';
   user-select: none;
 }
 /* 공통 화면 좌우 여백 */
-.main_margin {
-  overflow: scroll;
-  &::-webkit-scrollbar {
-    display: none;
-  }
+.main-wrap {
+    // position: relative;
+      /* ✅ v-dialog 기준 */
+      flex: 1;
+    overflow: auto;  
+    /* 내부 스크롤 */
+    &::-webkit-scrollbar {
+      display: none;
+    }
 }
 .nav-footer {
   margin-top: auto;

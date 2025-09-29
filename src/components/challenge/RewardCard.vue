@@ -3,35 +3,35 @@
 <template>
   <div class="card-wrap otd-top-margin">
     <div class="otd-box-style otd-shadow first">
-      <img class="medal" src="/public/image/challenge/medal1.png" alt="1" />
+      <img class="medal" src="/image/challenge/medal1.png" alt="1" />
       <span class="otd-caption"
         >당신은 만점 챌린저!<br />
         31일 개근 달성!</span
       >
       <div>
-        <img class="point" src="/public/image/main/point.png" alt="point" />
+        <img class="point" src="/image/main/point.png" alt="point" />
         <span class="otd-body-3">100P</span>
       </div>
     </div>
     <div class="otd-box-style otd-shadow second">
-      <img class="medal" src="/public/image/challenge/medal2.png" alt="2" />
+      <img class="medal" src="/image/challenge/medal2.png" alt="2" />
       <span class="otd-caption"
         >멈추지 않는 열정! <br />
         25일 달성!</span
       >
       <div>
-        <img class="point" src="/public/image/main/point.png" alt="point" />
+        <img class="point" src="/image/main/point.png" alt="point" />
         <span class="otd-body-3">70P</span>
       </div>
     </div>
     <div class="otd-box-style otd-shadow third">
-      <img class="medal" src="/public/image/challenge/medal3.png" alt="3" />
+      <img class="medal" src="/image/challenge/medal3.png" alt="3" />
       <span class="otd-caption"
         >작지만 확실한 성취!<br />
         20일 달성!</span
       >
       <div>
-        <img class="point" src="/public/image/main/point.png" alt="point" />
+        <img class="point" src="/image/main/point.png" alt="point" />
         <span class="otd-body-3">50P</span>
       </div>
     </div>
