@@ -44,8 +44,11 @@ const submit = async () => {
 
       // store 상태 확인
       console.log('업데이트 후 store 상태:', authentication.state.signedUser);
-
-      await router.push('/');
+      if (result.userRole === 'ADMIN') {
+        await router.push('/admin');
+      } else {
+        await router.push('/');
+      }
     }
   } catch (error) {
     console.error('로그인 오류:', error);

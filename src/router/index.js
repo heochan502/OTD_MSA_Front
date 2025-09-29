@@ -44,6 +44,7 @@ import ExerciseRecordForm from '@/views/exercise/ExerciseRecordForm.vue';
 import ExerciseRecordDetail from '@/views/exercise/ExerciseRecordDetail.vue';
 
 import MealDetailView from '@/views/meal/MealDetailView.vue';
+import Admin from '@/views/admin/AdminDashboard.vue';
 
 // 카테고리 라벨 맵
 const CATEGORY_LABEL = {
@@ -208,7 +209,7 @@ const router = createRouter({
       name: 'modifiProfile',
       component: ModifiProfile,
     },
-  
+
     {
       path: '/user/term',
       name: 'term',
@@ -297,6 +298,27 @@ const router = createRouter({
       name: 'MealRecordView',
       component: () => import('@/views/meal/MealRecordView.vue'),
     },
+    {
+      path: '/admin',
+      // component: () => import('@/views/admin/AdminLayout.vue'),
+      children: [
+        {
+          path: '', // /admin 진입 시 기본 페이지
+          name: 'AdminDashboard',
+          component: () => import('@/views/admin/AdminDashboard.vue'),
+        },
+        {
+          path: 'users',
+          name: 'AdminUsers',
+          component: () => import('@/views/admin/AdminUsers.vue'),
+        },
+        {
+          path: 'challenges',
+          name: 'AdminChallenges',
+          component: () => import('@/views/admin/AdminChallenges.vue'),
+        },
+      ],
+    },
   ],
 });
 
@@ -305,11 +327,16 @@ const unSignedPathList = ['/user/login', '/user/join', '/fe/redirect'];
 
 //navigation guard
 router.beforeEach((to, from) => {
-  console.log('to.path:', `"${to.path}"`);
   const authentcationStore = useAuthenticationStore();
   const isUnsignedPath = unSignedPathList.some((path) =>
     to.path.startsWith(path)
   );
+  // body 클래스 분기
+  if (to.path.startsWith('/admin')) {
+    document.body.classList.add('is-admin');
+  } else {
+    document.body.classList.remove('is-admin');
+  }
 
   if (unSignedPathList.includes(to.path) && authentcationStore.state.isSigned) {
     //로그인 상태에서 /user/login, /user/join 경로로 이동하려고 하면
