@@ -17,5 +17,9 @@ import { ref, watch, onMounted } from 'vue';
   background: #fafafa;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   border-radius: 60px;
+
+  /*  오버레이 기준 + 프레임 안으로 클리핑 */
+  position: relative;
+  overflow: hidden;
 }
 </style>
