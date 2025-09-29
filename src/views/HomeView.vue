@@ -55,25 +55,23 @@ const healthToggle = (index) => {
   }
 };
 
-onMounted(async () => {
-  
-});
+onMounted(async () => {});
 </script>
 
 <template>
   <div>
     <v-dialog v-model="settlementDialog" max-width="300" min-height="100">
-    <v-card>
-      <v-card-title class="text-h8">정산</v-card-title>
-      <v-card-text>
-        <div class="challenge-info">챌린지는 2개까지만 도전 가능합니다</div>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer />
-        <v-btn color="dark" text @click="stopDialog = false">확인</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+      <v-card>
+        <v-card-title class="text-h8">정산</v-card-title>
+        <v-card-text>
+          <div class="challenge-info">챌린지는 2개까지만 도전 가능합니다</div>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn color="dark" text @click="stopDialog = false">확인</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <div class="top-wrap">
       <section class="meal">
         <MealCard />

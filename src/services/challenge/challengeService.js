@@ -53,5 +53,5 @@ export const postChallenge = (params) => {
 };
 
 export const settlement = (params) => {
-  return axios.post(`${BASE_URL}/settlement`, params).catch(e => response)
-}
+  return axios.post(`${BASE_URL}/settlement`, params).catch((e) => response);
+};

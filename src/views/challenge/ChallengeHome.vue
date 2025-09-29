@@ -33,10 +33,9 @@ const tierImg = {
   다이아: '/otd/image/challenge/diamond.png',
   default: '',
 };
-const myTierImg = computed(() => {
-  const myTier = state.tier;
-  return tierImg[`${myTier}`] || tierImg.default;
-});
+const myTier = computed(() => authentication.state.signedUser.challengeRole);
+
+const myTierImg = computed(() => tierImg[myTier.value] || tierImg.default);
 const toChallengeList = () => {
   router.push('challenge/alllist');
 };
@@ -77,10 +76,12 @@ onMounted(async () => {
 
   challengeStore.state.progressChallenge = res.data;
   totalXp.value = res.data.user?.xp ?? 0;
-  state.tier = authentication.state.signedUser.challengeRole;
+  // state.tier = authentication.state.signedUser.challengeRole;
   console.log('res', res.data);
   setMissionState();
   console.log('로그 데이터', state);
+  authentication.setPoint(state.user.point);
+  authentication.setChallengeRole(res.data.user?.challengeRole);
 });
 
 const totalXp = ref(0);
@@ -130,7 +131,7 @@ const completeMission = async (mission) => {
 };
 
 const levelMent = () => {
-  switch (state.tier) {
+  switch (myTier.value) {
     case '다이아':
       return '다이아처럼 빤짝빤짝 !';
     case '골드':
@@ -154,6 +155,21 @@ const settlementButton = async () => {
   };
   const res = await settlement(params);
   console.log(res);
+  // 테스트용
+  if (res.data?.user) {
+    authentication.setChallengeRole(res.data.user.challengeRole);
+    authentication.setPoint(res.data.user.point);
+
+    state.user = res.data.user; // state.user도 최신으로 교체
+    totalXp.value = res.data.user.xp;
+  } else {
+    const refresh = await getSelectedAll();
+    authentication.setChallengeRole(refresh.data.user.challengeRole);
+    authentication.setPoint(refresh.data.user.point);
+
+    state.user = refresh.data.user; // 최신 데이터로 교체
+    totalXp.value = refresh.data.user.xp;
+  }
 };
 </script>
 

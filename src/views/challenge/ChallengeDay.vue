@@ -3,7 +3,6 @@ import Calendar from '@/components/challenge/Calendar.vue';
 import { onMounted, reactive } from 'vue';
 import { getDay } from '@/services/challenge/challengeService';
 import RewardCard from '@/components/challenge/RewardCard.vue';
-import { useRoute } from 'vue-router';
 import { useHeaderStore } from '@/stores/challenge/headerStore';
 
 const props = defineProps({
@@ -14,7 +13,6 @@ const state = reactive({
   progress: {},
   recDate: [],
 });
-const route = useRoute();
 const headerStore = useHeaderStore();
 
 onMounted(async () => {
@@ -33,7 +31,11 @@ onMounted(async () => {
     <!-- 캘린더 -->
     <div class="title-wrap">
       <div class="otd-category">
-        현재 {{ state.recDate.length }}일 성공했어요!
+        {{
+          state.recDate.length == 0
+            ? '아직 기록이 없어요😅'
+            : '현재 ' + state.recDate.length + ' 일 성공했어요!'
+        }}
       </div>
       <div class="otd-body-3">15일 성공시 {{ state.progress.reward }}p!</div>
     </div>
