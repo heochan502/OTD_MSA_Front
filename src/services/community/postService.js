@@ -4,10 +4,11 @@ import axios from '@/services/httpRequester';
 // → 여기서는 /community/posts 이하만 작성
 const BASE = '/community/posts';
 
-// X-MEMBER-ID 헤더 유틸
+// 공통 헤더 유틸
 const withUser = (userId, headers = {}) => ({
   ...headers,
-  ...(userId ? { 'X-MEMBER-ID': String(userId) } : {}),
+  'Content-Type': 'application/json',
+  'X-MEMBER-ID': String(userId ?? 0), // <- 로그인 전이면 0
 });
 
 // 목록 조회 (서버 page=0 기준)
@@ -20,12 +21,12 @@ export const fetchPosts = (page = 0, size = 10, categoryKey) => {
 // 상세
 export const fetchPostById = (postId) => axios.get(`${BASE}/${postId}`);
 
-// JSON으로 게시글 생성 (FormData 아님)
-export const createPost = (payload, userId) =>
-  axios.post(`${BASE}`, payload, {
-    headers: withUser(userId, { 'Content-Type': 'application/json' }),
+// 게시글 생성(JSON)
+export const createPost = (payload, userId) => {
+  return axios.post(`${BASE}`, payload, {
+    headers: withUser(userId),
   });
-
+};
 // 수정
 export const updatePost = (postId, payload, userId) =>
   axios.put(`${BASE}/${postId}`, payload, {
