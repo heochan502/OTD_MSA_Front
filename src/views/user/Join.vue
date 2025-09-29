@@ -50,6 +50,11 @@ const validation = ref({
     isValid: true,
     message: '',
     touched: false,
+  },
+  nickname: {
+    isValid: true,
+    message: '',
+    touched: false,
   }
 })
 
@@ -322,7 +327,7 @@ const checkNicknameDuplicateAction = async () => {
   
   try {
     isLoading.value = true
-    const response = await checkNicknameDuplicate(nickname)  // import된 서비스 함수 호출
+    const response = await checkUidDuplicate(nickname)  // import된 서비스 함수 호출
     
     validation.value.nickname.checked = true
     validation.value.nickname.available = response.data.result.isAvailable
@@ -579,7 +584,7 @@ const handlePrevious = () => {
 // 회원가입 처리
 const submitJoin = async () => {
   isLoading.value = true;
-
+  const formData = new FormData();
   try {
     const joinData = {
       uid: accountInfo.value.uid,
@@ -590,7 +595,7 @@ const submitJoin = async () => {
       phone: additionalInfo.value.phone,
       gender: additionalInfo.value.gender,
       nickname: additionalInfo.value.nickname,
-      roles: ['유저'],
+      roles: ['USER_1'],
       surveyAnswers: calculateSurveyScore.value,
     }
     
@@ -599,13 +604,13 @@ const submitJoin = async () => {
       'req',
       new Blob([JSON.stringify(joinData)], {
         type: 'application/json',
-      })
+      }),'req.json'
     );
 
     // 프로필 이미지 추가
-    if (additionalInfo.value.pic) {
-      formData.append('pic', additionalInfo.value.pic);
-    }
+    if (additionalInfo.value.pic instanceof File || additionalInfo.value.pic instanceof Blob) {
+    formData.append('pic', additionalInfo.value.pic, additionalInfo.value.pic.name ?? 'pic');
+  }
 
     console.log('FormData entries:');
     for (let pair of formData.entries()) {
