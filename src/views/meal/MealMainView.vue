@@ -1,10 +1,15 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { useRouter ,useRoute} from 'vue-router';
 import MealSummaryCard from '@/components/meal/MealSummaryCard.vue';
 import MealDayCards from '@/components/meal/MealDayCards.vue';
 import WaterCard from '@/components/meal/WaterCard.vue'; // ✅ 추가
 import MealDateStrip from '@/components/meal/MealDateStrip.vue';
+
+import {useMealSelectedDayStore} from '@/stores/meal/mealStore.js'
+
+
+const selectedDay = useMealSelectedDayStore();
 
 const router = useRouter();
 const route = useRoute()
@@ -22,12 +27,18 @@ const selectedDate = ref(new Date()) ;
 
 // 날짜 바뀔 때 라우터 쿼리 싱크 (선택)
 watch(selectedDate, (d) => {
-  const yyyy = d.getFullYear()
-  const mm = String(d.getMonth() + 1).padStart(2, '0')
-  const dd = String(d.getDate()).padStart(2, '0')
-  router.replace({ query: { ...route.query, meal: `${yyyy}-${mm}-${dd}` } })
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  selectedDay.selectedDay.setDay = `${yyyy}-${mm}-${dd}`;
+  console.log(selectedDay.selectedDay.setDay);
+  router.replace({ query: { ...route.query, day: `${yyyy}-${mm}-${dd}` } });
 });
 
+
+onMounted (async () => {
+ 
+});
 </script>
 
 <template>
