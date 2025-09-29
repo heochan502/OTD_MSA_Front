@@ -149,8 +149,8 @@ const BASE_URL = import.meta.env.BASE_URL;
 const settlementButton = async () => {
   const params = {
     startDate: '2025-09-01',
-    endDate: '2025-09-28',
-    type: 'weekly',
+    endDate: '2025-09-30',
+    type: 'personal',
   };
   const res = await settlement(params);
   console.log(res);
