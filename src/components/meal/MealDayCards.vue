@@ -51,7 +51,7 @@ const onTopIconClick = (index) => {
     router.push({ name: 'MealRecordView', query: { meal: item.meal_day } });
   } else if (!item.check) {
     item.recorded = true;
-    router.push({ name: 'MealFoodSearchView', query: { meal: item.meal_day } });
+    router.push({ name: 'MealFoodSearchView', query: { meal: item.meal_day  } });
   }
 };
 </script>
