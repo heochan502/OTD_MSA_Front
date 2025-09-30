@@ -2,10 +2,14 @@
 import { logout } from '@/services/user/userService';
 import { RouterView } from 'vue-router';
 import { useAuthenticationStore } from '@/stores/user/authentication';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
+import { computed } from 'vue';
 
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthenticationStore();
+const isActive = computed(() => route.path === '/admin');
+
 const logoutAccount = async () => {
   if (!confirm('로그아웃 하시겠습니까?')) return;
   const res = await logout();
@@ -19,35 +23,115 @@ const logoutAccount = async () => {
     <!-- 공통 사이드바 -->
     <aside class="sidebar">
       <div class="menu">
-        <h2 class="sidebar-title otd-titl">관리자 메뉴</h2>
+        <h2 class="sidebar-title otd-title">관리자 메뉴</h2>
         <router-link to="/" class="home">사이트 바로가기</router-link>
         <router-link
           to="/admin"
-          class="menu-item otd-subtitle-1"
+          class="menu-item otd-subtitle-1 d-flex"
           active-class="active"
           exact-active-class="active"
         >
-          대시보드
+          <img
+            class="icon"
+            :src="
+              isActive
+                ? '/otd/image/admin_page/dashboard-s.png'
+                : '/otd/image/admin_page/dashboard.png'
+            "
+          />
+          <span>대시보드</span>
         </router-link>
         <router-link
           to="/admin/users"
-          class="menu-item otd-subtitle-1"
+          class="menu-item otd-subtitle-1 d-flex"
           active-class="active"
+          :class="{ active: route.path.startsWith('/admin/users') }"
         >
-          사용자 관리
+          <img
+            class="icon"
+            :src="
+              route.path.startsWith('/admin/users')
+                ? '/otd/image/admin_page/user-s.png'
+                : '/otd/image/admin_page/user.png'
+            "
+          />
+          <span>사용자 관리</span>
         </router-link>
         <router-link
           to="/admin/challenges"
-          class="menu-item otd-subtitle-1"
+          class="menu-item otd-subtitle-1 d-flex"
           active-class="active"
+          :class="{ active: route.path.startsWith('/admin/challenges') }"
         >
-          챌린지 관리
+          <img
+            class="icon"
+            :src="
+              route.path.startsWith('/admin/challenges')
+                ? '/otd/image/admin_page/challenge-s.png'
+                : '/otd/image/admin_page/challenge.png'
+            "
+          />
+          <span>챌린지 관리</span>
+        </router-link>
+        <router-link
+          to="/admin/points"
+          class="menu-item otd-subtitle-1 d-flex"
+          active-class="active"
+          :class="{ active: route.path.startsWith('/admin/points') }"
+        >
+          <img
+            class="icon"
+            :src="
+              route.path.startsWith('/admin/points')
+                ? '/otd/image/admin_page/point-s.png'
+                : '/otd/image/admin_page/point.png'
+            "
+          />
+          <span>포인트 관리</span>
+        </router-link>
+        <router-link
+          to="/admin/statistics"
+          class="menu-item otd-subtitle-1 d-flex"
+          active-class="active"
+          :class="{ active: route.path.startsWith('/admin/statistics') }"
+        >
+          <img
+            class="icon"
+            :src="
+              route.path.startsWith('/admin/statistics')
+                ? '/otd/image/admin_page/graph-s.png'
+                : '/otd/image/admin_page/graph.png'
+            "
+          />
+          <span>통계</span>
+        </router-link>
+        <router-link
+          to="/admin/qna"
+          class="menu-item otd-subtitle-1 d-flex"
+          active-class="active"
+          :class="{ active: route.path.startsWith('/admin/qna') }"
+        >
+          <img
+            class="icon"
+            :src="
+              route.path.startsWith('/admin/qna')
+                ? '/otd/image/admin_page/qna-s.png'
+                : '/otd/image/admin_page/qna.png'
+            "
+          />
+          <span>Q&A</span>
         </router-link>
       </div>
 
       <!-- 항상 하단에 고정 -->
       <div class="sidebar-footer">
-        <button class="logout-btn" @click="logoutAccount">로그아웃</button>
+        <button class="logout-btn" @click="logoutAccount">
+          <img
+            src="/public/image/admin_page/logout.png"
+            alt="logout"
+            class="logout-icon"
+          />로그아웃
+        </button>
       </div>
     </aside>
 
@@ -63,7 +147,6 @@ const logoutAccount = async () => {
   display: flex;
   // height: 100vh;
 }
-
 .sidebar {
   display: flex;
   flex-direction: column;
@@ -81,7 +164,9 @@ const logoutAccount = async () => {
     display: flex;
     flex-direction: column;
     // margin: 10px 0;
-
+    .icon {
+      width: 30px;
+    }
     .home {
       display: flex;
       padding-top: 15px;
@@ -93,13 +178,15 @@ const logoutAccount = async () => {
       border-bottom: 1px solid #393e46;
     }
     .menu-item {
+      gap: 15px;
+      align-items: center;
       padding: 12px 20px;
       color: #393e46;
       text-decoration: none;
 
       &:hover {
         background: rgba(255, 255, 255, 0.1);
-        padding: 6px;
+        padding: 12px;
       }
       &.active {
         background: #393e46;
@@ -114,16 +201,18 @@ const logoutAccount = async () => {
   padding: 15px 20px;
 
   .logout-btn {
+    display: flex;
+    gap: 15px;
     width: 100%;
-    padding: 10px;
+
     border: none;
     background: transparent;
     color: #393e46;
     text-align: left;
     cursor: pointer;
 
-    &:hover {
-      color: #e74c3c;
+    .logout-icon {
+      width: 30px;
     }
   }
 }

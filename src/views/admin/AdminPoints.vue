@@ -1,0 +1,9 @@
+<script setup></script>
+
+<template>
+  <div>
+    <h1>포인트 관리</h1>
+  </div>
+</template>
+
+<style lang="scss" scoped></style>

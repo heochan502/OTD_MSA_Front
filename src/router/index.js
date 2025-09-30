@@ -44,7 +44,6 @@ import ExerciseRecordForm from '@/views/exercise/ExerciseRecordForm.vue';
 import ExerciseRecordDetail from '@/views/exercise/ExerciseRecordDetail.vue';
 
 import MealDetailView from '@/views/meal/MealDetailView.vue';
-import Admin from '@/views/admin/AdminDashboard.vue';
 
 // 카테고리 라벨 맵
 const CATEGORY_LABEL = {
@@ -316,6 +315,21 @@ const router = createRouter({
           path: 'challenges',
           name: 'AdminChallenges',
           component: () => import('@/views/admin/AdminChallenges.vue'),
+        },
+        {
+          path: 'points',
+          name: 'AdminPoints',
+          component: () => import('@/views/admin/AdminPoints.vue'),
+        },
+        {
+          path: 'qna',
+          name: 'AdminQnA',
+          component: () => import('@/views/admin/AdminQnA.vue'),
+        },
+        {
+          path: 'statistics',
+          name: 'AdminStatistics',
+          component: () => import('@/views/admin/AdminStatistics.vue'),
         },
       ],
     },
