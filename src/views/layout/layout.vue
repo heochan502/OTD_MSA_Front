@@ -28,7 +28,7 @@ import Footer from './Footer.vue';
 }
 /* 공통 화면 좌우 여백 */
 .main-wrap {
-  margin-top: 20px;
+  // margin-top: 20px;
   // position: relative;
   /* ✅ v-dialog 기준 */
   flex: 1;
