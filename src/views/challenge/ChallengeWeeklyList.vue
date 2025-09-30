@@ -46,16 +46,18 @@ onMounted(async () => {
 
 <template>
   <div class="wrap">
-    <div v-for="challenge in state.challengeList" :key="challenge.id">
-      <ChallengeCard
-        class="challenge-card"
-        :key="challenge.id"
-        :id="challenge.id"
-        :image="challenge.image"
-        :name="challenge.name"
-        :reward="challenge.reward"
-        @click="openDialog(challenge)"
-      ></ChallengeCard>
+    <div class="card-wrap">
+      <div v-for="challenge in state.challengeList" :key="challenge.id">
+        <ChallengeCard
+          class="challenge-card"
+          :key="challenge.id"
+          :id="challenge.id"
+          :image="challenge.image"
+          :name="challenge.name"
+          :reward="challenge.reward"
+          @click="openDialog(challenge)"
+        ></ChallengeCard>
+      </div>
     </div>
   </div>
   <v-dialog v-model="dialog" max-width="380" min-height="100">

@@ -2,7 +2,7 @@
 import { useRouter } from 'vue-router';
 import { logout } from '@/services/user/userService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
-import { ref, computed } from 'vue';
+import { ref, computed, reactive } from 'vue';
 
 const router = useRouter();
 const authStore = useAuthenticationStore();
@@ -10,15 +10,22 @@ const isLoggingOut = ref(false);
 
 console.log(authStore.state.signedUser);
 
+const defaultProfile = '/otd/image/main/default-profile.png';
+// const BASE_URL = `home/green/download/profile/${userInfo.userId}`;
+
+// pic이 있으면 그걸 쓰고, 없으면 기본 이미지
+const profileImage = computed(() => {
+  return authStore.state.signedUser?.pic &&
+    authStore.state.signedUser.pic.trim() !== ''
+    ? authStore.state.signedUser.pic
+    : defaultProfile;
+});
 const userInfo = computed(() => {
-  const pic = authStore.state.signedUser?.pic;
   return {
     nickName: authStore.state.signedUser?.nickName || '게스트',
-    email: authStore.state.signedUser?.email || '로그인이 필요합니다',
+    email: authStore.state.signedUser?.email || '이메일을 불러올 수 없습니다',
     point: authStore.state.signedUser?.point || 0,
-    profileImage: pic
-      ? `${import.meta.env.VITE_API_URL}/uploads/${pic}`
-      : '/default-avatar.png',
+    pic: authStore.state.signedUser?.pic,
   };
 });
 // 로그아웃 버튼 클릭 시
@@ -29,6 +36,7 @@ const logoutAccount = async () => {
   authStore.logout();
   router.push('/user/login');
 };
+
 // 포인트 포맷팅
 const formatPoint = (point) => {
   return point?.toLocaleString() || '0';
@@ -36,27 +44,17 @@ const formatPoint = (point) => {
 </script>
 
 <template>
-  <div>
-    <div>
-      <a>프로필사진</a>
-      <a>{{ authStore.state.signedUser?.nickName || '사용자' }}</a>
-      <a>이메일</a>
-    </div>
-    <div><a>내가 쓴 게시글</a><a>나의 좋아요</a><a>내가 쓴 댓글</a></div>
-  </div>
-  <div>
-    <a>내포인트</a><a>{{ authStore.state.signedUser.point }}P</a>
-  </div>
   <div class="profile-container">
     <!-- 프로필 섹션 -->
     <div class="profile-section">
       <router-link to="/user/ModifiProfile" class="profile-header">
-        <div class="profile-image">
-          <img :src="userInfo.profileImage" :alt="userInfo.nickName" />
+        <div class="profile-image otd-shadow">
+          <img :src="profileImage" :alt="userInfo.nickName" />
         </div>
         <div class="profile-info">
           <h2 class="nickname">{{ userInfo.nickName }}</h2>
           <p class="email">{{ userInfo.email }}</p>
+          <div class="arrow">›</div>
         </div>
       </router-link>
     </div>
@@ -96,7 +94,7 @@ const formatPoint = (point) => {
           <div class="history-date">2025.10.20</div>
         </div>
         <!-- 더 많은 기록들을 위한 공간 -->
-        <router-link to="/user/point-history" class="view-all-link">
+        <router-link to="/user/pointhistory" class="view-all-link">
           모든 포인트 기록 보기 →
         </router-link>
       </div>
@@ -118,12 +116,12 @@ const formatPoint = (point) => {
     <div class="support-section">
       <h3 class="section-title">고객센터</h3>
       <div class="support-list">
-        <router-link to="/user/inquiry" class="support-item">
+        <router-link to="/user/email/munhe" class="support-item">
           <div class="support-icon">💬</div>
           <span>1:1 문의하기</span>
           <div class="arrow">›</div>
         </router-link>
-        <router-link to="/user/frequently" class="support-item">
+        <router-link to="/user/qna" class="support-item">
           <div class="support-icon">❓</div>
           <span>자주 묻는 질문</span>
           <div class="arrow">›</div>
@@ -208,6 +206,7 @@ const formatPoint = (point) => {
   margin: 0 0 16px 0;
   color: #333;
 }
+
 .activity-section {
   margin-bottom: 30px;
 
@@ -435,6 +434,36 @@ const formatPoint = (point) => {
     .history-date {
       order: -1;
       font-size: 12px;
+    }
+  }
+}
+.profile-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .default-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+
+    span {
+      font-size: 32px;
+      color: white;
     }
   }
 }

@@ -5,33 +5,24 @@ export const useChallengeStore = defineStore(
   'challenge',
   () => {
     const state = reactive({
-      progressChallenge: [],
+      progressChallenge: {
+        weeklyCount : 0,
+        competitionCount : 0,
+        personalCOunt : 0,
+      },
       year: new Date().getFullYear(),
       month: new Date().getMonth() + 1,
     });
 
-    const setProgressChallenge = (data) => (state.progressChallenge = data);
+    const addChallenge = () => {
 
-    // const setCurrentYear = (data) => (state.currentYear = data);
+    };
 
-    // const setCurrentMonth = (data) => (state.currentMonth = data);
-
-    // const checkChallenge = (type) => {
-    //   const dailyChallenge = state.progressChallenge.dailyMission.length();
-    //   const weeklyChallenge = state.progressChallenge.weeklyChallenge.length();
-    //   const competitionChallenge = state.progressChallenge.
-    //   switch(type){
-    //     case 'daily':
-
-    //   }
-    //   state.progressChallenge
-    // }
+    const setChallengeCount = (data) => (state.progressChallenge = data);
 
     return {
       state,
-      // setCurrentYear,
-      // setCurrentMonth,
-      setProgressChallenge,
+      setChallengeCount,
     };
   }
   // {

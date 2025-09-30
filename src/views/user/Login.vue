@@ -9,7 +9,6 @@ const router = useRouter();
 
 const authentication = useAuthenticationStore();
 const beBaseUrl = import.meta.env.VITE_BASE_URL;
-// const beBaseUrl = import.meta.env.VITE_API_URL;
 
 const feBaseUrl = window.location.origin;
 const redirectUrl = `${feBaseUrl}/fe/redirect`;
@@ -22,7 +21,6 @@ const state = reactive({
 });
 
 const submit = async () => {
-  //유효성 체크
   if (checkValidation()) {
     return;
   }
@@ -30,19 +28,28 @@ const submit = async () => {
   try {
     console.log('전송할 데이터:', state.form);
     const res = await login(state.form);
+    console.log('Login.vue - submit() - res: ', res);
 
-    console.log('Login.vue - submit() - res: ', res);    
+    console.log('응답 데이터:', JSON.stringify(res.data.result, null, 2));
 
     if (res.status === 200) {
-      const signedUser = res.data.result;
-      console.log('signedUser:', signedUser);
-      authentication.setSignedUser(signedUser);
+      const result = res.data.result;
+
+      console.log('result 전체:', result);
+
+      console.log('구조화된 userData:', result);
+
+      // store 업데이트
+      authentication.setSignedUser(result);
+
+      // store 상태 확인
+      console.log('업데이트 후 store 상태:', authentication.state.signedUser);
+
       await router.push('/');
     }
   } catch (error) {
     console.error('로그인 오류:', error);
     console.error('오류 상세:', error.response?.data);
-    console.error('요청 설정:', error.config);
     alert('로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.');
   }
 };
@@ -89,19 +96,13 @@ const submit = async () => {
       </div>
       <!-- API 로그인 -->
 
-      <div class="mb-3">
-        <span class="naver"
-          ><a
-            :href="`${beBaseUrl}/oauth2/authorization/naver?redirect_uri=${redirectUrl}`"
-            >네이버</a
-          ></span
-        >
       <div class="API">
         <span class="naver"
           ><a
             :href="`${beBaseUrl}/oauth2/authorization/naver?redirect_uri=${redirectUrl}`"
-            >네이버</a>
-          </span>
+            >네이버</a
+          >
+        </span>
         <span class="kakao"
           ><a
             :href="`${beBaseUrl}/oauth2/authorization/kakao?redirect_uri=${redirectUrl}`"
@@ -109,16 +110,14 @@ const submit = async () => {
           ></span
         >
       </div>
-
-      <div class="additional-links">
-        <div class="link-row">
-          <a href="#" class="link">아이디 찾기</a>
-          <span class="link-separator">|</span>
-          <a href="#" class="link">비밀번호 찾기</a>
-        </div>
+    </div>
+    <div class="additional-links">
+      <div class="link-row">
+        <a href="#" class="link">아이디 찾기</a>
+        <span class="link-separator">|</span>
+        <a href="#" class="link">비밀번호 찾기</a>
       </div>
     </div>
-  </div>
   </div>
 </template>
 
@@ -126,7 +125,6 @@ const submit = async () => {
 .container {
   max-width: 576px;
   padding: 0px;
-  
 }
 
 .buttonlogin {
@@ -182,25 +180,7 @@ const submit = async () => {
   padding-left: 10px;
 }
 
-
 .naver {
-  width: 100%;
-  font-size: 16px;
-  padding-top: 10px;
-  padding-bottom: 10px;
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-  background-color: #fbe900;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-
-}
-.kakao {
   width: 100%;
   font-size: 16px;
   padding-top: 10px;
@@ -215,7 +195,22 @@ const submit = async () => {
   text-align: center;
   text-decoration: none;
   display: inline-block;
-
+}
+.kakao {
+  width: 100%;
+  font-size: 16px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  background-color: #fbe900;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
 }
 
 .additional-links {
