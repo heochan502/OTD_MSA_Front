@@ -44,9 +44,9 @@ axios.interceptors.response.use(
         err.response.status === 500
       ) {
         authenticationStore.signOut();
-      } else if (err.response.status === 401 && authenticationStore.state.isSigned) {
-        //401 UnAuthorized 에러인데 FE 로그인 처리 되어 있다면
-
+      } else if (err.response.status === 403 && authenticationStore.state.isSigned) {
+        //403 UnAuthorized 에러인데 FE 로그인 처리 되어 있다면
+        console.log("실행되는거 맞냐");
 
         await reissue(); //AccessToken 재발행 시도
 
@@ -60,7 +60,6 @@ axios.interceptors.response.use(
         messageModalStore.setMessage(message);
       }
     }
-    return Promise.reject(err);
   }
 );
 // console.log("Axios BaseURL:", axios.defaults.baseURL);

@@ -96,7 +96,6 @@ const submit = async () => {
       </div>
       <!-- API 로그인 -->
 
-         
       <div class="API">
         <span class="naver"
           ><a
@@ -112,13 +111,11 @@ const submit = async () => {
         >
       </div>
     </div>
-
-      <div class="additional-links">
-        <div class="link-row">
-          <a href="#" class="link">아이디 찾기</a>
-          <span class="link-separator">|</span>
-          <a href="#" class="link">비밀번호 찾기</a>
-        </div>
+    <div class="additional-links">
+      <div class="link-row">
+        <a href="#" class="link">아이디 찾기</a>
+        <span class="link-separator">|</span>
+        <a href="#" class="link">비밀번호 찾기</a>
       </div>
     </div>
 </template>

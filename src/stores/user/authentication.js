@@ -31,7 +31,7 @@ export const useAuthenticationStore = defineStore(
       };
     };
 
-    const setSigndUserPic = (pic) => {
+    const setSignedUserPic = (pic) => {
       state.signedUser.pic = pic;
     };
 
@@ -39,20 +39,23 @@ export const useAuthenticationStore = defineStore(
       state.signedUser.point = point;
     };
 
+    const setChallengeRole = (challengeRole) => {
+      state.signedUser.challengeRole = challengeRole;
+    };
+
     const logout = async () => {
       console.log('logout 처리');
       state.signedUser = { userId: 0, nickName: '', pic: DEFAULT_PROFILE };
-      state.accessToken = null;
-      state.refreshToken = null;
       state.isSigned = false;
     };
 
     return {
       state,
       setSignedUser,
-      setSigndUserPic,
+      setSignedUserPic,
       logout,
       setPoint,
+      setChallengeRole,
     };
   },
   { persist: true }

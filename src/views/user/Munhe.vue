@@ -1,8 +1,10 @@
 <script setup>
 import { reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAuthenticationStore } from '@/stores/user/authentication';
 
 const router = useRouter();
+const authStore = useAuthenticationStore();
 
 const state = reactive({
   memo: {
@@ -46,12 +48,14 @@ const sendEmailInquiry = async () => {
             subject: state.memo.title,
             message: state.memo.content,
             senderName: '웹사이트 방문자',
+            senderEmail: authStore.user?.email, 
             timestamp: new Date().toISOString()
         };
 
         const response = await fetch('http://localhost:8080/api/OTD/email/sendMunhe', { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', 
         body: JSON.stringify(emailData)
 });
 
