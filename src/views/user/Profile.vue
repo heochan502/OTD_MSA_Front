@@ -1,6 +1,6 @@
 <script setup>
 import { useRouter } from 'vue-router';
-import { logout, getUserProfile } from '@/services/user/userService';
+import { logout } from '@/services/user/userService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { ref, computed, reactive } from 'vue';
 
@@ -94,7 +94,7 @@ const formatPoint = (point) => {
           <div class="history-date">2025.10.20</div>
         </div>
         <!-- 더 많은 기록들을 위한 공간 -->
-        <router-link to="/user/point-history" class="view-all-link">
+        <router-link to="/user/pointhistory" class="view-all-link">
           모든 포인트 기록 보기 →
         </router-link>
       </div>
@@ -116,7 +116,7 @@ const formatPoint = (point) => {
     <div class="support-section">
       <h3 class="section-title">고객센터</h3>
       <div class="support-list">
-        <router-link to="/user/munhe" class="support-item">
+        <router-link to="/user/email/munhe" class="support-item">
           <div class="support-icon">💬</div>
           <span>1:1 문의하기</span>
           <div class="arrow">›</div>
