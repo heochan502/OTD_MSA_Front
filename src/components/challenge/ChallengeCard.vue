@@ -1,6 +1,6 @@
 <script setup>
 import { defineProps } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useAuthenticationStore } from '@/stores/user/authentication';
 
 const props = defineProps({
   id: Number,
@@ -8,13 +8,18 @@ const props = defineProps({
   name: String,
   reward: Number,
 });
-const router = useRouter();
-const route = useRoute();
+const auth = useAuthenticationStore();
+const userTier = auth.state.signedUser.challengeRole;
+const FILE_URL = import.meta.env.VITE_BASE_URL;
 </script>
 
 <template>
   <div class="challenge-card">
-    <img :src="`${props.image}`" :alt="`${props.name}`" class="challenge-img" />
+    <img
+      :src="`${FILE_URL}${props.image}`"
+      :alt="`${props.name}`"
+      class="challenge-img"
+    />
     <div class="point-box">
       <img src="/image/main/point.png" alt="point" class="point" />
       <span class="point-text">{{ `${props.reward}P` }}</span>

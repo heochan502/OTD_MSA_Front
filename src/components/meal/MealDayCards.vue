@@ -28,7 +28,7 @@ const mealInfo = ref([
     meal_day: '저녁',
     kcal: 0,
     check: false,
-    recorded: false,
+    recorded: true,
     img: mealImg('dinner'),
   },
   {
@@ -40,18 +40,18 @@ const mealInfo = ref([
   },
 ]);
 
-const toggleFasting = (i) => {
-  mealInfo.value[i].check = !mealInfo.value[i].check;
-  if (mealInfo.value[i].check) mealInfo.value[i].recorded = false;
+const toggleFasting = (index) => {
+  mealInfo.value[index].check = !mealInfo.value[index].check;
+  if (mealInfo.value[index].check) mealInfo.value[index].recorded = false;
 };
 
-const onTopIconClick = (i) => {
-  const item = mealInfo.value[i];
+const onTopIconClick = (index) => {
+  const item = mealInfo.value[index];
   if (item.recorded) {
     router.push({ name: 'MealRecordView', query: { meal: item.meal_day } });
   } else if (!item.check) {
     item.recorded = true;
-    router.push({ name: 'MealFoodSearchView', query: { meal: item.meal_day } });
+    router.push({ name: 'MealFoodSearchView', query: { meal: item.meal_day  } });
   }
 };
 </script>
@@ -59,13 +59,13 @@ const onTopIconClick = (i) => {
 <template>
   <div class="meal-cards">
     <div
-      class="meal-card"
+      class="meal-card otd-shadow"
       v-for="(item, index) in mealInfo"
       :key="item.meal_day"
     >
       <button class="meal-card-top d-flex justify-content-between">
         <div class="d-flex flex-column">
-          <!-- ✅ BASE_URL을 반영한 상단 아이콘 경로 -->
+          <!-- BASE_URL을 반영한 상단 아이콘 경로 -->
           <img class="meal-top-img" :src="item.img" :alt="item.meal_day" />
           <span class="d-flex align-self-center otd-subtitle-1">{{
             item.meal_day
@@ -143,12 +143,11 @@ const onTopIconClick = (i) => {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  width: 170px;
+  width: 168px;
   height: 125px;
   background: #fff;
   padding: 15px;
   border-radius: 12px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
   font-weight: 500;
   font-size: 14px;
   color: #303030;

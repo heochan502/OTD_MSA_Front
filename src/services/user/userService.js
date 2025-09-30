@@ -1,6 +1,6 @@
 import axios from '@/services/httpRequester';
 
-const path = '/user';
+const path = `/user`;
 
 // 인증 관련
 export const join = (data) => axios.post(`${path}/join`, data);
@@ -9,11 +9,11 @@ export const login = (data) => axios.post(`${path}/login`, data);
 
 export const logout = () => axios.post(`${path}/logout`);
 
-export const reissue = (data) => axios.post(`${path}/reissue`, data);
+export const reissue = () =>
+  axios.post(`/user/reissue`, null, { withCredentials: true });
 
 // 프로필 관련
-export const getUserProfile = (params) =>
-  axios.get(`${path}/profile`, { params });
+export const getUserProfile = () => axios.get(`${path}/profile`);
 
 export const patchUserProfilePic = (data) =>
   axios.patch(`${path}/profile/pic`, data);
@@ -31,3 +31,5 @@ export const checkDuplicateUser = (data) =>
 
 // 비밀번호 관련
 export const changePassword = (data) => axios.patch(`${path}/password`, data);
+
+export const getPointHistory = (userId) => axios.get(`${path}/pointhistory/${userId}`);

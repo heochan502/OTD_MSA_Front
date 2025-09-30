@@ -4,7 +4,11 @@ import { useRouter, useRoute } from "vue-router";
 import { getExerciseRecordList } from "@/services/exercise/exerciseService";
 import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
 import { calcDuration } from "@/utils/exerciseUtils";
-import { getDateString, formatTimeKR } from "@/utils/dateTimeUtils";
+import {
+  getDateString,
+  formatTimeKR,
+  formatDateKR,
+} from "@/utils/dateTimeUtils";
 
 const router = useRouter();
 const route = useRoute();
@@ -17,7 +21,6 @@ const props = defineProps({
     default: () => [],
   },
 });
-
 
 // @click
 const goDetail = (exerciseRecordId) => {
@@ -34,7 +37,13 @@ const goDetail = (exerciseRecordId) => {
   <div>
     <ul class="d-flex flex-column ga-2 p-0">
       <li
-        v-for="item in exerciseRecordStore.today"
+        v-if="exerciseRecordStore.records.length < 1"
+        class="list_item otd-box-style"
+      >
+        오늘도 운동에 도전하세요!
+      </li>
+      <li
+        v-for="item in exerciseRecordStore.records"
         :key="item.exerciseRecordId"
         class="list_item otd-box-style"
       >
@@ -45,19 +54,21 @@ const goDetail = (exerciseRecordId) => {
                 ?.exerciseName
             }}
           </span>
-          <span v-if="item.distance === null">{{
-            calcDuration(item.startAt, item.endAt)
-          }}</span>
-
-          <span>{{ item.distance }}km</span>
+          <span v-if="item.distance === null"
+            >{{ calcDuration(item.startAt, item.endAt) }}분</span
+          >
+          <span v-else>{{ item.distance }}km</span>
         </div>
         <div class="d-flex align-center ga-2">
-          <span class="otd-body-3">{{ formatTimeKR(item.startAt) }}</span>
+          <div class="d-flex flex-column align-end">
+            <span class="otd-body-3">{{ formatTimeKR(item.startAt) }}</span>
+            <span class="otd-caption">{{ formatDateKR(item.startAt) }}</span>
+          </div>
           <img
             class="btn_more"
             src="\image\exercise\btn_more.png"
             alt="상세보기 버튼"
-            @click.prevent="goDetail(1)"
+            @click.prevent="goDetail(item.exerciseRecordId)"
           />
         </div>
       </li>

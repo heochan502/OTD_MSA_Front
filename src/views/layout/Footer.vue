@@ -1,10 +1,9 @@
 <script setup>
-import { useRouter, useRoute } from "vue-router";
-import { computed } from "vue";
-
+import { useRouter, useRoute } from 'vue-router';
+import { computed } from 'vue';
 
 const route = useRoute();
-const isActive = computed(() => route.path === "/");
+const isActive = computed(() => route.path === '/');
 </script>
 
 <template>
@@ -27,11 +26,11 @@ const isActive = computed(() => route.path === "/");
       <router-link
         to="/exercise/main"
         class="nav-menu"
-        :class="{ active: route.path.startsWith('/exercise/main') }"
+        :class="{ active: route.path.startsWith('/exercise') }"
       >
         <img
           :src="
-            route.path.startsWith('/exercise/main')
+            route.path.startsWith('/exercise')
               ? '/otd/image/navigator_img/exercise-s.png'
               : '/otd/image/navigator_img/exercise.png'
           "
@@ -96,11 +95,11 @@ const isActive = computed(() => route.path === "/");
       <router-link
         to="/user/profile"
         class="nav-menu"
-        :class="{ active: route.path.startsWith('/user/profile') }"
+        :class="{ active: route.path.startsWith('/user') }"
       >
         <img
           :src="
-            route.path.startsWith('/test')
+            route.path.startsWith('/user')
               ? '/otd/image/navigator_img/user-s.png'
               : '/otd/image/navigator_img/user.png'
           "
@@ -110,7 +109,7 @@ const isActive = computed(() => route.path === "/");
       >
     </div>
     <div>
-      <img class="image" src="/otd/image/main/fixed-bottom.png" />
+      <img class="image" src="/image/main/fixed-bottom.png" />
     </div>
   </nav>
 </template>
