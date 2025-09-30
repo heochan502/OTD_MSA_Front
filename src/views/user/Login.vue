@@ -121,7 +121,6 @@ const submit = async () => {
         </div>
       </div>
     </div>
-  </div>
 </template>
 
 <style scoped>

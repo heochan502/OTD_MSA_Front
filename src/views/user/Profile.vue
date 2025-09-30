@@ -21,43 +21,6 @@ const profileImage = computed(() => {
     ? authStore.state.signedUser.pic
     : defaultProfile;
 });
-<<<<<<< HEAD
-
-onMounted(() => {
-  loadProfile();
-});
-
-const loadProfile = async () => {
-  if (!authStore.isLoggedIn) {
-    router.push('/user/login');
-    return;
-  }
-
-  try {
-    state.loading = true;
-    const res = await getUserProfile();
-    console.log("온데이터 : " ,res.data );
-    if (res && res.status === 200) {
-      const userData = res.data.result  
-      Object.assign(state.form, userData);
-      authStore.state.signedUser = userData 
-    }
-  } catch (error) {
-    console.error('Profile loading error:', error);
-    if (error.response && error.response.status === 401) {
-      authStore.logout(); 
-      router.push('/user/login');
-    } else {
-     
-      alert('프로필 정보를 불러오는데 실패했습니다.');
-    }
-  } finally {
-    state.loading = false;
-  }
-};
-
-=======
->>>>>>> aa1910e1324aa8208a1cc17185063183905390a1
 const userInfo = computed(() => {
   return {
     nickName: authStore.state.signedUser?.nickName || '게스트',
@@ -132,7 +95,7 @@ const formatPoint = (point) => {
           <div class="history-date">2025.10.20</div>
         </div>
         <!-- 더 많은 기록들을 위한 공간 -->
-        <router-link to="/user/point-history" class="view-all-link">
+        <router-link to="/user/pointhistory" class="view-all-link">
           모든 포인트 기록 보기 →
         </router-link>
       </div>
