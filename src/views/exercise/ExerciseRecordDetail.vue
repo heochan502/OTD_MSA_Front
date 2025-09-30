@@ -56,7 +56,6 @@ const duration = computed(() =>
 );
 
 const recordId = route.params.exerciseRecordId;
-const userId = 1;
 
 onMounted(() => {
   getData(recordId);
@@ -66,7 +65,7 @@ onMounted(() => {
 const getData = async (recordId) => {
   if (!recordId) return;
 
-  const res = await getExerciseRecordDetail(recordId, { userId });
+  const res = await getExerciseRecordDetail(recordId);
 
   if (res === undefined || res.status !== 200) {
     alert(`에러발생? ${res.status}`);
@@ -88,7 +87,6 @@ const onDateClick = async (date) => {
     row_per_page: 2,
     type: "daily",
     date: date, // YYYY-MM-DD 형태
-    userId: 1,
   };
 
   const res = await getExerciseRecordList(params);
@@ -121,12 +119,9 @@ watch(
 
     const base = dayjs(newStartAt);
     const params = {
-      userId,
       startOfWeek: base.startOf("isoWeek").format("YYYY-MM-DDTHH:mm:ss"),
       endOfWeek: base.endOf("isoWeek").format("YYYY-MM-DDTHH:mm:ss"),
     };
-
-    console.log(params);
     const res = await getExerciseRecordWeekly(params);
     if (res?.status === 200) {
       state.weeklyRecords = res.data;

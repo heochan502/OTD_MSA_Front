@@ -5,6 +5,7 @@ import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
 import ExerciseRecordList from "@/components/exercise/ExerciseRecordList.vue";
 import { getExerciseRecordList } from "@/services/exercise/exerciseService";
 import { formatDateYearMonthKR } from "@/utils/dateTimeUtils";
+import { calcDuration } from "@/utils/exerciseUtils";
 
 const route = useRoute();
 const exerciseRecordStore = useExerciseRecordStore();
@@ -19,7 +20,6 @@ onMounted(async () => {
     row_per_page: 10,
     type: "monthly",
     date: date,
-    userId: 1,
   };
 
   const res = await getExerciseRecordList(params);
@@ -31,7 +31,36 @@ onUnmounted(() => {
   exerciseRecordStore.clearRecords();
 });
 
-const countRecord = exerciseRecordStore.records.length;
+const countRecord = computed(() => exerciseRecordStore.records.length);
+
+// 전체 운동시간
+const calcMonthlyTotalDuration = computed(() =>
+  exerciseRecordStore.records.reduce((total, record) => {
+    const duration = calcDuration(record.startAt, record.endAt);
+    return total + duration;
+  }, 0)
+);
+
+// 평균시간
+const calcMonthlyAvgDuration = computed(() => {
+  const totalDuration = calcMonthlyTotalDuration.value;
+  return totalDuration / countRecord.value;
+});
+
+// 전체 킬로칼로리
+const calcMonthlyTotalKcal = computed(() =>
+  exerciseRecordStore.records.reduce((total, record) => {
+    const kcal = record.activityKcal;
+    return total + kcal;
+  }, 0)
+);
+
+// 평균 킬로칼로리
+const calcMonthlyAvgKcal = computed(() => {
+  const totalKcal = calcMonthlyTotalKcal.value;
+  return totalKcal / countRecord.value;
+});
+console.log(calcMonthlyAvgKcal.value);
 </script>
 
 <template>
@@ -57,13 +86,13 @@ const countRecord = exerciseRecordStore.records.length;
           </tr>
           <tr>
             <td>시간</td>
-            <td>{{ "전체시간" }}</td>
-            <td>{{ "평균시간" }}</td>
+            <td>{{ calcMonthlyTotalDuration }}</td>
+            <td>{{ calcMonthlyAvgDuration }}</td>
           </tr>
           <tr>
             <td>킬로칼로리</td>
-            <td>{{ "전체칼로리" }}</td>
-            <td>{{ "평균칼로리" }}</td>
+            <td>{{ calcMonthlyTotalKcal }}</td>
+            <td>{{ calcMonthlyAvgKcal }}</td>
           </tr>
         </tbody>
       </table>

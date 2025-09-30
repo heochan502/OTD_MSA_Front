@@ -29,7 +29,6 @@ const onDateClick = async (date) => {
     row_per_page: 2,
     type: "daily",
     date: date, // YYYY-MM-DD 형태
-    userId: 1,
   });
 
   const res = await getExerciseRecordList(params);
@@ -73,7 +72,7 @@ const onDateClick = async (date) => {
       <div class="subtitle">
         <div class="d-flex align-center ga-1 mb-3">
           <span class="otd-subtitle-1">체성분</span>
-          <img class="btn_add" :src="btnAdd" alt="체성분 추가 버튼" />
+          <!-- <img class="btn_add" :src="btnAdd" alt="체성분 추가 버튼" /> -->
         </div>
         <span class="otd-body-2">변화 보기</span>
       </div>
