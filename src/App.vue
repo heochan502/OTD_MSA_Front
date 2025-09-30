@@ -1,16 +1,27 @@
 <script setup>
+import AdminLayout from './views/admin/AdminLayout.vue';
 import Layout from './views/layout/layout.vue';
 import { useRoute, useRouter } from 'vue-router';
-import { ref, watch, onMounted } from 'vue';
+
+const route = useRoute();
 </script>
 
 <template>
-  <div class="layout" >
-    <Layout id="modal-root" />
+
+  <div v-if="route.path.startsWith('/admin')" class="admin-layout">
+    <AdminLayout />
+  </div>
+  <div v-else class="layout">
+    <Layout id="modal-root"/>
   </div>
 </template>
 
-<style>
+<style scoped>
+.admin-layout {
+  width: 100%;
+  height: 100%;
+  background: #fafafa;
+}
 .layout {
   width: 390px; /* 아이폰 12 기준 */
   height: 805px;
