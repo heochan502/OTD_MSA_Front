@@ -16,6 +16,7 @@ export const useAuthenticationStore = defineStore(
         point: 0,
         xp: 0,
         challengeRole: '',
+        userRole: '',
       },
       isSigned: false,
     });
@@ -31,7 +32,7 @@ export const useAuthenticationStore = defineStore(
       };
     };
 
-    const setSigndUserPic = (pic) => {
+    const setSignedUserPic = (pic) => {
       state.signedUser.pic = pic;
     };
 
@@ -52,7 +53,7 @@ export const useAuthenticationStore = defineStore(
     return {
       state,
       setSignedUser,
-      setSigndUserPic,
+      setSignedUserPic,
       logout,
       setPoint,
       setChallengeRole,

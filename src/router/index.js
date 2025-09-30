@@ -23,6 +23,7 @@ import Signal from '@/views/user/Signal.vue';
 import QnA from '@/views/user/QnA.vue';
 import Munhe from '@/views/user/Munhe.vue';
 import ModifiProfile from '@/views/user/ModifiProfile.vue';
+import PointHistory from '@/views/user/pointHistory.vue';
 import Term from '@/views/user/Term.vue';
 import Oauth2 from '@/views/auth/OAuth2Handler.vue';
 
@@ -36,6 +37,10 @@ import PointShop from '@/components/pointshop/PointShop.vue';
 
 //식단
 import MealMainView from '@/views/meal/MealMainView.vue';
+import MealDetailView from '@/views/meal/MealDetailView.vue';
+import MealRecordView from '@/views/meal/MealRecordView.vue'  
+import MealFoodSearchView from '@/views/meal/MealFoodSearchView.vue'
+import MealCustomAddView from '@/views/meal/MealCustomAdd.vue';
 
 // 운동
 import ExerciseMain from '@/views/exercise/ExerciseMain.vue';
@@ -43,7 +48,6 @@ import ExerciseRecord from '@/views/exercise/ExerciseRecord.vue';
 import ExerciseRecordForm from '@/views/exercise/ExerciseRecordForm.vue';
 import ExerciseRecordDetail from '@/views/exercise/ExerciseRecordDetail.vue';
 
-import MealDetailView from '@/views/meal/MealDetailView.vue';
 
 // 카테고리 라벨 맵
 const CATEGORY_LABEL = {
@@ -199,7 +203,7 @@ const router = createRouter({
       component: QnA,
     },
     {
-      path: '/user/munhe',
+      path: '/user/email/munhe',
       name: 'munhe',
       component: Munhe,
     },
@@ -208,7 +212,12 @@ const router = createRouter({
       name: 'modifiProfile',
       component: ModifiProfile,
     },
-  
+    {
+      path: '/user/pointhistory',
+      name: 'pointHistory',
+      component: PointHistory,
+    },
+
     {
       path: '/user/term',
       name: 'term',
@@ -290,12 +299,57 @@ const router = createRouter({
     {
       path: '/meal/food-search',
       name: 'MealFoodSearchView',
-      component: () => import('@/views/meal/MealFoodSearchView.vue'),
+      component: MealFoodSearchView,
+      meta: { headerType: 'title', title: '식단 기록', showUserPanel: false },
     },
     {
       path: '/meal/record',
       name: 'MealRecordView',
-      component: () => import('@/views/meal/MealRecordView.vue'),
+      component: MealRecordView,
+      meta: { headerType: 'title', title: '식단 기록', showUserPanel: false },
+    },
+    {
+      path: '/meal/mealcustomadd',
+      name: 'MealCustomAddView',
+      component: MealCustomAddView,
+      meta: { headerType: 'title', title: '식단 기록', showUserPanel: false },
+    },
+    {
+      path: '/admin',
+      // component: () => import('@/views/admin/AdminLayout.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true },
+      children: [
+        {
+          path: '', // /admin 진입 시 기본 페이지
+          name: 'AdminDashboard',
+          component: () => import('@/views/admin/AdminDashboard.vue'),
+        },
+        {
+          path: 'users',
+          name: 'AdminUsers',
+          component: () => import('@/views/admin/AdminUsers.vue'),
+        },
+        {
+          path: 'challenges',
+          name: 'AdminChallenges',
+          component: () => import('@/views/admin/AdminChallenges.vue'),
+        },
+        {
+          path: 'points',
+          name: 'AdminPoints',
+          component: () => import('@/views/admin/AdminPoints.vue'),
+        },
+        {
+          path: 'qna',
+          name: 'AdminQnA',
+          component: () => import('@/views/admin/AdminQnA.vue'),
+        },
+        {
+          path: 'statistics',
+          name: 'AdminStatistics',
+          component: () => import('@/views/admin/AdminStatistics.vue'),
+        },
+      ],
     },
   ],
 });
@@ -305,12 +359,23 @@ const unSignedPathList = ['/user/login', '/user/join', '/fe/redirect'];
 
 //navigation guard
 router.beforeEach((to, from) => {
-  console.log('to.path:', `"${to.path}"`);
   const authentcationStore = useAuthenticationStore();
   const isUnsignedPath = unSignedPathList.some((path) =>
     to.path.startsWith(path)
   );
-
+  // body 클래스 분기
+  if (to.path.startsWith('/admin')) {
+    document.body.classList.add('is-admin');
+  } else {
+    document.body.classList.remove('is-admin');
+  }
+  if (to.path.startsWith('/admin')) {
+    const user = authentcationStore.state.signedUser;
+    if (!user || user.userRole !== 'ADMIN') {
+      alert('관리자만 접근 가능합니다.');
+      return { path: '/' }; // 일반 유저는 홈으로 돌려보내기
+    }
+  }
   if (unSignedPathList.includes(to.path) && authentcationStore.state.isSigned) {
     //로그인 상태에서 /user/login, /user/join 경로로 이동하려고 하면
     return { path: '/' };
