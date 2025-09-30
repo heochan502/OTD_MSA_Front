@@ -21,7 +21,9 @@ const route = useRoute();
 const exerciseRecordStore = useExerciseRecordStore();
 const selectedDate = ref();
 const selectionItems = ref([]); // 모달에 보여질 운동 기록들
-const confirmDialog = ref(false); // 모달 열림 여부
+const confirmDialog = ref(false); // 운동 선택용 모달 열림 여부
+const noticeDialog = ref(false);
+const recordId = route.params.exerciseRecordId;
 
 const state = reactive({
   record: {},
@@ -54,8 +56,6 @@ const hasReps = computed(() => {
 const duration = computed(() =>
   calcDuration(state.record.startAt, state.record.endAt)
 );
-
-const recordId = route.params.exerciseRecordId;
 
 onMounted(() => {
   getData(recordId);
@@ -97,7 +97,7 @@ const onDateClick = async (date) => {
   exerciseRecordStore.records = res.data;
 
   if (exerciseRecordStore.records.length === 0) {
-    alert("기록이 없습니다");
+    noticeDialog.value = true;
   } else if (exerciseRecordStore.records.length === 1) {
     getData(exerciseRecordStore.records.exerciseRecordId);
   } else {
@@ -202,36 +202,47 @@ watch(
   </div>
 
   <!-- 모달창 -->
-  <v-dialog v-model="confirmDialog" max-width="380" min-height="100">
+  <v-dialog v-model="confirmDialog" max-width="350" min-height="100">
     <v-card>
-      <v-card-title> 운동 기록 선택 </v-card-title>
-
+      <v-card-title class="otd-subtitle-1"> 운동 기록 선택 </v-card-title>
       <v-card-text>
         <v-list>
           <v-list-item
             v-for="item in selectionItems"
             :key="item.exerciseRecordId"
           >
-            <div>
-              <div class="otd-subtitle-2">
-                {{
-                  exerciseRecordStore.exerciseList.find(
-                    (e) => e.exerciseId === item.exerciseId
-                  )?.exerciseName || "운동명 없음"
-                }}
+            <div class="d-flex justify-space-between m-1">
+              <div>
+                <div class="otd-subtitle-2">
+                  {{
+                    exerciseRecordStore.exerciseList.find(
+                      (e) => e.exerciseId === String(item.exerciseId)
+                    )?.exerciseName || "운동명 없음"
+                  }}
+                </div>
+                <div class="otd-body-1">{{ duration }}분</div>
               </div>
-              <div class="otd-body-1">{{ duration }}분</div>
+              <v-btn @click="selectRecord(item)" class="otd-shadow btn_select">
+                보기
+              </v-btn>
             </div>
-
-            <v-btn color="primary" @click="selectRecord(item)"> 보기 </v-btn>
           </v-list-item>
         </v-list>
       </v-card-text>
-
-      <v-card-actions>
-        <v-spacer />
-        <v-btn @click="confirmDialog = false">닫기</v-btn>
+      <v-card-actions class="d-flex justify-center">
+        <v-btn @click="confirmDialog = false" class="btn_close w-50"
+          >닫기</v-btn
+        >
       </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <v-dialog v-model="noticeDialog" max-width="350" min-height="100">
+    <v-card class="pa-2 d-flex">
+      <v-card-text class="otd-body-1 text-center">
+        <span> 운동을 기록하지 않았어요! </span>
+        <v-btn @click="noticeDialog = false" class="btn_close w-50">닫기</v-btn>
+      </v-card-text>
     </v-card>
   </v-dialog>
 </template>
@@ -289,5 +300,19 @@ watch(
 .btn_delete {
   width: 24px;
   height: 24px;
+}
+.btn_select {
+  background-color: #e6e6e6;
+}
+.btn_select:hover {
+  background-color: #ffe864;
+}
+.btn_close {
+  width: 143px;
+  height: 38px;
+  margin-top: 20px;
+  background-color: #e6e6e6;
+  border-radius: 10px;
+  box-shadow: none;
 }
 </style>
