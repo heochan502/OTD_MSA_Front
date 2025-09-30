@@ -36,15 +36,13 @@ axios.interceptors.response.use(
   },
   async (err) => {
     console.log('err: ', err);
+     const status = err.response.status ?? 0;
     if (err.response) {
       console.log('err.response : ', err.response);
       const authenticationStore = useAuthenticationStore();
-      if (
-        err.config.url === `${BASE_URL}/user/reissue` &&
-        err.response.status === 500
-      ) {
+      if (err.config.url === `${BASE_URL}/user/reissue` && status === 500) {
         authenticationStore.signOut();
-      } else if (err.response.status === 403 && authenticationStore.state.isSigned) {
+      } else if ((status === 403 || status === 401 || status === 500) && authenticationStore.state.isSigned) {
         //403 UnAuthorized 에러인데 FE 로그인 처리 되어 있다면
         console.log("실행되는거 맞냐");
 
