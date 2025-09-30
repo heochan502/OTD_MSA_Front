@@ -32,7 +32,7 @@ export const useAuthenticationStore = defineStore(
       };
     };
 
-    const setSigndUserPic = (pic) => {
+    const setSignedUserPic = (pic) => {
       state.signedUser.pic = pic;
     };
 
@@ -53,7 +53,7 @@ export const useAuthenticationStore = defineStore(
     return {
       state,
       setSignedUser,
-      setSigndUserPic,
+      setSignedUserPic,
       logout,
       setPoint,
       setChallengeRole,
