@@ -38,7 +38,7 @@ const ageChartData = ref({
   ],
 });
 
-// ✅ 퍼센트 계산용 툴팁 콜백 함수 (마지막 조각 보정)
+// 퍼센트 계산용 툴팁 콜백 함수 (마지막 조각 보정)
 const makePercentLabel = (context) => {
   const values = context.dataset.data.map(Number);
   const total = values.reduce((a, b) => a + b, 0);
@@ -79,7 +79,7 @@ const commonOptions = {
 };
 
 onMounted(async () => {
-  // ✅ 성별 데이터 가져오기
+  // 성별 데이터 가져오기
   const res = await getGender();
   const genderData = res.data;
 
@@ -98,7 +98,7 @@ onMounted(async () => {
   };
   genderTotal.value = male + female;
 
-  // ✅ 연령대 데이터 가져오기
+  // 연령대 데이터 가져오기
   const res2 = await getAgeCount();
   const data = res2.data.map((d) => ({
     ageGroup: d.ageGroup,
