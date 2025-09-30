@@ -58,48 +58,52 @@
 .settings-section,
 .support-section {
   margin-bottom: 30px;
-  
-  .settings-list,
-  .support-list {
-    background: white;
-    border-radius: 12px;
-    border: 1px solid #e0e0e0;
-    overflow: hidden;
-    
-    .settings-item,
-    .support-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 16px 20px;
-      text-decoration: none;
-      color: #333;
-      border-bottom: 1px solid #f0f0f0;
-      transition: background 0.2s ease;
-      
-      &:hover {
-        background: #f8f9fa;
-      }
-      
-      &:last-child {
-        border-bottom: none;
-      }
-      
-      .settings-icon,
-      .support-icon {
-        font-size: 20px;
-      }
-      
-      span {
-        flex: 1;
-        font-weight: 500;
-      }
-      
-      .arrow {
-        font-size: 18px;
-        color: #ccc;
-      }
-    }
-  }
+}
+
+.settings-section .settings-list,
+.support-section .support-list {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+}
+
+.settings-section .settings-list .settings-item,
+.support-section .support-list .support-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  text-decoration: none;
+  color: #333;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background 0.2s ease;
+}
+
+.settings-section .settings-list .settings-item:hover,
+.support-section .support-list .support-item:hover {
+  background: #f8f9fa;
+}
+
+.settings-section .settings-list .settings-item:last-child,
+.support-section .support-list .support-item:last-child {
+  border-bottom: none;
+}
+
+.settings-section .settings-list .settings-item .settings-icon,
+.support-section .support-list .support-item .support-icon {
+  font-size: 20px;
+}
+
+.settings-section .settings-list .settings-item span,
+.support-section .support-list .support-item span {
+  flex: 1;
+  font-weight: 500;
+}
+
+.settings-section .settings-list .settings-item .arrow,
+.support-section .support-list .support-item .arrow {
+  font-size: 18px;
+  color: #ccc;
 }
 </style>

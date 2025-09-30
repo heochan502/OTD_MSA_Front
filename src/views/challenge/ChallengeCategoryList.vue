@@ -143,7 +143,7 @@ onMounted(async () => {
         loop
         :autoplay="{ delay: 5000, disableOnInteraction: false }"
       >
-        <SwiperSlide v-for="challenge in list">
+        <SwiperSlide v-for="challenge in list" :key="challenge.id">
           <div class="challenge-card-wrapper" @click="handleClick(challenge)">
             <ChallengeCard
               class="challenge-card"

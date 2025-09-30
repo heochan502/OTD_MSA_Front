@@ -1,8 +1,10 @@
 <script setup>
 import { reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAuthenticationStore } from '@/stores/user/authentication';
 
 const router = useRouter();
+const authStore = useAuthenticationStore();
 
 const state = reactive({
   memo: {
@@ -37,39 +39,58 @@ const validateInput = () => {
 
 // 직접 이메일 전송 함수
 const sendEmailInquiry = async () => {
-    // 입력 검증
-    if (!validateInput()) {
+    if (!validateInput()) return;
+
+    // 로그인 확인
+    if (!authStore.state.isSigned || !authStore.state.signedUser.userId) {
+        alert('로그인이 필요한 서비스입니다.');
+        router.push('/login'); // 로그인 페이지 경로를 실제 경로로 수정
         return;
     }
 
     state.isLoading = true;
-    
+
     try {
         const emailData = {
             subject: state.memo.title,
             message: state.memo.content,
-            senderName: '웹사이트 방문자',
+            senderName: authStore.state.signedUser.nickName || '웹사이트 방문자',
+            senderEmail: authStore.state.signedUser.email, 
             timestamp: new Date().toISOString()
         };
 
-        // 직접 fetch 요청
-        const response = await fetch('/api/send-email', {
+        const response = await fetch('http://localhost:8080/api/OTD/email/sendMunhe', { 
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
+            headers: { 
+                'Content-Type': 'application/json'
             },
+            credentials: 'include', // 세션 쿠키 포함
             body: JSON.stringify(emailData)
         });
 
+        if (!response.ok) {
+            const text = await response.text();
+            console.error('서버 응답:', text);
+            
+            if (response.status === 401) {
+                alert('로그인 세션이 만료되었습니다. 다시 로그인해주세요.');
+                await authStore.logout();
+                router.push('/login');
+                return;
+            }
+            
+            alert('문의 전송 중 오류가 발생했습니다.');
+            return;
+        }
+
         const result = await response.json();
-        
-        if (result.resultData === 1) {
-            alert('문의가 성공적으로 전송되었습니다!');
-            // 폼 초기화
+
+        if (result.result?.success) {
+            alert(result.message || '문의가 성공적으로 전송되었습니다!');
             state.memo.title = '';
             state.memo.content = '';
         } else {
-            alert(result.resultMessage || '문의 전송에 실패했습니다.');
+            alert(result.message || '문의 전송에 실패했습니다.');
         }
     } catch (error) {
         console.error('이메일 전송 오류:', error);
@@ -77,9 +98,8 @@ const sendEmailInquiry = async () => {
     } finally {
         state.isLoading = false;
     }
-}
+};
 </script>
-
 <template>
   <div class="detail">
     <div class="mb-3" v-if="state.memo.createdAt">

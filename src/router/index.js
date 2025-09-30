@@ -23,6 +23,7 @@ import Signal from '@/views/user/Signal.vue';
 import QnA from '@/views/user/QnA.vue';
 import Munhe from '@/views/user/Munhe.vue';
 import ModifiProfile from '@/views/user/ModifiProfile.vue';
+import PointHistory from '@/views/user/pointHistory.vue';
 import Term from '@/views/user/Term.vue';
 import Oauth2 from '@/views/auth/OAuth2Handler.vue';
 
@@ -202,7 +203,7 @@ const router = createRouter({
       component: QnA,
     },
     {
-      path: '/user/munhe',
+      path: '/user/email/munhe',
       name: 'munhe',
       component: Munhe,
     },
@@ -210,6 +211,11 @@ const router = createRouter({
       path: '/user/modifiProfile',
       name: 'modifiProfile',
       component: ModifiProfile,
+    },
+    {
+      path: '/user/pointhistory',
+      name: 'pointHistory',
+      component: PointHistory,
     },
   
     {
