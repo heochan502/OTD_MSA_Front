@@ -1,9 +1,7 @@
 import axios from 'axios';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { reissue } from './user/userService';
-
 import { useMessageModalStore } from '@/stores/messageModal';
-
 
 // 환경별 baseURL (dev → localhost:8080, prod → greenart.n-e.kr/otd-api)
 axios.defaults.baseURL = `${import.meta.env.VITE_BASE_URL}/api/OTD`;
@@ -47,8 +45,8 @@ axios.interceptors.response.use(
       ) {
         authenticationStore.signOut();
       } else if (err.response.status === 403 && authenticationStore.state.isSigned) {
-        //401 UnAuthorized 에러인데 FE 로그인 처리 되어 있다면
-
+        //403 UnAuthorized 에러인데 FE 로그인 처리 되어 있다면
+        console.log("실행되는거 맞냐");
 
         await reissue(); //AccessToken 재발행 시도
 
@@ -62,7 +60,6 @@ axios.interceptors.response.use(
         messageModalStore.setMessage(message);
       }
     }
-    return Promise.reject(err);
   }
 );
 // console.log("Axios BaseURL:", axios.defaults.baseURL);

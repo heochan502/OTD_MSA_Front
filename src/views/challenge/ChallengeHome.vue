@@ -1,7 +1,11 @@
 <script setup>
 import { onMounted, reactive, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import {  getSelectedAll,  postMissionRecord,} from '@/services/challenge/challengeService.js';
+import {
+  getSelectedAll,
+  postMissionRecord,
+  settlement,
+} from '@/services/challenge/challengeService';
 import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 import { useChallengeStore } from '@/stores/challenge/challengeStore.js';
 import Progress from '@/components/challenge/Progress.vue';
@@ -16,12 +20,22 @@ const state = reactive({
   competitionChallenge: [],
   personalChallenge: [],
   dailyMission: [],
-  user: {},
+  user: { xp: 0, point: 0 },
   missionComplete: [],
   success: 0,
   tier: '',
 });
 
+const tierImg = {
+  브론즈: '/otd/image/challenge/bronze.png',
+  실버: '/otd/image/challenge/silver.png',
+  골드: '/otd/image/challenge/gold.png',
+  다이아: '/otd/image/challenge/diamond.png',
+  default: '',
+};
+const myTier = computed(() => authentication.state.signedUser.challengeRole);
+
+const myTierImg = computed(() => tierImg[myTier.value] || tierImg.default);
 const toChallengeList = () => {
   router.push('challenge/alllist');
 };
@@ -52,19 +66,22 @@ const detail = (id, type) => {
 
 onMounted(async () => {
   const res = await getSelectedAll();
-  state.weeklyChallenge = res.data.weeklyChallenge;
-  state.competitionChallenge = res.data.competitionChallenge;
-  state.personalChallenge = res.data.personalChallenge;
-  state.dailyMission = res.data.dailyMission;
-  state.user = res.data.user;
-  state.missionComplete = res.data.missionComplete;
+  state.weeklyChallenge = res.data.weeklyChallenge || [];
+  state.competitionChallenge = res.data.competitionChallenge || [];
+  state.personalChallenge = res.data.personalChallenge || [];
+  state.dailyMission = res.data.dailyMission || [];
+  state.user = res.data.user || { xp: 0, point: 0 };
+  state.missionComplete = res.data.missionComplete || [];
   state.success = res.data.success;
+
   challengeStore.state.progressChallenge = res.data;
-  totalXp.value = res.data.user.xp;
-  state.tier = authentication.state.signedUser.challengeRole;
+  totalXp.value = res.data.user?.xp ?? 0;
+  // state.tier = authentication.state.signedUser.challengeRole;
   console.log('res', res.data);
   setMissionState();
-  console.log("로그 데이터",state );
+  console.log('로그 데이터', state);
+  authentication.setPoint(state.user.point);
+  authentication.setChallengeRole(res.data.user?.challengeRole);
 });
 
 const totalXp = ref(0);
@@ -114,34 +131,67 @@ const completeMission = async (mission) => {
 };
 
 const levelMent = () => {
-  switch (state.tier) {
+  switch (myTier.value) {
     case '다이아':
       return '다이아처럼 빤짝빤짝 !';
     case '골드':
-      return `다이아까지 ${leftLevel} 남았어요!`;
+      return `다이아까지 Lv${leftLevel.value} 남았어요!`;
     case '실버':
-      return `골드까지 ${leftLevel} 남았어요!`;
+      return `골드까지 Lv${leftLevel.value} 남았어요!`;
     case '브론즈':
-      return `실버까지 ${leftLevel} 남았어요!`;
+      return `실버까지 Lv${leftLevel.value} 남았어요!`;
   }
 };
 
 const FILE_URL = import.meta.env.VITE_BASE_URL;
 const BASE_URL = import.meta.env.BASE_URL;
+
+// 정산 테스트용
+const settlementButton = async () => {
+  const params = {
+    startDate: '2025-09-01',
+    endDate: '2025-09-30',
+    type: 'competition',
+  };
+  const res = await settlement(params);
+  console.log(res);
+  // 테스트용
+  if (res.data?.user) {
+    authentication.setChallengeRole(res.data.user.challengeRole);
+    authentication.setPoint(res.data.user.point);
+
+    state.user = res.data.user; // state.user도 최신으로 교체
+    totalXp.value = res.data.user.xp;
+  } else {
+    const refresh = await getSelectedAll();
+    authentication.setChallengeRole(refresh.data.user.challengeRole);
+    authentication.setPoint(refresh.data.user.point);
+
+    state.user = refresh.data.user; // 최신 데이터로 교체
+    totalXp.value = refresh.data.user.xp;
+  }
+};
 </script>
 
 <template>
   <div class="wrap">
     <!-- 내정보 -->
+    <div @click="settlementButton()">월간 정산</div>
     <div>
       <div class="first-title">내 정보</div>
       <div>
-        <div>티어 이미지</div>
-        <div>
-          <span>{{ totalLevel }}레벨</span><span>{{ state.tier }}</span>
-          <span>{{ ' ' + levelMent() }}</span>
+        <div class="info">
+          <img :src="myTierImg" alt="tier" class="tier-img" />
+          <div class="info-right">
+            <span>Lv {{ totalLevel }}</span>
+            <span>{{ ' ' + levelMent() }}</span>
+            <Progress
+              class="progress"
+              :indata-progress="leftXp"
+              bar-type="xp"
+            ></Progress>
+          </div>
         </div>
-        <Progress :indata-progress="leftXp" bar-type="xp"></Progress>
       </div>
       <div class="sub-wrap">
         <div class="point-wrap otd-list-box-style">
@@ -319,7 +369,7 @@ const BASE_URL = import.meta.env.BASE_URL;
 .monthly {
   display: flex;
   justify-content: space-between;
-  // align-items: center;
+  align-items: center;
   .route-list {
     margin-top: 10px;
     font-size: 12px;
@@ -379,6 +429,22 @@ const BASE_URL = import.meta.env.BASE_URL;
     font-weight: 500;
     display: flex;
     flex-direction: column;
+  }
+}
+.info {
+  display: flex;
+  gap: 15px;
+  .tier-img {
+    width: 100px;
+  }
+  .info-right {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    .progress {
+      // width: 70%;
+    }
   }
 }
 </style>
