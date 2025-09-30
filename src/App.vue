@@ -7,11 +7,12 @@ const route = useRoute();
 </script>
 
 <template>
+
   <div v-if="route.path.startsWith('/admin')" class="admin-layout">
     <AdminLayout />
   </div>
   <div v-else class="layout">
-    <Layout />
+    <Layout id="modal-root"/>
   </div>
 </template>
 
