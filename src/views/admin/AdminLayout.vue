@@ -119,7 +119,7 @@ const logoutAccount = async () => {
                 : '/otd/image/admin_page/qna.png'
             "
           />
-          <span>Q&A</span>
+          <span>문의</span>
         </router-link>
       </div>
 
@@ -145,7 +145,8 @@ const logoutAccount = async () => {
 <style lang="scss" scoped>
 .admin-layout {
   display: flex;
-  // height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 .sidebar {
   display: flex;
@@ -154,6 +155,7 @@ const logoutAccount = async () => {
   background: #e6e6e6;
   color: #393e46;
   padding: 20px;
+  flex-shrink: 0; // 고정
 
   .sidebar-title {
     padding: 15px;
@@ -221,5 +223,8 @@ const logoutAccount = async () => {
   flex: 1;
   padding: 20px;
   background: #f9f9f9;
+  overflow-y: auto;
+  height: 100vh;
+  box-sizing: border-box;
 }
 </style>

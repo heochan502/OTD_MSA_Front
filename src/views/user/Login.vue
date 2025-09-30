@@ -26,18 +26,12 @@ const submit = async () => {
   }
 
   try {
-    console.log('전송할 데이터:', state.form);
     const res = await login(state.form);
-    console.log('Login.vue - submit() - res: ', res);
 
     console.log('응답 데이터:', JSON.stringify(res.data.result, null, 2));
 
     if (res.status === 200) {
       const result = res.data.result;
-
-      console.log('result 전체:', result);
-
-      console.log('구조화된 userData:', result);
 
       // store 업데이트
       authentication.setSignedUser(result);

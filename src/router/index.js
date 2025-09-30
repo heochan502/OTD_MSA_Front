@@ -214,7 +214,7 @@ const router = createRouter({
       name: 'pointHistory',
       component: PointHistory,
     },
-  
+
     {
       path: '/user/term',
       name: 'term',
@@ -306,6 +306,7 @@ const router = createRouter({
     {
       path: '/admin',
       // component: () => import('@/views/admin/AdminLayout.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true },
       children: [
         {
           path: '', // /admin 진입 시 기본 페이지
@@ -357,7 +358,13 @@ router.beforeEach((to, from) => {
   } else {
     document.body.classList.remove('is-admin');
   }
-
+  if (to.path.startsWith('/admin')) {
+    const user = authentcationStore.state.signedUser;
+    if (!user || user.userRole !== 'ADMIN') {
+      alert('관리자만 접근 가능합니다.');
+      return { path: '/' }; // 일반 유저는 홈으로 돌려보내기
+    }
+  }
   if (unSignedPathList.includes(to.path) && authentcationStore.state.isSigned) {
     //로그인 상태에서 /user/login, /user/join 경로로 이동하려고 하면
     return { path: '/' };
