@@ -42,16 +42,16 @@ onMounted (async () => {
 </script>
 
 <template>
-   
-<MealDateStrip
+     
+  <MealDateStrip
     v-model="selectedDate"
     :before="365"
     :after="365"
     @change="(d) => { /* d로 데이터 로드 등 */ }"
   />
 
+  <div class="wrap wrap-top">
 
-  <div class="wrap">
     <!-- 상단 요약 카드 -->
     <div class="otd-top-margin">
       <div
@@ -80,8 +80,12 @@ onMounted (async () => {
 <style setup >
 /* 이 뷰는 공통 유틸(main.css) + 각 카드 내부 스타일을 사용
    */
-.wrap{
-  margin-top: 0px !important;
+  .wrap
+  {
+    margin-top: 20px !important;
+  }
+.wrap-top{
+  margin-top: 20px !important;
 }
 </style>
 

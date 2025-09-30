@@ -5,8 +5,8 @@ import { ref, watch, onMounted } from 'vue';
 </script>
 
 <template>
-  <div class="layout">
-    <Layout />
+  <div class="layout" >
+    <Layout id="modal-root" />
   </div>
 </template>
 
