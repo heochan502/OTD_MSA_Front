@@ -7,6 +7,7 @@ import effortLevels from "@/assets/effortLevels.json";
 import WeeklyCalendar from "@/components/exercise/WeeklyCalendar.vue";
 import WeeklyChart from "@/components/exercise/WeeklyCalendar.vue";
 import {
+  deleteExerciseRecord,
   getExerciseRecordDetail,
   getExerciseRecordList,
   getExerciseRecordWeekly,
@@ -18,11 +19,13 @@ import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
 dayjs.extend(isoWeek);
 
 const route = useRoute();
+const router = useRouter();
 const exerciseRecordStore = useExerciseRecordStore();
 const selectedDate = ref();
 const selectionItems = ref([]); // 모달에 보여질 운동 기록들
-const confirmDialog = ref(false); // 운동 선택용 모달 열림 여부
-const noticeDialog = ref(false);
+const selectionDialog = ref(false); // 운동 선택용 모달 열림 여부
+const noticeDialog = ref(false); // 기록 없을 때 모달
+const confirmDialog = ref(false); // 삭제 확인용 모달
 const recordId = route.params.exerciseRecordId;
 
 const state = reactive({
@@ -102,13 +105,13 @@ const onDateClick = async (date) => {
     getData(exerciseRecordStore.records.exerciseRecordId);
   } else {
     selectionItems.value = exerciseRecordStore.records;
-    confirmDialog.value = true;
+    selectionDialog.value = true;
   }
 };
 
 // 모달에서 선택된 기록
 const selectRecord = (record) => {
-  confirmDialog.value = false;
+  selectionDialog.value = false;
   getData(record.exerciseRecordId);
 };
 
@@ -128,6 +131,16 @@ watch(
     }
   }
 );
+
+// 삭제버튼
+const confirmYes = async () => {
+  const res = await deleteExerciseRecord(recordId);
+  if (res === undefined || res.status !== 200) {
+    alert("에러발생");
+    return;
+  }
+  router.push("/exercise/record");
+};
 </script>
 
 <template>
@@ -143,7 +156,11 @@ watch(
     <div class="content_wrap">
       <div class="subtitle">
         <span class="otd-subtitle-1">{{ state.record.exerciseName }}</span>
-        <img src="\image\exercise\btn_trash.png" class="btn_delete" />
+        <img
+          src="\image\exercise\btn_trash.png"
+          class="btn_delete"
+          @click.prevent="confirmDialog = true"
+        />
       </div>
       <div class="content_main otd-top-margin">
         <div class="content_effort otd-box-style">
@@ -202,7 +219,7 @@ watch(
   </div>
 
   <!-- 모달창 -->
-  <v-dialog v-model="confirmDialog" max-width="350" min-height="100">
+  <v-dialog v-model="selectionDialog" max-width="350" min-height="100">
     <v-card>
       <v-card-title class="otd-subtitle-1"> 운동 기록 선택 </v-card-title>
       <v-card-text>
@@ -230,7 +247,7 @@ watch(
         </v-list>
       </v-card-text>
       <v-card-actions class="d-flex justify-center">
-        <v-btn @click="confirmDialog = false" class="btn_close w-50"
+        <v-btn @click="selectionDialog = false" class="btn_close w-50"
           >닫기</v-btn
         >
       </v-card-actions>
@@ -242,6 +259,26 @@ watch(
       <v-card-text class="otd-body-1 text-center">
         <span> 운동을 기록하지 않았어요! </span>
         <v-btn @click="noticeDialog = false" class="btn_close w-50">닫기</v-btn>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
+  <v-dialog v-model="confirmDialog" max-width="350" min-height="100">
+    <v-card class="pa-2 d-flex">
+      <v-card-text class="otd-body-1 text-center">
+        <span class="otd-subtitle-1"> 정말 기록을 삭제하겠습니까? </span>
+        <div class="d-flex justify-center">
+          <v-btn
+            color="#ffe864"
+            @click="confirmYes"
+            class="btn_close w-50 otd-body-1 ma-1"
+            >삭제</v-btn
+          >
+          <v-btn
+            @click="confirmDialog = false"
+            class="btn_close w-50 otd-body-1 ma-1"
+            >닫기</v-btn
+          >
+        </div>
       </v-card-text>
     </v-card>
   </v-dialog>

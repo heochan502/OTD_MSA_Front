@@ -33,8 +33,10 @@ export const getExerciseRecordDetail = (recordId, params) => {
 };
 
 // 운동기록삭제
-export const deleteExerciseRecord = (recordId) => {
-  return axios.delete(BASE_URL, recordId).catch((e) => e.response);
+export const deleteExerciseRecord = (exerciseRecordId) => {
+  return axios
+    .delete(`${BASE_URL}?exercise_record_id=${exerciseRecordId}`)
+    .catch((e) => e.response);
 };
 
 // 운동종목가져오기

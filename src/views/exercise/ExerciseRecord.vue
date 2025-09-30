@@ -60,7 +60,6 @@ const calcMonthlyAvgKcal = computed(() => {
   const totalKcal = calcMonthlyTotalKcal.value;
   return totalKcal / countRecord.value;
 });
-console.log(calcMonthlyAvgKcal.value);
 </script>
 
 <template>
