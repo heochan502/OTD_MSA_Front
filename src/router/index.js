@@ -33,7 +33,7 @@ import PayCompleted from '@/views/pay/PayCompleted.vue';
 import PayFail from '@/views/pay/PayFail.vue';
 
 // 포인트샵
-import PointShop from '@/components/pointshop/PointShop.vue';
+import PointShop from '@/components/pointshop/PointItemCard.vue';
 
 //식단
 import MealMainView from '@/views/meal/MealMainView.vue';
