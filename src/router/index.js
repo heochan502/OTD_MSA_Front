@@ -37,6 +37,10 @@ import PointShop from '@/components/pointshop/PointShop.vue';
 
 //식단
 import MealMainView from '@/views/meal/MealMainView.vue';
+import MealDetailView from '@/views/meal/MealDetailView.vue';
+import MealRecordView from '@/views/meal/MealRecordView.vue'  
+import MealFoodSearchView from '@/views/meal/MealFoodSearchView.vue'
+import MealCustomAddView from '@/views/meal/MealCustomAdd.vue';
 
 // 운동
 import ExerciseMain from '@/views/exercise/ExerciseMain.vue';
@@ -44,7 +48,6 @@ import ExerciseRecord from '@/views/exercise/ExerciseRecord.vue';
 import ExerciseRecordForm from '@/views/exercise/ExerciseRecordForm.vue';
 import ExerciseRecordDetail from '@/views/exercise/ExerciseRecordDetail.vue';
 
-import MealDetailView from '@/views/meal/MealDetailView.vue';
 
 // 카테고리 라벨 맵
 const CATEGORY_LABEL = {
@@ -296,12 +299,20 @@ const router = createRouter({
     {
       path: '/meal/food-search',
       name: 'MealFoodSearchView',
-      component: () => import('@/views/meal/MealFoodSearchView.vue'),
+      component: MealFoodSearchView,
+      meta: { headerType: 'title', title: '식단 기록', showUserPanel: false },
     },
     {
       path: '/meal/record',
       name: 'MealRecordView',
-      component: () => import('@/views/meal/MealRecordView.vue'),
+      component: MealRecordView,
+      meta: { headerType: 'title', title: '식단 기록', showUserPanel: false },
+    },
+    {
+      path: '/meal/mealcustomadd',
+      name: 'MealCustomAddView',
+      component: MealCustomAddView,
+      meta: { headerType: 'title', title: '식단 기록', showUserPanel: false },
     },
     {
       path: '/admin',

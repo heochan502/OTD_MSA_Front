@@ -10,7 +10,7 @@ import Footer from './Footer.vue';
       <Breadcrumb />
       <!--  상단 내용 -->
     </div>
-    <div class="main-wrap">
+    <div class="main-wrap " >
       <router-view />
     </div>
     <!-- <Content />    컨텐츠 내용 -->

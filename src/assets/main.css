@@ -18,7 +18,7 @@ body,
 }
 
 .wrap {
-  margin: 30px 20px 30px 20px;
+  margin: 30px 20px 30px 20px ;
 }
 
 .otd-top-margin {
@@ -73,7 +73,7 @@ body,
 }
 .otd-button {
   font-size: 12px;
-  color: #ffffff;
+  color: #000000;
   font-weight: 600;
 }
 
