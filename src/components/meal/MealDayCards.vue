@@ -28,7 +28,7 @@ const mealInfo = ref([
     meal_day: '저녁',
     kcal: 0,
     check: false,
-    recorded: true,
+    recorded: false,
     img: mealImg('dinner'),
   },
   {
@@ -40,18 +40,18 @@ const mealInfo = ref([
   },
 ]);
 
-const toggleFasting = (index) => {
-  mealInfo.value[index].check = !mealInfo.value[index].check;
-  if (mealInfo.value[index].check) mealInfo.value[index].recorded = false;
+const toggleFasting = (i) => {
+  mealInfo.value[i].check = !mealInfo.value[i].check;
+  if (mealInfo.value[i].check) mealInfo.value[i].recorded = false;
 };
 
-const onTopIconClick = (index) => {
-  const item = mealInfo.value[index];
+const onTopIconClick = (i) => {
+  const item = mealInfo.value[i];
   if (item.recorded) {
     router.push({ name: 'MealRecordView', query: { meal: item.meal_day } });
   } else if (!item.check) {
     item.recorded = true;
-    router.push({ name: 'MealFoodSearchView', query: { meal: item.meal_day  } });
+    router.push({ name: 'MealFoodSearchView', query: { meal: item.meal_day } });
   }
 };
 </script>
