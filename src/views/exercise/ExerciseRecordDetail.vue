@@ -15,6 +15,7 @@ import {
 import { formatTimeKR, formatDateISO } from "@/utils/dateTimeUtils";
 import { calcDuration } from "@/utils/exerciseUtils";
 import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
+import BarChart from "@/components/exercise/BarChart.vue";
 
 dayjs.extend(isoWeek);
 
@@ -130,7 +131,6 @@ watch(
       state.weeklyRecords = res.data;
     }
   }
-  
 );
 
 // 삭제버튼
@@ -199,7 +199,7 @@ const confirmYes = async () => {
             </div>
             <div v-if="hasReps" class="item">
               <span>반복 횟수</span>
-              <span class="otd-subtitle-2">{{ state.record.reps }}rep</span>
+              <span class="otd-subtitle-2">{{ state.record.reps }}회</span>
             </div>
           </div>
         </div>
@@ -210,11 +210,17 @@ const confirmYes = async () => {
         <span class="otd-subtitle-1">주간 운동 시간</span>
       </div>
       <div>
-        <WeeklyChart
-          :selectedDate="selectedDate"
+        <!-- <WeeklyChart
+          :selectedDate="state.record.startAt"
           :records="state.weeklyRecords"
           label="duration"
-        />
+        /> -->
+        <BarChart
+          :selectedDate="state.record.startAt"
+          :records="state.weeklyRecords"
+          label="duration"
+          class="mt-2"
+        ></BarChart>
       </div>
     </div>
   </div>
