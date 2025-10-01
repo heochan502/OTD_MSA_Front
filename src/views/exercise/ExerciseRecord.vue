@@ -103,7 +103,7 @@ const calcMonthlyAvgKcal = computed(() => {
       <router-link to="/exercise/record_form">
         <img
           class="btn_add"
-          src="\public\image\exercise\btn_add.png"
+          src="\image\exercise\btn_add.png"
           alt="운동기록 추가하기 버튼"
         />
       </router-link>
