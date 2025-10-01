@@ -32,21 +32,23 @@ ChartJS.register(
 
 const props = defineProps({
   selectedDate: {
+    // 주차 기준이 되는 날자 (선택 날짜 1개)
     type: String,
     required: true,
+    default: "",
   },
+  records: { type: Array, default: () => [] }, // 서버에서 내린 기록들
   selectedField: String,
   fields: Array,
   label: String,
-  logs: { type: Array, default: () => [] },
 });
 
 // 해당 주차 범위
 const weekRange = computed(() => {
   const base = dayjs(props.selectedDate);
   return {
-    start: base.startOf("isoWeek"), // 월요일
-    end: base.endOf("isoWeek"), // 일요일
+    startOfWeek: base.startOf("isoWeek"), // 월요일
+    endOfWeek: base.endOf("isoWeek"), // 일요일
   };
 });
 
@@ -61,9 +63,9 @@ const weekRange = computed(() => {
 //   });
 // });
 
-const weeklyLogs = computed(() => {
-  return props.logs.filter((log) => {
-    const day = dayjs(log.healthlogDatetime || log.exerciseDatetime);
+const weeklyRecords = computed(() => {
+  return props.records.filter((records) => {
+    const day = dayjs(records.startAt);
     return (
       day.isAfter(weekRange.value.start.subtract(1, "day")) &&
       day.isBefore(weekRange.value.end.add(1, "day"))
@@ -71,18 +73,17 @@ const weeklyLogs = computed(() => {
   });
 });
 
-// 건강 차트
 // 주차 데이터 매핑 (월~일, 빈 값은 null)
 const weeklyData = computed(() => {
   const days = Array(7).fill(0);
   let lastValue = null;
 
-  weeklyLogs.value.forEach((log) => {
-    const day = dayjs(log.healthlogDatetime || log.exerciseDatetime);
+  weeklyRecords.value.forEach((records) => {
+    const day = dayjs(records.startAt);
     const weekday = day.isoWeekday(); // 1=월 ~ 7=일
 
     const fieldKey = props.label || props.selectedField;
-    let value = log[fieldKey];
+    let value = records[fieldKey];
 
     if (value != null) {
       days[weekday - 1] = value;
@@ -169,8 +170,9 @@ const chartOptions = {
   },
 };
 
-
-
+onMounted(() => {
+  console.log("프롭스", props);
+});
 </script>
 
 <template>

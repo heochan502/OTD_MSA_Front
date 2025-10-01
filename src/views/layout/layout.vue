@@ -10,7 +10,7 @@ import Footer from './Footer.vue';
       <Breadcrumb />
       <!--  상단 내용 -->
     </div>
-    <div class="main-wrap">
+    <div class="main-wrap " >
       <router-view />
     </div>
     <!-- <Content />    컨텐츠 내용 -->
@@ -28,7 +28,7 @@ import Footer from './Footer.vue';
 }
 /* 공통 화면 좌우 여백 */
 .main-wrap {
-  margin-top: 20px;
+  // margin-top: 20px;
   // position: relative;
   /* ✅ v-dialog 기준 */
   flex: 1;

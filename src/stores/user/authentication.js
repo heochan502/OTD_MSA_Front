@@ -16,6 +16,7 @@ export const useAuthenticationStore = defineStore(
         point: 0,
         xp: 0,
         challengeRole: '',
+        userRole: '',
       },
       isSigned: false,
     });

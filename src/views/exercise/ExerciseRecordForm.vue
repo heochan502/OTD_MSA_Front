@@ -224,7 +224,7 @@ const cancelYes = () => {
   </div>
 
   <!-- 모달창 -->
-  <v-dialog v-model="saveDialog" max-width="400">
+  <v-dialog v-model="saveDialog" max-width="380" min-height="100">
     <v-card>
       <v-card-title> 저장 </v-card-title>
       <v-card-text>운동 기록을 저장하시겠습니까?</v-card-text>

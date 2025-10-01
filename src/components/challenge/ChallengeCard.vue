@@ -14,7 +14,7 @@ const FILE_URL = import.meta.env.VITE_BASE_URL;
 </script>
 
 <template>
-  <div class="challenge-card">
+  <div class="challenge-card otd-box-shadow">
     <img
       :src="`${FILE_URL}${props.image}`"
       :alt="`${props.name}`"
@@ -32,8 +32,6 @@ const FILE_URL = import.meta.env.VITE_BASE_URL;
   position: relative;
   width: 168px;
   height: 121px;
-  border-radius: 10px;
-  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   margin-bottom: 15px;
   .challenge-img {
