@@ -36,18 +36,40 @@ axios.interceptors.response.use(
   },
   async (err) => {
     console.log('err: ', err);
-     const status = err.response.status ?? 0;
+
+    //  ADD 1) 네트워크/타임아웃 등 response 자체가 없을 때
+    if (!err.response) {
+      const messageModalStore = useMessageModalStore();
+      messageModalStore.setMessage('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+      return Promise.reject(err);
+    }
+
     if (err.response) {
       console.log('err.response : ', err.response);
+
+      //  MOVE: status는 여기(안전)
+      const status = err.response.status ?? 0;
+
       const authenticationStore = useAuthenticationStore();
-      if (err.config.url === `${BASE_URL}/user/reissue` && status === 500) {
+
+      // ADD 2) 재발급 API 자체는 어떤 코드든 재시도 금지
+      const isReissue = err.config?.url?.includes('/user/reissue');
+      if (isReissue) {
         authenticationStore.signOut();
-      } else if ((status === 403 || status === 401 || status === 500) && authenticationStore.state.isSigned) {
-        //403 UnAuthorized 에러인데 FE 로그인 처리 되어 있다면
-        console.log("실행되는거 맞냐");
+        return Promise.reject(err);
+      }
 
-        await reissue(); //AccessToken 재발행 시도
+      // 기존 분기 유지 +  무한루프 방지 (_retry)
+      if ((status === 403 || status === 401 || status === 500) && authenticationStore.state.isSigned) {
+        // ADD 3) 한 번만 재발급/재요청
+        if (err.config._retry) {
+          return Promise.reject(err);
+        }
+        err.config._retry = true;
 
+        console.log('실행되는거 맞냐');
+
+        await reissue(); // AccessToken 재발행 시도 (쿠키 기반이면 헤더 갱신 불필요)
         // 중단된 요청을(에러난 요청)을 토큰 갱신 후 재요청
         return await axios.request(err.config);
       } else {
@@ -58,6 +80,9 @@ axios.interceptors.response.use(
         messageModalStore.setMessage(message);
       }
     }
+
+    //  ADD 4) 항상 reject로 마무리
+    return Promise.reject(err);
   }
 );
 // console.log("Axios BaseURL:", axios.defaults.baseURL);
