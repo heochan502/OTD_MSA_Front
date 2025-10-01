@@ -1,27 +1,87 @@
 <script setup>
-import { computed, ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { computed, onMounted, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useCommunityStore } from '@/stores/community/community';
+import CommentSection from '@/components/community/CommentSection.vue';
 
 const route = useRoute();
+const router = useRouter();
 const store = useCommunityStore();
-const routeId = computed(() => String(route.params.id));
 
-const post = computed(() => store.getById(routeId.value)); // 정규화된 객체( id / author / time ... )
+const routeId = computed(() => String(route.params.id));
+const post = computed(() => store.getById(routeId.value));
 
 onMounted(() => {
   if (!post.value) store.loadPostDetail(routeId.value);
 });
 
+watch(routeId, (id) => {
+  if (!store.getById(id)) store.loadPostDetail(id);
+});
 
-const myComment = ref('');
-const like = () => {
-  if (post.value) post.value.likes++;
+const like = async () => {
+  try {
+    await store.toggleLike(routeId.value);
+  } catch {
+    alert('좋아요 처리에 실패했습니다.');
+  }
 };
-const addComment = () => {
-  if (!post.value || !myComment.value.trim()) return;
-  post.value.comments++;
-  myComment.value = '';
+
+const myId = computed(
+  () =>
+    store.me?.memberNoLogin ??
+    store.currentUserId ??
+    store.signedUserId ??
+    store.userId ??
+    null
+);
+
+const myNick = computed(
+  () => store.me?.nickName ?? store.me?.nickname ?? store.me?.name ?? null
+);
+
+const postOwnerId = computed(
+  () =>
+    post.value?.authorId ??
+    post.value?.memberNoLogin ??
+    post.value?.userId ??
+    null
+);
+
+const postOwnerNick = computed(
+  () => post.value?.author ?? post.value?.writer ?? null
+);
+
+const isOwner = computed(() => {
+  if (!post.value) return false;
+  if (myId.value != null && postOwnerId.value != null) {
+    return String(myId.value) === String(postOwnerId.value);
+  }
+  if (myNick.value && postOwnerNick.value) {
+    return String(myNick.value) === String(postOwnerNick.value);
+  }
+  return false;
+});
+
+const removePost = async () => {
+  if (!post.value) return;
+  const prevCategory = post.value.category || 'free';
+  const ok = confirm('이 게시글을 삭제할까요?');
+  if (!ok) return;
+
+  try {
+    await store.removePost(routeId.value);
+    router.replace({
+      name: 'CommunityCategory',
+      params: { category: prevCategory },
+    });
+  } catch {
+    alert('삭제에 실패했습니다.');
+  }
+};
+
+const editPost = () => {
+  router.push({ name: 'CommunityEdit', params: { id: routeId.value } });
 };
 </script>
 
@@ -36,29 +96,28 @@ const addComment = () => {
           post.author
         }}</span>
         <span class="otd-body-3">· {{ post.time }}</span>
-        <span class="sep">|</span>
-        <button class="link danger otd-body-3">삭제하기</button>
+
+        <template v-if="isOwner">
+          <span class="sep">|</span>
+          <button class="link otd-body-3" @click="editPost">수정하기</button>
+          <span class="sep">|</span>
+          <button class="link danger otd-body-3" @click="removePost">
+            삭제하기
+          </button>
+        </template>
       </div>
 
-      <article class="content otd-body-1">{{ post.content }}</article>
+      <article class="content otd-body-1">
+        {{ post.content }}
+      </article>
 
       <div class="actions otd-top-margin">
         <button class="btn-ghost otd-body-3" @click="like">
           ❤️ {{ post.likes }}
         </button>
-        <span class="otd-body-3">댓글 {{ post.comments }}개</span>
       </div>
 
-      <div class="comment-box otd-top-margin">
-        <input
-          class="input otd-body-2"
-          v-model="myComment"
-          placeholder="댓글을 입력하세요"
-        />
-        <button class="btn btn-primary otd-button" @click="addComment">
-          등록
-        </button>
-      </div>
+      <CommentSection :post-id="routeId" class="otd-top-margin" />
     </section>
 
     <section v-else class="detail">
@@ -66,78 +125,3 @@ const addComment = () => {
     </section>
   </div>
 </template>
-
-<style scoped>
-.detail {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #777;
-}
-.avatar {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #eaeaea;
-}
-.link {
-  background: none;
-  border: none;
-  color: #666;
-  cursor: pointer;
-}
-.link.danger {
-  color: #ff595e;
-}
-.sep {
-  color: #ddd;
-  margin: 0 4px;
-}
-.content {
-  white-space: pre-wrap;
-  line-height: 1.6;
-  color: #303030;
-}
-
-.actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.btn-ghost {
-  height: 36px;
-  padding: 0 12px;
-  border-radius: 999px;
-  border: 1px solid #e5e5e5;
-  background: #fff;
-  cursor: pointer;
-}
-
-.comment-box {
-  display: flex;
-  gap: 8px;
-}
-.input {
-  flex: 1;
-  height: 40px;
-  border: 1px solid #e5e5e5;
-  border-radius: 12px;
-  padding: 0 12px;
-}
-.btn {
-  height: 40px;
-  padding: 0 14px;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-}
-.btn-primary {
-  background: #00d5df;
-  color: #fff;
-}
-</style>

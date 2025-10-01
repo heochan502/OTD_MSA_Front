@@ -2,8 +2,8 @@ import axios from "@/services/httpRequester";
 
 const BASE_URL = "/body_composition";
 
-export const getLastestBodyComposition = (userId) => {
-  return axios.get(`${BASE_URL}/lastest`, { userId }).catch((e) => e.response);
+export const getLastestBodyComposition = () => {
+  return axios.get(`${BASE_URL}/lastest`).catch((e) => e.response);
 };
 
 // 체성분 변화 그래프를 위한 데이터

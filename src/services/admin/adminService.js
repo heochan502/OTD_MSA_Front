@@ -19,3 +19,11 @@ export const getUserDetail = (userId) => {
     .get(`${BASE_URL}/user/detail/${userId}`)
     .catch((e) => e.response);
 };
+
+export const getGender = () => {
+  return axios.get(`${BASE_URL}/gender`).catch((e) => e.response);
+};
+
+export const getAgeCount = () => {
+  return axios.get(`${BASE_URL}/agegroup`).catch((e) => e.response);
+};
