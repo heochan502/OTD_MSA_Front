@@ -7,14 +7,14 @@
 <div class="settings-section">
       <h3 class="section-title">정보수정</h3>
       <div class="settings-list">
-        <router-link to="/user/signal" class="settings-item">
+        <router-link to="/user/nickname" class="settings-item">
           <div class="settings-icon"></div>
           <span>닉네임수정</span>
           <div class="arrow">›</div>
         </router-link>
     </div>
     <div class="settings-list">
-        <router-link to="/user/signal" class="settings-item">
+        <router-link to="/user/email" class="settings-item">
           <div class="settings-icon"></div>
           <span>이메일수정</span>
           <div class="arrow">›</div>
@@ -23,7 +23,7 @@
       <div class="settings-list">
               <router-link to="/user/signal" class="settings-item">
                 <div class="settings-icon"></div>
-                <span>비밀번호 재발행</span>
+                <span>비밀번호 재설정</span>
                 <div class="arrow">›</div>
               </router-link>
             </div>

@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, watch, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { join, checkUidDuplicate } from '@/services/user/userService';
+import { join, checkUidDuplicate, checkNicknameDuplicate } from '@/services/user/userService';
 
 const router = useRouter();
 const basePath = import.meta.env.VITE_BASE_URL;
@@ -314,7 +314,7 @@ const resetIdValidation = () => {
 
 // 닉네임중복검사
 const checkNicknameDuplicateAction = async () => {
-  const nickname = additionalInfo.value.nickname; // accountInfo -> additionalInfo로 수정
+  const nickname = additionalInfo.value.nickname; 
 
   if (!nickname) {
     return;
@@ -330,7 +330,7 @@ const checkNicknameDuplicateAction = async () => {
 
   try {
     isLoading.value = true
-    const response = await checkUidDuplicate(nickname)  // import된 서비스 함수 호출
+    const response = await checkNicknameDuplicate(nickname) 
     
     validation.value.nickname.checked = true
     validation.value.nickname.available = response.data.result.isAvailable
@@ -363,7 +363,7 @@ const resetNicknameValidation = () => {
   }
 };
 
-// 워처 설정
+
 watch(
   () => accountInfo.value.uid,
   (newValue) => {

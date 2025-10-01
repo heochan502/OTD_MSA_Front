@@ -1,7 +1,7 @@
 import axios from '@/services/httpRequester';
 
 
-const path = `${import.meta.env.VITE_BASE_URL}/email`;
+const path = `/email`;
 
 // 이메일 인증관련
 export const sendEmailVerification = (data) =>
@@ -22,3 +22,7 @@ export const verifyPasswordResetCode = (data) =>
 
 export const resetPassword = (data) =>
   axios.post(`${path}/reset-password`, data);
+
+//업데이트 이메일
+export const updateEmail = (email) => 
+  axios.patch(`${path}/email-update`, { email });
