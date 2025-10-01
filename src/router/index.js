@@ -36,6 +36,7 @@ import PayFail from '@/views/pay/PayFail.vue';
 import PointShopListView from '@/views/point/PointShopListView.vue';
 import PointUserPurchaseHistoryView from '@/views/point/PointUserPurchaseHistoryView.vue';
 import PointUserView from '@/views/point/PointUserView.vue';
+import PointPurchaseHistoryTable from '@/components/pointshop/PointPurchaseHistoryTable.vue';
 
 //식단
 import MealMainView from '@/views/meal/MealMainView.vue';
@@ -251,19 +252,19 @@ const router = createRouter({
       component: PayFail,
     },
     {
-    path: '/point/shop',
-    name: 'PointShopList',
-    component: PointShopListView,
+      path: '/pointshop',
+      name: 'PointShopList',
+      component: PointShopListView,
     },
     {
-    path: '/point/history',
-    name: 'PointPurchaseHistory',
-    component: PointUserPurchaseHistoryView,
+      path: '/point/history',
+      name: 'PointPurchaseHistory',
+      component: PointPurchaseHistoryTable,
     },
     {
-    path: '/point/user',
-    name: 'PointUserStatus',
-    component: PointUserView,
+      path: '/point/user',
+      name: 'PointUserView',
+      component: PointUserView,
     },
     {
       path: '/meal',
