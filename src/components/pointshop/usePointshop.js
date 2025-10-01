@@ -6,7 +6,7 @@ import PointPurchaseService from '@/services/pointshop/PointPurchaseService';
 import PointShopService from '@/services/pointshop/PointShopService';
 
 const userPoints = ref(0);
-const purchasedItems = ref([]);
+const purchasedItemIds = ref([]);
 const allItems = ref([]);
 
 export function usePointShop() {
@@ -36,7 +36,7 @@ export function usePointShop() {
   const fetchPurchasedItems = async () => {
     const res = await PointPurchaseService.getUserPurchaseHistory();
     if (res?.status === 200) {
-      purchasedItems.value = res.data.map(p => p.itemId);
+      purchasedItemIds.value = res.data.map(p => p.itemId);
     } else {
       alert('구매 내역을 불러올 수 없습니다.');
     }
@@ -47,7 +47,7 @@ export function usePointShop() {
     const ok = confirm(`${item.name} (${item.price}포인트)를 구매하시겠습니까?`);
     if (!ok) return;
 
-    if (purchasedItems.value.includes(item.id)) {
+    if (purchasedItemIds.value.includes(item.id)) {
       alert('이미 구매한 아이템입니다.');
       return;
     }
@@ -62,7 +62,7 @@ export function usePointShop() {
 
     const res = await PointPurchaseService.createPurchase(item.id);
     if (res?.status === 200) {
-      purchasedItems.value.push(item.id);
+      purchasedItemIds.value.push(item.id);
       userPoints.value -= itemPrice;
       alert('구매가 완료되었습니다.');
     } else {
@@ -71,12 +71,12 @@ export function usePointShop() {
   };
 
   const isPurchased = (itemId) => {
-    return purchasedItems.value.includes(itemId);
+    return purchasedItemIds.value.includes(itemId);
   };
 
   return {
     userPoints,
-    purchasedItems,
+    purchasedItemIds,
     allItems,
     fetchAllItems,
     fetchUserPoints,
