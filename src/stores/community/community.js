@@ -1,4 +1,3 @@
-// stores/community/community.js
 import { defineStore } from 'pinia';
 import {
   fetchPosts,
@@ -111,14 +110,15 @@ export const useCommunityStore = defineStore('community', {
       },
   },
 
-  // stores/community/community.js (일부)
+  // actions
   actions: {
+    // 목록
     async loadPosts(page = 1, size = 10, categoryKey) {
       this.loading = true;
       this.error = null;
       try {
         const page0 = Math.max(0, Number(page) - 1);
-        const res = await fetchPosts(page0, size, categoryKey); // ★ 전달
+        const res = await fetchPosts(page0, size, categoryKey); // ★ categoryKey 전달
         const raw = res.data?.content ?? res.data ?? [];
         this.posts = Array.isArray(raw) ? raw : [];
         this.page = page;
@@ -271,7 +271,11 @@ export const useCommunityStore = defineStore('community', {
         const auth = useAuthenticationStore();
         const me = auth?.state?.signedUser ?? null;
 
-        const res = await toggleLike(postId, me?.userId || 0);
+        if (!me?.userId || me.userId <= 0) {
+          throw new Error('로그인이 필요합니다.');
+        }
+
+        const res = await toggleLike(postId, me.userId);
         const likeCount = res.data?.likeCount ?? res.data?.likes ?? null;
         const liked = res.data?.liked ?? undefined;
         const asNum = (v) => Number(v ?? 0);
@@ -294,6 +298,7 @@ export const useCommunityStore = defineStore('community', {
         }
       } catch (err) {
         this.error = err;
+        throw err;
       }
     },
 
