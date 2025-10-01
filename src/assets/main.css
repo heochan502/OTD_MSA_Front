@@ -95,6 +95,11 @@ body,
   box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
 }
 
+.otd-box-shadow{
+  border-radius: 10px;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+}
+
 .otd-shadow {
   box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
 }
