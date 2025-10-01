@@ -1,9 +1,8 @@
 <script setup>
 import { ref, reactive, onMounted } from "vue";
-import { useRouter } from "vue-router";
 import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
 import ExerciseRecordList from "@/components/exercise/ExerciseRecordList.vue";
-import BodyCompositionSummary from "@/components/exercise/BodyCompositionSummary.vue";
+import BodyCompositionSummary from "@/components/BodyComposition/BodyCompositionSummary.vue";
 import WeeklyCalendar from "@/components/exercise/WeeklyCalendar.vue";
 import { getExerciseRecordList } from "@/services/exercise/exerciseService";
 import { formatDateISO, formatDateYearMonthISO } from "@/utils/dateTimeUtils";
@@ -30,10 +29,13 @@ const onDateClick = async (date) => {
     row_per_page: 2,
     type: "daily",
     date: date, // YYYY-MM-DD 형태
-    memberId: 1,
   });
 
   const res = await getExerciseRecordList(params);
+  if (res === undefined || res.status !== 200) {
+    alert(`에러발생? ${res.status}`);
+    return;
+  }
   exerciseRecordStore.records = res.data;
 };
 </script>
@@ -41,7 +43,7 @@ const onDateClick = async (date) => {
 <template>
   <div class="wrap content_wrap">
     <div class="weekly_calendar">
-      <WeeklyCalendar @click-date="onDateClick" />
+      <WeeklyCalendar :recordDate="selectedDate" @click-date="onDateClick" />
     </div>
     <div class="exercise_report">
       <div class="subtitle ga-1">
@@ -70,7 +72,7 @@ const onDateClick = async (date) => {
       <div class="subtitle">
         <div class="d-flex align-center ga-1 mb-3">
           <span class="otd-subtitle-1">체성분</span>
-          <img class="btn_add" :src="btnAdd" alt="체성분 추가 버튼" />
+          <!-- <img class="btn_add" :src="btnAdd" alt="체성분 추가 버튼" /> -->
         </div>
         <span class="otd-body-2">변화 보기</span>
       </div>
