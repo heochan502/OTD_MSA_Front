@@ -1,49 +1,81 @@
 <script setup>
-import { ref, computed, reactive } from 'vue';
+import { ref, computed, reactive, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+
+import { useMealSelectedStore } from '@/stores/meal/mealStore.js';
+
+const selectedFoods = useMealSelectedStore();
 
 const BASE = import.meta.env.BASE_URL || '/';
 const route = useRoute();
 const router = useRouter();
 
 // 전달된 음식 목록
-const foods = ref(history.state?.foods || []);
+// const foods = selectedFoods.selectedFoods.value ;
+const foods =
+  Array.isArray(selectedFoods?.selectedFoods?.value)
+    ? selectedFoods.selectedFoods.value
+    : Object.values(selectedFoods?.selectedFoods?.value ?? {}); // ✅ null/undefined 방어
 
 // 합계 kcal & 개수
-const totalKcal = computed(() => foods.value.reduce((sum, food) => sum + (foof.kcal || 0), 0));
-const foodCount = computed(() => foods.value.length);
+// const totalKcal = computed(() => foods.selectedFood.value.reduce((sum, food) => sum + (foof.kcal || 0), 0));
+// const foodCount = computed(() => foods.value.length);
+
+// const totalKcal = foods.reduce((sum, food) => sum + (Number(food.kcal) || 0), 0);
+const foodCount = foods.value?.length || 0;
+
+const totalKcal = computed(() =>
+  foods.value.reduce((sum, food) => sum + (Number(food.kcal) || 0), 0)
+);
+const totalCarb = computed(() =>
+  foods.value.reduce((sum, food) => sum + (Number(food.carbohydrate) || 0), 0)
+);
+const totalFat = computed(() =>
+  foods.value.reduce((sum, food) => sum + (Number(food.fat) || 0), 0)
+);
+const totalProtein = computed(() =>
+  foods.value.reduce((sum, food) => sum + (Number(food.protein) || 0), 0)
+);
+
 
 // 식사 아이콘 (아침/점심/저녁 매핑)
-// 만약 값이 없으면 기본값은 점시으로 들어간다 
+// 만약 값이 없으면 기본값은 점시으로 들어간다
 const mealKey = (route.query.meal || '점심').toString();
 const mealIconMap = { 아침: 'breakfast', 점심: 'lunch', 저녁: 'dinner' };
 const mealImg = (name) => `${BASE}image/meal/${name}.png`;
 const mealIcon = computed(() => mealImg(mealIconMap[mealKey] || 'lunch'));
 
 // 삭제
-const removeFood = (i) => foods.value.splice(i, 1);
+const removeFood = (index) => foods.value.splice(index, 1);
 
 // 매크로 g
 const grams = reactive({ carb: 28.5, protein: 53.2, fat: 45.9 });
 
 // g → % (막대 폭)
 const macroPct = computed(() => {
-  const sum = grams.carb + grams.protein + grams.fat || 1;
+  const sum = totalCarb + totalProtein + totalFat || 1;
   return {
-    carb: Math.round((grams.carb / sum) * 100),
-    protein: Math.round((grams.protein / sum) * 100),
-    fat: Math.round((grams.fat / sum) * 100),
+    carb: Math.round((totalCarb / sum) * 100),
+    protein: Math.round((totalProtein / sum) * 100),
+    fat: Math.round((totalFat / sum) * 100),
   };
 });
 
+onMounted(async () => {
+  console.log('피니아 데이터', selectedFoods.selectedFoods.value);
+  console.log('토탕', totalKcal);
+});
 
-const clickAddFood = ()=>{
-  router.push({ name: 'MealFoodSearchView', query: { meal: route.query.meal  } });
-}
+const clickAddFood = () => {
+  router.push({
+    name: 'MealFoodSearchView',
+    query: { meal: route.query.meal },
+  });
+};
 </script>
 
 <template>
-  <div class="page ">
+  <div class="page">
     <div class="wrap warp-top">
       <!-- 상단 카테고리 -->
       <span class="otd-category d-flex align-center justify-center">
@@ -61,7 +93,10 @@ const clickAddFood = ()=>{
           <div class="seg carb" :style="{ width: macroPct.carb + '%' }"></div>
         </div>
         <div class="bar">
-          <div class="seg protein" :style="{ width: macroPct.protein + '%' }"></div>
+          <div
+            class="seg protein"
+            :style="{ width: macroPct.protein + '%' }"
+          ></div>
         </div>
         <div class="bar">
           <div class="seg fat" :style="{ width: macroPct.fat + '%' }"></div>
@@ -70,8 +105,12 @@ const clickAddFood = ()=>{
 
       <!-- g 표기 -->
       <div class="grams">
-        <div class="g"><span class="dot carb"></span>순탄수 {{ grams.carb }}g</div>
-        <div class="g"><span class="dot protein"></span>단백질 {{ grams.protein }}g</div>
+        <div class="g">
+          <span class="dot carb"></span>순탄수 {{ grams.carb }}g
+        </div>
+        <div class="g">
+          <span class="dot protein"></span>단백질 {{ grams.protein }}g
+        </div>
         <div class="g"><span class="dot fat"></span>지방 {{ grams.fat }}g</div>
       </div>
 
@@ -79,7 +118,7 @@ const clickAddFood = ()=>{
       <div class="food-list otd-top-margin">
         <div v-for="(food, idx) in foods" :key="food.name" class="food-item">
           <div class="fi-left">
-            <div class="fi-name">{{ food.name }}</div>
+            <div class="fi-name">{{ food.foodName }}</div>
             <div class="fi-amount">{{ food.amount }}</div>
           </div>
           <div class="fi-right">
@@ -91,7 +130,9 @@ const clickAddFood = ()=>{
 
       <!-- 버튼 -->
       <div class="btn-group otd-top-margin">
-        <button class="otd-button add-btn" @click="clickAddFood">음식 추가</button>
+        <button class="otd-button add-btn" @click="clickAddFood">
+          음식 추가
+        </button>
         <button class="otd-button complete-btn">식단 기록 완료</button>
       </div>
     </div>
@@ -101,11 +142,16 @@ const clickAddFood = ()=>{
 <style scoped>
 /* 페이지 배경 */
 .page {
-
 }
 
-.meal-img { height: 32px; width: 32px; margin-right: 6px; }
-.warp-top { margin-top: 20px !important; }
+.meal-img {
+  height: 32px;
+  width: 32px;
+  margin-right: 6px;
+}
+.warp-top {
+  margin-top: 20px !important;
+}
 
 .otd-category {
   display: flex;
@@ -121,7 +167,8 @@ const clickAddFood = ()=>{
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px; height: 22px;
+  width: 22px;
+  height: 22px;
   border-radius: 999px;
   background: #efefef;
   font-weight: 700;
@@ -147,10 +194,18 @@ const clickAddFood = ()=>{
   background: #eee;
   overflow: hidden;
 }
-.seg { height: 100%; }
-.carb { background: #ffb44d; }
-.protein { background: #a4db67; }
-.fat { background: #7fb8ff; }
+.seg {
+  height: 100%;
+}
+.carb {
+  background: #ffb44d;
+}
+.protein {
+  background: #a4db67;
+}
+.fat {
+  background: #7fb8ff;
+}
 
 /* g 표기 */
 .grams {
@@ -160,40 +215,93 @@ const clickAddFood = ()=>{
   color: #444;
   font-size: 14px;
 }
-.g { display: flex; align-items: center; gap: 6px; }
+.g {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 .dot {
   display: inline-block;
-  width: 6px; height: 6px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
 }
-.dot.carb { background: #ffb44d; }
-.dot.protein { background: #a4db67; }
-.dot.fat { background: #7fb8ff; }
+.dot.carb {
+  background: #ffb44d;
+}
+.dot.protein {
+  background: #a4db67;
+}
+.dot.fat {
+  background: #7fb8ff;
+}
 
 /* 음식 리스트: 구분선 스타일 */
-.food-list { margin-top: 16px; background: #fff; border-radius: 16px; overflow: hidden; }
+.food-list {
+  margin-top: 16px;
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+}
 .food-item {
-  display: flex; justify-content: space-between; align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 14px 16px;
   border-bottom: 1px solid #f0f0f0;
 }
-.food-item:last-child { border-bottom: none; }
-.fi-left { display: flex; flex-direction: column; }
-.fi-name { font-weight: 700; }
-.fi-amount { font-size: 12px; color: #777; margin-top: 2px; }
-.fi-right { display: flex; align-items: center; gap: 8px; }
-.fi-kcal { font-weight: 700; }
+.food-item:last-child {
+  border-bottom: none;
+}
+.fi-left {
+  display: flex;
+  flex-direction: column;
+}
+.fi-name {
+  font-weight: 700;
+}
+.fi-amount {
+  font-size: 12px;
+  color: #777;
+  margin-top: 2px;
+}
+.fi-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.fi-kcal {
+  font-weight: 700;
+}
 .remove-btn {
-  border: none; background: none; cursor: pointer;
-  color: #999; font-size: 16px; line-height: 1;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #999;
+  font-size: 16px;
+  line-height: 1;
 }
 
 /* 버튼들 */
-.btn-group { display: flex; gap: 12px; margin-top: 18px; }
-.otd-button {
-  flex: 1; padding: 12px 16px; border: none; border-radius: 999px;
-  font-weight: 700; cursor: pointer;
+.btn-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
 }
-.add-btn { background: #ffe864; color: #303030; }
-.complete-btn { background: #3b3b3b; color: #fff; }
+.otd-button {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.add-btn {
+  background: #ffe864;
+  color: #303030;
+}
+.complete-btn {
+  background: #3b3b3b;
+  color: #fff;
+}
 </style>

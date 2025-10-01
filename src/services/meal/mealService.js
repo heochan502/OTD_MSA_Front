@@ -14,3 +14,5 @@ export const getFood = async (foodName) => {
 //  console.log('json', res.data);
     return res.data;
 }
+
+

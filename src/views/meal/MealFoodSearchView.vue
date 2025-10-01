@@ -1,11 +1,11 @@
 <script setup>
-import { ref, computed, reactive, watch } from 'vue';
+import { ref, computed, reactive, watch,  } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { debounce, flatMapDepth } from 'lodash';
 import { getFood } from '@/services/meal/mealService';
 import { checkDuplicateUser } from '@/services/user/userService';
 
-import {useMealSelectedDayStore} from '@/stores/meal/mealStore.js'
+import {useMealSelectedStore} from '@/stores/meal/mealStore.js'
 
 import MealCustomFood from '@/components/meal/MealCustomFood.vue'
 
@@ -13,7 +13,7 @@ import checkOn from '@/assets/img/meal/meal_search_check.png'
 import checkOff from '@/assets/img/meal/meal_search_default.png'
 
 
-const selectedDay = useMealSelectedDayStore();
+const selectedDay = useMealSelectedStore();
 
 
 const router = useRouter();
@@ -214,7 +214,6 @@ const addToList = () => {
 // 음식 선택/해제
 const toggleSelect = (food) => {
 
-
   console.log("클릭중" , food);
 
   const foodInfo = food;
@@ -232,7 +231,6 @@ if (!selected.value.some((item) => item.foodDbId === foodInfo.foodDbId)) {
     sugar: foodInfo.sugar(foodInfo.amount / 100),
     natrium: foodInfo.natrium(foodInfo.amount / 100),
     amount: foodInfo.amount,
-    
   });
   foodInfo.checked = true;
 }
@@ -263,15 +261,22 @@ const menuOpen = ref(false);
 //데이터 입력 받고 정리 하는곳
 const itemList = ref([]);
 
-//  확정 버튼 → 식단 메인으로 이동
+
+
+//  확정 버튼 → 식단 저장 화면으로 이동
 const goRecord = () => {
+  selectedDay.selectedFoods.value = [ ...selected.value];
+
+
+
+
   router.push({
-    name: 'MealMainView', // 라우트 이름 그대로 사용
+    name: 'MealRecordView', // 라우트 이름 그대로 사용
     query: {
       meal: route.query.meal || '', // 어떤 끼니에서 왔는지(옵션)
       recorded: '1', // 기록 완료 신호(옵션)
     },
-    // state: { foods: selected.value }  // 필요하면 상태로 함께 전달
+  
   });
 };
 
@@ -436,8 +441,8 @@ const frameEl = ref(null); // 모달을 붙일 프레임
         </div>
 
 
-        <div class="layout-frame" ref="frameEl">
-          <MealCustomFood v-model:open="customSheet" :attach="frameEl" @submit="customAddToList" />
+        <div class="layout-frame" >
+          <MealCustomFood v-model:open="customSheet"  @submit="customAddToList" />
         </div>
       </div>
     </v-dialog>
