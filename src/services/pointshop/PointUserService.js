@@ -1,28 +1,29 @@
 import axios from 'axios';
 
-axios.defaults.baseURL = '/api/OTD/pointshop';
+axios.defaults.baseURL = '/api/OTD/pointshop/user';
 axios.defaults.withCredentials = true;
 
 export default {
-  async fetchPurchaseHistory() {
+  async getUserPoints() {
     try {
-      return await axios.get('/user/purchases');
+      const res = await axios.get('/balance');
+      return res;
     } catch (e) {
       return e.response;
     }
   },
 
-  async createPurchase(itemId) {
+  async chargePoints(amount) {
     try {
-      return await axios.post(`/purchase/${pointItemName}`);
+      return await axios.post('/charge', { amount });
     } catch (e) {
       return e.response;
     }
   },
 
-  async deletePurchase(purchaseId) {
+  async deductPoints(amount) {
     try {
-      return await axios.delete(`/user/purchases/${purchaseId}`);
+      return await axios.post('/deduct', { amount });
     } catch (e) {
       return e.response;
     }
