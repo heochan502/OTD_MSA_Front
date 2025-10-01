@@ -53,7 +53,13 @@ export const postChallenge = (params) => {
 };
 
 export const settlement = (params) => {
-  return axios.post(`${BASE_URL}/settlement`, params).catch((e) => response);
+  return axios.post(`${BASE_URL}/settlement`, params).catch((e) => e.response);
+};
+
+export const getChallengeSettlementLog = (params) => {
+  return axios
+    .get(`${BASE_URL}/settlement/log`, { params })
+    .catch((e) => e.response);
 };
 
 export const getMyChallenge = () => {
