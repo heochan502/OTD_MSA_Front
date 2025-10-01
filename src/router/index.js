@@ -40,7 +40,7 @@ import MealMainView from '@/views/meal/MealMainView.vue';
 import MealDetailView from '@/views/meal/MealDetailView.vue';
 import MealRecordView from '@/views/meal/MealRecordView.vue'  
 import MealFoodSearchView from '@/views/meal/MealFoodSearchView.vue'
-import MealCustomAddView from '@/views/meal/MealCustomAdd.vue';
+
 
 // 운동
 import ExerciseMain from '@/views/exercise/ExerciseMain.vue';
@@ -307,13 +307,7 @@ const router = createRouter({
       name: 'MealRecordView',
       component: MealRecordView,
       meta: { headerType: 'title', title: '식단 기록', showUserPanel: false },
-    },
-    {
-      path: '/meal/mealcustomadd',
-      name: 'MealCustomAddView',
-      component: MealCustomAddView,
-      meta: { headerType: 'title', title: '식단 기록', showUserPanel: false },
-    },
+    },    
     {
       path: '/admin',
       // component: () => import('@/views/admin/AdminLayout.vue'),
