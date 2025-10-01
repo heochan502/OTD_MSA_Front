@@ -162,13 +162,11 @@ const setWeeklyKey = (date) => {
 </script>
 
 <template>
-  <div>
+  <div>    
     <v-dialog
       v-model="monthlySettlementDialog"
       max-width="300"
-      min-height="100"
-      v-if="state.monthlySettlementLog.length"
-    >
+      min-height="100">
       <v-card>
         <v-card-title class="text-h8"
           >지난 달 정산이 완료되었어요!</v-card-title
@@ -189,9 +187,7 @@ const setWeeklyKey = (date) => {
     <v-dialog
       v-model="weeklySettlementDialog"
       max-width="300"
-      min-height="100"
-      v-if="state.weeklySettlementLog.length"
-    >
+      min-height="100">
       <v-card>
         <v-card-title class="text-h8"
           >지난 주 정산이 완료되었어요!</v-card-title
