@@ -31,33 +31,46 @@ onUnmounted(() => {
   exerciseRecordStore.clearRecords();
 });
 
-const countRecord = computed(() => exerciseRecordStore.records.length);
-
+const countRecord = computed(() =>
+  exerciseRecordStore.records ? exerciseRecordStore.records.length : 0
+);
 // 전체 운동시간
-const calcMonthlyTotalDuration = computed(() =>
+const calcMonthlyTotalDuration = computed(() => {
+  if (!exerciseRecordStore.records?.length) {
+    return 0;
+  }
   exerciseRecordStore.records.reduce((total, record) => {
     const duration = calcDuration(record.startAt, record.endAt);
     return total + duration;
-  }, 0)
-);
+  }, 0);
+});
 
 // 평균시간
 const calcMonthlyAvgDuration = computed(() => {
   const totalDuration = calcMonthlyTotalDuration.value;
+  if (countRecord.value === 0) {
+    return 0;
+  }
   return totalDuration / countRecord.value;
 });
 
 // 전체 킬로칼로리
-const calcMonthlyTotalKcal = computed(() =>
+const calcMonthlyTotalKcal = computed(() => {
+  if (!exerciseRecordStore.records?.length) {
+    return 0;
+  }
   exerciseRecordStore.records.reduce((total, record) => {
     const kcal = record.activityKcal;
     return total + kcal;
-  }, 0)
-);
+  }, 0);
+});
 
 // 평균 킬로칼로리
 const calcMonthlyAvgKcal = computed(() => {
-  const totalKcal = calcMonthlyTotalKcal.value;
+  if (countRecord.value === 0) {
+    return 0;
+  }
+  const totalKcal = calcMonthlyTotalKcal.value ? calcMonthlyTotalKcal : 0;
   return totalKcal / countRecord.value;
 });
 </script>
