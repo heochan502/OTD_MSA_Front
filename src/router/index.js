@@ -38,16 +38,14 @@ import PointShop from '@/components/pointshop/PointShop.vue';
 //식단
 import MealMainView from '@/views/meal/MealMainView.vue';
 import MealDetailView from '@/views/meal/MealDetailView.vue';
-import MealRecordView from '@/views/meal/MealRecordView.vue'  
-import MealFoodSearchView from '@/views/meal/MealFoodSearchView.vue'
-
+import MealRecordView from '@/views/meal/MealRecordView.vue';
+import MealFoodSearchView from '@/views/meal/MealFoodSearchView.vue';
 
 // 운동
 import ExerciseMain from '@/views/exercise/ExerciseMain.vue';
 import ExerciseRecord from '@/views/exercise/ExerciseRecord.vue';
 import ExerciseRecordForm from '@/views/exercise/ExerciseRecordForm.vue';
 import ExerciseRecordDetail from '@/views/exercise/ExerciseRecordDetail.vue';
-
 
 // 카테고리 라벨 맵
 const CATEGORY_LABEL = {
@@ -109,17 +107,6 @@ const router = createRouter({
       component: ChallengeAllList,
       meta: { headerType: 'title', title: '챌린지 목록', showUserPanel: false },
     },
-    // {
-    //   path: '/challenge/dailylist',
-    //   name: 'ChallengedailyList',
-    //   component: ChallengeWeeklyList,
-    //   meta: {
-    //     headerType: 'title',
-    //     title: '일일 미션 목록',
-
-    //     showUserPanel: false,
-    //   },
-    // },
     {
       path: '/challenge/weeklylist',
       name: 'ChallengeweeklyList',
@@ -307,7 +294,7 @@ const router = createRouter({
       name: 'MealRecordView',
       component: MealRecordView,
       meta: { headerType: 'title', title: '식단 기록', showUserPanel: false },
-    },    
+    },
     {
       path: '/admin',
       // component: () => import('@/views/admin/AdminLayout.vue'),
@@ -342,6 +329,11 @@ const router = createRouter({
           path: 'statistics',
           name: 'AdminStatistics',
           component: () => import('@/views/admin/AdminStatistics.vue'),
+        },
+        {
+          path: 'user/detail',
+          name: 'AdminUserDetail',
+          component: () => import('@/views/admin/AdminUserDetail.vue'),
         },
       ],
     },

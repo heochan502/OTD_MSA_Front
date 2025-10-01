@@ -18,6 +18,14 @@ onMounted(async () => {
   pointHistory.value = res.data;
   console.log('point', pointHistory.value);
 });
+
+const formatNumber = (n) => String(n).padStart(2, '0');
+const formatDate = (date) => {
+  const y = date.getFullYear();
+  const m = formatNumber(date.getMonth() + 1);
+  const d = formatNumber(date.getDate());
+  return `${y}-${m}-${d}`;
+};
 </script>
 
 <template>
@@ -103,7 +111,7 @@ onMounted(async () => {
 
         <!-- 획득일 -->
         <template #item.createdAt="{ item }">
-          {{ new Date(item.createdAt).toLocaleDateString() }}
+          {{ formatDate(new Date(item.createdAt)) }}
         </template>
       </v-data-table>
     </v-card>

@@ -11,6 +11,8 @@ const headers = [
   { title: '목표', key: 'cdGoal' },
   { title: '단위', key: 'cdUnit' },
   { title: '보상(P)', key: 'cdReward' },
+  { title: '경험치(XP)', key: 'xp' },
+  { title: '티어', key: 'tier' },
   { title: '이미지 경로', key: 'cdImage' },
 ];
 
@@ -51,7 +53,7 @@ onMounted(async () => {
       <v-data-table
         :headers="headers"
         :items="challenges"
-        height="580"
+        style="max-height: calc(100vh - 200px)"
         fixed-header
         :items-per-page="10"
         :search="search"

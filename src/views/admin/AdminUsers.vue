@@ -1,6 +1,9 @@
 <script setup>
 import { getUsers } from '@/services/admin/adminService';
 import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const users = ref([]);
 const search = ref('');
@@ -20,6 +23,14 @@ const formatBirthDate = (birthDate) => {
   return str;
 };
 
+const formatNumber = (n) => String(n).padStart(2, '0');
+const formatDate = (date) => {
+  const y = date.getFullYear();
+  const m = formatNumber(date.getMonth() + 1);
+  const d = formatNumber(date.getDate());
+  return `${y}-${m}-${d}`;
+};
+
 // ✅ Vuetify v-data-table headers
 const headers = [
   { title: 'ID', key: 'userId' },
@@ -30,6 +41,18 @@ const headers = [
   { title: '가입일', key: 'createdAt' },
   { title: '생년월일', key: 'birthDate' },
 ];
+
+const rowProps = ({ item }) => ({
+  onClick: () => toUserDetial(item),
+  style: 'cursor: pointer;',
+});
+
+const toUserDetial = (user) => {
+  console.log('user', user);
+  const plainUser = JSON.stringify(user);
+  console.log('planUser', plainUser);
+  router.push({ path: '/admin/user/detail', state: { user: plainUser } });
+};
 </script>
 
 <template>
@@ -54,9 +77,9 @@ const headers = [
         :items="users"
         :search="search"
         :items-per-page="10"
-        height="580"
         fixed-header
         class="styled-table"
+        :row-props="rowProps"
       >
         <!-- 닉네임 (이름) -->
         <template #item.nickName="{ item }">
@@ -113,7 +136,7 @@ const headers = [
 
         <!-- 가입일 -->
         <template #item.createdAt="{ item }">
-          {{ new Date(item.createdAt).toLocaleDateString() }}
+          {{ formatDate(new Date(item.createdAt)) }}
         </template>
 
         <!-- 생년월일 -->
