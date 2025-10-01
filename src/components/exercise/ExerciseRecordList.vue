@@ -68,7 +68,7 @@ const goDetail = (exerciseRecordId) => {
             class="btn_more"
             src="\image\exercise\btn_more.png"
             alt="상세보기 버튼"
-            @click.prevent="goDetail(1)"
+            @click.prevent="goDetail(item.exerciseRecordId)"
           />
         </div>
       </li>

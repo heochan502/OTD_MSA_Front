@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, reactive } from 'vue';
 import Progress from '@/components/challenge/Progress.vue';
 import ProgressJs from '@/components/challenge/ProgressJs.vue';
 
@@ -11,9 +11,24 @@ import BmiProg from '@/components/exercise/BmiProg.vue';
 import { getMyChallenge } from '@/services/challenge/challengeService';
 import { useRouter } from 'vue-router';
 
+import { getChallengeSettlementLog } from '@/services/challenge/challengeService';
+import ChallengeSettlementCard from '@/components/challenge/ChallengeSettlementCard.vue';
+import { useChallengeStore } from '@/stores/challenge/challengeStore';
+
+const state = reactive({
+  monthlySettlementLog: [],
+  weeklySettlementLog: [],
+});
+
+const challengeInfo = ref([
+  { challenge_name: '달리기 30km', progress: 62 },
+  { challenge_name: '운동시간 60시간', progress: 82 },
+  { challenge_name: '팔굽혀 펴기 100개', progress: 22 },
+  { challenge_name: '운동시간 50시간', progress: 72 },
+  { challenge_name: '일간 미션 ', progress: 100 },
+]);
 const router = useRouter();
 
-const challengeInfo = ref([]);
 const healthInfo = ref([
   { text: '체중(kg)', value: 70.5, check: true },
   { text: '체지방률(%)', value: 15.3, check: false },
@@ -51,27 +66,142 @@ const healthToggle = (index) => {
     }
   }
 };
-const challengeHome = () => {
-  router.push('/challenge');
+
+const formatNumber = (n) => String(n).padStart(2, '0');
+const formatDate = (date) => {
+  const y = date.getFullYear();
+  const m = formatNumber(date.getMonth() + 1);
+  const d = formatNumber(date.getDate());
+  return `${y}-${m}-${d}`;
 };
+
+const todayDate = new Date();
+const year = todayDate.getFullYear();
+const month = todayDate.getMonth() + 1;
+
+const monthlySettlementDialog = ref(false);
+const weeklySettlementDialog = ref(false);
+
+const challengeStore = useChallengeStore();
+
 onMounted(async () => {
+  await fetchMonthlySettlement(todayDate);
+  await fetchWeeklySettlement(todayDate);
+  console.log('state', state.monthlySettlementLog, state.weeklySettlementLog);
   const challenge = await getMyChallenge();
   challengeInfo.value = challenge.data;
   console.log('homechallenge', challengeInfo.value);
 });
+
+const challengeHome = () => {
+  router.push('/challenge');
+};
+
+
+// 월간 정산 api호출
+const fetchMonthlySettlement = async (date) => {
+  const monthlyKey = formatDate(date).slice(0, 7);
+  console.log('monthlykey', monthlyKey);
+  console.log(
+    'challengeStore.state.lastMonthCheck',
+    challengeStore.state.lastMonthCheck
+  );
+  if (challengeStore.state.lastMonthCheck === monthlyKey) {
+    return;
+  } else {
+    const params = {
+      type: 'monthly',
+      settlementDate: formatDate(new Date(year, month - 1, 1)),
+    };
+    const res = await getChallengeSettlementLog(params);
+    state.monthlySettlementLog = res.data;
+    monthlySettlementDialog.value = true;
+    challengeStore.state.lastMonthCheck = monthlyKey;
+  }
+};
+
+// 주간 정산 api호출
+const fetchWeeklySettlement = async (date) => {
+  const weeklyKey = setWeeklyKey(date);
+  console.log('weeklykey', weeklyKey);
+  console.log(
+    'challengeStore.state.lastWeekCheck',
+    challengeStore.state.lastWeekCheck
+  );
+  if (challengeStore.state.lastWeekCheck === weeklyKey) {
+    return;
+  } else {
+    const params = {
+      type: 'weekly',
+      settlementDate: formatDate(getMonday(date)),
+    };
+    const res = await getChallengeSettlementLog(params);
+    state.weeklySettlementLog = res.data;
+    weeklySettlementDialog.value = true;
+    challengeStore.state.lastWeekCheck = weeklyKey;
+  }
+};
+
+// 월요일 날짜 구하기
+const getMonday = (date) => {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  return d;
+};
+
+// n주차 계산
+const setWeeklyKey = (date) => {
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = formatNumber(d.getMonth() + 1);
+  const week = Math.ceil((d.getDate() - d.getDay() + 1) / 7);
+  return `${year}-${month}-W${week}`;
+};
 </script>
 
 <template>
-  <div>
-    <v-dialog v-model="settlementDialog" max-width="300" min-height="100">
+  <div>    
+    <v-dialog
+      v-model="monthlySettlementDialog"
+      max-width="300"
+      min-height="100">
       <v-card>
-        <v-card-title class="text-h8">정산</v-card-title>
-        <v-card-text>
-          <div class="challenge-info">챌린지는 2개까지만 도전 가능합니다</div>
+        <v-card-title class="text-h8"
+          >지난 달 정산이 완료되었어요!</v-card-title
+        >
+        <v-card-text v-for="data in state.monthlySettlementLog">
+          <ChallengeSettlementCard
+            :settlement-data="data"
+          ></ChallengeSettlementCard>
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn color="dark" text @click="stopDialog = false">확인</v-btn>
+          <v-btn color="dark" text @click="monthlySettlementDialog = false"
+            >확인</v-btn
+          >
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog
+      v-model="weeklySettlementDialog"
+      max-width="300"
+      min-height="100">
+      <v-card>
+        <v-card-title class="text-h8"
+          >지난 주 정산이 완료되었어요!</v-card-title
+        >
+        <v-card-text v-for="data in state.weeklySettlementLog">
+          <ChallengeSettlementCard
+            :settlement-data="data"
+          ></ChallengeSettlementCard>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn color="dark" text @click="weeklySettlementDialog = false"
+            >확인</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-dialog>

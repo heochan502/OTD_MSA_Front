@@ -7,6 +7,7 @@ import { checkDuplicateUser } from '@/services/user/userService';
 
 import {useMealSelectedDayStore} from '@/stores/meal/mealStore.js'
 
+import MealCustomFood from '@/components/meal/MealCustomFood.vue'
 
 import checkOn from '@/assets/img/meal/meal_search_check.png'
 import checkOff from '@/assets/img/meal/meal_search_default.png'
@@ -119,7 +120,7 @@ const displayKcal = (food) => selectedValue.value.get(food.foodDbId)?.kcal ?? fo
 
 //  바텀시트 상태 + 편집 대상(상세에서 조절)
 const sheetOpen = ref(false)
-const custom_food = ref ({
+const customFood = ref ({
   foodDbId: null,
   foodName: '',
   amount: 0,          // 사용자가 조절하는 값(ml/g)
@@ -143,16 +144,16 @@ const openSheet = (food) => {
     ...food,
     _kcalPer100: kcalPer100,
   }
-  // 이미 담아둔 값이 있으면 그 값으로 custom_food 채우기
+  // 이미 담아둔 값이 있으면 그 값으로 customFood 채우기
   const saved = selectedValue.value.get(food.foodDbId)
   if (saved) {
-    custom_food.value = {
+    customFood.value = {
       ...saved,
       _kcalPer100: kcalPer100, // 계산용 per100은 최신으로 유지
     }
   } else {
     // 없으면 원본 food로 채우기
-    custom_food.value = {
+    customFood.value = {
       ...food,
       _kcalPer100: kcalPer100,
     }
@@ -162,44 +163,44 @@ const openSheet = (food) => {
 
 // 양 변경 시 kcal 재계산
 const recalc = () => {
-  const result = (custom_food.value.amount || 0) / 100;
-  custom_food.value.kcal = Math.round((clickFood.value._kcalPer100 || 0) * result);
-  custom_food.value.protein = Math.round((clickFood.value.protein || 0) * result);
-  custom_food.value.carbohydrate = Math.round((clickFood.value.carbohydrate || 0) * result);
-  custom_food.value.fat = Math.round((clickFood.value.fat || 0) * result);
-  custom_food.value.sugar = Math.round((clickFood.value.sugar || 0) * result);
-  custom_food.value.natrium = Math.round((clickFood.value.natrium || 0) * result);
+  const result = (customFood.value.amount || 0) / 100;
+  customFood.value.kcal = Math.round((clickFood.value._kcalPer100 || 0) * result);
+  customFood.value.protein = Math.round((clickFood.value.protein || 0) * result);
+  customFood.value.carbohydrate = Math.round((clickFood.value.carbohydrate || 0) * result);
+  customFood.value.fat = Math.round((clickFood.value.fat || 0) * result);
+  customFood.value.sugar = Math.round((clickFood.value.sugar || 0) * result);
+  customFood.value.natrium = Math.round((clickFood.value.natrium || 0) * result);
 }
 // + / - 버튼
 const changeAmount = (delta) => {
-  const next = Math.max(0, (Number(custom_food.value.amount) || 0) + delta)
-  custom_food.value.amount = next;
+  const next = Math.max(0, (Number(customFood.value.amount) || 0) + delta)
+  customFood.value.amount = next;
   recalc();
 }
 
 //  [목록에 담기]
 const addToList = () => {
-  const e = custom_food.value
-  const idx = selected.value.findIndex(v => v.foodDbId === e.foodDbId)
+  const modiFood = customFood.value
+  const idx = selected.value.findIndex(value => value.foodDbId === modiFood.foodDbId)
 
   const payload = {
-    foodDbId: e.foodDbId,
-    foodName: e.foodName,
-    amount: e.amount,
-    kcal: e.kcal,
-    flag: e.flag,
-    protein: e.protein,
-    carbohydrate: e.carbohydrate,
-    fat: e.fat,
-    sugar: e.sugar,
-    natrium: e.natrium,
+    foodDbId: modiFood.foodDbId,
+    foodName: modiFood.foodName,
+    amount: modiFood.amount,
+    kcal: modiFood.kcal,
+    flag: modiFood.flag,
+    protein: modiFood.protein,
+    carbohydrate: modiFood.carbohydrate,
+    fat: modiFood.fat,
+    sugar: modiFood.sugar,
+    natrium: modiFood.natrium,
   }
 
   if (idx === -1) selected.value.push(payload)
   else selected.value[idx] = payload
 
   // (선택) 리스트 표시값도 덮어쓰고 싶으면:
-  const target = items.foodList.find(f => f.foodDbId === e.foodDbId)
+  const target = items.foodList.find(f => f.foodDbId === modiFood.foodDbId)
   if (target) {
     // target.checked = true   // 이제 체크는 selected 기반이므로 불필요
     // target.amount  = e.amount
@@ -249,6 +250,15 @@ console.log('배열에 넣는데:', selected.value);
   // else selected.value.splice(idx, 1);  
 };
 
+const cancelFood =(foodId) =>{
+
+ const idx = selected.value.findIndex(value => value.foodDbId === foodId)
+ selected.value.splice(idx, 1);
+
+  sheetOpen.value = false
+};
+
+
 const menuOpen = ref(false);
 //데이터 입력 받고 정리 하는곳
 const itemList = ref([]);
@@ -266,13 +276,42 @@ const goRecord = () => {
 };
 
 
+//직접입력 페이지
+
+
+//커스텀 입력 클릭시 
+const customSheet = ref(false);
+
+const customAddToList = (payload) => {
+  // payload: { name, unit, kcal, carb, protein, fat, sugar, na }
+  selected.value.push({
+    foodDbId: null,
+    foodName: payload.foodName,
+    kcal: payload.kcal,
+    flag: payload.flag,
+    protein: payload.protein,
+    carbohydrate: payload.carbohydrate,
+    fat: payload.fat,
+    sugar: payload.sugar,
+    natrium: payload.natrium,
+    amount: payload.amount,
+    
+  });
+  console.log('자유입력 결과', payload);
+};
+
+const frameEl = ref(null); // 모달을 붙일 프레임
 </script>
 
 <template>
-  <div class="wrap">
-    <span class="otd-title">무슨 음식을 먹었나요?</span>
-    <!-- <input v-model="keyword" placeholder="음식명 입력" class="search-input otd-border " /> -->
+  <div class="wrap wrap-top" ref="frameEl">
 
+    <div class="d-flex flex-column">
+      <span class="otd-title">무슨 음식을 <br />먹었나요?</span>
+      <!-- <input v-model="keyword" placeholder="음식명 입력" class="search-input otd-border " /> -->
+      <img class="custom-add align-self-end mt-2" src="/image/meal/custom_add.png" alt="직접 등록"
+        @click="customSheet=true">
+    </div>
     <v-text-field placeholder="음식명 입력" class="search-input otd-top-margin" v-model="keyword" :items="items.foodList"
       item-title="foodName" item-value="foodDbId" variant="outlined" rounded="xl" density="comfortable" clearable
       @update:model-value="onFoodNameInput" @keyup.enter.prevent="searchFoodName(keyword)">
@@ -345,24 +384,27 @@ const goRecord = () => {
       :contained="true" content-class="otd-sheet" scrim-class="otd-scrim" @click:outside="sheetOpen = false">
       <div class="sheet-card">
         <!-- 핸들바 -->
-        <div class="sheet-handle" />
+        <div class="sheet-handle" @click="sheetOpen = false" />
 
         <!-- 제목 -->
         <div class="sheet-title">
-          {{ custom_food.foodName }}
+          {{ customFood.foodName }}
         </div>
 
         <!-- 영양 간단 피ills (필요 없으면 v-if 지우기) -->
         <div class="pill-row">
-          <div class="pill pill-carb"><span class="badge">탄</span> {{ Math.ceil((custom_food.carbohydrate )) }} {{ custom_food.flag }}</div>
-          <div class="pill pill-protein"><span class="badge">단</span> {{ Math.ceil((custom_food.protein)) }} {{ custom_food.flag }}</div>
-          <div class="pill pill-fat"><span class="badge">지</span> {{ Math.ceil((custom_food.fat)) }} {{ custom_food.flag }}</div>
+          <div class="pill pill-carb"><span class="badge">탄</span> {{ Math.ceil((customFood.carbohydrate )) }} {{
+            customFood.flag }}</div>
+          <div class="pill pill-protein"><span class="badge">단</span> {{ Math.ceil((customFood.protein)) }} {{
+            customFood.flag }}</div>
+          <div class="pill pill-fat"><span class="badge">지</span> {{ Math.ceil((customFood.fat)) }} {{ customFood.flag
+            }}</div>
         </div>
 
         <!-- kcal 카드 -->
         <div class="kcal-card">
           <span class="kcal-label">kcal</span>
-          <div class="kcal-value"><strong>{{ custom_food.kcal }}</strong> kcal</div>
+          <div class="kcal-value"><strong>{{ customFood.kcal }}</strong> kcal</div>
         </div>
 
         <!-- 단위/슬라이더 영역 (슬라이더가 없으면 이 블록은 빼도 됨) -->
@@ -379,8 +421,8 @@ const goRecord = () => {
             <v-icon>mdi-minus</v-icon>
           </v-btn>
 
-          <v-text-field v-model.number="custom_food.amount" type="number" min="0" variant="outlined" density="comfortable"
-            class="amount-field" hide-details suffix="g" @update:model-value="recalc" />
+          <v-text-field v-model.number="customFood.amount" type="number" min="0" variant="outlined"
+            density="comfortable" class="amount-field" hide-details suffix="g" @update:model-value="recalc" />
 
           <v-btn icon variant="flat" class="step-btn" @click="changeAmount(10)">
             <v-icon>mdi-plus</v-icon>
@@ -392,8 +434,18 @@ const goRecord = () => {
           <v-btn variant="outlined" class="btn-outline" @click="sheetOpen = false">음식 상세</v-btn>
           <v-btn class="btn-primary" @click="addToList">목록에 담기</v-btn>
         </div>
+
+
+        <div class="layout-frame" ref="frameEl">
+          <MealCustomFood v-model:open="customSheet" :attach="frameEl" @submit="customAddToList" />
+        </div>
       </div>
     </v-dialog>
+
+    <!-- 커스텀 데이터 입력 부분 -->
+    <div class="layout-frame" ref="modal-root">
+      <MealCustomFood v-model:open="customSheet" @submit="customAddToList" />
+    </div>
     <!-- 하단 확정 버튼(선택개수 표시용) -->
     <button class="otd-button confirm-btn" :disabled="selected.length === 0" @click="goRecord">
       {{ selected.length }} 개 담았어요
@@ -402,6 +454,22 @@ const goRecord = () => {
 </template>
 
 <style scoped>
+
+.layout-frame{ position:relative; width:391px; overflow:hidden; }
+.layout-frame :deep(.otd-sheet){ position:absolute !important; bottom:-24px !important; }
+.layout-frame :deep(.backdrop){ position:absolute !important; }
+
+
+
+.custom-add
+{width: 88px;
+height: 22px;}
+
+.wrap-top
+{
+  margin-top: 20px !important;
+}
+
 .check {
   width: 30px;
   height: 32px;
@@ -490,8 +558,7 @@ const goRecord = () => {
   align-items: center !important;
   /* 아래에서 올라오기 */
   justify-content: end !important;
-  bottom: -24px !important;
-  
+  bottom: -24px !important;  
 }
 
 /* 스크림도 프레임 안에서만 */

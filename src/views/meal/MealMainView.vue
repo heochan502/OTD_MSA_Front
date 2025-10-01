@@ -26,13 +26,13 @@ const todayWater = ref(0.0);
 const selectedDate = ref(new Date()) ;
 
 // 날짜 바뀔 때 라우터 쿼리 싱크 (선택)
-watch(selectedDate, (d) => {
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
+watch(selectedDate, (day) => {
+  const yyyy = day.getFullYear();
+  const mm = String(day.getMonth() + 1).padStart(2, '0');
+  const dd = String(day.getDate()).padStart(2, '0');
   selectedDay.selectedDay.setDay = `${yyyy}-${mm}-${dd}`;
   console.log(selectedDay.selectedDay.setDay);
-  router.replace({ query: { ...route.query, day: `${yyyy}-${mm}-${dd}` } });
+  router.replace({ query: { ...route.query}, day: `${yyyy}-${mm}-${dd}` });
 });
 
 
@@ -42,16 +42,16 @@ onMounted (async () => {
 </script>
 
 <template>
-   
-<MealDateStrip
+     
+  <MealDateStrip
     v-model="selectedDate"
-    :before="60"
-    :after="60"
+    :before="365"
+    :after="365"
     @change="(d) => { /* d로 데이터 로드 등 */ }"
   />
 
+  <div class="wrap wrap-top">
 
-  <div class="wrap ">
     <!-- 상단 요약 카드 -->
     <div class="otd-top-margin">
       <div
@@ -80,8 +80,12 @@ onMounted (async () => {
 <style setup >
 /* 이 뷰는 공통 유틸(main.css) + 각 카드 내부 스타일을 사용
    */
-.wrap{
-  margin-top: 0px !important;
+  .wrap
+  {
+    margin-top: 20px !important;
+  }
+.wrap-top{
+  margin-top: 20px !important;
 }
 </style>
 
