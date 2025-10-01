@@ -6,10 +6,10 @@ import MealDayCards from '@/components/meal/MealDayCards.vue';
 import WaterCard from '@/components/meal/WaterCard.vue'; // ✅ 추가
 import MealDateStrip from '@/components/meal/MealDateStrip.vue';
 
-import {useMealSelectedDayStore} from '@/stores/meal/mealStore.js'
+import {useMealSelectedStore} from '@/stores/meal/mealStore.js'
 
 
-const selectedDay = useMealSelectedDayStore();
+const selectedDay = useMealSelectedStore();
 
 const router = useRouter();
 const route = useRoute()

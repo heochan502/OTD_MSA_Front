@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 
-import {useMealSelectedDayStore} from '@/stores/meal/mealStore.js'
+import {useMealSelectedStore} from '@/stores/meal/mealStore.js'
 
 
 import dayjs from 'dayjs';
@@ -10,7 +10,7 @@ import 'dayjs/locale/ko';
 
 dayjs.locale('ko');
 
-const selectedDay = useMealSelectedDayStore();
+const selectedDay = useMealSelectedStore();
 
 
 
