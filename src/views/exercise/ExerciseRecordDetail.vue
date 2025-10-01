@@ -5,7 +5,7 @@ import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 import effortLevels from "@/assets/effortLevels.json";
 import WeeklyCalendar from "@/components/exercise/WeeklyCalendar.vue";
-import WeeklyChart from "@/components/exercise/WeeklyCalendar.vue";
+import WeeklyChart from "@/components/exercise/WeeklyChart.vue";
 import {
   deleteExerciseRecord,
   getExerciseRecordDetail,
@@ -126,10 +126,11 @@ watch(
       endOfWeek: base.endOf("isoWeek").format("YYYY-MM-DDTHH:mm:ss"),
     };
     const res = await getExerciseRecordWeekly(params);
-    if (res?.status === 200) {
+    if (res.status === 200) {
       state.weeklyRecords = res.data;
     }
   }
+  
 );
 
 // 삭제버튼
@@ -209,11 +210,11 @@ const confirmYes = async () => {
         <span class="otd-subtitle-1">주간 운동 시간</span>
       </div>
       <div>
-        <!-- <WeeklyChart
+        <WeeklyChart
           :selectedDate="selectedDate"
           :records="state.weeklyRecords"
           label="duration"
-        /> -->
+        />
       </div>
     </div>
   </div>
