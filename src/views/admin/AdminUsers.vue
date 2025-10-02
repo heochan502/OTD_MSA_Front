@@ -2,15 +2,20 @@
 import { getUsers } from '@/services/admin/adminService';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAdminStore } from '@/stores/admin/adminStore';
 
 const router = useRouter();
+const adminStore = useAdminStore();
 
 const users = ref([]);
 const search = ref('');
 
 onMounted(async () => {
   const res = await getUsers();
-  users.value = res.data;
+  users.value = res.data.map((user) => ({
+    ...user,
+    userRoles: user.userRoles[0]?.userRoleIds.roleCode ?? '없음',
+  }));
   console.log('adminUser', users.value);
 });
 
@@ -49,9 +54,9 @@ const rowProps = ({ item }) => ({
 
 const toUserDetial = (user) => {
   console.log('user', user);
-  const plainUser = JSON.stringify(user);
-  console.log('planUser', plainUser);
-  router.push({ path: '/admin/user/detail', state: { user: plainUser } });
+  adminStore.setSelectedUser(user);
+  console.log(adminStore.state.selectedUser);
+  router.push({ path: '/admin/user/detail' });
 };
 </script>
 
@@ -89,25 +94,21 @@ const toUserDetial = (user) => {
 
         <!-- 권한 -->
         <template #item.userRoles="{ item }">
-          <template v-if="item.userRoles && item.userRoles.length">
+          <template v-if="item.userRoles != null">
             <v-chip
-              v-for="role in item.userRoles"
-              :key="role.userRoleIds.roleCode"
               :color="
-                role.userRoleIds.roleCode.toLowerCase() === 'user'
+                item.userRoles === 'USER' || item.userRoles === 'SOCIAL'
                   ? '#00D5DF'
-                  : role.userRoleIds.roleCode.toLowerCase() === 'admin'
+                  : item.userRoles === 'ADMIN'
                   ? '#303030'
-                  : '#fff'
+                  : '#FFE0B2'
               "
-              text-color="black"
               small
               class="ma-1"
             >
-              {{ role.userRoleIds.roleCode }}
+              {{ item.userRoles }}
             </v-chip>
           </template>
-          <v-chip v-else color="#fff" text-color="white" small>없음</v-chip>
         </template>
         <!-- 챌린지 등급 -->
         <template #item.challengeRole="{ item }">
@@ -121,12 +122,7 @@ const toUserDetial = (user) => {
                 ? '#ffba57'
                 : item.challengeRole === '다이아'
                 ? '#00c6ff'
-                : '#fff' // 그 외
-            "
-            :text-color="
-              item.challengeRole === '골드'
-                ? 'black' // 금색은 검정 글씨가 더 잘 보임
-                : 'white' // 기본은 흰 글씨
+                : '#FFE0B2' // 그 외
             "
             small
           >
