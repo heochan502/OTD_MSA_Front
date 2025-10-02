@@ -151,7 +151,7 @@ const settlementButton = async () => {
   const params = {
     startDate: '2025-09-01',
     endDate: '2025-09-30',
-    type: 'competition',
+    type: 'personal',
   };
   const res = await settlement(params);
   console.log(res);

@@ -1,5 +1,8 @@
 <script setup>
 import { computed } from "vue";
+import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
+
+const bodyCompositionStore = useBodyCompositionStore();
 
 // bmi 관련
 const minBmi = 15;
@@ -7,15 +10,13 @@ const maxBmi = 40;
 
 // bmi 계산식
 const bmi = computed(() => {
-  return 24;
-  // if (!healthStore.logList.length) return 0;
-  // const heightInMeters = (healthStore.logList[0]?.height || 0) / 100;
-  // if (!heightInMeters || !healthStore.logList[0]?.weight) return 0;
-  // return parseFloat(
-  //   (healthStore.logList[0]?.weight / heightInMeters ** 2).toFixed(1)
-  // );
-});
+  const heightInMeters = bodyCompositionStore.lastest.height / 100;
+  if (!heightInMeters || !bodyCompositionStore.lastest.weight) return 0;
 
+  return parseFloat(
+    (bodyCompositionStore.lastest.weight / heightInMeters ** 2).toFixed(1)
+  );
+});
 const bmiStatus = computed(() => {
   const userBmi = bmi.value;
   if (userBmi === 0) return "기록없음";

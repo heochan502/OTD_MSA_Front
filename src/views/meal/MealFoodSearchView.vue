@@ -305,12 +305,13 @@ const frameEl = ref(null); // 모달을 붙일 프레임
 
 <template>
   <div class="wrap wrap-top" ref="frameEl">
-    
+
     <div class="d-flex flex-column">
-    <span class="otd-title">무슨 음식을 <br/>먹었나요?</span>
-    <!-- <input v-model="keyword" placeholder="음식명 입력" class="search-input otd-border " /> -->
-      <img class="custom-add align-self-end mt-2" src="/image/meal/custom_add.png" alt="직접 등록" @click="customSheet=true">
-  </div>
+      <span class="otd-title">무슨 음식을 <br />먹었나요?</span>
+      <!-- <input v-model="keyword" placeholder="음식명 입력" class="search-input otd-border " /> -->
+      <img class="custom-add align-self-end mt-2" src="/image/meal/custom_add.png" alt="직접 등록"
+        @click="customSheet=true">
+    </div>
     <v-text-field placeholder="음식명 입력" class="search-input otd-top-margin" v-model="keyword" :items="items.foodList"
       item-title="foodName" item-value="foodDbId" variant="outlined" rounded="xl" density="comfortable" clearable
       @update:model-value="onFoodNameInput" @keyup.enter.prevent="searchFoodName(keyword)">
@@ -383,7 +384,7 @@ const frameEl = ref(null); // 모달을 붙일 프레임
       :contained="true" content-class="otd-sheet" scrim-class="otd-scrim" @click:outside="sheetOpen = false">
       <div class="sheet-card">
         <!-- 핸들바 -->
-        <div class="sheet-handle" />
+        <div class="sheet-handle" @click="sheetOpen = false" />
 
         <!-- 제목 -->
         <div class="sheet-title">
@@ -392,9 +393,12 @@ const frameEl = ref(null); // 모달을 붙일 프레임
 
         <!-- 영양 간단 피ills (필요 없으면 v-if 지우기) -->
         <div class="pill-row">
-          <div class="pill pill-carb"><span class="badge">탄</span> {{ Math.ceil((customFood.carbohydrate )) }} {{ customFood.flag }}</div>
-          <div class="pill pill-protein"><span class="badge">단</span> {{ Math.ceil((customFood.protein)) }} {{ customFood.flag }}</div>
-          <div class="pill pill-fat"><span class="badge">지</span> {{ Math.ceil((customFood.fat)) }} {{ customFood.flag }}</div>
+          <div class="pill pill-carb"><span class="badge">탄</span> {{ Math.ceil((customFood.carbohydrate )) }} {{
+            customFood.flag }}</div>
+          <div class="pill pill-protein"><span class="badge">단</span> {{ Math.ceil((customFood.protein)) }} {{
+            customFood.flag }}</div>
+          <div class="pill pill-fat"><span class="badge">지</span> {{ Math.ceil((customFood.fat)) }} {{ customFood.flag
+            }}</div>
         </div>
 
         <!-- kcal 카드 -->
@@ -417,8 +421,8 @@ const frameEl = ref(null); // 모달을 붙일 프레임
             <v-icon>mdi-minus</v-icon>
           </v-btn>
 
-          <v-text-field v-model.number="customFood.amount" type="number" min="0" variant="outlined" density="comfortable"
-            class="amount-field" hide-details suffix="g" @update:model-value="recalc" />
+          <v-text-field v-model.number="customFood.amount" type="number" min="0" variant="outlined"
+            density="comfortable" class="amount-field" hide-details suffix="g" @update:model-value="recalc" />
 
           <v-btn icon variant="flat" class="step-btn" @click="changeAmount(10)">
             <v-icon>mdi-plus</v-icon>
@@ -426,19 +430,21 @@ const frameEl = ref(null); // 모달을 붙일 프레임
         </div>
 
         <!-- 액션 버튼 -->
-     <div class="layout-frame" ref="frameEl">
-  <MealCustomFood
-    v-model:open="customSheet"
-    :attach="frameEl"         
-    @submit="customAddToList"
-  />
-</div>
+        <div class="actions">
+          <v-btn variant="outlined" class="btn-outline" @click="sheetOpen = false">음식 상세</v-btn>
+          <v-btn class="btn-primary" @click="addToList">목록에 담기</v-btn>
+        </div>
+
+
+        <div class="layout-frame" ref="frameEl">
+          <MealCustomFood v-model:open="customSheet" :attach="frameEl" @submit="customAddToList" />
+        </div>
       </div>
     </v-dialog>
 
     <!-- 커스텀 데이터 입력 부분 -->
     <div class="layout-frame" ref="modal-root">
-    <MealCustomFood v-model:open="customSheet"  @submit="customAddToList"/>
+      <MealCustomFood v-model:open="customSheet" @submit="customAddToList" />
     </div>
     <!-- 하단 확정 버튼(선택개수 표시용) -->
     <button class="otd-button confirm-btn" :disabled="selected.length === 0" @click="goRecord">
