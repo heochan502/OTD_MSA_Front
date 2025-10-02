@@ -5,6 +5,7 @@ import isoWeek from "dayjs/plugin/isoWeek"; // 주 시작일 설정용
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import Calendar from "../challenge/Calendar.vue";
 
 dayjs.extend(isoWeek);
 dayjs.extend(isSameOrAfter);
@@ -17,6 +18,9 @@ const props = defineProps({
     default: () => [], // ["2025-09-10", "2025-09-12"]
   },
 });
+
+const openCalendar = ref(false);
+
 const emit = defineEmits(["click-date"]);
 
 const today = dayjs();
@@ -68,6 +72,10 @@ const goNow = () => {
   weekStart.value = today.startOf("isoWeek"); // 이번 주 시작일 갱신
   emit("click-date", today.format("YYYY-MM-DD"));
 };
+
+const confirmYes = () => {
+  alert("적용완료");
+};
 </script>
 
 <template>
@@ -77,6 +85,7 @@ const goNow = () => {
         src="\image\exercise\calender.png"
         alt="캘린더 아이콘"
         class="calendar_icon"
+        @click="openCalendar = true"
       />
       <span class="otd-subtitle-1">{{ currentDate.format("YYYY년 M월") }}</span>
     </div>
@@ -106,6 +115,30 @@ const goNow = () => {
       <img src="\image\exercise\btn_next.png" alt="" width="10" />
     </button>
   </div>
+
+  <v-dialog v-model="openCalendar" max-width="380" min-height="100">
+    <v-card>
+      <v-card-title> 저장 </v-card-title>
+      <v-card-text class="otd-body-2">
+        <Calendar class="calendar" />
+        <span class="d-flex align-center justify-center mt-3">
+          선택한 날의 기록을 보시겠어요?
+        </span>
+      </v-card-text>
+      <v-card-actions class="d-flex justify-center">
+        <v-spacer />
+        <v-btn
+          text
+          @click="openCalendar = false"
+          class="btn_close otd-body-1 ma-1"
+          >닫기</v-btn
+        >
+        <v-btn text @click="confirmYes" class="btn_select otd-body-1 ma-1"
+          >적용하기</v-btn
+        >
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <style lang="scss" scoped>
@@ -176,5 +209,27 @@ const goNow = () => {
 }
 :hover {
   border: none;
+}
+
+.btn_close {
+  width: 143px;
+  height: 38px;
+  margin-top: 20px;
+  background-color: #e6e6e6;
+  border-radius: 10px;
+  box-shadow: none;
+}
+.btn_select {
+  width: 143px;
+  height: 38px;
+  margin-top: 20px;
+
+  border-radius: 10px;
+  box-shadow: none;
+  background-color: #ffe864;
+}
+
+.calendar {
+  box-shadow: none;
 }
 </style>
