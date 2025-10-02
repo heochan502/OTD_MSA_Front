@@ -11,9 +11,7 @@ export const useMealSelectedStore = defineStore("mealSelected",()=>{
         setDay :'',   // 선택한날        
       });
     
-    const selectedFoods =ref ([
-    
-    ]);
+    const selectedFoods =ref ({});
 
     const totalKcal = computed(() =>
       selectedFoods.value.reduce((sum, food) => sum + (Number(food.kcal) || 0), 0)
