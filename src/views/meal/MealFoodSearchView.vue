@@ -1,9 +1,11 @@
 <script setup>
-import { ref, computed, reactive, watch,  } from 'vue';
+import { ref, computed, reactive, watch, onMounted  } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { debounce, flatMapDepth } from 'lodash';
 import { getFood } from '@/services/meal/mealService';
 import { checkDuplicateUser } from '@/services/user/userService';
+
+import { storeToRefs } from 'pinia';
 
 import {useMealSelectedStore} from '@/stores/meal/mealStore.js'
 
@@ -13,13 +15,27 @@ import checkOn from '@/assets/img/meal/meal_search_check.png'
 import checkOff from '@/assets/img/meal/meal_search_default.png'
 
 
+
 const selectedDay = useMealSelectedStore();
 
+const { selectedFoods } = storeToRefs(selectedDay);
 
 const router = useRouter();
 const route = useRoute();
 const keyword = ref(null);
-const selected = ref([]);
+// const selected = selectedDay.selectedFoods;
+
+
+
+onMounted (()=>{
+  if ( selectedDay.selectedDay.setDay.values === route.query.meal.values)
+{
+  console.log("초기화");
+  selectedFoods.value =null;
+}
+
+  selectedDay.selectedDay.setDay = route.query.meal;
+});
 
 // 선택된 음식
 const clickFood = ref({
@@ -105,15 +121,15 @@ const searchFoodName = async (keyword) => {
 // 선택 빠른 조회용 맵
 const selectedValue = computed(() => {
   const values = new Map()
-  for (const item of selected.value) values.set(item.foodDbId, item)
+  for (const item of selectedFoods) values.set(item.foodDbId, item)
   return values
 })
 
 // 체크여부 & 표시값 헬퍼 함수
 //역할은 해당 키(key)가 Map 안에 존재하는지 확인하는 것.
-const isSelected = (id) => selectedValue.value.has(id);
-const displayAmount = (food) => selectedValue.value.get(food.foodDbId)?.amount ?? food.amount;
-const displayKcal = (food) => selectedValue.value.get(food.foodDbId)?.kcal ?? food.kcal;
+const isSelected = (id) => selectedValue.foodDbId;
+const displayAmount = (food) => selectedValue.foodDbId?.amount ?? food.amount;
+const displayKcal = (food) => selectedValue.foodDbId?.kcal ?? food.kcal;
 
 
 
@@ -145,7 +161,7 @@ const openSheet = (food) => {
     _kcalPer100: kcalPer100,
   }
   // 이미 담아둔 값이 있으면 그 값으로 customFood 채우기
-  const saved = selectedValue.value.get(food.foodDbId)
+  const saved = selectedValue.foodDbId
   if (saved) {
     customFood.value = {
       ...saved,
@@ -181,7 +197,7 @@ const changeAmount = (delta) => {
 //  [목록에 담기]
 const addToList = () => {
   const modiFood = customFood.value
-  const idx = selected.value.findIndex(value => value.foodDbId === modiFood.foodDbId)
+  const idx = selectedFoods.value?.findIndex(value => value.foodDbId === modiFood.foodDbId)
 
   const payload = {
     foodDbId: modiFood.foodDbId,
@@ -196,8 +212,8 @@ const addToList = () => {
     natrium: modiFood.natrium,
   }
 
-  if (idx === -1) selected.value.push(payload)
-  else selected.value[idx] = payload
+  if (idx === -1) selectedFoods.value.push(payload)
+  else selectedFoods.value[idx] = payload
 
   // (선택) 리스트 표시값도 덮어쓰고 싶으면:
   const target = items.foodList.find(f => f.foodDbId === modiFood.foodDbId)
@@ -219,8 +235,8 @@ const toggleSelect = (food) => {
   const foodInfo = food;
 
 // console.log('드롭다운에서 클릭된 항목:', foodInfo);
-if (!selected.value.some((item) => item.foodDbId === foodInfo.foodDbId)) {
-  selected.value.push({
+if (!selectedFoods.value.some((item) => item.foodDbId === foodInfo.foodDbId)) {
+  selectedFoods.value.push({
     foodDbId: foodInfo.foodDbId,
     foodName: foodInfo.foodName,
     kcal: foodInfo.kcal*(foodInfo.amount/100),
@@ -237,12 +253,12 @@ if (!selected.value.some((item) => item.foodDbId === foodInfo.foodDbId)) {
 // 음식id가 이미 선택된 상태라면 선택 해제
 else
 {
-  const idx = selected.value.findIndex((f) => f.foodDbId === food.foodDbId);
+  const idx = selectedFoods.value.findIndex((f) => f.foodDbId === food.foodDbId);
   food.checked = false;
-  selected.value.splice(idx, 1);
+  selectedFoods.value.splice(idx, 1);
   console.log("같은거 클릭", idx);  
 }
-console.log('배열에 넣는데:', selected.value);
+console.log('배열에 넣는데:', selectedFoods.value);
   // const idx = selected.value.findIndex((f) => f.name === food.name);
   // if (idx === -1) selected.value.push(food);
   // else selected.value.splice(idx, 1);  
@@ -250,8 +266,8 @@ console.log('배열에 넣는데:', selected.value);
 
 const cancelFood =(foodId) =>{
 
- const idx = selected.value.findIndex(value => value.foodDbId === foodId)
- selected.value.splice(idx, 1);
+ const idx = selectedFoods.value.findIndex(value => value.foodDbId === foodId)
+ selectedFoods.value.splice(idx, 1);
 
   sheetOpen.value = false
 };
@@ -265,9 +281,12 @@ const itemList = ref([]);
 
 //  확정 버튼 → 식단 저장 화면으로 이동
 const goRecord = () => {
-  selectedDay.selectedFoods.value = [ ...selected.value];
 
-
+// const merged = [...selectedDay.selectedFoods.value, ...selectedFoods.value];
+// const dedup = Array.from(
+//   new Map(merged.map(f => [String(f.foodDbId ?? f.foodName), f])).values()
+// );
+// selectedDay.selectedFoods.value = dedup;
 
 
   router.push({
@@ -289,7 +308,7 @@ const customSheet = ref(false);
 
 const customAddToList = (payload) => {
   // payload: { name, unit, kcal, carb, protein, fat, sugar, na }
-  selected.value.push({
+  selectedFoods.value.push({
     foodDbId: null,
     foodName: payload.foodName,
     kcal: payload.kcal,
@@ -440,10 +459,10 @@ const frameEl = ref(null); // 모달을 붙일 프레임
           <v-btn class="btn-primary" @click="addToList">목록에 담기</v-btn>
         </div>
 
-
+<!-- 
         <div class="layout-frame" >
           <MealCustomFood v-model:open="customSheet"  @submit="customAddToList" />
-        </div>
+        </div> -->
       </div>
     </v-dialog>
 
@@ -452,8 +471,8 @@ const frameEl = ref(null); // 모달을 붙일 프레임
       <MealCustomFood v-model:open="customSheet" @submit="customAddToList" />
     </div>
     <!-- 하단 확정 버튼(선택개수 표시용) -->
-    <button class="otd-button confirm-btn" :disabled="selected.length === 0" @click="goRecord">
-      {{ selected.length }} 개 담았어요
+    <button class="otd-button confirm-btn" :disabled="(selectedFoods?.length ?? 0) === 0" @click="goRecord">
+      {{ selectedFoods?.length ?? 0 }} 개 담았어요
     </button>
   </div>
 </template>

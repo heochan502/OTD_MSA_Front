@@ -1,10 +1,14 @@
 <script setup>
 import { ref, computed, reactive, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import {storeToRefs} from 'pinia';
 
 import { useMealSelectedStore } from '@/stores/meal/mealStore.js';
 
-const selectedFoods = useMealSelectedStore();
+// const selectedFoods = useMealSelectedStore();
+const store = useMealSelectedStore();
+const { selectedFoods } = storeToRefs(store);   // Ref<Food[]>
+
 
 const BASE = import.meta.env.BASE_URL || '/';
 const route = useRoute();
@@ -12,10 +16,12 @@ const router = useRouter();
 
 // 전달된 음식 목록
 // const foods = selectedFoods.selectedFoods.value ;
-const foods =
-  Array.isArray(selectedFoods?.selectedFoods?.value)
-    ? selectedFoods.selectedFoods.value
-    : Object.values(selectedFoods?.selectedFoods?.value ?? {}); // ✅ null/undefined 방어
+// ✅ 합계들
+const foods = computed(() => selectedFoods.value ?? []) // null 방어
+// const foods =
+//   Array.isArray(selectedFoods?.selectedFoods?.value)
+//     ? selectedFoods.selectedFoods.value
+//     : Object.values(selectedFoods?.selectedFoods?.value ?? {}); // ✅ null/undefined 방어
 
 // 합계 kcal & 개수
 // const totalKcal = computed(() => foods.selectedFood.value.reduce((sum, food) => sum + (foof.kcal || 0), 0));
@@ -37,6 +43,11 @@ const totalProtein = computed(() =>
   foods.value.reduce((sum, food) => sum + (Number(food.protein) || 0), 0)
 );
 
+// const foodCount =0;
+// const totalKcal =0;
+// const totalCarb=0;
+// const totalFat=0;
+// const totalProtein=0;
 
 // 식사 아이콘 (아침/점심/저녁 매핑)
 // 만약 값이 없으면 기본값은 점시으로 들어간다
@@ -62,8 +73,10 @@ const macroPct = computed(() => {
 });
 
 onMounted(async () => {
-  console.log('피니아 데이터', selectedFoods.selectedFoods.value);
-  console.log('토탕', totalKcal);
+  // console.log('피니아 데이터',foods.value);
+  console.log('토탕', selectedFoods);
+  console.log('isArray?', Array.isArray(selectedFoods.value))     // true여야 함
+console.log('has reduce?', typeof selectedFoods.value?.reduce)  // 'function'이어야 함
 });
 
 const clickAddFood = () => {
