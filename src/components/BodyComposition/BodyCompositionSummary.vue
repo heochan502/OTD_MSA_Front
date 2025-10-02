@@ -1,5 +1,15 @@
 <script setup>
+import { onMounted, reactive } from "vue";
 import BmiProg from "@/components/exercise/BmiProg.vue";
+import { getLastestBodyComposition } from "@/services/body_composition/bodyCompositionService";
+import { formatDateKR } from "@/utils/dateTimeUtils";
+import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
+
+const bodyCompositionStore = useBodyCompositionStore();
+
+onMounted(async () => {
+  await bodyCompositionStore.fetchLastestBodyComposition();
+});
 </script>
 
 <template>
@@ -7,21 +17,29 @@ import BmiProg from "@/components/exercise/BmiProg.vue";
     <!-- 내용 -->
     <div class="content_main otd-box-style">
       <!-- 체성분 기록일 -->
-      <div class="current_date otd-body-3">yyyy년 MM월 dd일</div>
+      <div class="current_date otd-body-3">
+        {{ formatDateKR(bodyCompositionStore.lastest.createdAt) }}
+      </div>
       <div class="d-flex flex-column align-center">
         <!-- 체성분 정보 -->
         <div class="item_wrap">
           <div class="item">
             <div class="otd-body-1">체중(kg)</div>
-            <div class="otd-subtitle-1">{{ 68 }}</div>
+            <div class="otd-subtitle-1">
+              {{ bodyCompositionStore.lastest.weight }}
+            </div>
           </div>
           <div class="item">
             <div class="otd-body-1">체지방률(%)</div>
-            <div class="otd-subtitle-1">{{ 68 }}</div>
+            <div class="otd-subtitle-1">
+              {{ bodyCompositionStore.lastest.percentBodyFat }}
+            </div>
           </div>
           <div class="item">
             <div class="otd-body-1">골격근량(kg)</div>
-            <div class="otd-subtitle-1">{{ 68 }}</div>
+            <div class="otd-subtitle-1">
+              {{ bodyCompositionStore.lastest.skeletalMuscleMass }}
+            </div>
           </div>
         </div>
         <!-- BMI -->

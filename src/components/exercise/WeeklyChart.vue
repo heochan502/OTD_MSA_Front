@@ -35,6 +35,7 @@ const props = defineProps({
     // 주차 기준이 되는 날자 (선택 날짜 1개)
     type: String,
     required: true,
+    default: "",
   },
   records: { type: Array, default: () => [] }, // 서버에서 내린 기록들
   selectedField: String,
@@ -168,6 +169,10 @@ const chartOptions = {
     },
   },
 };
+
+onMounted(() => {
+  console.log("프롭스", props);
+});
 </script>
 
 <template>
