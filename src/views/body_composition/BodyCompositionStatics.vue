@@ -1,13 +1,14 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import lineChart from "@/components/exercise/lineChart.vue";
+import StaticChart from "@/components/exercise/StaticChart.vue";
 import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
 
 const model = ref(true);
 const bodyCompositionStore = useBodyCompositionStore();
 onMounted(async () => {
   await bodyCompositionStore.fetchSeriesBodyComposition();
-  console.log(bodyCompositionStore.series);
+  console.log("Series", bodyCompositionStore.series);
 });
 
 // TODO: 서버에서 내려받을 수 있도록 api 수정하기
@@ -43,7 +44,8 @@ const metrics = [
       </div>
     </div>
     <div>
-      <lineChart :logs="bodyCompositionStore.series.points" />
+      <!-- <lineChart :logs="bodyCompositionStore.series.points" /> -->
+      <StaticChart :series="bodyCompositionStore.series" />
     </div>
   </div>
 </template>
