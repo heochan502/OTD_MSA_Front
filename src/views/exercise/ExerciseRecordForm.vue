@@ -1,10 +1,10 @@
 <script setup>
-import { reactive, computed, ref, watch } from "vue";
-import { useRouter } from "vue-router";
-import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
-import effortLevels from "@/assets/effortLevels.json";
-import { calcDuration } from "@/utils/exerciseUtils";
-import { saveExerciseRecord } from "@/services/exercise/exerciseService";
+import { reactive, computed, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
+import { useExerciseRecordStore } from '@/stores/exercise/exerciseRecordStore';
+import effortLevels from '@/assets/effortLevels.json';
+import { calcDuration } from '@/utils/exerciseUtils';
+import { saveExerciseRecord } from '@/services/exercise/exerciseService';
 
 const router = useRouter();
 const exerciseRecordStore = useExerciseRecordStore();
@@ -13,8 +13,8 @@ const state = reactive({
   form: {
     exerciseId: null,
     effortLevel: 1,
-    startAt: "",
-    endAt: "",
+    startAt: '',
+    endAt: '',
     distance: null,
     reps: null,
     activityKcal: 0,
@@ -23,9 +23,9 @@ const state = reactive({
 
 // 운동강도 색상
 const color = computed(() => {
-  if (state.form.effortLevel < 4) return "#00D5DF";
-  if (state.form.effortLevel < 7) return "#FFB996";
-  return "#FF8282";
+  if (state.form.effortLevel < 4) return '#00D5DF';
+  if (state.form.effortLevel < 7) return '#FFB996';
+  return '#FF8282';
 });
 
 // 선택된 운동
@@ -68,7 +68,7 @@ const calcKcal = computed(() => {
 // 계산된 칼로리 소모량 state.form.activityKcal에 저장
 watch(calcKcal, (val) => {
   state.form.activityKcal = Math.ceil(val);
-  console.log("저장", state.form.activityKcal);
+  console.log('저장', state.form.activityKcal);
 });
 
 const saveDialog = ref(false);
@@ -76,7 +76,7 @@ const saveDialog = ref(false);
 // 기록 저장
 const confirmYes = async () => {
   const convertDatetimeFormat = (datetimeStr) => {
-    return datetimeStr.replace("T", " ");
+    return datetimeStr.replace('T', ' ');
   };
 
   const jsonBody = {
@@ -91,14 +91,14 @@ const confirmYes = async () => {
 
   const res = await saveExerciseRecord(jsonBody);
   if (res === undefined || res.status !== 200) {
-    alert("에러발생");
+    alert('에러발생');
     return;
   }
-  router.push("/exercise/main");
+  router.push('/exercise/main');
 };
 
 const cancelYes = () => {
-  router.push("/exercise/main");
+  router.push('/exercise/main');
 };
 </script>
 
@@ -276,11 +276,11 @@ const cancelYes = () => {
   padding: 20px 20px;
 
   // <input> datetime-local 아이콘 변경
-  input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  input[type='datetime-local']::-webkit-calendar-picker-indicator {
     color: rgba(0, 0, 0, 0);
     opacity: 1;
     display: block;
-    background: url("/image/exercise/calender.png") center/80% no-repeat;
+    background: url('/image/exercise/calender.png') center/80% no-repeat;
     width: 15px;
     height: 15px;
 
