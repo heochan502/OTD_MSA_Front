@@ -40,7 +40,7 @@ const metrics = [
       </div>
     </div>
     <div>
-      <!-- <lineChart :logs="bodyCompositionStore.series.points" /> -->
+      <lineChart :logs="bodyCompositionStore.series.points" />
       <StaticChart :series="bodyCompositionStore.series" />
     </div>
   </div>

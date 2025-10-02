@@ -230,4 +230,26 @@ const applyDate = (date) => {
 :hover {
   border: none;
 }
+
+.btn_close {
+  width: 143px;
+  height: 38px;
+  margin-top: 20px;
+  background-color: #e6e6e6;
+  border-radius: 10px;
+  box-shadow: none;
+}
+.btn_select {
+  width: 143px;
+  height: 38px;
+  margin-top: 20px;
+
+  border-radius: 10px;
+  box-shadow: none;
+  background-color: #ffe864;
+}
+
+.calendar {
+  box-shadow: none;
+}
 </style>
