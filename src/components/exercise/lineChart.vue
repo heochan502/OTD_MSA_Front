@@ -89,10 +89,9 @@ const weeklyData = computed(() => {
   return days;
 });
 
-
 // Chart.js 데이터셋
 const chartData = computed(() => ({
-  labels: labels,
+  // labels: labels,
   datasets: [
     {
       data: weeklyData.value,
