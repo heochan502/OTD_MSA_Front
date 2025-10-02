@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import lineChart from "@/components/exercise/lineChart.vue";
+import StaticChart from "@/components/exercise/StaticChart.vue";
 import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
 
 const model = ref(true);
@@ -39,7 +40,8 @@ const metrics = [
       </div>
     </div>
     <div>
-      <lineChart :logs="bodyCompositionStore.series.points" />
+      <!-- <lineChart :logs="bodyCompositionStore.series.points" /> -->
+      <StaticChart :series="bodyCompositionStore.series" />
     </div>
   </div>
 </template>
