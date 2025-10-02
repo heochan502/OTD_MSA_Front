@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, watch, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { join, checkUidDuplicate, checkNicknameDuplicate } from '@/services/user/userService';
+import { join, checkUidDuplicate } from '@/services/user/userService';
 
 const router = useRouter();
 const basePath = import.meta.env.VITE_BASE_URL;
@@ -146,6 +146,32 @@ onUnmounted(() => {
     clearInterval(timerInterval);
   }
 });
+
+// 생년월일 포맷팅 함수
+const formatBirthDate = (event) => {
+  let value = event.target.value.replace(/[^0-9]/g, '');
+  
+  if (value.length <= 4) {
+    additionalInfo.value.birthDate = value;
+  } else if (value.length <= 6) {
+    additionalInfo.value.birthDate = `${value.slice(0, 4)}-${value.slice(4)}`;
+  } else {
+    additionalInfo.value.birthDate = `${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6, 8)}`;
+  }
+};
+
+// 전화번호 포맷팅 함수
+const formatPhoneNumber = (event) => {
+  let value = event.target.value.replace(/[^0-9]/g, '');
+  
+  if (value.length <= 3) {
+    additionalInfo.value.phone = value;
+  } else if (value.length <= 7) {
+    additionalInfo.value.phone = `${value.slice(0, 3)}-${value.slice(3)}`;
+  } else {
+    additionalInfo.value.phone = `${value.slice(0, 3)}-${value.slice(3, 7)}-${value.slice(7, 11)}`;
+  }
+};
 
 // 아이디 유효성 검사 함수
 const validateMemberId = (uid) => {
@@ -314,7 +340,7 @@ const resetIdValidation = () => {
 
 // 닉네임중복검사
 const checkNicknameDuplicateAction = async () => {
-  const nickname = additionalInfo.value.nickname; 
+  const nickname = additionalInfo.value.nickname;
 
   if (!nickname) {
     return;
@@ -330,7 +356,7 @@ const checkNicknameDuplicateAction = async () => {
 
   try {
     isLoading.value = true
-    const response = await checkNicknameDuplicate(nickname) 
+    const response = await checkUidDuplicate(nickname)
     
     validation.value.nickname.checked = true
     validation.value.nickname.available = response.data.result.isAvailable
@@ -350,6 +376,7 @@ const checkNicknameDuplicateAction = async () => {
     isLoading.value = false;
   }
 };
+
 // 닉네임 변경 시 중복검사 상태 초기화
 const resetNicknameValidation = () => {
   validation.value.nickname.checked = false;
@@ -358,12 +385,11 @@ const resetNicknameValidation = () => {
     validation.value.nickname.touched &&
     validation.value.nickname.message.includes('사용')
   ) {
-    // uid -> nickname
     validation.value.nickname.message = '';
   }
 };
 
-
+// 워처 설정
 watch(
   () => accountInfo.value.uid,
   (newValue) => {
@@ -490,7 +516,7 @@ const sendVerificationEmail = async () => {
 
     if (response.ok) {
       isEmailSent.value = true;
-      emailTimer.value = 300; // 5분
+      emailTimer.value = 300;
       alert('인증코드가 발송되었습니다.');
     } else {
       const error = await response.json();
@@ -609,7 +635,6 @@ const submitJoin = async () => {
       surveyAnswers: calculateSurveyScore.value,
     };
 
-    // JSON 데이터 추가
     formData.append(
       'req',
       new Blob([JSON.stringify(joinData)], {
@@ -617,7 +642,6 @@ const submitJoin = async () => {
       }),'req.json'
     );
 
-    // 프로필 이미지 추가
     if (additionalInfo.value.pic instanceof File || additionalInfo.value.pic instanceof Blob) {
     formData.append('pic', additionalInfo.value.pic, additionalInfo.value.pic.name ?? 'pic');
   }
@@ -640,7 +664,6 @@ const submitJoin = async () => {
     let errorMessage = '회원가입에 실패했습니다.';
 
     if (error.response) {
-      // 서버에서 응답을 받았지만 오류 상태
       const serverMessage =
         error.response.data?.message || error.response.data?.error;
       errorMessage =
@@ -648,11 +671,9 @@ const submitJoin = async () => {
         `서버 오류 (${error.response.status}): ${error.response.statusText}`;
       console.error('서버 응답 데이터:', error.response.data);
     } else if (error.request) {
-      // 요청을 보냈지만 응답을 받지 못함
       errorMessage = '서버와 통신할 수 없습니다. 네트워크 연결을 확인해주세요.';
       console.error('요청 정보:', error.request);
     } else {
-      // 요청 설정 중에 오류 발생
       errorMessage = `요청 처리 중 오류: ${error.message}`;
     }
 
@@ -681,10 +702,8 @@ const modalContent = {
 
 <template>
   <div class="signup-container">
-    <!-- Header -->
     <div class="header"></div>
 
-    <!-- Progress Indicator -->
     <div v-if="currentStep <= 5" class="progress-container">
       <div class="progress-dots">
         <div
@@ -695,7 +714,6 @@ const modalContent = {
       </div>
     </div>
 
-    <!-- Content -->
     <div class="content">
       <!-- Step 1: 이메일 인증 -->
       <div v-if="currentStep === 1" class="step-container">
@@ -825,18 +843,16 @@ const modalContent = {
         </div>
       </div>
 
-      <!-- Step 3: 계정 정보 (개선된 검증 시스템) -->
+      <!-- Step 3: 계정 정보 -->
       <div v-if="currentStep === 3" class="step-container">
         <h2 class="step-title">아이디 비밀번호 입력</h2>
 
-        <!-- 일반 에러 메시지 -->
         <div v-if="generalError" class="error-message">
           <div class="message-icon">⚠</div>
           <div>{{ generalError }}</div>
         </div>
 
         <div class="form-group">
-          <!-- 아이디 입력 및 중복검사 -->
           <div class="form-group">
             <label for="uid">아이디 *</label>
             <div class="input-wrapper">
@@ -882,7 +898,6 @@ const modalContent = {
             </div>
           </div>
 
-          <!-- 비밀번호 입력 -->
           <div class="form-group">
             <label for="upw"></label>
             <div class="input-wrapper">
@@ -961,7 +976,6 @@ const modalContent = {
             </p>
           </div>
 
-          <!-- 비밀번호 확인 -->
           <div class="form-group">
             <label for="confirmPassword"></label>
             <div class="input-wrapper">
@@ -1051,7 +1065,6 @@ const modalContent = {
         <h2 class="step-title">추가정보를 입력해주세요</h2>
 
         <div class="form-group">
-          <!-- 프로필 이미지 -->
           <div class="profile-image-container">
             <div class="profile-image-wrapper">
               <div class="profile-image">
@@ -1081,15 +1094,19 @@ const modalContent = {
 
           <input
             type="text"
-            placeholder="생년월일"
+            placeholder="생년월일 (YYYY-MM-DD)"
             v-model="additionalInfo.birthDate"
+            @input="formatBirthDate"
+            maxlength="10"
             class="input-field"
           />
 
           <input
             type="tel"
-            placeholder="휴대폰번호"
+            placeholder="휴대폰번호 (010-0000-0000)"
             v-model="additionalInfo.phone"
+            @input="formatPhoneNumber"
+            maxlength="13"
             class="input-field"
           />
 
@@ -1099,7 +1116,6 @@ const modalContent = {
             <option value="F">여성</option>
           </select>
 
-          <!-- 닉네임 입력 및 중복검사 -->
           <div class="form-group">
             <label for="nickname"></label>
             <div class="input-wrapper">
@@ -1258,38 +1274,9 @@ const modalContent = {
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
-.back-button {
-  margin-right: 0.75rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #374151;
-}
-
-.title-gray {
-  color: #9ca3af;
-}
-
-.icon-xs {
-  width: 1rem;
-  height: 1rem;
-}
 .icon-sm {
   width: 1.25rem;
   height: 1.25rem;
-}
-.icon-md {
-  width: 1.5rem;
-  height: 1.5rem;
-}
-.icon-lg {
-  width: 2rem;
-  height: 2rem;
 }
 
 .progress-container {
@@ -1350,11 +1337,6 @@ const modalContent = {
   outline: none;
   border-color: #10b981;
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
-.input-field:disabled {
-  background-color: #f3f4f6;
-  cursor: not-allowed;
 }
 
 .input-wrapper {
@@ -1452,7 +1434,6 @@ const modalContent = {
 .btn-secondary {
   background-color: #393e46;
   color: white;
-  gap: 3px;
 }
 
 .btn-secondary:hover:not(:disabled) {
@@ -1471,11 +1452,6 @@ const modalContent = {
 
 .btn-outline:hover:not(:disabled) {
   background-color: #f9fafb;
-}
-
-.btn-outline:disabled {
-  background-color: #f3f4f6;
-  color: #9ca3af;
 }
 
 .btn-start {
@@ -1645,7 +1621,6 @@ const modalContent = {
   object-fit: cover;
 }
 
-/* 설문조사 스타일 */
 .questions-container {
   margin-bottom: 20px;
 }
@@ -1724,7 +1699,6 @@ const modalContent = {
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
-/* 결과 페이지 스타일 */
 .result-container {
   text-align: center;
   padding: 2rem 1rem;
@@ -1767,6 +1741,10 @@ const modalContent = {
   gap: 0.75rem;
 }
 
+.full-width {
+  width: 100%;
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -1804,15 +1782,6 @@ const modalContent = {
   color: #6b7280;
 }
 
-.text-gray-400 {
-  color: #9ca3af;
-}
-
-.text-white {
-  color: white;
-}
-
-/* 반응형 */
 @media (max-width: 600px) {
   .step-container {
     max-width: 100%;

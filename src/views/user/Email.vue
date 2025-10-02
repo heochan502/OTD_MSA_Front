@@ -8,6 +8,7 @@ const router = useRouter();
 const authStore = useAuthenticationStore();
 const basePath = import.meta.env.VITE_BASE_URL;
 
+
 const email = ref('');
 const verificationCode = ref('');
 const isEmailSent = ref(false);

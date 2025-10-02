@@ -230,7 +230,6 @@ const router = createRouter({
       name: 'pointHistory',
       component: PointHistory,
     },
-
     {
       path: '/user/term',
       name: 'term',
