@@ -24,6 +24,88 @@ const validation = ref({
     message: ''
   }
 });
+const sendVerificationEmail = async () => {
+  if (!email.value) return;
+
+  const validationResult = validateEmail(email.value);
+  if (!validationResult.isValid) {
+    validation.value.email.touched = true;
+    validation.value.email.isValid = false;
+    validation.value.email.message = validationResult.message;
+    return;
+  }
+
+  isLoading.value = true;
+  try {
+
+    const response = await fetch(
+      `${basePath}/api/OTD/email/send-email-update-code`,
+      {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // 인증 쿠키 포함
+        body: JSON.stringify({ email: email.value }),
+      }
+    );
+
+    if (response.ok) {
+      isEmailSent.value = true;
+      emailTimer.value = 300;
+      validation.value.email.isValid = true;
+      validation.value.email.message = '인증코드가 발송되었습니다.';
+    } else {
+      const error = await response.json();
+      generalError.value = error.message || '이메일 발송에 실패했습니다.';
+      setTimeout(() => (generalError.value = ''), 3000);
+    }
+  } catch (error) {
+    generalError.value = '네트워크 오류가 발생했습니다.';
+    setTimeout(() => (generalError.value = ''), 3000);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// 이메일 인증번호 확인
+const verifyEmailCode = async () => {
+  if (verificationCode.value.length !== 6) return;
+
+  isLoading.value = true;
+  try {
+   
+    const response = await fetch(
+      `${basePath}/api/OTD/email/verify-email-update-code`, 
+      {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // 인증 쿠키 포함
+        body: JSON.stringify({
+          email: email.value,
+          code: verificationCode.value,
+        }),
+      }
+    );
+
+    const result = await response.json();
+
+    if (response.ok && result.result?.verified === true) {
+      isEmailVerified.value = true;
+      validation.value.email.message = '이메일 인증이 완료되었습니다.';
+    } else {
+      generalError.value = result.message || '인증코드가 일치하지 않습니다.';
+      setTimeout(() => (generalError.value = ''), 3000);
+    }
+  } catch (error) {
+    generalError.value = '네트워크 오류가 발생했습니다.';
+    setTimeout(() => (generalError.value = ''), 3000);
+  } finally {
+    isLoading.value = false;
+  }
+};
 
 // 이메일 유효성 검사
 const validateEmail = (email) => {
@@ -66,78 +148,7 @@ const timerDisplay = computed(() => {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 });
 
-// 이메일 인증번호 전송
-const sendVerificationEmail = async () => {
-  if (!email.value) return;
 
-  const validationResult = validateEmail(email.value);
-  if (!validationResult.isValid) {
-    validation.value.email.touched = true;
-    validation.value.email.isValid = false;
-    validation.value.email.message = validationResult.message;
-    return;
-  }
-
-  isLoading.value = true;
-  try {
-    const response = await fetch(
-      `${basePath}/api/OTD/email/send-verification`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.value }),
-      }
-    );
-
-    if (response.ok) {
-      isEmailSent.value = true;
-      emailTimer.value = 300;
-      validation.value.email.isValid = true;
-      validation.value.email.message = '인증코드가 발송되었습니다.';
-    } else {
-      const error = await response.json();
-      generalError.value = error.message || '이메일 발송에 실패했습니다.';
-      setTimeout(() => (generalError.value = ''), 3000);
-    }
-  } catch (error) {
-    generalError.value = '네트워크 오류가 발생했습니다.';
-    setTimeout(() => (generalError.value = ''), 3000);
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-// 이메일 인증번호 확인
-const verifyEmailCode = async () => {
-  if (verificationCode.value.length !== 6) return;
-
-  isLoading.value = true;
-  try {
-    const response = await fetch(`${basePath}/api/OTD/email/verify-code`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: email.value,
-        code: verificationCode.value,
-      }),
-    });
-
-    const result = await response.json();
-
-    if (response.ok && result.result?.verified === true) {
-      isEmailVerified.value = true;
-      validation.value.email.message = '이메일 인증이 완료되었습니다.';
-    } else {
-      generalError.value = result.message || '인증코드가 일치하지 않습니다.';
-      setTimeout(() => (generalError.value = ''), 3000);
-    }
-  } catch (error) {
-    generalError.value = '네트워크 오류가 발생했습니다.';
-    setTimeout(() => (generalError.value = ''), 3000);
-  } finally {
-    isLoading.value = false;
-  }
-};
 
 // 이메일 변경 제출
 const handleSubmit = async () => {

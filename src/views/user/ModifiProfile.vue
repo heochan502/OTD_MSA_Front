@@ -1,6 +1,11 @@
 <script setup>
-import { ref } from 'vue'
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { deleteUser } from '@/services/user/userService';
+import { useAuthenticationStore } from '@/stores/user/authentication';
 
+const router = useRouter();
+const authenticationStore = useAuthenticationStore();
 const showModal = ref(false)
 const email = ref('')
 
@@ -41,10 +46,36 @@ const handleSubmit = async () => {
     alert('네트워크 오류가 발생했습니다.')
   }
 }
+
 const handleClose = () => {
   showModal.value = false
   email.value = ''
 }
+
+const remove = async (userId) => {
+  if (!confirm('정말 회원 탈퇴하시겠습니까?')) return;
+
+  try {
+    const res = await deleteUser(userId);
+    if (res.status === 200) {
+      alert('회원 탈퇴가 완료되었습니다.');
+      
+      // Pinia 스토어 초기화 (logout 메서드 사용)
+      await authenticationStore.logout();
+      
+      // 추가로 로컬/세션 스토리지도 클리어
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      router.push('/user/login');
+    } else {
+      alert('회원 탈퇴에 실패했습니다.');
+    }
+  } catch (error) {
+    console.error('회원탈퇴 에러:', error);
+    alert('오류가 발생했습니다.');
+  }
+};
 </script>
 
 <template>
@@ -69,20 +100,20 @@ const handleClose = () => {
     </div>
     
     <div class="settings-list">
-      <button @click="handlePasswordReset" class="settings-item">
+      <router-link to="/user/password" class="settings-item">
         <div class="settings-icon">🔒</div>
         <span>비밀번호 재설정</span>
         <div class="arrow">›</div>
-      </button>
+      </router-link>
     </div>
     
     <div class="settings-list">
-      <router-link to="/user/withdrawal" class="settings-item">
-        <div class="settings-icon">🚪</div>
-        <span>회원탈퇴</span>
-        <div class="arrow">›</div>
-      </router-link>
-    </div>
+  <button @click="remove(userId)" class="settings-item">
+    <div class="settings-icon">🚪</div>
+    <span>회원탈퇴</span>
+    <div class="arrow">›</div>
+  </button>
+</div>
   </div>
 
   <!-- 비밀번호 재설정 모달 -->

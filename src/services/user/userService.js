@@ -38,3 +38,9 @@ export const updateNickname = (nickname) =>
 export const changePassword = (data) => axios.patch(`${path}/password`, data);
 
 export const getPointHistory = (userId) => axios.get(`${path}/pointhistory/${userId}`);
+
+export const deleteUser = (userId) => {
+  return axios
+    .delete(`${path}/account`, { userId })
+    .catch((e) => e.response);
+};

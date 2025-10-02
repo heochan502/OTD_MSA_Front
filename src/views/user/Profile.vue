@@ -169,7 +169,7 @@ const fetchRecentHistory = async () => {
       .slice(0, 2);
       
   } catch (err) {
-    console.error('포인트 히스토리 조회 실패:', err);
+    console.error('포인트 히스토리 조회 실패:백엔드켰나?쿠키있나?', err);
     recentHistory.value = [];
   } finally {
     loadingHistory.value = false;

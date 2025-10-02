@@ -11,6 +11,17 @@ const dailyMission = ref([]);
 const loading = ref(true);
 const error = ref(null);
 
+// 페이징 관련 상태
+const currentPage = ref(1);
+const itemsPerPage = 10;
+
+// 날짜 계산 (한 달 전)
+const getOneMonthAgo = () => {
+  const today = new Date();
+  const oneMonthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+  return oneMonthAgo;
+};
+
 const fetchData = async () => {
   try {
     loading.value = true;
@@ -32,9 +43,12 @@ const fetchData = async () => {
     missionComplete.value = missionResponse.data.missionComplete || [];
     dailyMission.value = missionResponse.data.dailyMission || [];
     
-    console.log('포인트 히스토리:', pointHistory.value);
-    console.log('미션 완료:', missionComplete.value);
-    console.log('일일 미션:', dailyMission.value);
+    console.log('========== 데이터 확인 ==========');
+    console.log('포인트 히스토리 개수:', pointHistory.value.length);
+    console.log('미션 완료 개수:', missionComplete.value.length);
+    console.log('일일 미션 개수:', dailyMission.value.length);
+    console.log('미션 완료 전체 데이터:', missionComplete.value);
+    console.log('================================');
     
   } catch (err) {
     console.error('에러 발생:', err);
@@ -49,35 +63,62 @@ const fetchData = async () => {
   }
 };
 
-// 모든 내역을 합쳐서 최신순 정렬
+// 모든 내역을 합쳐서 최신순 정렬 (한 달치만)
 const allHistory = computed(() => {
   const combined = [];
+  const oneMonthAgo = getOneMonthAgo();
   
-  // 포인트 히스토리 추가
+  console.log('========== allHistory 계산 시작 ==========');
+  console.log('한 달 전 날짜:', oneMonthAgo);
+  console.log('처리할 미션 완료 개수:', missionComplete.value.length);
+  
+  // 포인트 히스토리 추가 (한 달 이내)
   pointHistory.value.forEach(item => {
-    combined.push({
-      type: 'point',
-      reason: item.reason,
-      point: item.point,
-      createdAt: item.createdAt,
-      id: `point-${item.chId}`
-    });
-  });
-  
-  // 일일 미션 완료 내역 추가
-  missionComplete.value.forEach(mission => {
-    // cdId 타입 통일 (문자열로 비교)
-    const missionDetail = dailyMission.value.find(m => String(m.cdId) === String(mission.cdId));
-    if (missionDetail) {
+    const itemDate = new Date(item.createdAt);
+    if (itemDate >= oneMonthAgo) {
       combined.push({
-        type: 'mission',
-        reason: missionDetail.cdName,
-        point: missionDetail.cdReward,
-        createdAt: mission.successDate, // successDate 사용
-        id: `mission-${mission.cdId}-${mission.successDate}`
+        type: 'point',
+        reason: item.reason,
+        point: item.point,
+        createdAt: item.createdAt,
+        id: `point-${item.chId}`
       });
     }
   });
+  
+  console.log('포인트 히스토리 추가 후:', combined.length);
+  
+  // 일일 미션 완료 내역 추가 (한 달 이내)
+  missionComplete.value.forEach((mission, index) => {
+    console.log(`미션 ${index + 1}:`, mission);
+    
+    // successDate 파싱 확인
+    const missionDate = new Date(mission.successDate);
+    console.log('  - successDate:', mission.successDate);
+    console.log('  - 파싱된 날짜:', missionDate);
+    console.log('  - 한 달 이내?:', missionDate >= oneMonthAgo);
+    
+    if (missionDate >= oneMonthAgo) {
+      const missionDetail = dailyMission.value.find(m => String(m.cdId) === String(mission.cdId));
+      console.log('  - 매칭된 미션:', missionDetail);
+      
+      if (missionDetail) {
+        combined.push({
+          type: 'mission',
+          reason: missionDetail.cdName,
+          point: missionDetail.cdReward,
+          createdAt: mission.successDate,
+          id: `mission-${mission.cdId}-${mission.successDate}`
+        });
+        console.log('  ✅ 추가 완료');
+      } else {
+        console.log('  ❌ 매칭 실패 - cdId:', mission.cdId);
+      }
+    }
+  });
+  
+  console.log('최종 combined 개수:', combined.length);
+  console.log('========== allHistory 계산 완료 ==========');
   
   // 최신순 정렬
   return combined.sort((a, b) => {
@@ -85,6 +126,49 @@ const allHistory = computed(() => {
     const dateB = new Date(b.createdAt);
     return dateB - dateA;
   });
+});
+
+// 페이징된 내역
+const paginatedHistory = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return allHistory.value.slice(start, end);
+});
+
+// 총 페이지 수
+const totalPages = computed(() => {
+  return Math.ceil(allHistory.value.length / itemsPerPage);
+});
+
+// 페이지 변경
+const changePage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+};
+
+// 페이지 번호 배열 생성 (최대 5개 표시)
+const pageNumbers = computed(() => {
+  const pages = [];
+  const total = totalPages.value;
+  const current = currentPage.value;
+  
+  if (total <= 5) {
+    for (let i = 1; i <= total; i++) {
+      pages.push(i);
+    }
+  } else {
+    if (current <= 3) {
+      pages.push(1, 2, 3, 4, 5);
+    } else if (current >= total - 2) {
+      pages.push(total - 4, total - 3, total - 2, total - 1, total);
+    } else {
+      pages.push(current - 2, current - 1, current, current + 1, current + 2);
+    }
+  }
+  
+  return pages;
 });
 
 const formatDate = (dateString) => {
@@ -99,7 +183,6 @@ const formatDate = (dateString) => {
   });
 };
 
-// reason에서 타입 추출
 const getReasonType = (item) => {
   if (item.type === 'mission') return 'mission';
   
@@ -113,7 +196,6 @@ const getReasonType = (item) => {
   return 'normal';
 };
 
-// reason을 사용자 친화적으로 변환
 const formatReason = (item) => {
   if (item.type === 'mission') {
     return ' 일일 미션: ' + item.reason;
@@ -173,10 +255,14 @@ onMounted(() => {
 
     <!-- 전체 포인트 내역 -->
     <div v-else class="point-history">
-      <h3>포인트 내역</h3>
-      <ul v-if="allHistory.length > 0" class="history-list">
+      <div class="history-header">
+        <h3>포인트 내역 (최근 1개월)</h3>
+        <span class="total-count">전체 {{ allHistory.length }}건</span>
+      </div>
+
+      <ul v-if="paginatedHistory.length > 0" class="history-list">
         <li 
-          v-for="item in allHistory" 
+          v-for="item in paginatedHistory" 
           :key="item.id" 
           class="history-item"
           :class="{
@@ -198,7 +284,36 @@ onMounted(() => {
           </span>
         </li>
       </ul>
-      <p v-else class="no-data">포인트 내역이 없습니다.</p>
+      <p v-else class="no-data">최근 1개월 내 포인트 내역이 없습니다.</p>
+
+      <!-- 페이징 -->
+      <div v-if="totalPages > 1" class="pagination">
+        <button 
+          class="page-btn" 
+          :disabled="currentPage === 1"
+          @click="changePage(currentPage - 1)"
+        >
+          이전
+        </button>
+        
+        <button
+          v-for="page in pageNumbers"
+          :key="page"
+          class="page-number"
+          :class="{ active: page === currentPage }"
+          @click="changePage(page)"
+        >
+          {{ page }}
+        </button>
+        
+        <button 
+          class="page-btn" 
+          :disabled="currentPage === totalPages"
+          @click="changePage(currentPage + 1)"
+        >
+          다음
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -253,16 +368,31 @@ onMounted(() => {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.point-history h3 {
-  margin: 0 0 20px 0;
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.history-header h3 {
+  margin: 0;
   font-size: 20px;
   color: #333;
+}
+
+.total-count {
+  font-size: 14px;
+  color: #666;
+  background: #f3f4f6;
+  padding: 5px 12px;
+  border-radius: 20px;
 }
 
 .history-list {
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 0 0 20px 0;
 }
 
 .history-item {
@@ -283,25 +413,21 @@ onMounted(() => {
   border-bottom: none;
 }
 
-/* 일일 미션 */
 .mission-item {
   background: linear-gradient(135deg, #f0fdf4 0%, #f7fef9 100%);
   border-left: 4px solid #22c55e;
 }
 
-/* 랭킹 보상 */
 .rank-item {
   background: linear-gradient(135deg, #fff9e6 0%, #fffbf0 100%);
   border-left: 4px solid #fbbf24;
 }
 
-/* 개근 보상 */
 .perfect-item {
   background: linear-gradient(135deg, #f0fdf4 0%, #f7fef9 100%);
   border-left: 4px solid #10b981;
 }
 
-/* 출석 보상 */
 .attendance-item {
   background: linear-gradient(135deg, #eff6ff 0%, #f5f9ff 100%);
   border-left: 4px solid #3b82f6;
@@ -339,5 +465,48 @@ onMounted(() => {
 
 .point.negative {
   color: #ef4444;
+}
+
+/* 페이징 스타일 */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.page-btn,
+.page-number {
+  padding: 8px 16px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  color: #374151;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.page-btn:hover:not(:disabled),
+.page-number:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-number.active {
+  background: #393e46;
+  color: white;
+  border-color: #393e46;
+  font-weight: bold;
+}
+
+.page-number {
+  min-width: 40px;
 }
 </style>

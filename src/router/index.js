@@ -26,14 +26,10 @@ import Munhe from '@/views/user/Munhe.vue';
 import ModifiProfile from '@/views/user/ModifiProfile.vue';
 import NickName from '@/views/user/Nickname.vue';
 import Email from '@/views/user/Email.vue';
+import Password from '@/views/user/password.vue';
 import PointHistory from '@/views/user/pointHistory.vue';
 import Term from '@/views/user/Term.vue';
 import Oauth2 from '@/views/auth/OAuth2Handler.vue';
-
-import PayApproval from '@/views/pay/PayApproval.vue';
-import PayCancel from '@/views/pay/PayCancel.vue';
-import PayCompleted from '@/views/pay/PayCompleted.vue';
-import PayFail from '@/views/pay/PayFail.vue';
 
 // 포인트샵
 import PointShopListView from '@/views/point/PointShopListView.vue';
@@ -229,6 +225,11 @@ const router = createRouter({
       component: Email,
     },
     {
+      path: '/user/password',
+      name: 'password',
+      component: Password,
+    },
+    {
       path: '/user/pointhistory',
       name: 'pointHistory',
       component: PointHistory,
@@ -242,26 +243,6 @@ const router = createRouter({
       path: '/fe/redirect',
       name: 'oauth2',
       component: Oauth2,
-    },
-    {
-      path: '/pay/approval',
-      name: 'pay-approval',
-      component: PayApproval,
-    },
-    {
-      path: '/pay/cancel',
-      name: 'pay-cancel',
-      component: PayCancel,
-    },
-    {
-      path: '/pay/completed',
-      name: 'pay-completed',
-      component: PayCompleted,
-    },
-    {
-      path: '/pay/fail',
-      name: 'pay-fail',
-      component: PayFail,
     },
     {
       path: '/pointshop',
