@@ -63,11 +63,11 @@ function open() {
       <span class="comment">💬 {{ getComments(post) }}</span>
     </footer>
 
-    <!-- 오른쪽: 썸네일(없어도 칸은 보이게) -->
+    <!-- 오른쪽: 썸네일(없으면 아예 안보임) -->
     <figure class="thumb" v-if="getThumb(post)">
       <img :src="getThumb(post)" alt="" loading="lazy" decoding="async" />
     </figure>
-    <div class="thumb thumb--skeleton" v-else aria-hidden="true"></div>
+    <!-- 🔽 skeleton 제거 -->
   </article>
 </template>
 
