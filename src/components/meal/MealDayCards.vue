@@ -48,6 +48,7 @@ const toggleFasting = (i) => {
 const onTopIconClick = (i) => {
   const item = mealInfo.value[i];
   if (item.recorded) {
+    
     router.push({ name: 'MealRecordView', query: { meal: item.meal_day } });
   } else if (!item.check) {
     item.recorded = true;
