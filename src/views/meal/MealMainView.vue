@@ -6,10 +6,10 @@ import MealDayCards from '@/components/meal/MealDayCards.vue';
 import WaterCard from '@/components/meal/WaterCard.vue'; // ✅ 추가
 import MealDateStrip from '@/components/meal/MealDateStrip.vue';
 
-import {useMealSelectedDayStore} from '@/stores/meal/mealStore.js'
+import {useMealSelectedStore} from '@/stores/meal/mealStore.js'
 
 
-const selectedDay = useMealSelectedDayStore();
+const selectedDay = useMealSelectedStore();
 
 const router = useRouter();
 const route = useRoute()
@@ -31,7 +31,7 @@ watch(selectedDate, (day) => {
   const mm = String(day.getMonth() + 1).padStart(2, '0');
   const dd = String(day.getDate()).padStart(2, '0');
   selectedDay.selectedDay.setDay = `${yyyy}-${mm}-${dd}`;
-  console.log(selectedDay.selectedDay.setDay);
+  console.log("선택날" ,selectedDay.selectedDay.setDay);
   router.replace({ query: { ...route.query}, day: `${yyyy}-${mm}-${dd}` });
 });
 

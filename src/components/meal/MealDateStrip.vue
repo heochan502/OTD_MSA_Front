@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 
-import {useMealSelectedDayStore} from '@/stores/meal/mealStore.js'
+import {useMealSelectedStore} from '@/stores/meal/mealStore.js'
 
 
 import dayjs from 'dayjs';
@@ -10,7 +10,7 @@ import 'dayjs/locale/ko';
 
 dayjs.locale('ko');
 
-const selectedDay = useMealSelectedDayStore();
+const selectedDay = useMealSelectedStore();
 
 
 
@@ -84,8 +84,8 @@ watch(selected, syncIndex);
 // 선택 처리
 function select(day) {
   // console.log("여기 : ", new dayjs(day).format('YYYY-MM-DD'));
-  // console.log("여기2 : ", selectedDay.selectedDay.setDay);
-  if (new dayjs(day).format('YYYY-MM-DD') === selectedDay.selectedDay.setDay)
+  // console.log("여기2 : ", selectedDay.selectedDay.setTime);
+  if (new dayjs(day).format('YYYY-MM-DD') === selectedDay.selectedDay.setTime)
     {selected.value = new Date();  }
 
   else{
