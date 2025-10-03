@@ -84,8 +84,8 @@ watch(selected, syncIndex);
 // 선택 처리
 function select(day) {
   // console.log("여기 : ", new dayjs(day).format('YYYY-MM-DD'));
-  // console.log("여기2 : ", selectedDay.selectedDay.setDay);
-  if (new dayjs(day).format('YYYY-MM-DD') === selectedDay.selectedDay.setDay)
+  // console.log("여기2 : ", selectedDay.selectedDay.setTime);
+  if (new dayjs(day).format('YYYY-MM-DD') === selectedDay.selectedDay.setTime)
     {selected.value = new Date();  }
 
   else{
