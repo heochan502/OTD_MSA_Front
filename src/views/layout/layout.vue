@@ -1,8 +1,8 @@
 <script setup>
-import { useScroll } from '@vueuse/core';
-import Breadcrumb from './Breadcrumb.vue';
-import Content from './Content.vue';
-import Footer from './Footer.vue';
+import { useScroll } from "@vueuse/core";
+import Breadcrumb from "./Breadcrumb.vue";
+import Content from "./Content.vue";
+import Footer from "./Footer.vue";
 </script>
 <template>
   <div class="app-layout">
@@ -10,7 +10,7 @@ import Footer from './Footer.vue';
       <Breadcrumb />
       <!--  상단 내용 -->
     </div>
-    <div class="main-wrap " >
+    <div class="main-wrap">
       <router-view />
     </div>
     <!-- <Content />    컨텐츠 내용 -->
@@ -23,8 +23,10 @@ import Footer from './Footer.vue';
 .app-layout {
   display: flex;
   flex-direction: column;
-  height: 805px;
+  // height: 805px;
+  height: 100vh;
   user-select: none;
+  padding-bottom: 95px;
 }
 /* 공통 화면 좌우 여백 */
 .main-wrap {
@@ -40,5 +42,6 @@ import Footer from './Footer.vue';
 }
 .nav-footer {
   margin-top: auto;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 </style>
