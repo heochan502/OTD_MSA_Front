@@ -3,7 +3,6 @@ import { ref, computed, reactive, watch, onMounted  } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { debounce, flatMapDepth } from 'lodash';
 import { getFood } from '@/services/meal/mealService';
-import { checkDuplicateUser } from '@/services/user/userService';
 
 import { storeToRefs } from 'pinia';
 
@@ -28,13 +27,13 @@ const keyword = ref(null);
 
 
 onMounted (()=>{
-  if ( selectedDay.selectedDay.setDay.values === route.query.meal.values)
-{
-  console.log("초기화");
-  selectedFoods.value =null;
-}
-
-  selectedDay.selectedDay.setDay = route.query.meal;
+  const meal = String(route.query.meal ?? '');
+  if (selectedDay.selectedDay.setTime !== meal || !selectedDay.selectedDay.setTime) {
+    selectedFoods.value = [];        // 끼니 바뀌면 선택 초기화
+    selectedDay.selectedDay.setTime = meal;
+    console.log('끼니 변경:', meal);
+    console.log('끼니 변경:', selectedDay.selectedDay.setDay);
+  }
 });
 
 // 선택된 음식
@@ -59,10 +58,10 @@ const items = reactive({
   foodList: [],
 });
 
-const changeText = debounce(() => {
+const changeText = debounce((keyword) => {
   // const searchFood = value;
   // console.log('foodName change:', searchFood);
-  searchFoodName(keyword.value);
+  searchFoodName(keyword);
 }, 50);
 
 // 검색어 입력/선택 처리
@@ -77,7 +76,7 @@ const onFoodNameInput = async (value) => {
 
 const searchFoodName = async (keyword) => {
   console.log('이게왜', keyword);
-  console.log('시간:', selectedDay.selectedDay.setDay);
+  console.log('시간:', selectedDay.selectedDay.setTime);
   const res = await getFood(keyword);
 
   // console.log(" 이름 : ", res);
@@ -117,21 +116,21 @@ const searchFoodName = async (keyword) => {
   }
 };
 
-//출력할때 선택 한거는 내가 선택한 값으로 표시
-// 선택 빠른 조회용 맵
-const selectedValue = computed(() => {
-  const values = new Map()
-  for (const item of selectedFoods) values.set(item.foodDbId, item)
-  return values
-})
 
 // 체크여부 & 표시값 헬퍼 함수
 //역할은 해당 키(key)가 Map 안에 존재하는지 확인하는 것.
-const isSelected = (id) => selectedValue.foodDbId;
-const displayAmount = (food) => selectedValue.foodDbId?.amount ?? food.amount;
-const displayKcal = (food) => selectedValue.foodDbId?.kcal ?? food.kcal;
+const isSelected = (id) =>
+  id != null && (selectedFoods.value ?? []).some(food => food?.foodDbId === id);
 
+const displayAmount = (food) => {
+  const sel = (selectedFoods.value ?? []).find(food => food?.foodDbId === food?.foodDbId);
+  return Number(sel?.amount ?? food?.amount ?? 0);
+};
 
+const displayKcal = (food) => {
+  const sel = (selectedFoods.value ?? []).find(food => food?.foodDbId === food?.foodDbId);
+  return Number(sel?.kcal ?? food?.kcal ?? 0);
+};
 
 
 //  바텀시트 상태 + 편집 대상(상세에서 조절)
@@ -152,30 +151,42 @@ const customFood = ref ({
 });
 
 // 리스트 아이템 클릭 → 바텀시트 오픈
+// const openSheet = (food) => {
+//   const kcalPer100 = food.amount ? Math.round(food.kcal / (food.amount / 100)) : 0
+  
+//   clickFood.value = {
+//     ...food,
+//     _kcalPer100: kcalPer100,
+//   }
+//   // 이미 담아둔 값이 있으면 그 값으로 customFood 채우기
+//   const saved = selectedValue.foodDbId
+//   if (saved) {
+//     customFood.value = {
+//       ...saved,
+//       _kcalPer100: kcalPer100, // 계산용 per100은 최신으로 유지
+//     }
+//   } else {
+//     // 없으면 원본 food로 채우기
+//     customFood.value = {
+//       ...food,
+//       _kcalPer100: kcalPer100,
+//     }
+//   }
+//   sheetOpen.value = true
+// }
 
 const openSheet = (food) => {
-  const kcalPer100 = food.amount ? Math.round(food.kcal / (food.amount / 100)) : 0
-  
-  clickFood.value = {
-    ...food,
-    _kcalPer100: kcalPer100,
-  }
-  // 이미 담아둔 값이 있으면 그 값으로 customFood 채우기
-  const saved = selectedValue.foodDbId
-  if (saved) {
-    customFood.value = {
-      ...saved,
-      _kcalPer100: kcalPer100, // 계산용 per100은 최신으로 유지
-    }
-  } else {
-    // 없으면 원본 food로 채우기
-    customFood.value = {
-      ...food,
-      _kcalPer100: kcalPer100,
-    }
-  }
-  sheetOpen.value = true
-}
+  const kcalPer100 = food.amount ? Math.round(food.kcal / (food.amount / 100)) : 0;
+
+  clickFood.value = { ...food, _kcalPer100: kcalPer100 };
+
+  const saved = (selectedFoods.value ?? []).find(f => f.foodDbId === food.foodDbId);
+  customFood.value = saved
+    ? { ...saved, _kcalPer100: kcalPer100 }
+    : { ...food, _kcalPer100: kcalPer100 };
+
+  sheetOpen.value = true;
+};
 
 // 양 변경 시 kcal 재계산
 const recalc = () => {
@@ -196,81 +207,50 @@ const changeAmount = (delta) => {
 
 //  [목록에 담기]
 const addToList = () => {
-  const modiFood = customFood.value
-  const idx = selectedFoods.value?.findIndex(value => value.foodDbId === modiFood.foodDbId)
+  const modiFood = customFood.value;
+  selectedFoods.value ??= []; // 배열 보정
 
   const payload = {
     foodDbId: modiFood.foodDbId,
     foodName: modiFood.foodName,
-    amount: modiFood.amount,
-    kcal: modiFood.kcal,
+    amount: Number(modiFood.amount) || 0,
+    kcal: Number(modiFood.kcal) || 0,
     flag: modiFood.flag,
-    protein: modiFood.protein,
-    carbohydrate: modiFood.carbohydrate,
-    fat: modiFood.fat,
-    sugar: modiFood.sugar,
-    natrium: modiFood.natrium,
-  }
+    protein: Number(modiFood.protein) || 0,
+    carbohydrate: Number(modiFood.carbohydrate) || 0,
+    fat: Number(modiFood.fat) || 0,
+    sugar: Number(modiFood.sugar) || 0,
+    natrium: Number(modiFood.natrium) || 0,
+  };
 
-  if (idx === -1) selectedFoods.value.push(payload)
-  else selectedFoods.value[idx] = payload
+  const idx = selectedFoods.value.findIndex(v => v?.foodDbId === modiFood.foodDbId);
+  if (idx === -1) selectedFoods.value.push(payload);
+  else selectedFoods.value[idx] = payload;
 
-  // (선택) 리스트 표시값도 덮어쓰고 싶으면:
-  const target = items.foodList.find(f => f.foodDbId === modiFood.foodDbId)
-  if (target) {
-    // target.checked = true   // 이제 체크는 selected 기반이므로 불필요
-    // target.amount  = e.amount
-    // target.kcal    = e.kcal
-  }
-
-  sheetOpen.value = false
-}
+  sheetOpen.value = false;
+};
 
 
-// 음식 선택/해제
+// 체크 아이콘 전용 토글
 const toggleSelect = (food) => {
-
-  console.log("클릭중" , food);
-
-  const foodInfo = food;
-
-// console.log('드롭다운에서 클릭된 항목:', foodInfo);
-if (!selectedFoods.value.some((item) => item.foodDbId === foodInfo.foodDbId)) {
-  selectedFoods.value.push({
-    foodDbId: foodInfo.foodDbId,
-    foodName: foodInfo.foodName,
-    kcal: foodInfo.kcal*(foodInfo.amount/100),
-    flag: foodInfo.flag,
-    protein: foodInfo.protein(foodInfo.amount / 100),
-    carbohydrate: foodInfo.carbohydrate(foodInfo.amount / 100),
-    fat: foodInfo.fat(foodInfo.amount / 100),
-    sugar: foodInfo.sugar(foodInfo.amount / 100),
-    natrium: foodInfo.natrium(foodInfo.amount / 100),
-    amount: foodInfo.amount,
-  });
-  foodInfo.checked = true;
-}
-// 음식id가 이미 선택된 상태라면 선택 해제
-else
-{
-  const idx = selectedFoods.value.findIndex((f) => f.foodDbId === food.foodDbId);
-  food.checked = false;
-  selectedFoods.value.splice(idx, 1);
-  console.log("같은거 클릭", idx);  
-}
-console.log('배열에 넣는데:', selectedFoods.value);
-  // const idx = selected.value.findIndex((f) => f.name === food.name);
-  // if (idx === -1) selected.value.push(food);
-  // else selected.value.splice(idx, 1);  
+  if (isSelected(food.foodDbId)) {
+    // 이미 담겨 있으면 해제
+    cancelFood(food.foodDbId);
+  } else {
+    // 아직 없으면 상세에서 양 설정 후 담게 하기
+    openSheet(food);
+    // 만약 상세 없이 즉시 담고 싶다면 openSheet 대신 바로 push:
+    // selectedFoods.value.push({ ...food });
+  }
 };
 
-const cancelFood =(foodId) =>{
 
- const idx = selectedFoods.value.findIndex(value => value.foodDbId === foodId)
- selectedFoods.value.splice(idx, 1);
-
-  sheetOpen.value = false
+const cancelFood = (foodId) => {
+  const idx = (selectedFoods.value ?? []).findIndex(v => v?.foodDbId === foodId);
+  if (idx > -1) selectedFoods.value.splice(idx, 1);
+  sheetOpen.value = false;
 };
+
 
 
 const menuOpen = ref(false);
@@ -309,7 +289,7 @@ const customSheet = ref(false);
 const customAddToList = (payload) => {
   // payload: { name, unit, kcal, carb, protein, fat, sugar, na }
   selectedFoods.value.push({
-    foodDbId: null,
+    foodDbId: payload.foodDbId,
     foodName: payload.foodName,
     kcal: payload.kcal,
     flag: payload.flag,
@@ -371,39 +351,10 @@ const frameEl = ref(null); // 모달을 붙일 프레임
         <div class="d-flex align-center">
           <span class="mr-2">{{ displayKcal(food) }} kcal</span> <!-- 선택되면 selected.kcal -->
           <img class="check" :src="isSelected(food.foodDbId) ? checkOn : checkOff"
-            :alt="isSelected(food.foodDbId) ? 'Checked' : 'Default'" />
+            :alt="isSelected(food.foodDbId) ? 'Checked' : 'Default'" @click.stop="toggleSelect(food)" />
         </div>
       </div>
-    </div>
-    <!--  바텀시트 v-dialog -->
-    <!-- <v-dialog v-model="sheetOpen" transition="dialog-bottom-transition" :scrim="true" :persistent="true" width="500"
-      class="bottom-sheet otd-sheet" :contained="false" :z-index="5000" >
-      <template #default>
-        <div class="sheet-card">
-          <div class="sheet-handle" />
-          <div class="sheet-title otd-title">{{ custom_food.foodName }}</div>
-
-          <div class="kcal-card">
-            <div class="otd-body-2">kcal</div>
-            <div class="otd-title">{{ custom_food.kcal }} kcal</div>
-          </div>
-
-          <div class="amount-row">
-            <v-btn icon="mdi-minus" variant="tonal" @click="changeAmount(-10)" />
-            <v-text-field v-model.number="custom_food.amount" type="number" min="0" density="comfortable" variant="outlined"
-              class="mx-3" suffix="g" @update:model-value="recalc" />
-            <v-btn icon="mdi-plus" variant="tonal" @click="changeAmount(10)" />
-          </div>
-
-          <div class="actions">
-            <v-btn variant="outlined" class="mr-2" @click="sheetOpen = false">닫기</v-btn>
-            <v-btn color="yellow-darken-2" class="text-black" @click="addToList">
-              목록에 담기
-            </v-btn>
-          </div>
-        </div>
-      </template>
-    </v-dialog> -->
+    </div>  
     <v-dialog v-model="sheetOpen" transition="dialog-bottom-transition" :scrim="true" :persistent="true"
       :contained="true" content-class="otd-sheet" scrim-class="otd-scrim" @click:outside="sheetOpen = false">
       <div class="sheet-card">
@@ -429,15 +380,7 @@ const frameEl = ref(null); // 모달을 붙일 프레임
         <div class="kcal-card">
           <span class="kcal-label">kcal</span>
           <div class="kcal-value"><strong>{{ customFood.kcal }}</strong> kcal</div>
-        </div>
-
-        <!-- 단위/슬라이더 영역 (슬라이더가 없으면 이 블록은 빼도 됨) -->
-        <!--
-    <div class="unit-row">
-      <div class="unit-chip">ml</div>
-      <div class="unit-track"><div class="unit-thumb" :style="{ left: '40%' }"></div></div>
-    </div>
-    -->
+        </div>      
 
         <!-- 수량 스텝퍼 -->
         <div class="stepper">
@@ -459,7 +402,7 @@ const frameEl = ref(null); // 모달을 붙일 프레임
           <v-btn class="btn-primary" @click="addToList">목록에 담기</v-btn>
         </div>
 
-<!-- 
+        <!-- 
         <div class="layout-frame" >
           <MealCustomFood v-model:open="customSheet"  @submit="customAddToList" />
         </div> -->

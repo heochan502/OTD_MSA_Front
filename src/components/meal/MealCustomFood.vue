@@ -1,6 +1,10 @@
 <script setup>
 import { reactive, computed, watch, onMounted } from 'vue';
 
+import { useAuthenticationStore } from '@/stores/user/authentication.js'
+
+
+const userInfo = useAuthenticationStore();
 const props = defineProps({
   open: { type: Boolean, default: false },
   // 초기값 주고 싶으면 전달
@@ -12,6 +16,8 @@ const props = defineProps({
 const emit = defineEmits(['update:open', 'submit', 'close']);
 
 const form = reactive({
+            
+  foodDbId: null, // userId로 대체
   foodName: '',
   flag: 'g',
   kcal: 0,

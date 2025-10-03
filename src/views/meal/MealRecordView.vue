@@ -3,6 +3,8 @@ import { ref, computed, reactive, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import {storeToRefs} from 'pinia';
 
+import{ postMealRecord }from '@/services/meal/mealService.js';
+
 import { useMealSelectedStore } from '@/stores/meal/mealStore.js';
 
 // const selectedFoods = useMealSelectedStore();
@@ -64,12 +66,19 @@ const grams = reactive({ carb: 28.5, protein: 53.2, fat: 45.9 });
 
 // g → % (막대 폭)
 const macroPct = computed(() => {
-  const sum = totalCarb + totalProtein + totalFat || 1;
-  return {
-    carb: Math.round((totalCarb / sum) * 100),
-    protein: Math.round((totalProtein / sum) * 100),
-    fat: Math.round((totalFat / sum) * 100),
-  };
+  const carb = Number(totalCarb.value) * 4 || 0;
+  const protein = Number(totalProtein.value) * 4 || 0;
+  const fat = Number(totalFat.value) * 9 || 0;
+
+  const sum = carb + protein + fat || 0;
+
+  if (sum <= 0) return { carb: 0, protein: 0, fat: 0 };
+
+  const modiCarb = Math.round((carb / sum) * 100);
+  const modiProtein = Math.round((protein / sum) * 100);
+  const modiFat = Math.max(0, 100 - modiCarb - modiProtein); // 반올림 오차 보정
+
+  return { carb: modiCarb, protein: modiProtein, fat: modiFat };
 });
 
 onMounted(async () => {
@@ -85,6 +94,63 @@ const clickAddFood = () => {
     query: { meal: route.query.meal },
   });
 };
+
+const inputdata=(async() => {
+//   console.log('입력 데이터', foods.value);
+//   console.log('입력 데이터 시간대 ', store.selectedDay.setTime);
+//   console.log('입력 데이터 날짜 ', store.selectedDay.setDay);
+  
+const res = await postMealRecord({
+    mealTime : store.selectedDay.setTime,   // 끼니
+    mealDay : store.selectedDay.setDay,    // 날짜
+    foods : foods.value                     // 음식들
+  });
+  console.log('입력 데이터', res);
+  if (res.savedCount > 0) {
+    openResultModal(true);
+  } else {
+    openResultModal(false);
+  }
+  // if (res.savedCount > 0) {
+  //   alert('식단이 성공적으로 기록되었습니다.');
+  //   // 기록 후 초기화
+  //   selectedFoods.value = [];
+  //   router.push({ name: 'MealMainView' });
+  // } else {
+  //   alert('식단 기록에 실패했습니다. 다시 시도해주세요.');
+  // }
+});
+
+// 모달 상태
+const resultModal = ref({
+  open: false,
+  success: false,
+  title: '',
+  message: '',
+});
+
+// 모달 열기
+function openResultModal(success) {
+  resultModal.value = {
+    open: true,
+    success,
+    title: success ? '기록 완료' : '기록 실패',
+    message: success
+      ? '식단이 성공적으로 기록되었어요.'
+      : '식단 기록에 실패했어요. 다시 시도해주세요.',
+  };
+}
+
+// 모달 닫기(성공 시 초기화 + 이동)
+function closeResultModal() {
+  resultModal.value.open = false;
+  if (resultModal.value.success) {
+    selectedFoods.value = [];
+    router.push({ name: 'MealMainView' });
+  }
+}
+
+
 </script>
 
 <template>
@@ -101,30 +167,27 @@ const clickAddFood = () => {
       <div class="total-kcal">총 {{ totalKcal }}kcal</div>
 
       <!-- 매크로 바 -->
-      <div class="bar-container d-flex align-center flex-row">
-        <div class="bar">
-          <div class="seg carb" :style="{ width: macroPct.carb + '%' }"></div>
+      <div class="bars">
+        <div class="bar" :style="{ width: macroPct.carb + '%' }">
+          <div class="fill carb"></div>
         </div>
-        <div class="bar">
-          <div
-            class="seg protein"
-            :style="{ width: macroPct.protein + '%' }"
-          ></div>
+        <div class="bar" :style="{ width: macroPct.protein + '%' }">
+          <div class="fill protein"></div>
         </div>
-        <div class="bar">
-          <div class="seg fat" :style="{ width: macroPct.fat + '%' }"></div>
+        <div class="bar" :style="{ width: macroPct.fat + '%' }">
+          <div class="fill fat"></div>
         </div>
       </div>
 
-      <!-- g 표기 -->
+      <!-- % 표기 -->
       <div class="grams">
         <div class="g">
-          <span class="dot carb"></span>순탄수 {{ grams.carb }}g
+          <span class="dot carb"></span>순탄수 {{ macroPct.carb }}%
         </div>
         <div class="g">
-          <span class="dot protein"></span>단백질 {{ grams.protein }}g
+          <span class="dot protein"></span>단백질 {{ macroPct.protein }}%
         </div>
-        <div class="g"><span class="dot fat"></span>지방 {{ grams.fat }}g</div>
+        <div class="g"><span class="dot fat"></span>지방 {{ macroPct.fat }}%</div>
       </div>
 
       <!-- 음식 리스트 -->
@@ -146,10 +209,35 @@ const clickAddFood = () => {
         <button class="otd-button add-btn" @click="clickAddFood">
           음식 추가
         </button>
-        <button class="otd-button complete-btn">식단 기록 완료</button>
+        <button class="otd-button complete-btn" @click="inputdata">식단 기록 완료</button>
       </div>
     </div>
   </div>
+  <!-- 모달창  -->
+  <v-dialog v-model="resultModal.open" width="320" :scrim="true">
+    <v-card class="pa-4 rounded-xl">
+      <div class="d-flex align-center mb-2">
+        <v-icon :color="resultModal.success ? 'teal' : 'red'">
+          {{ resultModal.success ? 'mdi-check-circle' : 'mdi-alert-circle' }}
+        </v-icon>
+        <div class="ml-2 text-subtitle-1 font-weight-bold">
+          {{ resultModal.title }}
+        </div>
+      </div>
+
+      <div class="text-body-2 mb-4">
+        {{ resultModal.message }}
+      </div>
+
+      <div class="d-flex justify-end">
+        <v-btn  class="btn-confirm" @click="closeResultModal">
+          확인
+        </v-btn>
+      </div>
+    </v-card>
+  </v-dialog>
+
+
 </template>
 
 <style scoped>
@@ -196,19 +284,26 @@ const clickAddFood = () => {
 }
 
 /* 매크로 바 */
-.bar-container {
-  gap: 12px;
-  margin-top: 12px;
+.bars {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
+
 .bar {
-  flex: 1;
   height: 14px;
+  max-width: 100%;
+  background: transparent;
+  /* 회색 트랙 제거 */
   border-radius: 999px;
-  background: #eee;
   overflow: hidden;
 }
-.seg {
+
+.fill {
+  width: 100%;
+  /* 바 내부는 항상 꽉 채움 */
   height: 100%;
+  border-radius: inherit;
 }
 .carb {
   background: #ffb44d;
@@ -227,6 +322,7 @@ const clickAddFood = () => {
   margin-top: 8px;
   color: #444;
   font-size: 14px;
+  justify-content: space-between;
 }
 .g {
   display: flex;
@@ -316,5 +412,22 @@ const clickAddFood = () => {
 .complete-btn {
   background: #3b3b3b;
   color: #fff;
+}
+
+/* 모달 버튼 */
+.btn-confirm {
+  background: #00D5DF !important;
+  /* 원하는 색으로 바꿔도 됨 */
+  color: #fff !important;
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.btn-confirm:hover {
+  filter: brightness(0.95);
+}
+
+.btn-confirm:active {
+  transform: translateY(1px);
 }
 </style>

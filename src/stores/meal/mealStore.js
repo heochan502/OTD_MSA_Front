@@ -8,10 +8,35 @@ import 'dayjs/locale/ko';
 
 export const useMealSelectedStore = defineStore("mealSelected",()=>{
     const selectedDay = ref({
-        setDay :'',   // 선택한날        
+        setTime :'',   // 선택한 타이밍
+        setDay : '',   // 선택한 날짜        
       });
     
-    const selectedFoods =ref ({});
+    const selectedFoods = ref({
+      foodDbId: 0,
+      foodName: '',
+      amount: 0,
+      kcal: 0,
+      flag: '',
+      protein: 0,
+      carbohydrate: 0,
+      fat: 0,
+      sugar: 0,
+      natrium: 0,
+    });  // 선택한 음식들
+    //  const selectedFoods = ref<[]>([]);  
+      // const selectedFoods = ref<Array<{ 
+      //   foodDbId: number | null,
+      //   foodName: string,
+      //   amount: number,
+      //   kcal: number,
+      //   protein: number,
+      //   carbohydrate: number,
+      //   fat: number,
+      //   sugar: number,
+      //   natrium: number,
+      //   flag: string,
+      // }>>([]);
 
     const totalKcal = computed(() =>
       selectedFoods.value.reduce((sum, food) => sum + (Number(food.kcal) || 0), 0)

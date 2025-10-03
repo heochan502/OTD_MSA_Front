@@ -31,7 +31,7 @@ watch(selectedDate, (day) => {
   const mm = String(day.getMonth() + 1).padStart(2, '0');
   const dd = String(day.getDate()).padStart(2, '0');
   selectedDay.selectedDay.setDay = `${yyyy}-${mm}-${dd}`;
-  console.log(selectedDay.selectedDay.setDay);
+  console.log("선택날" ,selectedDay.selectedDay.setDay);
   router.replace({ query: { ...route.query}, day: `${yyyy}-${mm}-${dd}` });
 });
 
