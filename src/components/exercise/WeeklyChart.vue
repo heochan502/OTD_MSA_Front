@@ -52,10 +52,9 @@ const weekRange = computed(() => {
   };
 });
 
-// 주차 데이터 필터링
-// const weeklyLogs = computed(() => {
-//   return healthStore.logs.filter((log) => {
-//     const day = dayjs(log.healthlogDatetime);
+// const weeklyRecords = computed(() => {
+//   return props.records.filter((records) => {
+//     const day = dayjs(records.startAt);
 //     return (
 //       day.isAfter(weekRange.value.start.subtract(1, "day")) &&
 //       day.isBefore(weekRange.value.end.add(1, "day"))
@@ -63,22 +62,12 @@ const weekRange = computed(() => {
 //   });
 // });
 
-const weeklyRecords = computed(() => {
-  return props.records.filter((records) => {
-    const day = dayjs(records.startAt);
-    return (
-      day.isAfter(weekRange.value.start.subtract(1, "day")) &&
-      day.isBefore(weekRange.value.end.add(1, "day"))
-    );
-  });
-});
-
 // 주차 데이터 매핑 (월~일, 빈 값은 null)
 const weeklyData = computed(() => {
   const days = Array(7).fill(0);
   let lastValue = null;
 
-  weeklyRecords.value.forEach((records) => {
+  props.records.forEach((records) => {
     const day = dayjs(records.startAt);
     const weekday = day.isoWeekday(); // 1=월 ~ 7=일
 
@@ -169,10 +158,6 @@ const chartOptions = {
     },
   },
 };
-
-onMounted(() => {
-  console.log("프롭스", props);
-});
 </script>
 
 <template>

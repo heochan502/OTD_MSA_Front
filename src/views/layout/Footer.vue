@@ -1,9 +1,9 @@
 <script setup>
-import { useRouter, useRoute } from 'vue-router';
-import { computed } from 'vue';
+import { useRouter, useRoute } from "vue-router";
+import { computed } from "vue";
 
 const route = useRoute();
-const isActive = computed(() => route.path === '/');
+const isActive = computed(() => route.path === "/");
 </script>
 
 <template>
@@ -108,23 +108,23 @@ const isActive = computed(() => route.path === '/');
         내정보</router-link
       >
     </div>
-    <div>
-      <img class="image" src="/image/main/fixed-bottom.png" />
-    </div>
   </nav>
 </template>
 
 <style scoped>
 .nav {
-  position: relative;
+  position: absolute;
+  bottom: 0;
+  width: 100vw;
   height: 92px;
+  min-width: 320px;
   display: flex;
   flex-direction: row;
   justify-content: space-around;
   padding: 10px 10px;
   border-top: 1px solid #ddd;
   background: #ffffff;
-  border-radius: 0 0 60px 60px;
+
   color: #000;
 }
 
@@ -138,14 +138,17 @@ const isActive = computed(() => route.path === '/');
 }
 
 .nav_container {
-  width: 61px;
+  /* width: 61px; */
+
   height: 58px;
+  min-width: 22px;
   background: none;
   border: none;
   font-size: 14px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: space-between;
 }
 .nav .active {
   font-weight: bold;
