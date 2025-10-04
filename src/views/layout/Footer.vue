@@ -116,7 +116,7 @@ const isActive = computed(() => route.path === "/");
   position: absolute;
   bottom: 0;
   width: 100vw;
-  height: 92px;
+  height: 80px;
   min-width: 320px;
   display: flex;
   flex-direction: row;
