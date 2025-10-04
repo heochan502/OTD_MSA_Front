@@ -65,9 +65,6 @@ onMounted(() => {
 
 <template>
   <div class="top-header">
-    <div>
-      <img class="image" src="/image/main/fixed-header.png">
-    </div>
     <!-- 로고 출력 해야할 때 -->
     <div class="title" v-if="headerType === 'logo'">
       <img class="otd-logo" src="/image/main/ontoday_logo.png" alt="로고" />
@@ -107,17 +104,28 @@ onMounted(() => {
 
 <style scoped>
 .image{
-  position: absolute;
+  /* position: absolute; */
+  position: fixed;
   width: 390px;
   right: 1px;
   top: 1px;
 }
 .title {
-  /* background: #00D5DF; */
-  margin-top: 38px;
   display: flex;
   justify-content: space-between;
-  margin-bottom: 15px;
+  position: absolute;
+  
+  bottom: 10px;
+  /* margin-top: 38px; */
+  /* margin-bottom: 15px; */
+  margin: 0 20px 0;
+
+  height: 43px;
+  max-width: 100%;
+  min-width: 320px;
+
+
+  /* background: #00D5DF; */
 }
 .point-img{
   width: 20px;
@@ -130,6 +138,7 @@ onMounted(() => {
 }
 .otd-logo {
   width: 40%;  
+  max-width: 500px;
 }
 .hearder-text {
   color: #FAFAFA;
@@ -161,12 +170,17 @@ onMounted(() => {
 }
 
 .top-header {
+  display: flex;
+  justify-content: center;
+  
   position: relative;
   background: #00D5DF;
   color: #000;
-  padding: 20px;
-  border-radius: 60px 60px 0 0; 
-  height: 104px;
+  padding-bottom: 15px;
+  height: 70px;
+  width: 100%;
+  /* 노치 safezone 설정 */
+  padding-top: env(safe-area-inset-top);  
 }
 .user-profile
 {

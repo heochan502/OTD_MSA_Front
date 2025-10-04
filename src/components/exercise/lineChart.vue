@@ -1,10 +1,10 @@
 <script setup>
-import { computed, ref, watch, nextTick } from 'vue';
+import { computed, ref, watch, nextTick } from "vue";
 
-import dayjs from 'dayjs';
-import isoWeek from 'dayjs/plugin/isoWeek';
+import dayjs from "dayjs";
+import isoWeek from "dayjs/plugin/isoWeek";
 
-import ChartDataLabels from 'chartjs-plugin-datalabels';
+import ChartDataLabels from "chartjs-plugin-datalabels";
 
 // Chart.js
 import {
@@ -17,8 +17,8 @@ import {
   CategoryScale,
   LinearScale,
   Filler,
-} from 'chart.js';
-import { Line } from 'vue-chartjs';
+} from "chart.js";
+import { Line } from "vue-chartjs";
 
 dayjs.extend(isoWeek);
 
@@ -52,8 +52,8 @@ const props = defineProps({
 const weekRange = computed(() => {
   const base = dayjs(props.selectedDate);
   return {
-    start: base.startOf('isoWeek'), // 월요일
-    end: base.endOf('isoWeek'), // 일요일
+    start: base.startOf("isoWeek"), // 월요일
+    end: base.endOf("isoWeek"), // 일요일
   };
 });
 
@@ -61,13 +61,12 @@ const weeklyLogs = computed(() => {
   return props.logs.filter((log) => {
     const day = dayjs(log.dataTime);
     return (
-      day.isAfter(weekRange.value.start.subtract(1, 'day')) &&
-      day.isBefore(weekRange.value.end.add(1, 'day'))
+      day.isAfter(weekRange.value.start.subtract(1, "day")) &&
+      day.isBefore(weekRange.value.end.add(1, "day"))
     );
   });
 });
 
-// 건강 차트
 // 주차 데이터 매핑 (월~일, 빈 값은 null)
 const weeklyData = computed(() => {
   const days = Array(7).fill(0);
@@ -78,7 +77,7 @@ const weeklyData = computed(() => {
     const weekday = day.isoWeekday(); // 1=월 ~ 7=일
 
     const fieldKey = props.label || props.selectedField;
-    let value = log[fieldKey];
+    let value = log.values[fieldKey];
 
     if (value != null) {
       days[weekday - 1] = value;
@@ -90,51 +89,39 @@ const weeklyData = computed(() => {
   return days;
 });
 
-// X축 라벨 (월 ~ 일)
-// const labels = ref(["월", "화", "수", "목", "금", "토", "일"]);
-const labels = weeklyLogs.value.map((item) =>
-  dayjs(item.dataTime).format('YY.MM.DD')
-);
-
 // Chart.js 데이터셋
-const chartData = computed(
-  () => (
+const chartData = computed(() => ({
+  // labels: labels,
+  datasets: [
     {
-      labels: labels,
-      datasets: [
-        {
-          data: weeklyData.value,
-          borderColor: '#FFE864', // 선 색깔 오렌지톤
-          backgroundColor: (context) => {
-            const ctx = context.chart.ctx;
-            const gradient = ctx.createLinearGradient(
-              0,
-              0,
-              0,
-              context.chart.height
-            );
-            gradient.addColorStop(1, 'rgba(255, 232, 100, 0)'); // 위쪽 진한색, 1은 불투명
+      data: weeklyData.value,
+      borderColor: "#FFE864", // 선 색깔 오렌지톤
+      backgroundColor: (context) => {
+        const ctx = context.chart.ctx;
+        const gradient = ctx.createLinearGradient(
+          0,
+          0,
+          0,
+          context.chart.height
+        );
+        gradient.addColorStop(1, "rgba(255, 232, 100, 0)"); // 위쪽 진한색, 1은 불투명
 
-            gradient.addColorStop(0, 'rgba(255, 232, 100, 0.3)'); // 아래쪽 투명 (알파 0)
-            gradient.addColorStop(0.3, 'rgba(255, 232, 100, 0)'); // 중간
-            return gradient;
-          },
-          fill: true,
-          pointRadius: 5,
-          pointBackgroundColor: '#FFE864',
-          pointBorderColor: '#ffffff', // 점 테두리는 조금 연한 오렌지색으로
-          pointBorderWidth: 2, // 테두리 두께 조절
-          tension: 0.4,
-        },
-      ],
-    }
-  )
-);
-
+        gradient.addColorStop(0, "rgba(255, 232, 100, 0.3)"); // 아래쪽 투명 (알파 0)
+        gradient.addColorStop(0.3, "rgba(255, 232, 100, 0)"); // 중간
+        return gradient;
+      },
+      fill: true,
+      pointRadius: 5,
+      pointBackgroundColor: "#FFE864",
+      pointBorderColor: "#ffffff", // 점 테두리는 조금 연한 오렌지색으로
+      pointBorderWidth: 2, // 테두리 두께 조절
+      tension: 0.4,
+    },
+  ],
+}));
 
 // Chart.js 옵션
 const chartOptions = {
- 
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
@@ -143,25 +130,25 @@ const chartOptions = {
     },
     // 툴팁
     tooltip: {
-        // 아래 tooltip.enabled=false 와 충돌나지 않도록 여기서만 설정하거나, 아래 것을 제거하세요.
-        enabled: true,
-        callbacks: {
-          label: (context) => {
-            const field = props.fields.find((f) => f.key === props.selectedField);
-            const unit = field?.unit || "";
-            if (context.parsed.y === 0) return "기록없음";
-            return `${context.parsed.y} ${unit}`;
-          },
+      // 아래 tooltip.enabled=false 와 충돌나지 않도록 여기서만 설정하거나, 아래 것을 제거하세요.
+      enabled: true,
+      callbacks: {
+        label: (context) => {
+          const field = props.fields.find((f) => f.key === props.selectedField);
+          const unit = field?.unit || "";
+          if (context.parsed.y === 0) return "기록없음";
+          return `${context.parsed.y} ${unit}`;
         },
       },
+    },
     datalabels: {
-        display: true,
-        align: "top",
-        anchor: "end",
-        color: "#f1c40f",
-        font: { size: 10 },
-        formatter: (value) => (value === 0 ? "" : value),
-      },
+      display: true,
+      align: "top",
+      anchor: "end",
+      color: "#f1c40f",
+      font: { size: 10 },
+      formatter: (value) => (value === 0 ? "" : value),
+    },
   },
   legend: {
     display: false,
@@ -182,7 +169,7 @@ const chartOptions = {
     y: {
       display: false,
       grid: { display: false },
-      grace: '20%',  // 위·아래 20% 여유
+      grace: "20%", // 위·아래 20% 여유
       // min: minValue.value - minValue.value * 0.1, // 최소값보다 약간 작게 설정, null일 때 0
       // max: maxValue.value + maxValue.value * 0.41, // 최대값보다 약간 크게 설정, null일 때 10
     },

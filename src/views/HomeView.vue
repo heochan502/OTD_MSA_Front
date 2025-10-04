@@ -1,19 +1,19 @@
 <script setup>
-import { ref, onMounted, computed, reactive } from 'vue';
-import Progress from '@/components/challenge/Progress.vue';
-import ProgressJs from '@/components/challenge/ProgressJs.vue';
+import { ref, onMounted, computed, reactive } from "vue";
+import Progress from "@/components/challenge/Progress.vue";
+import ProgressJs from "@/components/challenge/ProgressJs.vue";
 
-import LineChart from '@/components/exercise/lineChart.vue';
+import LineChart from "@/components/exercise/lineChart.vue";
 
-import MealCard from '@/components/meal/MealDayCards.vue';
+import MealCard from "@/components/meal/MealDayCards.vue";
 
-import BmiProg from '@/components/exercise/BmiProg.vue';
-import { getMyChallenge } from '@/services/challenge/challengeService';
-import { useRouter } from 'vue-router';
+import BmiProg from "@/components/exercise/BmiProg.vue";
+import { getMyChallenge } from "@/services/challenge/challengeService";
+import { useRouter } from "vue-router";
 
-import { getChallengeSettlementLog } from '@/services/challenge/challengeService';
-import ChallengeSettlementCard from '@/components/challenge/ChallengeSettlementCard.vue';
-import { useChallengeStore } from '@/stores/challenge/challengeStore';
+import { getChallengeSettlementLog } from "@/services/challenge/challengeService";
+import ChallengeSettlementCard from "@/components/challenge/ChallengeSettlementCard.vue";
+import { useChallengeStore } from "@/stores/challenge/challengeStore";
 
 const state = reactive({
   monthlySettlementLog: [],
@@ -21,35 +21,35 @@ const state = reactive({
 });
 
 const challengeInfo = ref([
-  { challenge_name: '달리기 30km', progress: 62 },
-  { challenge_name: '운동시간 60시간', progress: 82 },
-  { challenge_name: '팔굽혀 펴기 100개', progress: 22 },
-  { challenge_name: '운동시간 50시간', progress: 72 },
-  { challenge_name: '일간 미션 ', progress: 100 },
+  { challenge_name: "달리기 30km", progress: 62 },
+  { challenge_name: "운동시간 60시간", progress: 82 },
+  { challenge_name: "팔굽혀 펴기 100개", progress: 22 },
+  { challenge_name: "운동시간 50시간", progress: 72 },
+  { challenge_name: "일간 미션 ", progress: 100 },
 ]);
 const router = useRouter();
 
 const healthInfo = ref([
-  { text: '체중(kg)', value: 70.5, check: true },
-  { text: '체지방률(%)', value: 15.3, check: false },
-  { text: '골격근량(kg)', value: 30.2, check: false },
+  { text: "체중(kg)", value: 70.5, check: true },
+  { text: "체지방률(%)", value: 15.3, check: false },
+  { text: "골격근량(kg)", value: 30.2, check: false },
 ]);
 
 const fields = [
-  { key: 'weight', label: '체중', unit: 'kg' },
-  { key: 'BFP', label: '체지방률', unit: '%' },
-  { key: 'SMM', label: '골격근량', unit: 'kg' },
+  { key: "weight", label: "체중", unit: "kg" },
+  { key: "BFP", label: "체지방률", unit: "%" },
+  { key: "SMM", label: "골격근량", unit: "kg" },
 ];
 const selectedField = ref(fields[0].key);
 
 const inbodyData = ref([
-  { dataTime: '2025-09-22', weight: '62.4', BFP: '20', SMM: '23' },
-  { dataTime: '2025-09-23', weight: '62.1', BFP: '20.2', SMM: '22.9' },
-  { dataTime: '2025-09-24', weight: '60.9', BFP: '20.1', SMM: '23.1' },
-  { dataTime: '2025-09-25', weight: '62.5', BFP: '20.5', SMM: '22.8' },
-  { dataTime: '2025-09-26', weight: '62.2', BFP: '20.3', SMM: '22.9' },
-  { dataTime: '2025-09-27', weight: '61.8', BFP: '19.9', SMM: '23.2' },
-  { dataTime: '2025-09-28', weight: '60', BFP: '20.0', SMM: '23.0' },
+  { dataTime: "2025-09-22", weight: "62.4", BFP: "20", SMM: "23" },
+  { dataTime: "2025-09-23", weight: "62.1", BFP: "20.2", SMM: "22.9" },
+  { dataTime: "2025-09-24", weight: "60.9", BFP: "20.1", SMM: "23.1" },
+  { dataTime: "2025-09-25", weight: "62.5", BFP: "20.5", SMM: "22.8" },
+  { dataTime: "2025-09-26", weight: "62.2", BFP: "20.3", SMM: "22.9" },
+  { dataTime: "2025-09-27", weight: "61.8", BFP: "19.9", SMM: "23.2" },
+  { dataTime: "2025-09-28", weight: "60", BFP: "20.0", SMM: "23.0" },
 ]);
 
 const today = new Date().toISOString().slice(0, 10);
@@ -67,7 +67,7 @@ const healthToggle = (index) => {
   }
 };
 
-const formatNumber = (n) => String(n).padStart(2, '0');
+const formatNumber = (n) => String(n).padStart(2, "0");
 const formatDate = (date) => {
   const y = date.getFullYear();
   const m = formatNumber(date.getMonth() + 1);
@@ -87,30 +87,29 @@ const challengeStore = useChallengeStore();
 onMounted(async () => {
   await fetchMonthlySettlement(todayDate);
   await fetchWeeklySettlement(todayDate);
-  console.log('state', state.monthlySettlementLog, state.weeklySettlementLog);
+  console.log("state", state.monthlySettlementLog, state.weeklySettlementLog);
   const challenge = await getMyChallenge();
   challengeInfo.value = challenge.data;
-  console.log('homechallenge', challengeInfo.value);
+  console.log("homechallenge", challengeInfo.value);
 });
 
 const challengeHome = () => {
-  router.push('/challenge');
+  router.push("/challenge");
 };
-
 
 // 월간 정산 api호출
 const fetchMonthlySettlement = async (date) => {
   const monthlyKey = formatDate(date).slice(0, 7);
-  console.log('monthlykey', monthlyKey);
+  console.log("monthlykey", monthlyKey);
   console.log(
-    'challengeStore.state.lastMonthCheck',
+    "challengeStore.state.lastMonthCheck",
     challengeStore.state.lastMonthCheck
   );
   if (challengeStore.state.lastMonthCheck === monthlyKey) {
     return;
   } else {
     const params = {
-      type: 'monthly',
+      type: "monthly",
       settlementDate: formatDate(new Date(year, month - 1, 1)),
     };
     const res = await getChallengeSettlementLog(params);
@@ -123,16 +122,16 @@ const fetchMonthlySettlement = async (date) => {
 // 주간 정산 api호출
 const fetchWeeklySettlement = async (date) => {
   const weeklyKey = setWeeklyKey(date);
-  console.log('weeklykey', weeklyKey);
+  console.log("weeklykey", weeklyKey);
   console.log(
-    'challengeStore.state.lastWeekCheck',
+    "challengeStore.state.lastWeekCheck",
     challengeStore.state.lastWeekCheck
   );
   if (challengeStore.state.lastWeekCheck === weeklyKey) {
     return;
   } else {
     const params = {
-      type: 'weekly',
+      type: "weekly",
       settlementDate: formatDate(getMonday(date)),
     };
     const res = await getChallengeSettlementLog(params);
@@ -162,11 +161,12 @@ const setWeeklyKey = (date) => {
 </script>
 
 <template>
-  <div>    
+  <div>
     <v-dialog
       v-model="monthlySettlementDialog"
       max-width="300"
-      min-height="100">
+      min-height="100"
+    >
       <v-card>
         <v-card-title class="text-h8"
           >지난 달 정산이 완료되었어요!</v-card-title
@@ -184,10 +184,7 @@ const setWeeklyKey = (date) => {
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog
-      v-model="weeklySettlementDialog"
-      max-width="300"
-      min-height="100">
+    <v-dialog v-model="weeklySettlementDialog" max-width="300" min-height="100">
       <v-card>
         <v-card-title class="text-h8"
           >지난 주 정산이 완료되었어요!</v-card-title
@@ -205,12 +202,14 @@ const setWeeklyKey = (date) => {
         </v-card-actions>
       </v-card>
     </v-dialog>
+  </div>
+  <div class="wrap">
     <div class="top-wrap">
       <section class="meal">
         <MealCard />
       </section>
     </div>
-    <div class="wrap">
+    <div class="wrap_content">
       <section class="challenge-progress otd-top-margin">
         <span class="otd-subtitle-1">챌린지 달성률</span>
         <div class="challenge-progress-card otd-top-margin">
@@ -242,7 +241,7 @@ const setWeeklyKey = (date) => {
         </div>
       </section>
     </div>
-    <div class="wrap">
+    <div class="wrap wrap_content">
       <section class="health-progress otd-top-margin">
         <span class="otd-subtitle-1">건강</span>
         <div class="health-card">
@@ -304,9 +303,13 @@ const setWeeklyKey = (date) => {
   </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .top-wrap {
   margin: 5px 20px;
+}
+.wrap_content {
+  display: flex;
+  justify-content: center;
 }
 .progress-section {
   display: flex;
@@ -323,7 +326,17 @@ const setWeeklyKey = (date) => {
   color: #303030;
 }
 
-/* 
+.meal {
+  display: flex;
+  justify-content: center;
+}
+
+.meal-card {
+  width: 100%;
+  min-width: 160px;
+}
+
+/*
 .meal-cards {
   width: 350px;
   height: 265px;
