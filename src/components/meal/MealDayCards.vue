@@ -132,15 +132,26 @@ const onTopIconClick = (i) => {
 </template>
 
 <style scoped>
-.meal-cards {
+/* .meal-cards {
   width: 350px;
   height: 265px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 15px;
   border-radius: 12px;
-}
-.meal-card {
+} */
+ .meal-cards {
+   display: grid;
+   grid-template-columns: repeat(2, minmax(0, 1fr));
+   /* 부모폭에 맞춰 자동 */
+   gap: 12px;
+   width: 100%;
+   /* 고정폭 제거 */
+   
+   /* height: auto;        기본값이라 생략 가능 */
+   
+ }
+/* .meal-card {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -152,6 +163,25 @@ const onTopIconClick = (i) => {
   font-weight: 500;
   font-size: 14px;
   color: #303030;
+} */
+
+.meal-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  /* 고정폭 → 100% */
+  min-height: 125px;
+  /* 필요 시 최소높이만 */
+  background: #fff;
+  padding: 15px;
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 14px;
+  color: #303030;
+  box-sizing: border-box;
+  /* 넘침 방지 */
+  
 }
 .meal-top-img {
   width: 50px;
@@ -159,19 +189,41 @@ const onTopIconClick = (i) => {
 }
 .meal-check-img {
   width: 27px;
-  height: 22px;
+  height: 25px;
 }
-.meal-card-bottom {
+
+/* .meal-card-bottom {
   display: flex;
   justify-content: start;
   margin-top: 5px;
+} */
+
+
+.meal-card-top,
+.meal-card-bottom {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  
 }
+
+.meal-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .meal-card-bottom img {
   width: 91px;
   height: 17px;
+  padding-left: 5px;
+  margin-top: 2px;
+  display: flex;
+  justify-content: space-between;
 }
 .meal-card-bottom img.snack {
-  width: 70px;
+  width: 80px;
   height: 17px;
 }
 </style>

@@ -22,7 +22,7 @@ const isActive = computed(() => route.path === "/");
         <span class="d-flex justify-center">홈</span>
       </router-link>
     </div>
-    <div class="nav_container">
+    <div class="nav_container ">
       <router-link
         to="/exercise/main"
         class="nav-menu"
@@ -39,7 +39,7 @@ const isActive = computed(() => route.path === "/");
         운동</router-link
       >
     </div>
-    <div class="nav_container">
+    <div class="nav_container ">
       <router-link
         to="/meal"
         class="nav-menu"
@@ -148,8 +148,10 @@ const isActive = computed(() => route.path === "/");
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-}
+  justify-content: center;
+  padding: 0 0 0 5px;
+} 
+
 .nav .active {
   font-weight: bold;
   color: #00d5df;

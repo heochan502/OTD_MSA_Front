@@ -305,7 +305,7 @@ const setWeeklyKey = (date) => {
 
 <style lang="scss" scoped>
 .top-wrap {
-  margin: 5px 20px;
+  margin: 5px 0px;
 }
 .wrap_content {
   display: flex;
@@ -333,7 +333,7 @@ const setWeeklyKey = (date) => {
 
 .meal-card {
   width: 100%;
-  min-width: 160px;
+  // min-width: 160px;
 }
 
 /*
