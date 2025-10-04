@@ -5,11 +5,14 @@ import isoWeek from "dayjs/plugin/isoWeek"; // 주 시작일 설정용
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import ExerciseCalendar from "./ExerciseCalendar.vue";
 
 dayjs.extend(isoWeek);
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 dayjs.extend(customParseFormat);
+
+const openCalendar = ref(false);
 
 const props = defineProps({
   recordDate: {
@@ -68,6 +71,10 @@ const goNow = () => {
   weekStart.value = today.startOf("isoWeek"); // 이번 주 시작일 갱신
   emit("click-date", today.format("YYYY-MM-DD"));
 };
+
+const confirmYes = () => {
+  alert("적용완료");
+};
 </script>
 
 <template>
@@ -77,6 +84,7 @@ const goNow = () => {
         src="\image\exercise\calender.png"
         alt="캘린더 아이콘"
         class="calendar_icon"
+        @click="openCalendar = true"
       />
       <span class="otd-subtitle-1">{{ currentDate.format("YYYY년 M월") }}</span>
     </div>
@@ -106,6 +114,28 @@ const goNow = () => {
       <img src="\image\exercise\btn_next.png" alt="" width="10" />
     </button>
   </div>
+  <!-- 캘린더 모달 -->
+  <v-dialog v-model="openCalendar" max-width="350" min-height="100">
+    <v-card class="pa-0 d-flex">
+      <v-card-text class="otd-body-1 text-center">
+        <ExerciseCalendar />
+        <span>선택한 날의 기록을 보시겠어요?</span>
+        <div class="d-flex w-100">
+          <v-btn
+            @click="openCalendar = false"
+            class="btn_confirm otd-body-1 ma-1"
+            >닫기</v-btn
+          >
+          <v-btn
+            color="#ffe864"
+            @click="confirmYes"
+            class="btn_confirm otd-body-1 ma-1"
+            >적용하기</v-btn
+          >
+        </div>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
 </template>
 
 <style lang="scss" scoped>
@@ -174,6 +204,20 @@ const goNow = () => {
     }
   }
 }
+
+.btn_select:hover {
+  background-color: #ffe864;
+}
+.btn_confirm {
+  width: 100%;
+  max-width: 143px;
+  height: 38px;
+  margin-top: 20px;
+  background-color: #e6e6e6;
+  border-radius: 10px;
+  box-shadow: none;
+}
+
 :hover {
   border: none;
 }

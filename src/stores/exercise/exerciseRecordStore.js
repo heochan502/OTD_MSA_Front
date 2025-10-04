@@ -35,8 +35,8 @@ export const useExerciseRecordStore = defineStore("exerciseRecord", {
     addCalendarDate(list) {
       this.calendarDate.push(...list);
     },
-    clearCalendarDate() {
-      this.calendarDate = [];
+    clearMonthlyRecords() {
+      this.monthlyRecords = [];
     },
     addRecordList(list) {
       this.recordList.push(...list);
