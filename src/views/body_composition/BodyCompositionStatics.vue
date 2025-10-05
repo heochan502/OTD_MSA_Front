@@ -5,10 +5,6 @@ import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositi
 
 const model = ref(true);
 const bodyCompositionStore = useBodyCompositionStore();
-onMounted(async () => {
-  await bodyCompositionStore.fetchSeriesBodyComposition();
-  console.log(bodyCompositionStore.series);
-});
 
 // TODO: 서버에서 내려받을 수 있도록 api 수정하기
 const metrics = [

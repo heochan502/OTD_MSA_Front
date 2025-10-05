@@ -15,6 +15,8 @@ import { getChallengeSettlementLog } from "@/services/challenge/challengeService
 import ChallengeSettlementCard from "@/components/challenge/ChallengeSettlementCard.vue";
 import { useChallengeStore } from "@/stores/challenge/challengeStore";
 
+import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
+
 const state = reactive({
   monthlySettlementLog: [],
   weeklySettlementLog: [],
@@ -83,6 +85,7 @@ const monthlySettlementDialog = ref(false);
 const weeklySettlementDialog = ref(false);
 
 const challengeStore = useChallengeStore();
+const bodyCompositionStore = useBodyCompositionStore();
 
 onMounted(async () => {
   await fetchMonthlySettlement(todayDate);
@@ -91,6 +94,7 @@ onMounted(async () => {
   const challenge = await getMyChallenge();
   challengeInfo.value = challenge.data;
   console.log("homechallenge", challengeInfo.value);
+  await bodyCompositionStore.fetchSeriesBodyComposition();
 });
 
 const challengeHome = () => {
