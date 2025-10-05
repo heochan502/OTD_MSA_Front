@@ -15,3 +15,8 @@ export const getSeries = (jsonBody) => {
 export const getList = (params) => {
   return axios.get(`${BASE_URL}/list `, { params }).catch((e) => e.response);
 };
+
+// metirics 조회
+export const getMetrics = () => {
+  return axios.get(BASE_URL).catch((e) => e.response);
+};

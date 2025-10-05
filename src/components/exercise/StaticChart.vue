@@ -37,15 +37,18 @@ ChartJS.register(
 
 const props = defineProps({
   series: Object,
+  metrics: Object,
   data: Array,
 });
+
+console.log(props.metrics);
 
 // 날짜 라벨
 const labels = computed(() =>
   props.series.points.map((p) => dayjs(p.date).format("YY/MM/DD"))
 );
 
-const metrics = computed(() => Object.keys(props.series.points[0].values));
+const metricCode = computed(() => Object.keys(props.series.points[0].values));
 
 // 항목별 데이터셋 생성
 const makeChartData = (metric) => {
@@ -80,7 +83,7 @@ const makeChartData = (metric) => {
   };
 };
 
-const makeChartOptions = (metric) => ({
+const makeChartOptions = (metricCode) => ({
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
@@ -115,15 +118,15 @@ const makeChartOptions = (metric) => ({
 
 <template>
   <v-card
-    v-for="metric in metrics"
+    v-for="metric in props.metrics"
     :key="metric"
     class="chart otd-border otd-shadow otd-box-style"
   >
     <div style="margin-bottom: 24px">
-      <h4>{{ metric }}</h4>
+      <h4>{{ metric.metricName }}</h4>
       <Line
-        :data="makeChartData(metric)"
-        :options="makeChartOptions(metric)"
+        :data="makeChartData(metric.metricCode)"
+        :options="makeChartOptions(metric.metricCode)"
         style="width: 100%"
       />
     </div>

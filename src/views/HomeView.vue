@@ -96,6 +96,7 @@ onMounted(async () => {
   challengeInfo.value = challenge.data;
   console.log("homechallenge", challengeInfo.value);
   await bodyCompositionStore.fetchSeriesBodyComposition();
+  await bodyCompositionStore.fetchBodyCompositionMetrics();
 });
 
 const challengeHome = () => {
@@ -302,7 +303,10 @@ const setWeeklyKey = (date) => {
             :fields="fields"
             :logs="inbodyData"
           /> -->
-          <StaticChart :series="bodyCompositionStore.series" />
+          <StaticChart
+            :series="bodyCompositionStore.series"
+            :metrics="bodyCompositionStore.metrics"
+          />
         </div>
       </section>
     </div>
