@@ -24,14 +24,14 @@ onMounted(async () => {
 // @click
 const onDateClick = async (date) => {
   exerciseRecordStore.clearRecords();
-  selectedDate.value = date;
+  selectedDate.value = formatDateISO(date);
   // date 는 JS Date 객체 (컴포넌트에서 toDate()로 emit)
 
   const params = reactive({
     page: 1,
     row_per_page: 2,
     type: "daily",
-    date: date, // YYYY-MM-DD 형태
+    date: formatDateISO(date), // YYYY-MM-DD 형태
   });
 
   const res = await getExerciseRecordList(params);
