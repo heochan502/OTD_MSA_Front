@@ -6,6 +6,7 @@ import ProgressJs from "@/components/challenge/ProgressJs.vue";
 import LineChart from "@/components/exercise/lineChart.vue";
 
 import MealCard from "@/components/meal/MealDayCards.vue";
+import { useMealSelectedStore } from '@/stores/meal/mealStore.js'
 
 import BmiProg from "@/components/exercise/BmiProg.vue";
 import { getMyChallenge } from "@/services/challenge/challengeService";
@@ -14,6 +15,13 @@ import { useRouter } from "vue-router";
 import { getChallengeSettlementLog } from "@/services/challenge/challengeService";
 import ChallengeSettlementCard from "@/components/challenge/ChallengeSettlementCard.vue";
 import { useChallengeStore } from "@/stores/challenge/challengeStore";
+
+import dayjs from 'dayjs';
+import 'dayjs/locale/ko';
+
+
+const selectedDay = useMealSelectedStore();
+
 
 const state = reactive({
   monthlySettlementLog: [],
@@ -91,6 +99,7 @@ onMounted(async () => {
   const challenge = await getMyChallenge();
   challengeInfo.value = challenge.data;
   console.log("homechallenge", challengeInfo.value);
+  selectedDay.selectedDay.setDay = dayjs().format('YYYY-MM-DD');
 });
 
 const challengeHome = () => {

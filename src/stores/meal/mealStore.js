@@ -8,10 +8,10 @@ import 'dayjs/locale/ko';
 
 export const useMealSelectedStore = defineStore("mealSelected",()=>{
     const selectedDay = ref({
-        setTime :'',   // 선택한 타이밍
-        setDay : '',   // 선택한 날짜        
-      });
-    
+      setTime: "", // 선택한 타이밍
+      setDay: dayjs().format('YYYY-MM-DD') , // 선택한 날짜
+    });
+
     const selectedFoods = ref({
       foodDbId: 0,
       foodName: '',
@@ -58,12 +58,44 @@ export const useMealSelectedStore = defineStore("mealSelected",()=>{
   
 
 
-      return {
-        selectedDay, selectedFoods, totalKcal, foodCount, addOrUpdateFood, removeFood
-      }
+      return {        
+        selectedDay,
+        selectedFoods,
+        totalKcal,
+        foodCount,
+        addOrUpdateFood,
+        removeFood,
+      };
 },
-    {persist:true}
+    {persist:true} // 새로고침 시 상태 유지
 )
 
 
+
+
+export const useMealRecordStore = defineStore(
+  "mealRecord",
+  () => {
+const eatenFoodList = ref([]);
+
+//     const eatenFoodList = ref<EatenFood[]>([]); 
+    // const eatenFoodList = ref({
+    //   mealId: "", // MealFoodDb.foodDbId or null
+    //   userFoodId: "", // MealFoodMakeDb.userFoodId or null
+    //   foodName: "",
+    //   amount: 0,
+    //   kcal: 0,
+    //   flag: "",
+    //   protein: 0,
+    //   carbohydrate: 0,
+    //   fat: 0,
+    //   sugar: 0,
+    //   natrium: 0,
+    //   foodCapacity: 0,
+    //   mealTime: "",
+    // });
+    return { eatenFoodList };
+  },
+  { persist: true }
+);
 
