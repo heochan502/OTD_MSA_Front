@@ -4,6 +4,7 @@ import Progress from "@/components/challenge/Progress.vue";
 import ProgressJs from "@/components/challenge/ProgressJs.vue";
 
 import LineChart from "@/components/exercise/lineChart.vue";
+import StaticChart from "@/components/exercise/StaticChart.vue";
 
 import MealCard from "@/components/meal/MealDayCards.vue";
 
@@ -295,12 +296,13 @@ const setWeeklyKey = (date) => {
       </div> -->
 
         <div class="otd-top-margin">
-          <LineChart
+          <!-- <LineChart
             :selected-date="today"
             :selectedField="selectedField"
             :fields="fields"
             :logs="inbodyData"
-          />
+          /> -->
+          <StaticChart :series="bodyCompositionStore.series" />
         </div>
       </section>
     </div>

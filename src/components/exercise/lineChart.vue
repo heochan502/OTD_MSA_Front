@@ -38,14 +38,14 @@ ChartJS.register(
 const chartRef = ref(null);
 
 const props = defineProps({
-  selectedDate: {
-    type: String,
-    required: true,
-  },
-  selectedField: String,
-  fields: Array,
-  label: String,
-  logs: { type: Array, default: () => [] },
+  // selectedDate: {
+  //   type: String,
+  // },
+  // selectedField: String,
+  // fields: Array,
+  // label: String,
+  // logs: { type: Array, default: () => [] },
+  logs: Object,
 });
 
 // 해당 주차 범위
