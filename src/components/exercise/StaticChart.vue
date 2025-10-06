@@ -41,14 +41,12 @@ const props = defineProps({
   data: Array,
 });
 
-console.log(props.metrics);
-
 // 날짜 라벨
 const labels = computed(() =>
   props.series.points.map((p) => dayjs(p.date).format("YY/MM/DD"))
 );
 
-const metricCode = computed(() => Object.keys(props.series.points[0].values));
+console.log("data", props.series);
 
 // 항목별 데이터셋 생성
 const makeChartData = (metric) => {
@@ -136,8 +134,10 @@ const makeChartOptions = (metricCode) => ({
 <style lang="scss" scoped>
 .chart {
   display: flex;
+  justify-content: center;
 
   height: 250px;
-  padding: 12px;
+  padding: 15px;
+  margin: 15px;
 }
 </style>
