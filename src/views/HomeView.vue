@@ -4,6 +4,7 @@ import Progress from "@/components/challenge/Progress.vue";
 import ProgressJs from "@/components/challenge/ProgressJs.vue";
 
 import LineChart from "@/components/exercise/lineChart.vue";
+import StaticChart from "@/components/exercise/StaticChart.vue";
 
 import MealCard from "@/components/meal/MealDayCards.vue";
 
@@ -14,6 +15,8 @@ import { useRouter } from "vue-router";
 import { getChallengeSettlementLog } from "@/services/challenge/challengeService";
 import ChallengeSettlementCard from "@/components/challenge/ChallengeSettlementCard.vue";
 import { useChallengeStore } from "@/stores/challenge/challengeStore";
+
+import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
 
 const state = reactive({
   monthlySettlementLog: [],
@@ -83,6 +86,7 @@ const monthlySettlementDialog = ref(false);
 const weeklySettlementDialog = ref(false);
 
 const challengeStore = useChallengeStore();
+const bodyCompositionStore = useBodyCompositionStore();
 
 onMounted(async () => {
   await fetchMonthlySettlement(todayDate);
@@ -91,6 +95,7 @@ onMounted(async () => {
   const challenge = await getMyChallenge();
   challengeInfo.value = challenge.data;
   console.log("homechallenge", challengeInfo.value);
+  await bodyCompositionStore.fetchSeriesBodyComposition();
 });
 
 const challengeHome = () => {
@@ -291,12 +296,13 @@ const setWeeklyKey = (date) => {
       </div> -->
 
         <div class="otd-top-margin">
-          <LineChart
+          <!-- <LineChart
             :selected-date="today"
             :selectedField="selectedField"
             :fields="fields"
             :logs="inbodyData"
-          />
+          /> -->
+          <StaticChart :series="bodyCompositionStore.series" />
         </div>
       </section>
     </div>
