@@ -84,7 +84,7 @@ const addToDefaultList = (res)=>{
       foodCapacity: Number(food?.foodCapacity ?? 1),
       mealTime: mealRecord.mealRecordIds.mealTime,
     };
-    console.log("먹은 시점 : ", mealRecord.mealRecordIds.mealTime)
+    // console.log("먹은 시점 : ", mealRecord.mealRecordIds.mealTime)
 
     const mealTimming = mealRecord.mealRecordIds.mealTime;
 
@@ -93,10 +93,10 @@ const addToDefaultList = (res)=>{
     if(target ){
       // 체크/기록 표시
       // target.check = true;
-      console.log("추가 칼로리 : ", payload.kcal);
+      // console.log("추가 칼로리 : ", payload.kcal);
       target.kcal += payload.kcal;
       target.recorded = true;
-      console.log("체크 : ", mealInfo.check);
+      // console.log("체크 : ", mealInfo.check);
     }
     // if (mealRecord.mealRecordIds.mealTime === mealInfo.mealDay)
     //   {
@@ -105,7 +105,7 @@ const addToDefaultList = (res)=>{
     //   }
     
     eatenFoodList.value = [...eatenFoodList.value, payload];
-    console.log("페이로드 ", eatenFood.eatenFoodList);
+    // console.log("페이로드 ", eatenFood.eatenFoodList);
   });
  
 };
@@ -118,12 +118,12 @@ const toggleFasting = (i) => {
 
 const onTopIconClick = (i) => {
   const item = mealInfo.value[i];
-  console.log("뭐가 들어가 있을까 : ", item);
+  // console.log("뭐가 들어가 있을까 : ", item);
   if (item.recorded) {
     selectedDay.selectedFoods = eatenFood.eatenFoodList.filter(i => i.mealTime === item.mealDay);
 
     selectedDay.selectedDay.setTime = item.mealDay;
-    console.log("디테일 넘어갈때 : ", selectedDay.selectedFoods);
+    // console.log("디테일 넘어갈때 : ", selectedDay.selectedFoods);
     router.push({ name: 'MealRecordView', query: { meal: item.mealDay } });
   } else if (!item.check) {
     item.recorded = true;
@@ -148,10 +148,10 @@ watch( () => selectedDay.selectedDay.setDay, async () => {
 onMounted(async() => {
   // 여기서 API 호출하여 mealInfo 초기화 가능
   const res = await getMealRecord(selectedDay.selectedDay.setDay);
-  console.log("mealRecord", res);
-  console.log("mealRecordIds", res[0]?.mealRecordIds);
-  console.log("userFood", res[0]?.userFood);
-  console.log("foodDb", res[0]?.foodDb);
+  // console.log("mealRecord", res);
+  // console.log("mealRecordIds", res[0]?.mealRecordIds);
+  // console.log("userFood", res[0]?.userFood);
+  // console.log("foodDb", res[0]?.foodDb);
   addToDefaultList(res);
 
 });

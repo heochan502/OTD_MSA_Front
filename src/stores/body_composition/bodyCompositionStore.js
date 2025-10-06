@@ -11,10 +11,13 @@ export const useBodyCompositionStore = defineStore("bodyComposition", {
   }),
   actions: {
     async fetchLastestBodyComposition() {
+       console.log("getLastestBodyComposition : ");
       const res = await getLastestBodyComposition();
+         console.log("getLastestBodyComposition : ",res.data);
       this.lastest = res.data;
     },
     async fetchSeriesBodyComposition() {
+        console.log("fetchSeriesBodyComposition : ");
       const res = await getSeries();
       this.series = res.data;
     },

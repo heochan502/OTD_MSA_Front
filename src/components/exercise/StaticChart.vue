@@ -45,7 +45,7 @@ const labels = computed(() =>
   props.series.points.map((p) => dayjs(p.date).format("YY/MM/DD"))
 );
 
-const metrics = computed(() => Object.keys(props.series.points[0].values));
+const metrics = computed(() => Object.keys(props.series?.points[0].values) || null);
 
 // 항목별 데이터셋 생성
 const makeChartData = (metric) => {
