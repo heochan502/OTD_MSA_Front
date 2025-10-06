@@ -51,7 +51,8 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 .content_main {
-  width: 350px;
+  min-width: 320px;
+  width: 100%;
   height: 188px;
   padding: 10px;
 

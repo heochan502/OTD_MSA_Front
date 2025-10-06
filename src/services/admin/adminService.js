@@ -14,6 +14,12 @@ export const getPointHistory = () => {
   return axios.get(`${BASE_URL}/point`).catch((e) => e.response);
 };
 
+export const getUserDetail = (userId) => {
+  return axios
+    .get(`${BASE_URL}/user/${userId}`)
+    .catch((e) => e.response);
+};
+
 export const getGender = () => {
   return axios.get(`${BASE_URL}/gender`).catch((e) => e.response);
 };

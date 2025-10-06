@@ -1,17 +1,23 @@
 <script setup>
 import { reactive, computed, watch, onMounted } from 'vue';
 
+import { useAuthenticationStore } from '@/stores/user/authentication.js'
+
+
+const userInfo = useAuthenticationStore();
 const props = defineProps({
   open: { type: Boolean, default: false },
   // 초기값 주고 싶으면 전달
   initial: {
     type: Object,
-    default: () => ({ name: '', unit: 'g' }),
+    default: () => ({ foodName: '', flag: 'g' }),
   },
 });
 const emit = defineEmits(['update:open', 'submit', 'close']);
 
 const form = reactive({
+            
+  foodDbId: null, // userId로 대체
   foodName: '',
   flag: 'g',
   kcal: 0,
@@ -31,7 +37,7 @@ watch(
   { immediate: true }
 );
 
-const unitLabel = computed(() => (form.unit === 'ml' ? 'ml' : 'g'));
+const unitLabel = computed(() => (form.flag === 'ml' ? 'ml' : 'g'));
 
 const onClose = () => {
   emit('update:open', false);
@@ -77,7 +83,7 @@ onMounted(() => {
           <label class="lbl">음식 이름 <span class="req">(필수)</span></label>
           <input
             class="input"
-            v-model.trim="form.name"
+            v-model.trim="form.foodName"
             type="text"
             maxlength="20"
             placeholder="음식 이름 (최대 20자)"
@@ -89,14 +95,14 @@ onMounted(() => {
             <label class="lbl">영양 정보 <span class="opt">(선택)</span></label>
             <div class="seg">
               <button
-                :class="['seg-btn', { active: form.unit === 'g' }]"
-                @click="form.unit = 'g'"
+                :class="['seg-btn', { active: form.flag === 'g' }]"
+                @click="form.flag = 'g'"
               >
                 g
               </button>
               <button
-                :class="['seg-btn', { active: form.unit === 'ml' }]"
-                @click="form.unit = 'ml'"
+                :class="['seg-btn', { active: form.flag === 'ml' }]"
+                @click="form.flag = 'ml'"
               >
                 ml
               </button>
@@ -124,7 +130,7 @@ onMounted(() => {
                   class="input num"
                   type="number"
                   inputmode="decimal"
-                  v-model.number="form.carb"
+                  v-model.number="form.carbohydrate"
                 />
                 <span class="suffix">{{ unitLabel }}</span>
               </div>
@@ -186,7 +192,7 @@ onMounted(() => {
           <p class="hint">* 입력하지 않은 영양정보는 0으로 자동 입력돼요.</p>
         </section>
 
-        <button class="cta" :disabled="!form.name" @click="onSubmit">
+        <button class="cta" :disabled="!form.foodName" @click="onSubmit">
           목록에 담기
         </button>
       </div>

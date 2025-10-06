@@ -1,8 +1,10 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 
-import {useMealSelectedDayStore} from '@/stores/meal/mealStore.js'
+import {useMealSelectedStore} from '@/stores/meal/mealStore.js'
 
+
+import { getMealRecord } from '@/services/meal/mealService.js';
 
 import dayjs from 'dayjs';
 
@@ -10,7 +12,7 @@ import 'dayjs/locale/ko';
 
 dayjs.locale('ko');
 
-const selectedDay = useMealSelectedDayStore();
+const selectedDay = useMealSelectedStore();
 
 
 
@@ -33,9 +35,10 @@ const today = computed(() => startOfDay(new Date()));
 const selected = ref(startOfDay(toDate(props.modelValue)));
 
 watch(
-  () => props.modelValue,
-  (value) => {
+ () => props.modelValue,
+  async (value) => {
     selected.value = startOfDay(toDate(value));
+    // const res = await getMealRecord(selectedDay.selectedDay.setDay);
   }
 );
 
@@ -77,28 +80,30 @@ const internalIndex = ref(0);
 const syncIndex = () => {
   const idx = days.value.findIndex((d) => isSame(d.date, selected.value));
   internalIndex.value = idx === -1 ? Math.floor(days.value.length / 2) : idx;
+  
 };
 watch(days, syncIndex, { immediate: true });
 watch(selected, syncIndex);
 
 // 선택 처리
 function select(day) {
-  // console.log("여기 : ", new dayjs(day).format('YYYY-MM-DD'));
-  // console.log("여기2 : ", selectedDay.selectedDay.setDay);
-  if (new dayjs(day).format('YYYY-MM-DD') === selectedDay.selectedDay.setDay)
-    {selected.value = new Date();  }
+  // 클릭한 날과 현재 선택 문자열을 동일 포맷으로 맞춤
+  const clicked = dayjs(day).format('YYYY-MM-DD');
+  const current = selectedDay.selectedDay.setDay; // 문자열
 
-  else{
-    selected.value = day;  }
+  if (clicked === current) {
+    // 같으면 "오늘"로 전환
+    const todayStr = dayjs().format('YYYY-MM-DD');
+    selectedDay.selectedDay.setDay = todayStr;
+    selected.value = startOfDay(new Date()); // 내부 selected도 오늘로
+  } else {
+    // 다르면 클릭한 날짜로 선택
+    selectedDay.selectedDay.setDay = clicked;
+    selected.value = startOfDay(day);
+  }
 
-
-  emit('update:modelValue', day);
-  emit('change', day);
-}
-
-function onIndexChange(idx) {
-  const d = days.value[idx];
-  if (d && !isSame(d.date, selected.value)) select(d.date);
+  emit('update:modelValue', selected.value);
+  emit('change', selected.value);
 }
 </script>
 
@@ -109,7 +114,7 @@ function onIndexChange(idx) {
       class="px-2"
       center-active
       mandatory
-      @update:modelValue="onIndexChange"
+      @update:modelValue=""
     >
       <v-slide-group-item
         v-for="(data, idx) in days"

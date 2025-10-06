@@ -1,12 +1,15 @@
 <script setup>
 import { ref, reactive, onMounted } from "vue";
 import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
+import { getExerciseRecordList } from "@/services/exercise/exerciseService";
+import { formatDateISO, formatDateYearMonthISO } from "@/utils/dateTimeUtils";
+
+import btnAdd from "/image/exercise/btn_add_grey.png";
+
 import ExerciseRecordList from "@/components/exercise/ExerciseRecordList.vue";
 import BodyCompositionSummary from "@/components/BodyComposition/BodyCompositionSummary.vue";
 import WeeklyCalendar from "@/components/exercise/WeeklyCalendar.vue";
-import { getExerciseRecordList } from "@/services/exercise/exerciseService";
-import { formatDateISO, formatDateYearMonthISO } from "@/utils/dateTimeUtils";
-import btnAdd from "/image/exercise/btn_add_grey.png";
+import BodyCompositionStatics from "../body_composition/BodyCompositionStatics.vue";
 
 const exerciseRecordStore = useExerciseRecordStore();
 const selectedDate = ref(formatDateISO(new Date()));
@@ -21,14 +24,14 @@ onMounted(async () => {
 // @click
 const onDateClick = async (date) => {
   exerciseRecordStore.clearRecords();
-  selectedDate.value = date;
+  selectedDate.value = formatDateISO(date);
   // date 는 JS Date 객체 (컴포넌트에서 toDate()로 emit)
 
   const params = reactive({
     page: 1,
     row_per_page: 2,
     type: "daily",
-    date: date, // YYYY-MM-DD 형태
+    date: formatDateISO(date), // YYYY-MM-DD 형태
   });
 
   const res = await getExerciseRecordList(params);
@@ -74,7 +77,9 @@ const onDateClick = async (date) => {
           <span class="otd-subtitle-1">체성분</span>
           <!-- <img class="btn_add" :src="btnAdd" alt="체성분 추가 버튼" /> -->
         </div>
-        <span class="otd-body-2">변화 보기</span>
+        <router-link to="/exercise/body_composition">
+          <span class="otd-body-2">변화 보기</span>
+        </router-link>
       </div>
       <BodyCompositionSummary />
     </div>
