@@ -108,7 +108,14 @@ const res = await postMealRecord({
   console.log('입력 데이터', res);
   if (res.savedCount > 0) {
     openResultModal(true);
-  } else {
+  } 
+  else if (res.savedCount === -1)
+  {
+    resultModal.modify= true;
+    openResultModal(true);
+
+  }
+  else {
     openResultModal(false);
   }
   // if (res.savedCount > 0) {
@@ -127,6 +134,7 @@ const resultModal = ref({
   success: false,
   title: '',
   message: '',
+  modify : false,
 });
 
 // 모달 열기
@@ -134,9 +142,9 @@ function openResultModal(success) {
   resultModal.value = {
     open: true,
     success,
-    title: success ? '기록 완료' : '기록 실패',
+    title: success ? (resultModal.modify ? '수정 성공': '기록 성공' ) : '기록 실패',
     message: success
-      ? '식단이 성공적으로 기록되었어요.'
+      ? (resultModal.modify ? '식단이 성공적으로 수정되었어요.' : '식단이 성공적으로 기록되었어요.')
       : '식단 기록에 실패했어요. 다시 시도해주세요.',
   };
 }

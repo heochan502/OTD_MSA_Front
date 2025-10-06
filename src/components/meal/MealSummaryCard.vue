@@ -1,26 +1,29 @@
 <script setup>
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useMealSelectedStore } from '@/stores/meal/mealStore'
+import { useMealSelectedStore, useMealRecordStore } from '@/stores/meal/mealStore'
 
 const emit = defineEmits(['more'])
 
-const store = useMealSelectedStore()
-const { selectedFoods } = storeToRefs(store)
+const store = useMealRecordStore()
+const { eatenFoodList } = storeToRefs(store)
 
 // 총합
 const totalKcal = computed(() =>
-  (selectedFoods.value ?? []).reduce((s, f) => s + (Number(f.kcal) || 0), 0)
+  
+  (eatenFoodList.value ?? []).reduce((s, f) => s + ((f?.userFoodId ? Number(f.kcal) : (f.amount * f.kcal) / 100) || 0 ), 0)
 )
 const totalCarb = computed(() =>
-  (selectedFoods.value ?? []).reduce((s, f) => s + (Number(f.carbohydrate) || 0), 0)
+  (eatenFoodList.value ?? []).reduce((s, f) => s + ((f?.userFoodId ? Number(f.carbohydrate) : (f.amount * f.carbohydrate) / 100) || 0), 0)
 )
 const totalProtein = computed(() =>
-  (selectedFoods.value ?? []).reduce((s, f) => s + (Number(f.protein) || 0), 0)
+  (eatenFoodList.value ?? []).reduce((s, f) => s + ((f?.protein ? Number(f.protein) : (f.amount * f.protein) / 100) || 0), 0)
 )
 const totalFat = computed(() =>
-  (selectedFoods.value ?? []).reduce((s, f) => s + (Number(f.fat) || 0), 0)
+  (eatenFoodList.value ?? []).reduce((s, f) => s + ((f?.fat ? Number(f.fat) : (f.amount * f.fat) / 100) || 0), 0)
 )
+
+
 
 // 목표/소모(운동) - 필요시 스토어/프로프 연동
 const kcalGoal = computed(() => 1587)
@@ -54,15 +57,15 @@ const macroPct = computed(() => {
     </div>
 
     <div class="kcal-line">
-      <span class="big">{{ totalKcal }}</span>
+      <span class="big">{{ totalKcal.toFixed(0) }}</span>
       <span class="otd-body-1">/{{ kcalGoal }}kcal</span>
     </div>
 
     <!-- 매크로 칩 -->
     <div class="chips">
-      <div class="chip chip-carb"><span class="dot" > 탄</span> <b>{{ macroPct.carb }}%</b></div>
-      <div class="chip chip-protein"><span class="dot" > 단</span> <b>{{ macroPct.protein }}%</b></div>
-      <div class="chip chip-fat"><span class="dot" > 지</span> <b>{{ macroPct.fat }}%</b></div>
+      <div class="chip chip-carb"><span class="dot"> 탄</span> <b>{{ macroPct.carb }}%</b></div>
+      <div class="chip chip-protein"><span class="dot"> 단</span> <b>{{ macroPct.protein }}%</b></div>
+      <div class="chip chip-fat"><span class="dot"> 지</span> <b>{{ macroPct.fat }}%</b></div>
     </div>
 
     <!-- 총 섭취 진행바 -->
@@ -71,23 +74,23 @@ const macroPct = computed(() => {
     </div>
 
     <div class="meta">
-      <div class="otd-body-1"><span class="otd-subtitle-1">{{ burnedKcal }}kcal</span> 소모</div>
-      <div class="otd-body-1"><span class="otd-subtitle-1">{{ remainKcal }}</span>kcal 더 먹을 수 있어요</div>
+      <div class="otd-body-1"><span class="otd-subtitle-1">{{ burnedKcal.toFixed(0) }}kcal</span> 소모</div>
+      <div class="otd-body-1"><span class="otd-subtitle-1">{{ remainKcal.toFixed(0) }}</span>kcal 더 먹을 수 있어요</div>
     </div>
 
     <!-- 하단 g 합계 -->
     <div class="grams">
       <div class="g">
         <div class="label">순탄수</div>
-        <div class="val"><b>{{ totalCarb.toFixed(1) }}g</b></div>
+        <div class="val"><b>{{ totalCarb.toFixed(1) }}g/ml </b></div>
       </div>
       <div class="g">
         <div class="label">단백질</div>
-        <div class="val"><b>{{ totalProtein.toFixed(1) }}g</b></div>
+        <div class="val"><b>{{ totalProtein.toFixed(1) }}g/ml</b></div>
       </div>
       <div class="g">
         <div class="label">지방</div>
-        <div class="val"><b>{{ totalFat.toFixed(1) }}g</b></div>
+        <div class="val"><b>{{ totalFat.toFixed(1) }}g/ml</b></div>
       </div>
     </div>
   </div>

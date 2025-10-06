@@ -122,16 +122,15 @@ const searchFoodName = async (keyword) => {
 const isSelected = (id) =>
   id != null && (selectedFoods.value ?? []).some(food => food?.foodDbId === id);
 
-const displayAmount = (food) => {
-  const sel = (selectedFoods.value ?? []).find(food => food?.foodDbId === food?.foodDbId);
-  return Number(sel?.amount ?? food?.amount ?? 0);
+const displayAmount = (item) => {
+  const sel = (selectedFoods.value ?? []).find(f => f?.foodDbId === item?.foodDbId);
+  return Number(sel?.amount ?? item?.amount ?? 0);
 };
 
-const displayKcal = (food) => {
-  const sel = (selectedFoods.value ?? []).find(food => food?.foodDbId === food?.foodDbId);
-  return Number(sel?.kcal ?? food?.kcal ?? 0);
+const displayKcal = (item) => {
+  const sel = (selectedFoods.value ?? []).find(f => f?.foodDbId === item?.foodDbId);
+  return Number(sel?.kcal ?? item?.kcal ?? 0);
 };
-
 
 //  바텀시트 상태 + 편집 대상(상세에서 조절)
 const sheetOpen = ref(false)

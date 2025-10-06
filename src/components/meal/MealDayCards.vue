@@ -14,7 +14,7 @@ const selectedDay  = useMealSelectedStore();
 
 const  eatenFood = useMealRecordStore();
 
-const {eatenFoodList } = storeToRefs(eatenFood);
+const { eatenFoodList } = storeToRefs(eatenFood);
 
 // 배포 베이스(/ 또는 /otd/ 등)에 안전한 public 자산 경로 생성
 const BASE = import.meta.env.BASE_URL || '/';
@@ -68,7 +68,7 @@ const addToDefaultList = (res)=>{
     const userFoodId = mealRecord?.userFood?.userFoodId ?? null;
 
     const payload = {
-      mealId,                     // MealFoodDb.foodDbId or null
+      foodDbId: mealId,                     // MealFoodDb.foodDbId or null
       userFoodId,                       // MealFoodMakeDb.userFoodId or null
       foodName: food?.foodName ?? "",
       // amount는 음식 엔티티가 아니라 MealRecord의 foodAmount임
@@ -111,8 +111,6 @@ const addToDefaultList = (res)=>{
 };
 
 
-
-
 const toggleFasting = (i) => {
   mealInfo.value[i].check = !mealInfo.value[i].check;
   if (mealInfo.value[i].check) mealInfo.value[i].recorded = false;
@@ -120,12 +118,17 @@ const toggleFasting = (i) => {
 
 const onTopIconClick = (i) => {
   const item = mealInfo.value[i];
+  console.log("뭐가 들어가 있을까 : ", item);
   if (item.recorded) {
-    
-    router.push({ name: 'MealRecordView', query: { meal: item.mealDay0 } });
+    selectedDay.selectedFoods = eatenFood.eatenFoodList.filter(i => i.mealTime === item.mealDay);
+
+    selectedDay.selectedDay.setTime = item.mealDay;
+    console.log("디테일 넘어갈때 : ", selectedDay.selectedFoods);
+    router.push({ name: 'MealRecordView', query: { meal: item.mealDay } });
   } else if (!item.check) {
     item.recorded = true;
-    router.push({ name: 'MealFoodSearchView', query: { meal: item.mealDay0 } });
+    
+    router.push({ name: 'MealFoodSearchView', query: { meal: item.mealDay } });
   }
 };
 
@@ -156,7 +159,7 @@ onMounted(async() => {
 
 <template>
   <div class="meal-cards">
-    <div class="meal-card otd-shadow" v-for="(item, index) in mealInfo" :key="item.mealDay0">
+    <div class="meal-card otd-shadow" v-for="(item, index) in mealInfo" :key="item.mealDay">
       <button class="meal-card-top d-flex justify-content-between">
         <div class="d-flex flex-column">
           <!-- BASE_URL을 반영한 상단 아이콘 경로 -->
