@@ -27,6 +27,7 @@ import NickName from '@/views/user/Nickname.vue';
 import Email from '@/views/user/Email.vue';
 import Password from '@/views/user/password.vue';
 import ModifiProfile from "@/views/user/ModifiProfile.vue";
+import FindId from "@/views/user/FindId.vue";
 import PointHistory from "@/views/user/pointHistory.vue";
 import Term from "@/views/user/Term.vue";
 import Oauth2 from "@/views/auth/OAuth2Handler.vue";
@@ -235,6 +236,12 @@ const router = createRouter({
       component: Password,
     },
     {
+      path: '/user/findid',
+      name: 'findId',
+      component: FindId,
+    },
+    
+    {
       path: "/pointshop",
       name: "PointShopList",
       component: PointShopListView,
@@ -355,7 +362,7 @@ const router = createRouter({
 });
 
 // 로그인 하지 않아도 이용할 수 있는 Path들
-const unSignedPathList = ["/user/login", "/user/join", "/fe/redirect"];
+const unSignedPathList = ["/user/login", "/user/join", "/fe/redirect" ,"/user/findid" , "/user/password"];
 
 //navigation guard
 router.beforeEach((to, from) => {
@@ -363,28 +370,29 @@ router.beforeEach((to, from) => {
   const isUnsignedPath = unSignedPathList.some((path) =>
     to.path.startsWith(path)
   );
+  
   // body 클래스 분기
   if (to.path.startsWith("/admin")) {
     document.body.classList.add("is-admin");
   } else {
     document.body.classList.remove("is-admin");
   }
+  
   if (to.path.startsWith("/admin")) {
     const user = authentcationStore.state.signedUser;
     if (!user || user.userRole !== "ADMIN") {
       alert("관리자만 접근 가능합니다.");
-      return { path: "/" }; // 일반 유저는 홈으로 돌려보내기
+      return { path: "/" };
     }
   }
-  if (unSignedPathList.includes(to.path) && authentcationStore.state.isSigned) {
-    //로그인 상태에서 /user/login, /user/join 경로로 이동하려고 하면
+  
+  // 로그인 상태에서 로그인/회원가입 페이지 접근 차단
+  if (isUnsignedPath && authentcationStore.state.isSigned) {
     return { path: "/" };
-  } else if (
-    !authentcationStore.state.isSigned &&
-    !unSignedPathList.includes(to.path)
-  ) {
+  } 
+  // 로그아웃 상태에서 로그인 필요한 페이지 접근 차단
+  else if (!authentcationStore.state.isSigned && !isUnsignedPath) {
     console.log("로그아웃 상태에서 접근 불가 경로");
-    //로그아웃 상태에서 /user/login, /user/join 경로가 아닌 경우
     return { path: "/user/login" };
   }
 });

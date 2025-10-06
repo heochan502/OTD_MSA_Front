@@ -1,18 +1,58 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { join, checkUidDuplicate , checkNicknameDuplicate } from '@/services/user/userService';
+import { join, checkUidDuplicate, checkNicknameDuplicate } from '@/services/user/userService';
 import { termsService } from '@/services/user/termsService';
+import AlertModal from '@/components/user/Modal.vue';
 
 const router = useRouter();
 const basePath = import.meta.env.VITE_BASE_URL;
 
-// 현재 단계 (1: 이메일인증, 2: 약관동의, 3: 계정정보, 4: 추가정보, 5: 설문조사, 6: 완료)
+// 현재 단계
 const currentStep = ref(1);
 const isLoading = ref(false);
 
 const termsData = ref([]);
 const termsMap = ref(new Map());
+
+// 모달 상태
+const modalState = ref({
+  show: false,
+  title: '',
+  message: '',
+  type: 'info',
+  onConfirm: null,
+  onCancel: null
+});
+
+const showModal = (title, message, type = 'info', onConfirm = null, onCancel = null) => {
+  modalState.value = {
+    show: true,
+    title,
+    message,
+    type,
+    onConfirm,
+    onCancel
+  };
+};
+
+const closeModal = () => {
+  modalState.value.show = false;
+};
+
+const handleModalConfirm = () => {
+  if (modalState.value.onConfirm) {
+    modalState.value.onConfirm();
+  }
+  closeModal();
+};
+
+const handleModalCancel = () => {
+  if (modalState.value.onCancel) {
+    modalState.value.onCancel();
+  }
+  closeModal();
+};
 
 // 1단계: 이메일 인증 관련
 const email = ref('');
@@ -90,7 +130,8 @@ const surveyAnswers = ref({
 });
 
 // 모달
-const showModal = ref('');
+const showTermsModal = ref('');
+const modalContent = ref({});
 
 // 설문 문항 데이터
 const surveyQuestions = [
@@ -150,8 +191,6 @@ watch(emailTimer, (newValue) => {
   }
 });
 
-
-
 onUnmounted(() => {
   if (timerInterval) {
     clearInterval(timerInterval);
@@ -170,7 +209,7 @@ onMounted(async () => {
     }
   } catch (error) {
     console.error('약관 불러오기 실패:', error);
-    alert('약관을 불러오는데 실패했습니다.');
+    showModal('오류', '약관을 불러오는데 실패했습니다.', 'error');
   }
 });
 
@@ -223,6 +262,7 @@ const validateMemberId = (uid) => {
   }
   return { isValid: true, message: '' };
 };
+
 const validateMemberNick = (nickname) => {
   if (!nickname) {
     return { isValid: false, message: '닉네임을 입력해주세요.' };
@@ -447,12 +487,12 @@ watch(
     }
   }
 );
+
 watch(() => accountInfo.upw, (newValue) => {
   passwordCriteria.value.length = newValue.length >= 8;
   passwordCriteria.value.letter = /[a-z]/i.test(newValue);
   passwordCriteria.value.number = /[0-9]/.test(newValue);
   passwordCriteria.value.specialChar = /[!@#$%^&*(),.?":{}|<>_\-+=[\]\\\/'`~;]/.test(newValue);
-  
 
   if (validation.value.upw.touched) {
     validateField('upw', newValue);
@@ -470,16 +510,15 @@ watch(
     }
   }
 );
+
 watch(
   () => additionalInfo.value.nickname,
   (newValue) => {
     if (validation.value.nickname.touched) {
-      // 닉네임이 변경되면 유효성 검사
       const result = validateMemberNick(newValue);
       validation.value.nickname.isValid = result.isValid;
       validation.value.nickname.message = result.message;
     }
-    // 닉네임이 변경되면 중복검사 상태 초기화
     resetNicknameValidation();
   }
 );
@@ -556,7 +595,6 @@ const canProceedToNext = computed(() => {
     case 1:
       return isEmailVerified.value;
     case 2:
-      // 필수 약관만 체크
       const requiredTerms = termsData.value.filter(t => t.isRequired);
       return requiredTerms.every(term => 
         agreements.value.agreedTermsIds.includes(term.termsId)
@@ -614,13 +652,13 @@ const sendVerificationEmail = async () => {
     if (response.ok) {
       isEmailSent.value = true;
       emailTimer.value = 300;
-      alert('인증코드가 발송되었습니다.');
+      showModal('전송 완료', '인증코드가 발송되었습니다.', 'success');
     } else {
       const error = await response.json();
-      alert(error.message || '이메일 발송에 실패했습니다.');
+      showModal('전송 실패', error.message || '이메일 발송에 실패했습니다.', 'error');
     }
   } catch (error) {
-    alert('네트워크 오류가 발생했습니다.');
+    showModal('네트워크 오류', '네트워크 오류가 발생했습니다.', 'error');
   }
   isLoading.value = false;
 };
@@ -644,12 +682,12 @@ const verifyEmailCode = async () => {
 
     if (response.ok && result.result?.verified === true) {
       isEmailVerified.value = true;
-      alert('이메일 인증이 완료되었습니다.');
+      showModal('인증 완료', '이메일 인증이 완료되었습니다.', 'success');
     } else {
-      alert(result.message || '인증코드가 일치하지 않습니다.');
+      showModal('인증 실패', result.message || '인증코드가 일치하지 않습니다.', 'error');
     }
   } catch (error) {
-    alert('네트워크 오류가 발생했습니다.');
+    showModal('네트워크 오류', '네트워크 오류가 발생했습니다.', 'error');
   }
   isLoading.value = false;
 };
@@ -712,7 +750,7 @@ const submitJoin = async () => {
       nickname: additionalInfo.value.nickname,
       roles: ['USER_1'],
       surveyAnswers: calculateSurveyScore.value,
-      agreedTermsIds: agreements.value.agreedTermsIds  // 추가
+      agreedTermsIds: agreements.value.agreedTermsIds
     };
 
     formData.append(
@@ -727,17 +765,19 @@ const submitJoin = async () => {
     }
 
     await join(formData);
-    alert('회원가입이 완료되었습니다!');
-    router.push('/user/login');
+    showModal(
+      '가입 완료',
+      '회원가입이 완료되었습니다!',
+      'success',
+      () => router.push('/user/login')
+    );
   } catch (error) {
     console.error('회원가입 오류:', error);
-    alert('회원가입에 실패했습니다.');
+    showModal('가입 실패', '회원가입에 실패했습니다.', 'error');
   } finally {
     isLoading.value = false;
   }
 };
-
-const modalContent = ref({});
 
 const loadTermsContent = (type) => {
   const term = termsMap.value.get(type);
@@ -746,10 +786,9 @@ const loadTermsContent = (type) => {
       title: term.title,
       content: term.content
     };
-    showModal.value = type;
+    showTermsModal.value = type;
   }
 };
-
 </script>
 
 <template>
@@ -818,51 +857,51 @@ const loadTermsContent = (type) => {
       </div>
 
       <!-- Step 2: 약관 동의 -->
-<div v-if="currentStep === 2" class="step-container">
-  <h2 class="step-title">서비스 이용동의</h2>
+      <div v-if="currentStep === 2" class="step-container">
+        <h2 class="step-title">서비스 이용동의</h2>
 
-  <div class="form-group">
-    <div class="agreement-all">
-      <label class="checkbox-container">
-        <input
-          type="checkbox"
-          :checked="agreements.all"
-          @change="handleAgreementChange('all')"
-          class="checkbox"
-        />
-        <span class="checkbox-text font-medium">약관 전체동의</span>
-      </label>
-    </div>
+        <div class="form-group">
+          <div class="agreement-all">
+            <label class="checkbox-container">
+              <input
+                type="checkbox"
+                :checked="agreements.all"
+                @change="handleAgreementChange('all')"
+                class="checkbox"
+              />
+              <span class="checkbox-text font-medium">약관 전체동의</span>
+            </label>
+          </div>
 
-    <div class="agreement-list">
-      <div 
-        v-for="term in termsData" 
-        :key="term.termsId"
-        class="agreement-item"
-      >
-        <label class="checkbox-container">
-          <input
-            type="checkbox"
-            :checked="isTermsChecked(term.termsId)"
-            @change="handleAgreementChange(term.termsId)"
-            class="checkbox"
-          />
-          <span>
-            {{ term.isRequired ? '(필수)' : '(선택)' }} 
-            {{ term.title }}
-          </span>
-        </label>
-        <button
-          @click="loadTermsContent(term.type)"
-          class="view-button"
-          type="button"
-        >
-          보기
-        </button>
+          <div class="agreement-list">
+            <div 
+              v-for="term in termsData" 
+              :key="term.termsId"
+              class="agreement-item"
+            >
+              <label class="checkbox-container">
+                <input
+                  type="checkbox"
+                  :checked="isTermsChecked(term.termsId)"
+                  @change="handleAgreementChange(term.termsId)"
+                  class="checkbox"
+                />
+                <span>
+                  {{ term.isRequired ? '(필수)' : '(선택)' }} 
+                  {{ term.title }}
+                </span>
+              </label>
+              <button
+                @click="loadTermsContent(term.type)"
+                class="view-button"
+                type="button"
+              >
+                보기
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-</div>
 
       <!-- Step 3: 계정 정보 -->
       <div v-if="currentStep === 3" class="step-container">
@@ -920,12 +959,12 @@ const loadTermsContent = (type) => {
           </div>
 
           <div class="form-group">
-            <label for="upw"></label>
+            <label for="upw">비밀번호 *</label>
             <div class="input-wrapper">
               <input
                 :type="showPassword ? 'text' : 'password'"
                 id="upw"
-                placeholder="비밀번호를 입력해주세요(10자 이상)"
+                placeholder="비밀번호를 입력해주세요(8자 이상)"
                 v-model="accountInfo.upw"
                 :class="{
                   'input-field-with-icon': true,
@@ -994,7 +1033,7 @@ const loadTermsContent = (type) => {
           </div>
 
           <div class="form-group">
-            <label for="confirmPassword"></label>
+            <label for="confirmPassword">비밀번호 확인 *</label>
             <div class="input-wrapper">
               <input
                 :type="showConfirmPassword ? 'text' : 'password'"
@@ -1134,7 +1173,7 @@ const loadTermsContent = (type) => {
           </select>
 
           <div class="form-group">
-            <label for="nickname"></label>
+            <label for="nickname">닉네임 *</label>
             <div class="input-wrapper">
               <input
                 type="text"
@@ -1260,16 +1299,27 @@ const loadTermsContent = (type) => {
       </button>
     </div>
 
-   <!-- 약관 모달 수정 -->
-<div v-if="showModal" class="modal-overlay" @click="showModal = ''">
-  <div class="modal" @click.stop>
-    <h3 class="modal-title">{{ modalContent.title }}</h3>
-    <div class="modal-content">
-      <p class="modal-text" style="white-space: pre-wrap;">{{ modalContent.content }}</p>
+    <!-- 약관 모달 -->
+    <div v-if="showTermsModal" class="modal-overlay" @click="showTermsModal = ''">
+      <div class="modal" @click.stop>
+        <h3 class="modal-title">{{ modalContent.title }}</h3>
+        <div class="modal-content">
+          <p class="modal-text" style="white-space: pre-wrap;">{{ modalContent.content }}</p>
+        </div>
+        <button @click="showTermsModal = ''" class="btn btn-primary">확인</button>
+      </div>
     </div>
-    <button @click="showModal = ''" class="btn btn-primary">확인</button>
-  </div>
-</div>
+
+    <!-- Alert 모달 컴포넌트 -->
+    <AlertModal
+      :show="modalState.show"
+      :title="modalState.title"
+      :message="modalState.message"
+      :type="modalState.type"
+      @close="closeModal"
+      @confirm="handleModalConfirm"
+      @cancel="handleModalCancel"
+    />
   </div>
 </template>
 

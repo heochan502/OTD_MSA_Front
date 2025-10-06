@@ -3,142 +3,133 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { deleteUser } from '@/services/user/userService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
+import AlertModal from '@/components/user/Modal.vue';
 
 const router = useRouter();
 const authenticationStore = useAuthenticationStore();
-const showModal = ref(false)
-const email = ref('')
 
-const handlePasswordReset = () => {
-  showModal.value = true
-}
+// 모달 상태
+const modalState = ref({
+  show: false,
+  title: '',
+  message: '',
+  type: 'info',
+  onConfirm: null,
+  onCancel: null
+});
 
-const handleSubmit = async () => {
-  if (!email.value) {
-    alert('이메일을 입력해주세요.')
-    return
+const showModal = (title, message, type = 'info', onConfirm = null, onCancel = null) => {
+  modalState.value = {
+    show: true,
+    title,
+    message,
+    type,
+    onConfirm,
+    onCancel
+  };
+};
+
+const closeModal = () => {
+  modalState.value.show = false;
+};
+
+const handleModalConfirm = () => {
+  if (modalState.value.onConfirm) {
+    modalState.value.onConfirm();
   }
-  
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailRegex.test(email.value)) {
-    alert('올바른 이메일 형식이 아닙니다.')
-    return
+  closeModal();
+};
+
+const handleModalCancel = () => {
+  if (modalState.value.onCancel) {
+    modalState.value.onCancel();
   }
-  
-  try {
-    const response = await fetch('http://localhost:8080/api/OTD/email/send-password-reset-link', {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ email: email.value })
-    })
-    
-    if (response.ok) {
-      handleClose()
-      window.location.href = `/user/password-reset-sent?email=${encodeURIComponent(email.value)}`
-    } else {
-      const error = await response.json()
-      alert(error.message || '이메일 전송에 실패했습니다.')
+  closeModal();
+};
+
+const userId = authenticationStore.state.signedUser?.userId;
+
+const remove = async () => {
+  showModal(
+    '회원 탈퇴',
+    '정말 회원 탈퇴하시겠습니까?',
+    'confirm',
+    async () => {
+      try {
+        const res = await deleteUser(userId);
+        if (res.status === 200) {
+          showModal(
+            '탈퇴 완료',
+            '회원 탈퇴가 완료되었습니다.',
+            'success',
+            async () => {
+              await authenticationStore.logout();
+              localStorage.clear();
+              sessionStorage.clear();
+              router.push('/user/login');
+            }
+          );
+        } else {
+          showModal('탈퇴 실패', '회원 탈퇴에 실패했습니다.', 'error');
+        }
+      } catch (error) {
+        console.error('회원탈퇴 에러:', error);
+        showModal('오류 발생', '오류가 발생했습니다.', 'error');
+      }
     }
-  } catch (error) {
-    console.error('비밀번호 재설정 오류:', error)
-    alert('네트워크 오류가 발생했습니다.')
-  }
-}
-
-const handleClose = () => {
-  showModal.value = false
-  email.value = ''
-}
-
-const remove = async (userId) => {
-  if (!confirm('정말 회원 탈퇴하시겠습니까?')) return;
-
-  try {
-    const res = await deleteUser(userId);
-    if (res.status === 200) {
-      alert('회원 탈퇴가 완료되었습니다.');
-      
-      // Pinia 스토어 초기화 (logout 메서드 사용)
-      await authenticationStore.logout();
-      
-      // 추가로 로컬/세션 스토리지도 클리어
-      localStorage.clear();
-      sessionStorage.clear();
-      
-      router.push('/user/login');
-    } else {
-      alert('회원 탈퇴에 실패했습니다.');
-    }
-  } catch (error) {
-    console.error('회원탈퇴 에러:', error);
-    alert('오류가 발생했습니다.');
-  }
+  );
 };
 </script>
 
 <template>
-<div class="profile-container">
-  <div class="settings-section">
-    <h3 class="section-title">정보수정</h3>
-    
-    <div class="settings-list">
-      <router-link to="/user/nickname" class="settings-item">
-        <div class="settings-icon">👤</div>
-        <span>닉네임수정</span>
-        <div class="arrow">›</div>
-      </router-link>
-    </div>
-    
-    <div class="settings-list">
-      <router-link to="/user/email" class="settings-item">
-        <div class="settings-icon">📧</div>
-        <span>이메일수정</span>
-        <div class="arrow">›</div>
-      </router-link>
-    </div>
-    
-    <div class="settings-list">
-      <router-link to="/user/password" class="settings-item">
-        <div class="settings-icon">🔒</div>
-        <span>비밀번호 재설정</span>
-        <div class="arrow">›</div>
-      </router-link>
-    </div>
-    
-    <div class="settings-list">
-  <button @click="remove(userId)" class="settings-item">
-    <div class="settings-icon">🚪</div>
-    <span>회원탈퇴</span>
-    <div class="arrow">›</div>
-  </button>
-</div>
-  </div>
-
-  <!-- 비밀번호 재설정 모달 -->
-  <div v-if="showModal" class="modal-overlay" @click="handleClose">
-    <div class="modal-content" @click.stop>
-      <h2 class="modal-title">비밀번호 재설정</h2>
-      <p class="modal-description">
-        비밀번호 재설정을 위한 이메일을 보내드리겠습니다.<br />
-        등록된 이메일을 입력해주세요.
-      </p>
+  <div class="profile-container">
+    <div class="settings-section">
+      <h3 class="section-title">정보수정</h3>
       
-      <input
-        v-model="email"
-        type="email"
-        placeholder="이메일을 입력하세요"
-        class="modal-input"
-      />
+      <div class="settings-list">
+        <router-link to="/user/nickname" class="settings-item">
+          <div class="settings-icon">👤</div>
+          <span>닉네임수정</span>
+          <div class="arrow">›</div>
+        </router-link>
+      </div>
       
-      <div class="modal-buttons">
-        <button @click="handleClose" class="btn-cancel">취소</button>
-        <button @click="handleSubmit" class="btn-submit">전송</button>
+      <div class="settings-list">
+        <router-link to="/user/email" class="settings-item">
+          <div class="settings-icon">📧</div>
+          <span>이메일수정</span>
+          <div class="arrow">›</div>
+        </router-link>
+      </div>
+      
+      <div class="settings-list">
+        <router-link to="/user/password" class="settings-item">
+          <div class="settings-icon">🔒</div>
+          <span>비밀번호 재설정</span>
+          <div class="arrow">›</div>
+        </router-link>
+      </div>
+      
+      <div class="settings-list">
+        <button @click="remove" class="settings-item">
+          <div class="settings-icon">🚪</div>
+          <span>회원탈퇴</span>
+          <div class="arrow">›</div>
+        </button>
       </div>
     </div>
+
+    <!-- Alert 모달 컴포넌트 -->
+    <AlertModal
+      :show="modalState.show"
+      :title="modalState.title"
+      :message="modalState.message"
+      :type="modalState.type"
+      @close="closeModal"
+      @confirm="handleModalConfirm"
+      @cancel="handleModalCancel"
+    />
   </div>
-</div>
 </template>
 
 <style scoped>
