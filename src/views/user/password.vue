@@ -229,7 +229,7 @@ const handleBack = () => {
   if (currentStep.value > 1) {
     currentStep.value--;
   } else {
-    router.push('/user/login');
+    router.back();
   }
 };
 </script>

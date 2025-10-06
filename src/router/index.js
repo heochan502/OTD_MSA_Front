@@ -16,17 +16,20 @@ import ChallengeCategoryList from "@/views/challenge/ChallengeCategoryList.vue";
 import ChallengePer from "@/views/challenge/ChallengePer.vue";
 import ChallengeDay from "@/views/challenge/ChallengeDay.vue";
 
+//유저
 import Login from "@/views/user/Login.vue";
 import Join from "@/views/user/Join.vue";
 import Profile from "@/views/user/Profile.vue";
 import Signal from "@/views/user/Signal.vue";
 import QnA from "@/views/user/QnA.vue";
 import Munhe from "@/views/user/Munhe.vue";
+import NickName from '@/views/user/Nickname.vue';
+import Email from '@/views/user/Email.vue';
+import Password from '@/views/user/password.vue';
 import ModifiProfile from "@/views/user/ModifiProfile.vue";
 import PointHistory from "@/views/user/pointHistory.vue";
 import Term from "@/views/user/Term.vue";
 import Oauth2 from "@/views/auth/OAuth2Handler.vue";
-
 
 // 포인트샵
 import PointShopListView from "@/views/point/PointShopListView.vue";
@@ -215,7 +218,22 @@ const router = createRouter({
       path: "/fe/redirect",
       name: "oauth2",
       component: Oauth2,
-    },    
+    },
+    {
+      path: '/user/nickname',
+      name: 'nickName',
+      component: NickName,
+    },
+    {
+      path: '/user/email',
+      name: 'email',
+      component: Email,
+    },
+    {
+      path: '/user/password',
+      name: 'password',
+      component: Password,
+    },
     {
       path: "/pointshop",
       name: "PointShopList",
