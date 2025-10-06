@@ -106,6 +106,7 @@ onMounted(async () => {
   console.log("homechallenge", challengeInfo.value);
   selectedDay.selectedDay.setDay = dayjs().format('YYYY-MM-DD');
   await bodyCompositionStore.fetchSeriesBodyComposition();
+  await bodyCompositionStore.fetchBodyCompositionMetrics();
 });
 
 const challengeHome = () => {
@@ -316,7 +317,10 @@ const setModal = () => {
             :fields="fields"
             :logs="inbodyData"
           /> -->
-          <StaticChart :series="bodyCompositionStore.series" />
+          <StaticChart
+            :series="bodyCompositionStore.series"
+            :metrics="bodyCompositionStore.metrics"
+          />
         </div>
       </section>
     </div>
