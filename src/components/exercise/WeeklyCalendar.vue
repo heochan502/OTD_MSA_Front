@@ -5,11 +5,15 @@ import isoWeek from "dayjs/plugin/isoWeek"; // 주 시작일 설정용
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import ExerciseCalendar from "./ExerciseCalendar.vue";
 
 dayjs.extend(isoWeek);
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 dayjs.extend(customParseFormat);
+
+const openCalendar = ref(false); // 캘린더 모달창
+const emit = defineEmits(["click-date"]);
 
 const props = defineProps({
   recordDate: {
@@ -17,7 +21,6 @@ const props = defineProps({
     default: () => [], // ["2025-09-10", "2025-09-12"]
   },
 });
-const emit = defineEmits(["click-date"]);
 
 const today = dayjs();
 const currentDate = ref(props.recordDate ? dayjs(props.recordDate) : today);
@@ -68,6 +71,24 @@ const goNow = () => {
   weekStart.value = today.startOf("isoWeek"); // 이번 주 시작일 갱신
   emit("click-date", today.format("YYYY-MM-DD"));
 };
+
+// exerciseCalendar에서 emit 한 이벤를 받는 함수
+// const applyDate = (date) => {
+//   // 부모(ExerciseMain.vue)에 선택된 날짜 전달
+//   emit("click-date", date);
+//   openCalendar.value = false; // 모달 닫기
+// };
+
+// 날짜 선택 시 (단순히 날짜만 업데이트)
+const onSelectDate = (date) => {
+  emit("click-date", date); // 부모로 선택된 날짜 전달
+};
+
+// 적용 버튼 클릭 시 (날짜 반영 + 모달 닫기)
+const applyDate = (date) => {
+  emit("click-date", date);
+  openCalendar.value = false; // 모달 닫기
+};
 </script>
 
 <template>
@@ -77,6 +98,7 @@ const goNow = () => {
         src="\image\exercise\calender.png"
         alt="캘린더 아이콘"
         class="calendar_icon"
+        @click="openCalendar = true"
       />
       <span class="otd-subtitle-1">{{ currentDate.format("YYYY년 M월") }}</span>
     </div>
@@ -106,6 +128,26 @@ const goNow = () => {
       <img src="\image\exercise\btn_next.png" alt="" width="10" />
     </button>
   </div>
+  <!-- 캘린더 모달 -->
+  <v-dialog v-model="openCalendar" max-width="350" min-height="100">
+    <v-card class="pb-3 d-flex">
+      <v-card-text class="otd-body-1 text-center">
+        <ExerciseCalendar @select-date="onSelectDate" />
+        <span>선택한 날의 기록을 보시겠어요?</span>
+      </v-card-text>
+      <div class="d-flex justify-center">
+        <v-btn @click="openCalendar = false" class="btn_confirm otd-body-1 ma-1"
+          >닫기</v-btn
+        >
+        <v-btn
+          color="#ffe864"
+          @click="applyDate(currentDate)"
+          class="btn_confirm otd-body-1 ma-1"
+          >적용하기</v-btn
+        >
+      </div>
+    </v-card>
+  </v-dialog>
 </template>
 
 <style lang="scss" scoped>
@@ -174,7 +216,40 @@ const goNow = () => {
     }
   }
 }
+
+.btn_confirm {
+  max-width: 135px;
+  width: 100%;
+  height: 38px;
+  margin-top: 20px;
+  background-color: #e6e6e6;
+  border-radius: 10px;
+  box-shadow: none;
+}
+
 :hover {
   border: none;
+}
+
+.btn_close {
+  width: 143px;
+  height: 38px;
+  margin-top: 20px;
+  background-color: #e6e6e6;
+  border-radius: 10px;
+  box-shadow: none;
+}
+.btn_select {
+  width: 143px;
+  height: 38px;
+  margin-top: 20px;
+
+  border-radius: 10px;
+  box-shadow: none;
+  background-color: #ffe864;
+}
+
+.calendar {
+  box-shadow: none;
 }
 </style>

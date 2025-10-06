@@ -4,8 +4,10 @@ import Progress from "@/components/challenge/Progress.vue";
 import ProgressJs from "@/components/challenge/ProgressJs.vue";
 
 import LineChart from "@/components/exercise/lineChart.vue";
+import StaticChart from "@/components/exercise/StaticChart.vue";
 
 import MealCard from "@/components/meal/MealDayCards.vue";
+import { useMealSelectedStore } from '@/stores/meal/mealStore.js'
 
 import BmiProg from "@/components/exercise/BmiProg.vue";
 import { getMyChallenge } from "@/services/challenge/challengeService";
@@ -14,6 +16,14 @@ import { useRouter } from "vue-router";
 import { getChallengeSettlementLog } from "@/services/challenge/challengeService";
 import ChallengeSettlementCard from "@/components/challenge/ChallengeSettlementCard.vue";
 import { useChallengeStore } from "@/stores/challenge/challengeStore";
+
+import dayjs from 'dayjs';
+import 'dayjs/locale/ko';
+
+
+const selectedDay = useMealSelectedStore();
+
+import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
 
 const state = reactive({
   monthlySettlementLog: [],
@@ -77,6 +87,7 @@ const monthlySettlementDialog = ref(false);
 const weeklySettlementDialog = ref(false);
 
 const challengeStore = useChallengeStore();
+const bodyCompositionStore = useBodyCompositionStore();
 
 onMounted(async () => {
   await fetchMonthlySettlement(todayDate);
@@ -91,6 +102,10 @@ onMounted(async () => {
   } else if (state.weeklySettlementLog.length > 0) {
     weeklySettlementDialog.value = true;
   }
+
+  console.log("homechallenge", challengeInfo.value);
+  selectedDay.selectedDay.setDay = dayjs().format('YYYY-MM-DD');
+  await bodyCompositionStore.fetchSeriesBodyComposition();
 });
 
 const challengeHome = () => {
@@ -295,12 +310,13 @@ const setModal = () => {
       </div> -->
 
         <div class="otd-top-margin">
-          <LineChart
+          <!-- <LineChart
             :selected-date="today"
             :selectedField="selectedField"
             :fields="fields"
             :logs="inbodyData"
-          />
+          /> -->
+          <StaticChart :series="bodyCompositionStore.series" />
         </div>
       </section>
     </div>
@@ -309,7 +325,7 @@ const setModal = () => {
 
 <style lang="scss" scoped>
 .top-wrap {
-  margin: 5px 20px;
+  margin: 5px 0px;
 }
 .wrap_content {
   display: flex;
@@ -337,7 +353,7 @@ const setModal = () => {
 
 .meal-card {
   width: 100%;
-  min-width: 160px;
+  // min-width: 160px;
 }
 
 /*

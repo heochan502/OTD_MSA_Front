@@ -38,14 +38,14 @@ ChartJS.register(
 const chartRef = ref(null);
 
 const props = defineProps({
-  selectedDate: {
-    type: String,
-    required: true,
-  },
-  selectedField: String,
-  fields: Array,
-  label: String,
-  logs: { type: Array, default: () => [] },
+  // selectedDate: {
+  //   type: String,
+  // },
+  // selectedField: String,
+  // fields: Array,
+  // label: String,
+  // logs: { type: Array, default: () => [] },
+  logs: Object,
 });
 
 // 해당 주차 범위
@@ -67,6 +67,7 @@ const weeklyLogs = computed(() => {
   });
 });
 
+// 건강 차트
 // 주차 데이터 매핑 (월~일, 빈 값은 null)
 const weeklyData = computed(() => {
   const days = Array(7).fill(0);
@@ -77,7 +78,7 @@ const weeklyData = computed(() => {
     const weekday = day.isoWeekday(); // 1=월 ~ 7=일
 
     const fieldKey = props.label || props.selectedField;
-    let value = log.values[fieldKey];
+    let value = log[fieldKey];
 
     if (value != null) {
       days[weekday - 1] = value;

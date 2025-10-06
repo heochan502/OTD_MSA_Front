@@ -1,145 +1,226 @@
 <script setup>
-const props = defineProps({
-  dateLabel: { type: String, default: '오늘' },
-  kcalNow: { type: Number, default: 451 },
-  kcalGoal: { type: Number, default: 1587 },
-  macros: {
-    type: Object,
-    default: () => ({ carb: 35, protein: 15, fat: 15 }), // %
-  },
-  grams: {
-    type: Object,
-    default: () => ({ carb: 28.5, protein: 53.2, fat: 45.9 }), // g
-  },
-});
-const emit = defineEmits(['more']);
+import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useMealSelectedStore, useMealRecordStore } from '@/stores/meal/mealStore'
+
+const emit = defineEmits(['more'])
+
+const store = useMealRecordStore()
+const { eatenFoodList } = storeToRefs(store)
+
+// 총합
+const totalKcal = computed(() =>
+  
+  (eatenFoodList.value ?? []).reduce((s, f) => s + ((f?.userFoodId ? Number(f.kcal) : (f.amount * f.kcal) / 100) || 0 ), 0)
+)
+const totalCarb = computed(() =>
+  (eatenFoodList.value ?? []).reduce((s, f) => s + ((f?.userFoodId ? Number(f.carbohydrate) : (f.amount * f.carbohydrate) / 100) || 0), 0)
+)
+const totalProtein = computed(() =>
+  (eatenFoodList.value ?? []).reduce((s, f) => s + ((f?.protein ? Number(f.protein) : (f.amount * f.protein) / 100) || 0), 0)
+)
+const totalFat = computed(() =>
+  (eatenFoodList.value ?? []).reduce((s, f) => s + ((f?.fat ? Number(f.fat) : (f.amount * f.fat) / 100) || 0), 0)
+)
+
+
+
+// 목표/소모(운동) - 필요시 스토어/프로프 연동
+const kcalGoal = computed(() => 1587)
+const burnedKcal = computed(() => 0)
+
+const progressPct = computed(() => {
+  const g = kcalGoal.value || 1
+  return Math.min(100, Math.round((totalKcal.value / g) * 100))
+})
+
+const remainKcal = computed(() =>
+  Math.max(0, kcalGoal.value - totalKcal.value + burnedKcal.value)
+)
+
+const macroPct = computed(() => {
+  const sum = totalCarb.value + totalProtein.value + totalFat.value
+  if (!sum) return { carb: 0, protein: 0, fat: 0 }
+  return {
+    carb: Math.round((totalCarb.value / sum) * 100),
+    protein: Math.round((totalProtein.value / sum) * 100),
+    fat: Math.round((totalFat.value / sum) * 100),
+  }
+})
 </script>
 
 <template>
   <div class="card">
-    <div class="head">
-      <div class="title">나의 하루</div>
-      <button class="link" @click="$emit('more')">더보기</button>
+    <div class="card-hd">
+      <span class="title">나의 하루</span>
+      <button class="more" @click="$emit('more')">더보기</button>
     </div>
 
-    <div class="kcal">
-      <div class="now">{{ kcalNow }}</div>
-      <div class="goal">/{{ kcalGoal }}kcal</div>
+    <div class="kcal-line">
+      <span class="big">{{ totalKcal.toFixed(0) }}</span>
+      <span class="otd-body-1">/{{ kcalGoal }}kcal</span>
     </div>
 
-    <div class="ratio-row">
-      <span class="dot carb"></span><span>{{ macros.carb }}%</span>
-      <span class="dot protein"></span><span>{{ macros.protein }}%</span>
-      <span class="dot fat"></span><span>{{ macros.fat }}%</span>
+    <!-- 매크로 칩 -->
+    <div class="chips">
+      <div class="chip chip-carb"><span class="dot"> 탄</span> <b>{{ macroPct.carb }}%</b></div>
+      <div class="chip chip-protein"><span class="dot"> 단</span> <b>{{ macroPct.protein }}%</b></div>
+      <div class="chip chip-fat"><span class="dot"> 지</span> <b>{{ macroPct.fat }}%</b></div>
     </div>
 
-    <div class="bar">
-      <div class="seg carb" :style="{ width: macros.carb + '%' }"></div>
-      <div class="seg protein" :style="{ width: macros.protein + '%' }"></div>
-      <div class="seg fat" :style="{ width: macros.fat + '%' }"></div>
+    <!-- 총 섭취 진행바 -->
+    <div class="progress">
+      <div class="bar" :style="{ width: progressPct + '%' }"></div>
     </div>
 
+    <div class="meta">
+      <div class="otd-body-1"><span class="otd-subtitle-1">{{ burnedKcal.toFixed(0) }}kcal</span> 소모</div>
+      <div class="otd-body-1"><span class="otd-subtitle-1">{{ remainKcal.toFixed(0) }}</span>kcal 더 먹을 수 있어요</div>
+    </div>
+
+    <!-- 하단 g 합계 -->
     <div class="grams">
       <div class="g">
-        <span class="dot carb"></span>순탄수 {{ grams.carb }}g
+        <div class="label">순탄수</div>
+        <div class="val"><b>{{ totalCarb.toFixed(1) }}g/ml </b></div>
       </div>
       <div class="g">
-        <span class="dot protein"></span>단백질 {{ grams.protein }}g
+        <div class="label">단백질</div>
+        <div class="val"><b>{{ totalProtein.toFixed(1) }}g/ml</b></div>
       </div>
-      <div class="g"><span class="dot fat"></span>지방 {{ grams.fat }}g</div>
+      <div class="g">
+        <div class="label">지방</div>
+        <div class="val"><b>{{ totalFat.toFixed(1) }}g/ml</b></div>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
 .card {
-  background: #fff;
+  background: #F2F2F2;
   border-radius: 14px;
-  box-shadow: var(--shadow-md);
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  padding: 16px 16px 14px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .02);
+  border: none;
 }
-.head {
+
+.card-hd {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: center
 }
+
 .title {
-  font-weight: 800;
-  color: #333;
+  font-weight: 800
 }
-.link {
+
+.more {
   border: none;
-  background: none;
-  color: #6a6a6a;
-  font-weight: 700;
-  cursor: pointer;
+  background: #f5f6f7;
+  color: #686a70;
+  border-radius: 10px;
+  padding: 6px 10px;
+  cursor: pointer
 }
-.kcal {
+
+.kcal-line {
+  margin-top: 6px;
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  justify-content: center;
 }
-.kcal .now {
+
+.big {
   font-size: 28px;
   font-weight: 800;
+  margin-right: 6px
 }
-.kcal .goal {
-  color: #888;
-}
-.ratio-row {
+
+
+
+.chips {
   display: flex;
-  align-items: center;
   gap: 10px;
-  color: #666;
-  font-weight: 600;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 0 8px
 }
-.bar {
-  height: 14px;
-  border-radius: 999px;
-  background: #eee;
-  overflow: hidden;
-  display: flex;
-}
-.seg {
-  height: 100%;
-}
-.carb {
-  background: #ffb44d;
-}
-.protein {
-  background: #a4db67;
-}
-.fat {
-  background: #7fb8ff;
-}
-.dot {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  margin-right: 4px;
-}
-.dot.carb {
-  background: #ffb44d;
-}
-.dot.protein {
-  background: #a4db67;
-}
-.dot.fat {
-  background: #7fb8ff;
-}
-.grams {
-  display: flex;
-  gap: 12px;
-  color: #666;
-  font-size: 12px;
-}
-.g {
+
+.chip {
   display: flex;
   align-items: center;
   gap: 6px;
+  font-size: 13px;
+  color: #333
+}
+
+.chip .dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  display: flex;
+  text-align: center;
+  align-items: center;
+  font-weight: 500;
+  font-size: 90%;
+  justify-content: center;
+}
+
+.chip-carb .dot {
+  background: #7ed957
+}
+
+.chip-protein .dot {
+  background: #ffd84d
+}
+
+.chip-fat .dot {
+  background: #ff9b60
+}
+
+.progress {
+  height: 28px;
+  border-radius: 999px;
+  background: #fcfcfc;
+  overflow: hidden
+}
+
+.bar {
+  height: 100%;
+  background: #0b0c0c
+}
+
+.meta {
+  margin: 10px 0 6px;
+  text-align: center;
+  color: #5a5a5a;
+  font-size: 14px
+}
+
+.meta .remain {
+  margin-top: 4px;
+  color: #282828
+}
+
+.grams {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px
+}
+
+.g {
+  width: 33%;
+  text-align: center
+}
+
+.label {
+  color: #6c6c6c;
+  font-size: 13px
+}
+
+.val {
+  font-size: 16px;
+  margin-top: 2px
 }
 </style>

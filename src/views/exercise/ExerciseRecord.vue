@@ -14,7 +14,7 @@ const now = formatDateYearMonthKR(route.query.date);
 onMounted(async () => {
   exerciseRecordStore.clearRecords();
   const date = route.query.date;
-
+  console.log("타입확인", date);
   const params = {
     page: 1,
     row_per_page: 10,
@@ -25,6 +25,7 @@ onMounted(async () => {
   const res = await getExerciseRecordList(params);
 
   exerciseRecordStore.records = res.data;
+  exerciseRecordStore.monthlyRecords = res.data;
 });
 
 onUnmounted(() => {
@@ -126,6 +127,7 @@ const calcMonthlyAvgKcal = computed(() => {
 <style lang="scss" scoped>
 .btn {
   z-index: 999999;
+  
   .btn_add {
     width: 50px;
     height: 50px;

@@ -1,14 +1,11 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import lineChart from "@/components/exercise/lineChart.vue";
+import StaticChart from "@/components/exercise/StaticChart.vue";
 import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
 
 const model = ref(true);
 const bodyCompositionStore = useBodyCompositionStore();
-onMounted(async () => {
-  await bodyCompositionStore.fetchSeriesBodyComposition();
-  console.log(bodyCompositionStore.series);
-});
 
 // TODO: 서버에서 내려받을 수 있도록 api 수정하기
 const metrics = [
@@ -31,7 +28,7 @@ const metrics = [
         <div class="otd-body-2">{{ "2024.10.16 ~ 최근" }}</div>
       </div>
       <div class="d-flex align-center ga-2">
-        <span>전체</span>
+        <span>최근</span>
         <v-switch
           v-model="model"
           hide-details
@@ -39,11 +36,12 @@ const metrics = [
           density="compact"
           color="#989898"
         ></v-switch>
-        <span>최근</span>
+        <span>전체</span>
       </div>
     </div>
     <div>
-      <lineChart :logs="bodyCompositionStore.series.points" />
+      <!-- <lineChart :logs="bodyCompositionStore.series" /> -->
+      <StaticChart :series="bodyCompositionStore.series" />
     </div>
   </div>
 </template>
