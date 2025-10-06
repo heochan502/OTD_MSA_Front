@@ -36,9 +36,9 @@ ChartJS.register(
 );
 
 const props = defineProps({
-  series: Object,
-  metrics: Object,
-  data: Array,
+  series: { type: Object, default: () => ({ points: [] }) },
+  metrics: { type: Array, default: () => [] },
+  data: { type: Array, default: () => [] },
 });
 
 // 날짜 라벨
@@ -112,23 +112,35 @@ const makeChartOptions = (metricCode) => ({
     },
   },
 });
+
+const hasData = computed(() => {
+  return props.series?.points && props.series.points.length > 0;
+});
 </script>
 
 <template>
-  <v-card
-    v-for="metric in props.metrics"
-    :key="metric"
-    class="chart otd-border otd-shadow otd-box-style"
-  >
-    <div style="margin-bottom: 24px">
-      <h4>{{ metric.metricName }}</h4>
-      <Line
-        :data="makeChartData(metric.metricCode)"
-        :options="makeChartOptions(metric.metricCode)"
-        style="width: 100%"
-      />
-    </div>
-  </v-card>
+  <div v-if="!hasData" class="no-data">
+    <v-card class="chart flex-column otd-border otd-shadow otd-box-style">
+      <span class="text-h4">☹️</span>
+      <span class="otd-subtitle-2"> 체성분 측정 데이터가 없어요 </span>
+    </v-card>
+  </div>
+  <div v-else>
+    <v-card
+      v-for="metric in props.metrics"
+      :key="metric"
+      class="chart otd-border otd-shadow otd-box-style"
+    >
+      <div style="margin-bottom: 24px">
+        <h4>{{ metric.metricName }}</h4>
+        <Line
+          :data="makeChartData(metric.metricCode)"
+          :options="makeChartOptions(metric.metricCode)"
+          style="width: 100%"
+        />
+      </div>
+    </v-card>
+  </div>
 </template>
 
 <style lang="scss" scoped>

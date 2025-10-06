@@ -97,6 +97,7 @@ onMounted(async () => {
   console.log("homechallenge", challengeInfo.value);
   await bodyCompositionStore.fetchSeriesBodyComposition();
   await bodyCompositionStore.fetchBodyCompositionMetrics();
+  
 });
 
 const challengeHome = () => {
