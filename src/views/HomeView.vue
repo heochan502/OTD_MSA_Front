@@ -7,6 +7,7 @@ import LineChart from "@/components/exercise/lineChart.vue";
 import StaticChart from "@/components/exercise/StaticChart.vue";
 
 import MealCard from "@/components/meal/MealDayCards.vue";
+import { useMealSelectedStore } from '@/stores/meal/mealStore.js'
 
 import BmiProg from "@/components/exercise/BmiProg.vue";
 import { getMyChallenge } from "@/services/challenge/challengeService";
@@ -16,7 +17,16 @@ import { getChallengeSettlementLog } from "@/services/challenge/challengeService
 import ChallengeSettlementCard from "@/components/challenge/ChallengeSettlementCard.vue";
 import { useChallengeStore } from "@/stores/challenge/challengeStore";
 
+<<<<<<< HEAD
+import dayjs from 'dayjs';
+import 'dayjs/locale/ko';
+
+
+const selectedDay = useMealSelectedStore();
+
+=======
 import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
+>>>>>>> e6cbe8ba71416468b16fb3cc2bd7fc7f229fbd69
 
 const state = reactive({
   monthlySettlementLog: [],
@@ -95,7 +105,11 @@ onMounted(async () => {
   const challenge = await getMyChallenge();
   challengeInfo.value = challenge.data;
   console.log("homechallenge", challengeInfo.value);
+<<<<<<< HEAD
+  selectedDay.selectedDay.setDay = dayjs().format('YYYY-MM-DD');
+=======
   await bodyCompositionStore.fetchSeriesBodyComposition();
+>>>>>>> e6cbe8ba71416468b16fb3cc2bd7fc7f229fbd69
 });
 
 const challengeHome = () => {
@@ -311,7 +325,7 @@ const setWeeklyKey = (date) => {
 
 <style lang="scss" scoped>
 .top-wrap {
-  margin: 5px 20px;
+  margin: 5px 0px;
 }
 .wrap_content {
   display: flex;
@@ -339,7 +353,7 @@ const setWeeklyKey = (date) => {
 
 .meal-card {
   width: 100%;
-  min-width: 160px;
+  // min-width: 160px;
 }
 
 /*
