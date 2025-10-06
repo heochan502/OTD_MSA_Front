@@ -16,7 +16,7 @@ export const getPointHistory = () => {
 
 export const getUserDetail = (userId) => {
   return axios
-    .get(`${BASE_URL}/user/detail/${userId}`)
+    .get(`${BASE_URL}/user/${userId}`)
     .catch((e) => e.response);
 };
 
