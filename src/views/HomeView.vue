@@ -4,6 +4,7 @@ import Progress from "@/components/challenge/Progress.vue";
 import ProgressJs from "@/components/challenge/ProgressJs.vue";
 
 import LineChart from "@/components/exercise/lineChart.vue";
+import StaticChart from "@/components/exercise/StaticChart.vue";
 
 import MealCard from "@/components/meal/MealDayCards.vue";
 import { useMealSelectedStore } from '@/stores/meal/mealStore.js'
@@ -16,12 +17,16 @@ import { getChallengeSettlementLog } from "@/services/challenge/challengeService
 import ChallengeSettlementCard from "@/components/challenge/ChallengeSettlementCard.vue";
 import { useChallengeStore } from "@/stores/challenge/challengeStore";
 
+<<<<<<< HEAD
 import dayjs from 'dayjs';
 import 'dayjs/locale/ko';
 
 
 const selectedDay = useMealSelectedStore();
 
+=======
+import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
+>>>>>>> e6cbe8ba71416468b16fb3cc2bd7fc7f229fbd69
 
 const state = reactive({
   monthlySettlementLog: [],
@@ -91,6 +96,7 @@ const monthlySettlementDialog = ref(false);
 const weeklySettlementDialog = ref(false);
 
 const challengeStore = useChallengeStore();
+const bodyCompositionStore = useBodyCompositionStore();
 
 onMounted(async () => {
   await fetchMonthlySettlement(todayDate);
@@ -99,7 +105,11 @@ onMounted(async () => {
   const challenge = await getMyChallenge();
   challengeInfo.value = challenge.data;
   console.log("homechallenge", challengeInfo.value);
+<<<<<<< HEAD
   selectedDay.selectedDay.setDay = dayjs().format('YYYY-MM-DD');
+=======
+  await bodyCompositionStore.fetchSeriesBodyComposition();
+>>>>>>> e6cbe8ba71416468b16fb3cc2bd7fc7f229fbd69
 });
 
 const challengeHome = () => {
@@ -300,12 +310,13 @@ const setWeeklyKey = (date) => {
       </div> -->
 
         <div class="otd-top-margin">
-          <LineChart
+          <!-- <LineChart
             :selected-date="today"
             :selectedField="selectedField"
             :fields="fields"
             :logs="inbodyData"
-          />
+          /> -->
+          <StaticChart :series="bodyCompositionStore.series" />
         </div>
       </section>
     </div>
