@@ -17,29 +17,20 @@ import { getChallengeSettlementLog } from "@/services/challenge/challengeService
 import ChallengeSettlementCard from "@/components/challenge/ChallengeSettlementCard.vue";
 import { useChallengeStore } from "@/stores/challenge/challengeStore";
 
-<<<<<<< HEAD
 import dayjs from 'dayjs';
 import 'dayjs/locale/ko';
 
 
 const selectedDay = useMealSelectedStore();
 
-=======
 import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
->>>>>>> e6cbe8ba71416468b16fb3cc2bd7fc7f229fbd69
 
 const state = reactive({
   monthlySettlementLog: [],
   weeklySettlementLog: [],
 });
 
-const challengeInfo = ref([
-  { challenge_name: "달리기 30km", progress: 62 },
-  { challenge_name: "운동시간 60시간", progress: 82 },
-  { challenge_name: "팔굽혀 펴기 100개", progress: 22 },
-  { challenge_name: "운동시간 50시간", progress: 72 },
-  { challenge_name: "일간 미션 ", progress: 100 },
-]);
+const challengeInfo = ref([]);
 const router = useRouter();
 
 const healthInfo = ref([
@@ -104,12 +95,17 @@ onMounted(async () => {
   console.log("state", state.monthlySettlementLog, state.weeklySettlementLog);
   const challenge = await getMyChallenge();
   challengeInfo.value = challenge.data;
+  console.log('homechallenge', challengeInfo.value);
+
+  if (state.monthlySettlementLog.length > 0) {
+    monthlySettlementDialog.value = true;
+  } else if (state.weeklySettlementLog.length > 0) {
+    weeklySettlementDialog.value = true;
+  }
+
   console.log("homechallenge", challengeInfo.value);
-<<<<<<< HEAD
   selectedDay.selectedDay.setDay = dayjs().format('YYYY-MM-DD');
-=======
   await bodyCompositionStore.fetchSeriesBodyComposition();
->>>>>>> e6cbe8ba71416468b16fb3cc2bd7fc7f229fbd69
 });
 
 const challengeHome = () => {
@@ -133,7 +129,6 @@ const fetchMonthlySettlement = async (date) => {
     };
     const res = await getChallengeSettlementLog(params);
     state.monthlySettlementLog = res.data;
-    monthlySettlementDialog.value = true;
     challengeStore.state.lastMonthCheck = monthlyKey;
   }
 };
@@ -155,7 +150,6 @@ const fetchWeeklySettlement = async (date) => {
     };
     const res = await getChallengeSettlementLog(params);
     state.weeklySettlementLog = res.data;
-    weeklySettlementDialog.value = true;
     challengeStore.state.lastWeekCheck = weeklyKey;
   }
 };
@@ -177,6 +171,13 @@ const setWeeklyKey = (date) => {
   const week = Math.ceil((d.getDate() - d.getDay() + 1) / 7);
   return `${year}-${month}-W${week}`;
 };
+
+const setModal = () => {
+  monthlySettlementDialog.value = false;
+  if (state.weeklySettlementLog.length > 0) {
+    weeklySettlementDialog.value = true;
+  }
+};
 </script>
 
 <template>
@@ -187,9 +188,7 @@ const setWeeklyKey = (date) => {
       min-height="100"
     >
       <v-card>
-        <v-card-title class="text-h8"
-          >지난 달 정산이 완료되었어요!</v-card-title
-        >
+        <v-card-title class="text-h8">월간 정산이 완료되었어요!</v-card-title>
         <v-card-text v-for="data in state.monthlySettlementLog">
           <ChallengeSettlementCard
             :settlement-data="data"
@@ -197,9 +196,7 @@ const setWeeklyKey = (date) => {
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn color="dark" text @click="monthlySettlementDialog = false"
-            >확인</v-btn
-          >
+          <v-btn color="dark" text @click="setModal()">확인</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -231,12 +228,14 @@ const setWeeklyKey = (date) => {
     <div class="wrap_content">
       <section class="challenge-progress otd-top-margin">
         <span class="otd-subtitle-1">챌린지 달성률</span>
-        <div class="challenge-progress-card otd-top-margin">
-          <div class=" ">
+        <div
+          class="challenge-progress-card otd-top-margin"
+          @click="challengeHome"
+        >
+          <div class=" " v-if="challengeInfo.length > 0">
             <div
               v-for="value in challengeInfo"
               class="d-flex justify-content-around align-items-center challenge-progress-container"
-              @click="challengeHome"
             >
               <span class="otd-body-3 space-span-start"
                 >{{ value.formatedName }}
@@ -257,6 +256,7 @@ const setWeeklyKey = (date) => {
               >
             </div>
           </div>
+          <div v-else>아직 진행중인 챌린지가 없어요!</div>
         </div>
       </section>
     </div>
