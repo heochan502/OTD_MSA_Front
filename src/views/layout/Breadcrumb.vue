@@ -115,11 +115,12 @@ onMounted(() => {
   justify-content: space-between;
   position: absolute;
   
-  bottom: 15px;
+  bottom: 10px;
   /* margin-top: 38px; */
   /* margin-bottom: 15px; */
   margin: 0 20px 0;
 
+  height: 43px;
   max-width: 100%;
   min-width: 320px;
 
@@ -175,8 +176,8 @@ onMounted(() => {
   position: relative;
   background: #00D5DF;
   color: #000;
-  padding-bottom: 12px;
-  height: 104px;
+  padding-bottom: 15px;
+  height: 70px;
   width: 100%;
   /* 노치 safezone 설정 */
   padding-top: env(safe-area-inset-top);  
