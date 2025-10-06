@@ -39,10 +39,10 @@ import PointUserView from "@/views/point/PointUserView.vue";
 import PointPurchaseHistoryTable from "@/components/pointshop/PointPurchaseHistoryTable.vue";
 
 //식단
-import MealMainView from "@/views/meal/MealMainView.vue";
-import MealDetailView from "@/views/meal/MealDetailView.vue";
-import MealRecordView from "@/views/meal/MealRecordView.vue";
-import MealFoodSearchView from "@/views/meal/MealFoodSearchView.vue";
+import MealMainView from '@/views/meal/MealMainView.vue';
+import MealDetailView from '@/views/meal/MealDetailView.vue';
+import MealRecordView from '@/views/meal/MealRecordView.vue';
+import MealFoodSearchView from '@/views/meal/MealFoodSearchView.vue';
 
 // 운동
 import ExerciseMain from "@/views/exercise/ExerciseMain.vue";
@@ -113,17 +113,6 @@ const router = createRouter({
       component: ChallengeAllList,
       meta: { headerType: "title", title: "챌린지 목록", showUserPanel: false },
     },
-    // {
-    //   path: '/challenge/dailylist',
-    //   name: 'ChallengedailyList',
-    //   component: ChallengeWeeklyList,
-    //   meta: {
-    //     headerType: 'title',
-    //     title: '일일 미션 목록',
-
-    //     showUserPanel: false,
-    //   },
-    // },
     {
       path: "/challenge/weeklylist",
       name: "ChallengeweeklyList",
@@ -221,7 +210,6 @@ const router = createRouter({
       name: "pointHistory",
       component: PointHistory,
     },
-
     {
       path: "/user/term",
       name: "term",
@@ -325,7 +313,7 @@ const router = createRouter({
       path: "/meal/record",
       name: "MealRecordView",
       component: MealRecordView,
-      meta: { headerType: "title", title: "식단 기록", showUserPanel: false },
+      meta: { headerType: 'title', title: '식단 기록', showUserPanel: false },
     },
     {
       path: "/admin",
@@ -361,6 +349,11 @@ const router = createRouter({
           path: "statistics",
           name: "AdminStatistics",
           component: () => import("@/views/admin/AdminStatistics.vue"),
+        },
+        {
+          path: 'user/detail',
+          name: 'AdminUserDetail',
+          component: () => import('@/views/admin/AdminUserDetail.vue'),
         },
       ],
     },
