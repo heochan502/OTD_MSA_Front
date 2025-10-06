@@ -19,5 +19,5 @@ export const getList = (params) => {
 
 // metirics 조회
 export const getMetrics = () => {
-  return axios.get(BASE_URL).catch((e) => e.response);
+  return axios.get(`${BASE_URL}`).catch((e) => e.response);
 };
