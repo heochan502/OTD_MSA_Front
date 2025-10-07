@@ -1,9 +1,10 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import { logout, getPointHistory, patchUserProfilePic, deleteUserProfilePic } from '@/services/user/userService';
-import { getSelectedAll } from '@/services/challenge/challengeService';
+import { getSelectedAll } from '@/services/user/userService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { ref, computed, onMounted } from 'vue';
+
 
 const router = useRouter();
 const authStore = useAuthenticationStore();
@@ -13,8 +14,6 @@ const loadingHistory = ref(true);
 const showPhotoModal = ref(false);
 const selectedFile = ref(null);
 const previewUrl = ref(null);
-
-console.log(authStore.state.signedUser);
 
 const defaultProfile = '/otd/image/main/default-profile.png';
 
@@ -76,23 +75,16 @@ const saveProfilePhoto = async () => {
     const formData = new FormData();
     formData.append('pic', selectedFile.value);
     
-    console.log('프로필 사진 업로드 시작...');
     
     const response = await patchUserProfilePic(formData);
     
-    console.log('업로드 응답:', response);
     
     if (response.data && response.data.result) {
       const fileName = response.data.result;
       const imagePath = `http://localhost:8082/profile/${userInfo.value.userId}/${fileName}`;
       
-      console.log('=== 이미지 경로 디버깅 ===');
-      console.log('1. 서버에서 받은 파일명:', fileName);
-      console.log('2. 생성된 이미지 경로:', imagePath);
-      
       authStore.state.signedUser.pic = imagePath;
       
-      console.log('3. Store에 저장된 값:', authStore.state.signedUser.pic);
       
       alert('프로필 사진이 변경되었습니다.');
       closePhotoModal();
@@ -106,18 +98,27 @@ const saveProfilePhoto = async () => {
 
 // 프로필 사진 삭제
 const deleteProfilePhoto = async () => {
-  if (!confirm('프로필 사진을 삭제하시겠습니까?')) {
-    return;
-  }
+  if (!confirm('프로필 사진을 삭제하시겠습니까?')) return;
 
   try {
-    await deleteUserProfilePic();
-    authStore.state.signedUser.pic = null;
+
     
-    alert('프로필 사진이 삭제되었습니다.');
-    closePhotoModal();
+    const response = await deleteUserProfilePic();
+    
+
+    
+    if (response.status === 200) {
+      // Store의 프로필 사진을 기본 이미지로 변경
+      authStore.state.signedUser.pic = null;
+      
+      console.log('프로필 사진이 삭제되었습니다.');
+      
+      alert('프로필 사진이 삭제되었습니다.');
+      closePhotoModal();
+    }
   } catch (error) {
     console.error('프로필 사진 삭제 실패:', error);
+    console.error('에러 상세:', error.response);
     alert('프로필 사진 삭제에 실패했습니다.');
   }
 };
@@ -136,11 +137,23 @@ const fetchRecentHistory = async () => {
     const pointHistory = response.data.result?.pointHistory || [];
     
     const missionResponse = await getSelectedAll();
-    const missionComplete = missionResponse.data.missionComplete || [];
-    const dailyMission = missionResponse.data.dailyMission || [];
+    
+
+    const result = missionResponse.data.result;
+    let missionComplete = [];
+    let dailyMission = [];
+    
+    if (result) {
+      missionComplete = result.missionComplete || [];
+      dailyMission = result.dailyMission || [];
+    } else if (missionResponse.data.missionComplete) {
+      missionComplete = missionResponse.data.missionComplete || [];
+      dailyMission = missionResponse.data.dailyMission || [];
+    }
     
     const combined = [];
     
+    // 포인트 히스토리 추가
     pointHistory.forEach(item => {
       combined.push({
         type: 'point',
@@ -151,12 +164,13 @@ const fetchRecentHistory = async () => {
       });
     });
     
+    // 미션 완료 내역 추가
     missionComplete.forEach(mission => {
       const missionDetail = dailyMission.find(m => String(m.cdId) === String(mission.cdId));
       if (missionDetail) {
         combined.push({
           type: 'mission',
-          reason: ' 일일 미션: ' + missionDetail.cdName,
+          reason: '✅ 일일 미션: ' + missionDetail.cdName,
           point: missionDetail.cdReward,
           createdAt: mission.successDate,
           id: `mission-${mission.cdId}-${mission.successDate}`
@@ -164,12 +178,15 @@ const fetchRecentHistory = async () => {
       }
     });
     
+    // 최신순 정렬 후 최근 2개만
     recentHistory.value = combined
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, 2);
+    
       
   } catch (err) {
-    console.error('포인트 히스토리 조회 실패:백엔드켰나?쿠키있나?', err);
+    console.error('포인트 히스토리 조회 실패 백켰나?쿠키있나?:', err);
+    console.error('에러 응답:', err.response?.data);
     recentHistory.value = [];
   } finally {
     loadingHistory.value = false;
