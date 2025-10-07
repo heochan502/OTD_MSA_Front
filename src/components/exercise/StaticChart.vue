@@ -58,16 +58,17 @@ const makeChartData = (metric) => {
         data: props.series.points.map((p) => p.values[metric]),
         borderColor: "#FFE864", // 선 색깔 오렌지톤
         backgroundColor: (context) => {
-          const ctx = context.chart.ctx;
+          const chart = context.chart;  // chartArea가 계산된 후에 gradient 생성
+          const { ctx, chartArea } = chart; // ctx 객체로 선 긋고 색 칠하고 그라데이션 효과 줌
+          if (!chartArea) return null; // 아직 계산 전이면 null 리턴
           const gradient = ctx.createLinearGradient(
             0,
+            chartArea.top,
             0,
-            0,
-            context.chart.height
+            chartArea.bottom
           );
-          gradient.addColorStop(1, "rgba(255, 232, 100, 0)"); // 위쪽 진한색, 1은 불투명
-          gradient.addColorStop(0, "rgba(255, 232, 100, 0.3)"); // 아래쪽 투명 (알파 0)
-          gradient.addColorStop(0.3, "rgba(255, 232, 100, 0)"); // 중간
+          gradient.addColorStop(0, "rgba(255, 232, 100, 0.6)"); // 위쪽 진한색
+          gradient.addColorStop(1, "rgba(255, 232, 100, 0)"); // 아래쪽 투명
           return gradient;
         },
         fill: true,
