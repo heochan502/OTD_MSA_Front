@@ -126,30 +126,28 @@ const hasData = computed(() => {
     </v-card>
   </div>
   <div v-else>
-    <v-card
-      v-for="metric in props.metrics"
-      :key="metric"
-      class="chart otd-border otd-shadow otd-box-style"
-    >
-      <div style="margin-bottom: 24px">
-        <h4>{{ metric.metricName }}</h4>
-        <Line
-          :data="makeChartData(metric.metricCode)"
-          :options="makeChartOptions(metric.metricCode)"
-          style="width: 100%"
-        />
+    <div v-for="metric in props.metrics" :key="metric">
+      <div>
+        <span class="otd-subtitle-1 ml-2">{{ metric.metricName }}</span>
+        <v-card class="chart otd-border otd-shadow otd-box-style">
+          <Line
+            :data="makeChartData(metric.metricCode)"
+            :options="makeChartOptions(metric.metricCode)"
+            style="width: 100%"
+          />
+        </v-card>
       </div>
-    </v-card>
+    </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
 .chart {
   display: flex;
+  flex-direction: column;
   justify-content: center;
-
   height: 250px;
-  padding: 15px;
-  margin: 15px;
+  padding: 20px 10px;
+  margin: 0 0 15px 0;
 }
 </style>

@@ -87,7 +87,7 @@ const goDetail = (exerciseRecordId) => {
   align-items: center;
   justify-content: space-between;
 
-  min-width: 320px;
+  min-width: 300px;
   width: 100%;
   height: 75px;
   padding: 17px;

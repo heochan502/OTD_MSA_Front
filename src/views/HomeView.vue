@@ -7,7 +7,7 @@ import LineChart from "@/components/exercise/lineChart.vue";
 import StaticChart from "@/components/exercise/StaticChart.vue";
 
 import MealCard from "@/components/meal/MealDayCards.vue";
-import { useMealSelectedStore } from '@/stores/meal/mealStore.js'
+import { useMealSelectedStore } from "@/stores/meal/mealStore.js";
 
 import BmiProg from "@/components/exercise/BmiProg.vue";
 import { getMyChallenge } from "@/services/challenge/challengeService";
@@ -17,9 +17,8 @@ import { getChallengeSettlementLog } from "@/services/challenge/challengeService
 import ChallengeSettlementCard from "@/components/challenge/ChallengeSettlementCard.vue";
 import { useChallengeStore } from "@/stores/challenge/challengeStore";
 
-import dayjs from 'dayjs';
-import 'dayjs/locale/ko';
-
+import dayjs from "dayjs";
+import "dayjs/locale/ko";
 
 const selectedDay = useMealSelectedStore();
 
@@ -90,14 +89,13 @@ const challengeStore = useChallengeStore();
 const bodyCompositionStore = useBodyCompositionStore();
 
 onMounted(async () => {
-
   console.log("여기");
   await fetchMonthlySettlement(todayDate);
   await fetchWeeklySettlement(todayDate);
   console.log("state", state.monthlySettlementLog, state.weeklySettlementLog);
   const challenge = await getMyChallenge();
   challengeInfo.value = challenge.data;
-  console.log('homechallenge', challengeInfo.value);
+  console.log("homechallenge", challengeInfo.value);
 
   if (state.monthlySettlementLog.length > 0) {
     monthlySettlementDialog.value = true;
@@ -106,10 +104,9 @@ onMounted(async () => {
   }
 
   console.log("homechallenge", challengeInfo.value);
-  selectedDay.selectedDay.setDay = dayjs().format('YYYY-MM-DD');
+  selectedDay.selectedDay.setDay = dayjs().format("YYYY-MM-DD");
   await bodyCompositionStore.fetchSeriesBodyComposition();
   await bodyCompositionStore.fetchBodyCompositionMetrics();
-  
 });
 
 const challengeHome = () => {
@@ -186,11 +183,17 @@ const setModal = () => {
 
 <template>
   <div>
-    <v-dialog v-model="monthlySettlementDialog" max-width="300" min-height="100">
+    <v-dialog
+      v-model="monthlySettlementDialog"
+      max-width="300"
+      min-height="100"
+    >
       <v-card>
         <v-card-title class="text-h8">월간 정산이 완료되었어요!</v-card-title>
         <v-card-text v-for="data in state.monthlySettlementLog">
-          <ChallengeSettlementCard :settlement-data="data"></ChallengeSettlementCard>
+          <ChallengeSettlementCard
+            :settlement-data="data"
+          ></ChallengeSettlementCard>
         </v-card-text>
         <v-card-actions>
           <v-spacer />
@@ -200,13 +203,19 @@ const setModal = () => {
     </v-dialog>
     <v-dialog v-model="weeklySettlementDialog" max-width="300" min-height="100">
       <v-card>
-        <v-card-title class="text-h8">지난 주 정산이 완료되었어요!</v-card-title>
+        <v-card-title class="text-h8"
+          >지난 주 정산이 완료되었어요!</v-card-title
+        >
         <v-card-text v-for="data in state.weeklySettlementLog">
-          <ChallengeSettlementCard :settlement-data="data"></ChallengeSettlementCard>
+          <ChallengeSettlementCard
+            :settlement-data="data"
+          ></ChallengeSettlementCard>
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn color="dark" text @click="weeklySettlementDialog = false">확인</v-btn>
+          <v-btn color="dark" text @click="weeklySettlementDialog = false"
+            >확인</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -220,21 +229,32 @@ const setModal = () => {
     <div class="wrap_content">
       <section class="challenge-progress otd-top-margin">
         <span class="otd-subtitle-1">챌린지 달성률</span>
-        <div class="challenge-progress-card otd-top-margin" @click="challengeHome">
+        <div
+          class="challenge-progress-card otd-top-margin"
+          @click="challengeHome"
+        >
           <div class=" " v-if="challengeInfo.length > 0">
-            <div v-for="value in challengeInfo"
-              class="d-flex justify-content-around align-items-center challenge-progress-container">
-              <span class="otd-body-3 space-span-start">{{ value.formatedName }}
+            <div
+              v-for="value in challengeInfo"
+              class="d-flex justify-content-around align-items-center challenge-progress-container"
+            >
+              <span class="otd-body-3 space-span-start"
+                >{{ value.formatedName }}
               </span>
               <!-- 차트에 해당하는 데이터를 불러와서 그값을 뿌림-->
-              <Progress :class="{
+              <Progress
+                :class="{
                   'progress-chart': true,
                   'progress-chart-high': value.percent > 70,
                   'progress-chart-middle':
                     value.percent > 30 && value.percent <= 70,
                   'progress-chart-low': value.percent <= 30,
-                }" :indata-progress="value.percent" />
-              <span class="otd-body-3 space-span-end">{{ value.percent }}%</span>
+                }"
+                :indata-progress="value.percent"
+              />
+              <span class="otd-body-3 space-span-end"
+                >{{ value.percent }}%</span
+              >
             </div>
           </div>
           <div v-else>아직 진행중인 챌린지가 없어요!</div>
@@ -257,11 +277,15 @@ const setModal = () => {
           <div class="otd-top-margin item-group">
             <div v-for="(field, idx) in fields" :key="idx" class="card-wrapper">
               <v-item v-slot="{ selectedClass, toggle }" :value="field.key">
-                <v-card :class="[
+                <v-card
+                  :class="[
                     ` health-button d-flex flex-column justify-center align-center text-center`,
                     { 'health-button-active': selectedClass },
                     ,
-                  ]" @click="toggle" v-ripple="false">
+                  ]"
+                  @click="toggle"
+                  v-ripple="false"
+                >
                   <div>
                     <span class="otd-body-3">
                       {{ field.label }}({{ field.unit }})
@@ -287,13 +311,10 @@ const setModal = () => {
       </div> -->
 
         <div class="otd-top-margin">
-          <!-- <LineChart
-            :selected-date="today"
-            :selectedField="selectedField"
-            :fields="fields"
-            :logs="inbodyData"
-          /> -->
-          <StaticChart v-if="(bodyCompositionStore.series?.length ?? 0) > 0" :series="bodyCompositionStore.series" />
+          <StaticChart
+            :series="bodyCompositionStore.series"
+            :metrics="bodyCompositionStore.metrics"
+          />
         </div>
       </section>
     </div>
@@ -438,6 +459,8 @@ const setModal = () => {
 }
 
 .bmi-prog {
+  display: flex;
+  justify-content: center;
   padding: 10px;
 }
 
