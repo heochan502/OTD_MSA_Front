@@ -34,50 +34,29 @@ const fetchData = async () => {
     // 일일 미션 완료 내역 조회
     const missionResponse = await getSelectedAll();
     
-    console.log('========== API 응답 전체 구조 확인 ==========');
-    console.log('전체 응답:', missionResponse);
-    console.log('missionResponse.data:', missionResponse.data);
-    console.log('missionResponse.data.result:', missionResponse.data.result);
-    console.log('=========================================');
-    
-    // ✅ 응답 구조에 따라 수정
     const result = missionResponse.data.result;
     
     // 여러 가능성 체크
     if (result) {
       missionComplete.value = result.missionComplete || [];
       dailyMission.value = result.dailyMission || [];
-      
-      console.log('방법 1 - result에서 직접:', {
-        missionComplete: missionComplete.value.length,
-        dailyMission: dailyMission.value.length
-      });
+    
     } else if (missionResponse.data.missionComplete) {
-      // 혹시 result 없이 바로 올 수도 있음
+ 
       missionComplete.value = missionResponse.data.missionComplete || [];
       dailyMission.value = missionResponse.data.dailyMission || [];
       
-      console.log('방법 2 - data에서 직접:', {
-        missionComplete: missionComplete.value.length,
-        dailyMission: dailyMission.value.length
-      });
     }
-    
-    console.log('========== 데이터 확인 ==========');
-    console.log('포인트 히스토리 개수:', pointHistory.value.length);
-    console.log('미션 완료 개수:', missionComplete.value.length);
-    console.log('일일 미션 개수:', dailyMission.value.length);
+  
     
     // 실제 데이터 내용 확인
     if (missionComplete.value.length > 0) {
-      console.log('미션 첫 데이터:', missionComplete.value[0]);
-      console.log('미션 마지막 데이터:', missionComplete.value[missionComplete.value.length - 1]);
+
     }
     if (pointHistory.value.length > 0) {
-      console.log('포인트 첫 데이터:', pointHistory.value[0]);
-      console.log('포인트 마지막 데이터:', pointHistory.value[pointHistory.value.length - 1]);
+
     }
-    console.log('================================');
+
     
   } catch (err) {
     console.error('에러 발생:', err);
@@ -95,10 +74,7 @@ const fetchData = async () => {
 // 모든 내역을 합쳐서 최신순 정렬 (전체 데이터)
 const allHistory = computed(() => {
   const combined = [];
-  
-  console.log('========== allHistory 계산 시작 ==========');
-  console.log('처리할 포인트 히스토리:', pointHistory.value.length);
-  console.log('처리할 미션 완료:', missionComplete.value.length);
+
   
   // 포인트 히스토리 추가 (전체)
   pointHistory.value.forEach(item => {
@@ -111,7 +87,6 @@ const allHistory = computed(() => {
     });
   });
   
-  console.log('포인트 히스토리 추가 후:', combined.length);
   
   // 일일 미션 완료 내역 추가 (전체)
   missionComplete.value.forEach((mission, index) => {
@@ -134,8 +109,6 @@ const allHistory = computed(() => {
     }
   });
   
-  console.log('최종 combined 개수:', combined.length);
-  console.log('========== allHistory 계산 완료 ==========');
   
   // 최신순 정렬
   return combined.sort((a, b) => {
@@ -145,7 +118,7 @@ const allHistory = computed(() => {
   });
 });
 
-// 페이징된 내역
+
 const paginatedHistory = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
   const end = start + itemsPerPage;

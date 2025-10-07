@@ -5,7 +5,6 @@ import { getSelectedAll } from '@/services/user/userService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { ref, computed, onMounted } from 'vue';
 
-
 const router = useRouter();
 const authStore = useAuthenticationStore();
 const isLoggingOut = ref(false);
@@ -14,6 +13,7 @@ const loadingHistory = ref(true);
 const showPhotoModal = ref(false);
 const selectedFile = ref(null);
 const previewUrl = ref(null);
+
 
 const defaultProfile = '/otd/image/main/default-profile.png';
 
@@ -75,14 +75,16 @@ const saveProfilePhoto = async () => {
     const formData = new FormData();
     formData.append('pic', selectedFile.value);
     
+    console.log('프로필 사진 업로드 시작...');
     
     const response = await patchUserProfilePic(formData);
     
+    console.log('업로드 응답:', response);
     
     if (response.data && response.data.result) {
       const fileName = response.data.result;
       const imagePath = `http://localhost:8082/profile/${userInfo.value.userId}/${fileName}`;
-      
+       
       authStore.state.signedUser.pic = imagePath;
       
       
@@ -101,14 +103,14 @@ const deleteProfilePhoto = async () => {
   if (!confirm('프로필 사진을 삭제하시겠습니까?')) return;
 
   try {
-
+    console.log('프로필 사진 삭제 시작...');
     
     const response = await deleteUserProfilePic();
     
-
+    console.log('삭제 응답:', response);
     
     if (response.status === 200) {
-      // Store의 프로필 사진을 기본 이미지로 변경
+
       authStore.state.signedUser.pic = null;
       
       console.log('프로필 사진이 삭제되었습니다.');
@@ -138,7 +140,6 @@ const fetchRecentHistory = async () => {
     
     const missionResponse = await getSelectedAll();
     
-
     const result = missionResponse.data.result;
     let missionComplete = [];
     let dailyMission = [];
@@ -146,9 +147,11 @@ const fetchRecentHistory = async () => {
     if (result) {
       missionComplete = result.missionComplete || [];
       dailyMission = result.dailyMission || [];
+    
     } else if (missionResponse.data.missionComplete) {
       missionComplete = missionResponse.data.missionComplete || [];
       dailyMission = missionResponse.data.dailyMission || [];
+
     }
     
     const combined = [];
@@ -178,11 +181,12 @@ const fetchRecentHistory = async () => {
       }
     });
     
+    
     // 최신순 정렬 후 최근 2개만
     recentHistory.value = combined
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, 2);
-    
+      
       
   } catch (err) {
     console.error('포인트 히스토리 조회 실패 백켰나?쿠키있나?:', err);
@@ -271,7 +275,7 @@ onMounted(() => {
         </div>
       </router-link>
     </div>
-
+    
     <!-- 활동 섹션 -->
     <div class="activity-section">
       <h3 class="section-title">나의 활동</h3>
