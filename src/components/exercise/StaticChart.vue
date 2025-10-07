@@ -38,7 +38,7 @@ ChartJS.register(
 const props = defineProps({
   series: { type: Object, default: () => ({ points: [] }) },
   metrics: { type: Array, default: () => [] },
-  data: { type: Array, default: () => [] },
+  metricCode: String,
 });
 
 // 날짜 라벨
@@ -58,7 +58,7 @@ const makeChartData = (metric) => {
         data: props.series.points.map((p) => p.values[metric]),
         borderColor: "#FFE864", // 선 색깔 오렌지톤
         backgroundColor: (context) => {
-          const chart = context.chart;  // chartArea가 계산된 후에 gradient 생성
+          const chart = context.chart; // chartArea가 계산된 후에 gradient 생성
           const { ctx, chartArea } = chart; // ctx 객체로 선 긋고 색 칠하고 그라데이션 효과 줌
           if (!chartArea) return null; // 아직 계산 전이면 null 리턴
           const gradient = ctx.createLinearGradient(

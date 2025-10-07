@@ -1,9 +1,8 @@
 <script setup>
-import { ref, onMounted, computed, reactive } from "vue";
+import { ref, onMounted, computed, reactive, watch } from "vue";
 import Progress from "@/components/challenge/Progress.vue";
 import ProgressJs from "@/components/challenge/ProgressJs.vue";
 
-import LineChart from "@/components/exercise/lineChart.vue";
 import StaticChart from "@/components/exercise/StaticChart.vue";
 
 import MealCard from "@/components/meal/MealDayCards.vue";
@@ -43,7 +42,6 @@ const fields = [
   { key: "BFP", label: "체지방률", unit: "%" },
   { key: "SMM", label: "골격근량", unit: "kg" },
 ];
-const selectedField = ref(fields[0].key);
 
 const inbodyData = ref([
   { dataTime: "2025-09-22", weight: "62.4", BFP: "20", SMM: "23" },
@@ -179,6 +177,9 @@ const setModal = () => {
     weeklySettlementDialog.value = true;
   }
 };
+
+const selectedField = ref("");
+// watch("선택됨", selectedField.value);
 </script>
 
 <template>
@@ -273,7 +274,7 @@ const setModal = () => {
           </div>
         </div>
         <!-- 선형 그래프 선택 부분 -->
-        <v-item-group v-model="selectedField">
+        <!-- <v-item-group v-model="selectedField">
           <div class="otd-top-margin item-group">
             <div v-for="(field, idx) in fields" :key="idx" class="card-wrapper">
               <v-item v-slot="{ selectedClass, toggle }" :value="field.key">
@@ -298,22 +299,44 @@ const setModal = () => {
               </v-item>
             </div>
           </div>
-        </v-item-group>
-
-        <!-- <div class="otd-top-margin d-flex justify-content-between ">
-        <button v-for="(value, index) in healthInfo" :key="index" :class="{ 'health-button': true, 'health-button-active': value.check }" @click="healthToggle(index)">
-
-          <div class="d-flex flex-column align-items-center">
-            <span class="otd-body-3">{{ value.text }}</span>
-            <span class="otd-subtitle-1">{{ value.value }}</span>
+        </v-item-group> -->
+        <v-item-group v-model="selectedField">
+          <div class="otd-top-margin item-group">
+            <div
+              v-for="field in bodyCompositionStore.filteredMetrics"
+              :key="field.metricId"
+              class="card-wrapper"
+            >
+              <v-item
+                v-slot="{ selectedClass, toggle }"
+                :value="field.metricCode"
+              >
+                <v-card
+                  :class="[
+                    ` health-button d-flex flex-column justify-center align-center text-center`,
+                    { 'health-button-active': selectedClass },
+                    ,
+                  ]"
+                  @click="toggle"
+                  v-ripple="false"
+                >
+                  <div>
+                    <span class="otd-body-3">
+                      {{ field.metricName }}({{ field.unit }})
+                    </span>
+                  </div>
+                  <span class="otd-subtitle-1 text-center">
+                    {{ bodyCompositionStore.lastest[field.metricCode] || "-" }}
+                  </span>
+                </v-card>
+              </v-item>
+            </div>
           </div>
-        </button>
-      </div> -->
-
+        </v-item-group>
         <div class="otd-top-margin">
           <StaticChart
             :series="bodyCompositionStore.series"
-            :metrics="bodyCompositionStore.metrics"
+            :selectedMetric="bodyCompositionStore.filteredMetrics"
           />
         </div>
       </section>
@@ -468,6 +491,7 @@ const setModal = () => {
   display: flex;
   flex-wrap: nowrap;
   gap: 10px;
+  width: 350px;
 }
 .health-button {
   width: 110px;
