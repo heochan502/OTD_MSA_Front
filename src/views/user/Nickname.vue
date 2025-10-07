@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { checkNicknameDuplicate, updateNickname } from '@/services/user/userService'; 
 import { useAuthenticationStore } from '@/stores/user/authentication'; 
+import AlertModal from '@/components/user/Modal.vue';
 
 const router = useRouter();
 const authStore = useAuthenticationStore(); 
@@ -22,6 +23,36 @@ const validation = ref({
 
 const isLoading = ref(false);
 const generalError = ref('');
+
+// 모달 상태
+const modalState = ref({
+  show: false,
+  title: '',
+  message: '',
+  type: 'info',
+  onConfirm: null
+});
+
+const showModal = (title, message, type = 'info', onConfirm = null) => {
+  modalState.value = {
+    show: true,
+    title,
+    message,
+    type,
+    onConfirm
+  };
+};
+
+const closeModal = () => {
+  modalState.value.show = false;
+};
+
+const handleModalConfirm = () => {
+  if (modalState.value.onConfirm) {
+    modalState.value.onConfirm();
+  }
+  closeModal();
+};
 
 // 닉네임 유효성 검사
 const validateMemberNick = (nickname) => {
@@ -104,38 +135,47 @@ const handleSubmit = async () => {
     const response = await updateNickname(additionalInfo.value.nickname);
     
     if (response.data?.success) {
-  
       authStore.state.signedUser.nickName = additionalInfo.value.nickname;
       
-      alert('닉네임이 성공적으로 변경되었습니다.');
-      router.push('/user/profile');
+      showModal(
+        '변경 완료',
+        '닉네임이 성공적으로 변경되었습니다.',
+        'success',
+        () => router.push('/user/profile')
+      );
     } else {
       throw new Error('닉네임 변경에 실패했습니다.');
     }
   } catch (error) {
     console.error('닉네임 변경 오류:', error);
     
+    let errorMessage = '닉네임 변경에 실패했습니다.';
+    
     if (error.response) {
       const status = error.response.status;
       const message = error.response.data?.message;
       
       if (status === 400) {
-        generalError.value = message || '잘못된 요청입니다.';
+        errorMessage = message || '잘못된 요청입니다.';
       } else if (status === 401) {
-        generalError.value = '로그인이 필요합니다.';
-        setTimeout(() => router.push('/user/login'), 2000);
+        errorMessage = '로그인이 필요합니다.';
+        showModal(
+          '인증 오류',
+          errorMessage,
+          'warning',
+          () => router.push('/user/login')
+        );
+        return;
       } else if (status === 409) {
-        generalError.value = message || '이미 사용중인 닉네임입니다.';
+        errorMessage = message || '이미 사용중인 닉네임입니다.';
       } else {
-        generalError.value = message || '닉네임 변경에 실패했습니다.';
+        errorMessage = message || '닉네임 변경에 실패했습니다.';
       }
     } else if (error.request) {
-      generalError.value = '서버와 통신할 수 없습니다.';
-    } else {
-      generalError.value = '닉네임 변경 중 오류가 발생했습니다.';
+      errorMessage = '서버와 통신할 수 없습니다.';
     }
     
-    setTimeout(() => (generalError.value = ''), 3000);
+    showModal('변경 실패', errorMessage, 'error');
   } finally {
     isLoading.value = false;
   }
@@ -216,6 +256,16 @@ const handleBack = () => {
         <span v-else>변경하기</span>
       </button>
     </div>
+
+    <!-- 모달 컴포넌트 -->
+    <AlertModal
+      :show="modalState.show"
+      :title="modalState.title"
+      :message="modalState.message"
+      :type="modalState.type"
+      @close="closeModal"
+      @confirm="handleModalConfirm"
+    />
   </div>
 </template>
 

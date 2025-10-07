@@ -27,6 +27,9 @@ export const useBodyCompositionStore = defineStore("bodyComposition", {
       const res = await getMetrics();
       this.metrics = res.data;
     },
+    clearSeries() {
+      this.series = [];
+    },
   },
   persist: true,
 });

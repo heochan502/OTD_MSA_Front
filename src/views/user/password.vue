@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, watch, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
+import Modal from '@/components/user/Modal.vue';
 
 const router = useRouter();
 const basePath = import.meta.env.VITE_BASE_URL;
@@ -20,6 +21,9 @@ const isCodeVerified = ref(false);
 const emailTimer = ref(0);
 const isLoading = ref(false);
 const generalError = ref('');
+
+// 모달 상태
+const showSuccessModal = ref(false);
 
 // 비밀번호 표시 상태
 const showPassword = ref(false);
@@ -43,7 +47,7 @@ const validatePassword = (password) => {
   if (!password) return { isValid: false, message: '비밀번호를 입력해주세요.' };
   if (password.length < 8) return { isValid: false, message: '비밀번호는 8자 이상이어야 합니다.' };
 
-  const hasLetter = /[a-z]/i.test(password);  
+  const hasLetter = /[a-zA-Z]/.test(password);
   const hasNumber = /[0-9]/.test(password);    
   const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>_\-+=[\]\\/'`~;]/.test(password); 
 
@@ -165,8 +169,7 @@ const resetPassword = async () => {
     const result = await response.json();
 
     if (response.ok && result.success) {
-      alert('비밀번호가 성공적으로 변경되었습니다.');
-      router.push('/user/login');
+      showSuccessModal.value = true; // 모달 표시
     } else {
       generalError.value = result.message || '비밀번호 변경에 실패했습니다.';
       setTimeout(() => (generalError.value = ''), 3000);
@@ -177,6 +180,12 @@ const resetPassword = async () => {
   } finally {
     isLoading.value = false;
   }
+};
+
+// 모달 확인 버튼 클릭 시 페이지 이동
+const handleModalConfirm = () => {
+  showSuccessModal.value = false;
+  router.push('/user/ModifiProfile');
 };
 
 // 타이머 관리
@@ -229,7 +238,7 @@ const handleBack = () => {
   if (currentStep.value > 1) {
     currentStep.value--;
   } else {
-    router.push('/user/login');
+    router.back();
   }
 };
 </script>
@@ -490,6 +499,17 @@ const handleBack = () => {
         </button>
       </div>
     </div>
+
+    <!-- 성공 모달 -->
+    <Modal
+      :show="showSuccessModal"
+      title="비밀번호 변경 완료"
+      message="비밀번호가 성공적으로 변경되었습니다."
+      type="success"
+      confirm-text="확인"
+      @confirm="handleModalConfirm"
+      @close="handleModalConfirm"
+    />
   </div>
 </template>
 
