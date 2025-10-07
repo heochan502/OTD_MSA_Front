@@ -16,21 +16,21 @@ import ChallengeCategoryList from '@/views/challenge/ChallengeCategoryList.vue';
 import ChallengePer from '@/views/challenge/ChallengePer.vue';
 import ChallengeDay from '@/views/challenge/ChallengeDay.vue';
 
-import Login from '@/views/user/Login.vue';
-import Join from '@/views/user/Join.vue';
-import Profile from '@/views/user/Profile.vue';
-import Signal from '@/views/user/Signal.vue';
-import QnA from '@/views/user/QnA.vue';
-import Munhe from '@/views/user/Munhe.vue';
-import ModifiProfile from '@/views/user/ModifiProfile.vue';
-import PointHistory from '@/views/user/pointHistory.vue';
-import Term from '@/views/user/Term.vue';
-import Oauth2 from '@/views/auth/OAuth2Handler.vue';
+import Login from "@/views/user/Login.vue";
+import Join from "@/views/user/Join.vue";
+import Profile from "@/views/user/Profile.vue";
+import Signal from "@/views/user/Signal.vue";
+import QnA from "@/views/user/QnA.vue";
+import Munhe from "@/views/user/Munhe.vue";
+import ModifiProfile from "@/views/user/ModifiProfile.vue";
+import PointHistory from "@/views/user/pointHistory.vue";
+import Term from "@/views/user/Term.vue";
+import Oauth2 from "@/views/auth/OAuth2Handler.vue";
 
-import PayApproval from '@/views/pay/PayApproval.vue';
-import PayCancel from '@/views/pay/PayCancel.vue';
-import PayCompleted from '@/views/pay/PayCompleted.vue';
-import PayFail from '@/views/pay/PayFail.vue';
+import PayApproval from "@/views/pay/PayApproval.vue";
+import PayCancel from "@/views/pay/PayCancel.vue";
+import PayCompleted from "@/views/pay/PayCompleted.vue";
+import PayFail from "@/views/pay/PayFail.vue";
 
 // 포인트샵
 import PointShopListView from '@/views/point/PointShopListView.vue';
@@ -210,7 +210,6 @@ const router = createRouter({
       name: 'pointHistory',
       component: PointHistory,
     },
-
     {
       path: '/user/term',
       name: 'term',
@@ -222,25 +221,26 @@ const router = createRouter({
       component: Oauth2,
     },
     {
-      path: '/pay/approval',
-      name: 'pay-approval',
+      path: "/pay/approval",
+      name: "pay-approval",
       component: PayApproval,
     },
     {
-      path: '/pay/cancel',
-      name: 'pay-cancel',
+      path: "/pay/cancel",
+      name: "pay-cancel",
       component: PayCancel,
     },
     {
-      path: '/pay/completed',
-      name: 'pay-completed',
+      path: "/pay/completed",
+      name: "pay-completed",
       component: PayCompleted,
     },
     {
-      path: '/pay/fail',
-      name: 'pay-fail',
+      path: "/pay/fail",
+      name: "pay-fail",
       component: PayFail,
     },
+    
     {
       path: '/pointshop',
       name: 'PointShopList',
@@ -362,7 +362,7 @@ const router = createRouter({
 });
 
 // 로그인 하지 않아도 이용할 수 있는 Path들
-const unSignedPathList = ['/user/login', '/user/join', '/fe/redirect'];
+const unSignedPathList = ["/user/login", "/user/join", "/fe/redirect"];
 
 //navigation guard
 router.beforeEach((to, from) => {
@@ -370,29 +370,30 @@ router.beforeEach((to, from) => {
   const isUnsignedPath = unSignedPathList.some((path) =>
     to.path.startsWith(path)
   );
+  
   // body 클래스 분기
   if (to.path.startsWith('/admin')) {
     document.body.classList.add('is-admin');
   } else {
     document.body.classList.remove('is-admin');
   }
-  if (to.path.startsWith('/admin')) {
+  if (to.path.startsWith("/admin")) {
     const user = authentcationStore.state.signedUser;
-    if (!user || user.userRole !== 'ADMIN') {
-      alert('관리자만 접근 가능합니다.');
-      return { path: '/' }; // 일반 유저는 홈으로 돌려보내기
+    if (!user || user.userRole !== "ADMIN") {
+      alert("관리자만 접근 가능합니다.");
+      return { path: "/" }; // 일반 유저는 홈으로 돌려보내기
     }
   }
   if (unSignedPathList.includes(to.path) && authentcationStore.state.isSigned) {
     //로그인 상태에서 /user/login, /user/join 경로로 이동하려고 하면
-    return { path: '/' };
+    return { path: "/" };
   } else if (
     !authentcationStore.state.isSigned &&
     !unSignedPathList.includes(to.path)
   ) {
-    console.log('로그아웃 상태에서 접근 불가 경로');
+    console.log("로그아웃 상태에서 접근 불가 경로");
     //로그아웃 상태에서 /user/login, /user/join 경로가 아닌 경우
-    return { path: '/user/login' };
+    return { path: "/user/login" };
   }
 });
 

@@ -35,6 +35,7 @@ const userInfo = computed(() => {
   };
 });
 
+
 // 프로필 사진 클릭 시 모달 열기
 const openPhotoModal = (e) => {
   e.preventDefault();
@@ -77,15 +78,12 @@ const saveProfilePhoto = async () => {
     
     console.log('프로필 사진 업로드 시작...');
     
-    // userService의 API 함수 사용
     const response = await patchUserProfilePic(formData);
     
     console.log('업로드 응답:', response);
     
-    // 서버에서 받은 파일명으로 업데이트
     if (response.data && response.data.result) {
       const fileName = response.data.result;
-      // 백엔드 서버 주소 포함
       const imagePath = `http://localhost:8082/profile/${userInfo.value.userId}/${fileName}`;
       
       console.log('=== 이미지 경로 디버깅 ===');
@@ -114,8 +112,6 @@ const deleteProfilePhoto = async () => {
 
   try {
     await deleteUserProfilePic();
-
-    // 기본 이미지로 변경
     authStore.state.signedUser.pic = null;
     
     alert('프로필 사진이 삭제되었습니다.');
@@ -126,7 +122,7 @@ const deleteProfilePhoto = async () => {
   }
 };
 
-// 최근 포인트 히스토리 가져오기 (포인트 히스토리 + 일일 미션)
+// 최근 포인트 히스토리 가져오기
 const fetchRecentHistory = async () => {
   try {
     loadingHistory.value = true;
@@ -136,19 +132,15 @@ const fetchRecentHistory = async () => {
       return;
     }
 
-    // 포인트 히스토리 조회
     const response = await getPointHistory(userId);
     const pointHistory = response.data.result?.pointHistory || [];
     
-    // 일일 미션 완료 내역 조회
     const missionResponse = await getSelectedAll();
     const missionComplete = missionResponse.data.missionComplete || [];
     const dailyMission = missionResponse.data.dailyMission || [];
     
-    // 데이터 병합
     const combined = [];
     
-    // 포인트 히스토리 추가
     pointHistory.forEach(item => {
       combined.push({
         type: 'point',
@@ -159,7 +151,6 @@ const fetchRecentHistory = async () => {
       });
     });
     
-    // 일일 미션 완료 내역 추가
     missionComplete.forEach(mission => {
       const missionDetail = dailyMission.find(m => String(m.cdId) === String(mission.cdId));
       if (missionDetail) {
@@ -173,20 +164,18 @@ const fetchRecentHistory = async () => {
       }
     });
     
-    // 최신순 정렬 후 최근 2개만
     recentHistory.value = combined
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, 2);
       
   } catch (err) {
-    console.error('포인트 히스토리 조회 실패:', err);
+    console.error('포인트 히스토리 조회 실패:백엔드켰나?쿠키있나?', err);
     recentHistory.value = [];
   } finally {
     loadingHistory.value = false;
   }
 };
 
-// reason 포맷팅
 const formatPointReason = (reason) => {
   if (!reason) return '';
   
@@ -221,7 +210,6 @@ const formatPointReason = (reason) => {
   return reason;
 };
 
-// 날짜 포맷팅
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   return date.toLocaleDateString('ko-KR', {
@@ -243,7 +231,6 @@ const formatPoint = (point) => {
   return point?.toLocaleString() || '0';
 };
 
-// 컴포넌트 마운트 시 최근 포인트 히스토리 가져오기
 onMounted(() => {
   fetchRecentHistory();
 });
@@ -263,7 +250,7 @@ onMounted(() => {
         <div class="profile-info">
           <h2 class="nickname">{{ userInfo.nickName }}</h2>
           <p class="email">{{ userInfo.email }}</p>
-          <div class="arrow">›</div>
+          <div class="arrowpic">›</div>
         </div>
       </router-link>
     </div>
@@ -507,7 +494,7 @@ onMounted(() => {
         color: #393e46;
       }
       .arrow {
-      position: absolute;
+        position: absolute;
       right: 20px;
       top: 50%; 
       font-size: 24px;
@@ -951,5 +938,12 @@ onMounted(() => {
     width: 95%;
   }
 }
-
+.arrowpic {
+      position: absolute; 
+      right: 20px; 
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 24px; 
+      color: #ccc; 
+}
 </style>

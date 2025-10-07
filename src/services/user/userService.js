@@ -29,7 +29,18 @@ export const checkNicknameDuplicate = (nickname) =>
 export const checkDuplicateUser = (data) =>
   axios.post(`${path}/check-duplicate`, data);
 
+// 업데이트 관련
+export const updateNickname = (nickname) => 
+  axios.patch(`${path}/nickname`, { nickname });
+
+
 // 비밀번호 관련
 export const changePassword = (data) => axios.patch(`${path}/password`, data);
 
 export const getPointHistory = (userId) => axios.get(`${path}/pointhistory/${userId}`);
+
+export const deleteUser = (userId) => {
+  return axios
+    .delete(`${path}/account`, { userId })
+    .catch((e) => e.response);
+};
