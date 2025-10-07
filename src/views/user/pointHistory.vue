@@ -15,13 +15,6 @@ const error = ref(null);
 const currentPage = ref(1);
 const itemsPerPage = 10;
 
-// 날짜 계산 (한 달 전)
-const getOneMonthAgo = () => {
-  const today = new Date();
-  const oneMonthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
-  return oneMonthAgo;
-};
-
 const fetchData = async () => {
   try {
     loading.value = true;
@@ -47,7 +40,16 @@ const fetchData = async () => {
     console.log('포인트 히스토리 개수:', pointHistory.value.length);
     console.log('미션 완료 개수:', missionComplete.value.length);
     console.log('일일 미션 개수:', dailyMission.value.length);
-    console.log('미션 완료 전체 데이터:', missionComplete.value);
+    
+    // 실제 날짜 범위 확인
+    if (pointHistory.value.length > 0) {
+      console.log('포인트 첫 데이터:', pointHistory.value[0]);
+      console.log('포인트 마지막 데이터:', pointHistory.value[pointHistory.value.length - 1]);
+    }
+    if (missionComplete.value.length > 0) {
+      console.log('미션 첫 데이터:', missionComplete.value[0]);
+      console.log('미션 마지막 데이터:', missionComplete.value[missionComplete.value.length - 1]);
+    }
     console.log('================================');
     
   } catch (err) {
@@ -63,57 +65,45 @@ const fetchData = async () => {
   }
 };
 
-// 모든 내역을 합쳐서 최신순 정렬 (한 달치만)
+// 모든 내역을 합쳐서 최신순 정렬 (전체 데이터)
 const allHistory = computed(() => {
   const combined = [];
-  const oneMonthAgo = getOneMonthAgo();
   
   console.log('========== allHistory 계산 시작 ==========');
-  console.log('한 달 전 날짜:', oneMonthAgo);
-  console.log('처리할 미션 완료 개수:', missionComplete.value.length);
+  console.log('처리할 포인트 히스토리:', pointHistory.value.length);
+  console.log('처리할 미션 완료:', missionComplete.value.length);
   
-  // 포인트 히스토리 추가 (한 달 이내)
+  // 포인트 히스토리 추가 (전체)
   pointHistory.value.forEach(item => {
-    const itemDate = new Date(item.createdAt);
-    if (itemDate >= oneMonthAgo) {
-      combined.push({
-        type: 'point',
-        reason: item.reason,
-        point: item.point,
-        createdAt: item.createdAt,
-        id: `point-${item.chId}`
-      });
-    }
+    combined.push({
+      type: 'point',
+      reason: item.reason,
+      point: item.point,
+      createdAt: item.createdAt,
+      id: `point-${item.chId}`
+    });
   });
   
   console.log('포인트 히스토리 추가 후:', combined.length);
   
-  // 일일 미션 완료 내역 추가 (한 달 이내)
+  // 일일 미션 완료 내역 추가 (전체)
   missionComplete.value.forEach((mission, index) => {
-    console.log(`미션 ${index + 1}:`, mission);
+    const missionDetail = dailyMission.value.find(m => String(m.cdId) === String(mission.cdId));
     
-    // successDate 파싱 확인
-    const missionDate = new Date(mission.successDate);
-    console.log('  - successDate:', mission.successDate);
-    console.log('  - 파싱된 날짜:', missionDate);
-    console.log('  - 한 달 이내?:', missionDate >= oneMonthAgo);
-    
-    if (missionDate >= oneMonthAgo) {
-      const missionDetail = dailyMission.value.find(m => String(m.cdId) === String(mission.cdId));
-      console.log('  - 매칭된 미션:', missionDetail);
+    if (missionDetail) {
+      combined.push({
+        type: 'mission',
+        reason: missionDetail.cdName,
+        point: missionDetail.cdReward,
+        createdAt: mission.successDate,
+        id: `mission-${mission.cdId}-${mission.successDate}`
+      });
       
-      if (missionDetail) {
-        combined.push({
-          type: 'mission',
-          reason: missionDetail.cdName,
-          point: missionDetail.cdReward,
-          createdAt: mission.successDate,
-          id: `mission-${mission.cdId}-${mission.successDate}`
-        });
-        console.log('  ✅ 추가 완료');
-      } else {
-        console.log('  ❌ 매칭 실패 - cdId:', mission.cdId);
+      if (index < 3) {
+        console.log(`미션 ${index + 1} 추가:`, missionDetail.cdName, mission.successDate);
       }
+    } else if (index < 3) {
+      console.log(`미션 ${index + 1} 매칭 실패 - cdId:`, mission.cdId);
     }
   });
   
@@ -198,7 +188,7 @@ const getReasonType = (item) => {
 
 const formatReason = (item) => {
   if (item.type === 'mission') {
-    return ' 일일 미션: ' + item.reason;
+    return '✅ 일일 미션: ' + item.reason;
   }
   
   const reason = item.reason || '';
@@ -256,7 +246,7 @@ onMounted(() => {
     <!-- 전체 포인트 내역 -->
     <div v-else class="point-history">
       <div class="history-header">
-        <h3>포인트 내역 (최근 1개월)</h3>
+        <h3>포인트 내역</h3>
         <span class="total-count">전체 {{ allHistory.length }}건</span>
       </div>
 
@@ -284,7 +274,7 @@ onMounted(() => {
           </span>
         </li>
       </ul>
-      <p v-else class="no-data">최근 1개월 내 포인트 내역이 없습니다.</p>
+      <p v-else class="no-data">포인트 내역이 없습니다.</p>
 
       <!-- 페이징 -->
       <div v-if="totalPages > 1" class="pagination">
@@ -319,6 +309,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
+/* 기존 스타일 그대로 유지 */
 .challenge-point-container {
   max-width: 600px;
   margin: 0 auto;

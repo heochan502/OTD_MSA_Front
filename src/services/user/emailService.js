@@ -23,6 +23,13 @@ export const verifyPasswordResetCode = (data) =>
 export const resetPassword = (data) =>
   axios.post(`${path}/reset-password`, data);
 
+// 아이디찾기
+export const sendFindIdCode = (data) =>
+  axios.post(`${path}/send-find-id-code`, data);
+
+export const verifyFindIdCode = (data) =>
+  axios.post(`${path}/verify-find-id-code`, data);
+
 //업데이트 이메일
 export const updateEmail = (email) => 
   axios.patch(`${path}/email-update`, { email });

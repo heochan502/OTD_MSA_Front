@@ -3,11 +3,11 @@ import { ref, computed, watch, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { updateEmail } from '@/services/user/emailService';
+import AlertModal from '@/components/user/Modal.vue';
 
 const router = useRouter();
 const authStore = useAuthenticationStore();
 const basePath = import.meta.env.VITE_BASE_URL;
-
 
 const email = ref('');
 const verificationCode = ref('');
@@ -17,6 +17,36 @@ const emailTimer = ref(0);
 const isLoading = ref(false);
 const generalError = ref('');
 
+// 모달 상태
+const modalState = ref({
+  show: false,
+  title: '',
+  message: '',
+  type: 'info',
+  onConfirm: null
+});
+
+const showModal = (title, message, type = 'info', onConfirm = null) => {
+  modalState.value = {
+    show: true,
+    title,
+    message,
+    type,
+    onConfirm
+  };
+};
+
+const closeModal = () => {
+  modalState.value.show = false;
+};
+
+const handleModalConfirm = () => {
+  if (modalState.value.onConfirm) {
+    modalState.value.onConfirm();
+  }
+  closeModal();
+};
+
 const validation = ref({
   email: {
     touched: false,
@@ -24,6 +54,7 @@ const validation = ref({
     message: ''
   }
 });
+
 const sendVerificationEmail = async () => {
   if (!email.value) return;
 
@@ -37,7 +68,6 @@ const sendVerificationEmail = async () => {
 
   isLoading.value = true;
   try {
-
     const response = await fetch(
       `${basePath}/api/OTD/email/send-email-update-code`,
       {
@@ -45,7 +75,7 @@ const sendVerificationEmail = async () => {
         headers: { 
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // 인증 쿠키 포함
+        credentials: 'include',
         body: JSON.stringify({ email: email.value }),
       }
     );
@@ -55,26 +85,23 @@ const sendVerificationEmail = async () => {
       emailTimer.value = 300;
       validation.value.email.isValid = true;
       validation.value.email.message = '인증코드가 발송되었습니다.';
+      showModal('전송 완료', '인증코드가 발송되었습니다.', 'success');
     } else {
       const error = await response.json();
-      generalError.value = error.message || '이메일 발송에 실패했습니다.';
-      setTimeout(() => (generalError.value = ''), 3000);
+      showModal('전송 실패', error.message || '이메일 발송에 실패했습니다.', 'error');
     }
   } catch (error) {
-    generalError.value = '네트워크 오류가 발생했습니다.';
-    setTimeout(() => (generalError.value = ''), 3000);
+    showModal('네트워크 오류', '네트워크 오류가 발생했습니다.', 'error');
   } finally {
     isLoading.value = false;
   }
 };
 
-// 이메일 인증번호 확인
 const verifyEmailCode = async () => {
   if (verificationCode.value.length !== 6) return;
 
   isLoading.value = true;
   try {
-   
     const response = await fetch(
       `${basePath}/api/OTD/email/verify-email-update-code`, 
       {
@@ -82,7 +109,7 @@ const verifyEmailCode = async () => {
         headers: { 
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // 인증 쿠키 포함
+        credentials: 'include',
         body: JSON.stringify({
           email: email.value,
           code: verificationCode.value,
@@ -95,19 +122,17 @@ const verifyEmailCode = async () => {
     if (response.ok && result.result?.verified === true) {
       isEmailVerified.value = true;
       validation.value.email.message = '이메일 인증이 완료되었습니다.';
+      showModal('인증 완료', '이메일 인증이 완료되었습니다.', 'success');
     } else {
-      generalError.value = result.message || '인증코드가 일치하지 않습니다.';
-      setTimeout(() => (generalError.value = ''), 3000);
+      showModal('인증 실패', result.message || '인증코드가 일치하지 않습니다.', 'error');
     }
   } catch (error) {
-    generalError.value = '네트워크 오류가 발생했습니다.';
-    setTimeout(() => (generalError.value = ''), 3000);
+    showModal('네트워크 오류', '네트워크 오류가 발생했습니다.', 'error');
   } finally {
     isLoading.value = false;
   }
 };
 
-// 이메일 유효성 검사
 const validateEmail = (email) => {
   if (!email) {
     return { isValid: false, message: '이메일을 입력해주세요.' };
@@ -121,7 +146,6 @@ const validateEmail = (email) => {
   return { isValid: true, message: '' };
 };
 
-// 이메일 타이머 관리
 let timerInterval = null;
 watch(emailTimer, (newValue) => {
   if (newValue > 0 && !timerInterval) {
@@ -141,20 +165,15 @@ onUnmounted(() => {
   }
 });
 
-// 타이머 표시 형식
 const timerDisplay = computed(() => {
   const minutes = Math.floor(emailTimer.value / 60);
   const seconds = emailTimer.value % 60;
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 });
 
-
-
-// 이메일 변경 제출
 const handleSubmit = async () => {
   if (!isEmailVerified.value) {
-    generalError.value = '이메일 인증을 완료해주세요.';
-    setTimeout(() => (generalError.value = ''), 3000);
+    showModal('인증 필요', '이메일 인증을 완료해주세요.', 'warning');
     return;
   }
 
@@ -164,23 +183,24 @@ const handleSubmit = async () => {
     
     authStore.state.signedUser.email = email.value;
     
-    alert('이메일이 성공적으로 변경되었습니다.');
-    router.push('/user/profile');
+    showModal(
+      '변경 완료',
+      '이메일이 성공적으로 변경되었습니다.',
+      'success',
+      () => router.push('/user/profile')
+    );
   } catch (error) {
     console.error('이메일 변경 오류:', error);
-    generalError.value = '이메일 변경에 실패했습니다.';
-    setTimeout(() => (generalError.value = ''), 3000);
+    showModal('변경 실패', '이메일 변경에 실패했습니다.', 'error');
   } finally {
     isLoading.value = false;
   }
 };
 
-// 뒤로가기
 const handleBack = () => {
   router.back();
 };
 
-// 이메일 입력 변경 시
 watch(() => email.value, () => {
   isEmailSent.value = false;
   isEmailVerified.value = false;
@@ -292,6 +312,16 @@ watch(() => email.value, () => {
         <span v-else>변경하기</span>
       </button>
     </div>
+
+    <!-- Alert 모달 컴포넌트 -->
+    <AlertModal
+      :show="modalState.show"
+      :title="modalState.title"
+      :message="modalState.message"
+      :type="modalState.type"
+      @close="closeModal"
+      @confirm="handleModalConfirm"
+    />
   </div>
 </template>
 
