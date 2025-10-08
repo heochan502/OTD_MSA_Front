@@ -1,10 +1,33 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useMealSelectedStore, useMealRecordStore } from '@/stores/meal/mealStore'
 
+
+
+
+import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
+
+import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
+
+import dayjs from 'dayjs';
+
+import 'dayjs/locale/ko';
+
+dayjs.locale('ko');
+
+
+
+const bodyComposition = useBodyCompositionStore();
+const exerciseRecord = useExerciseRecordStore();
+
 const emit = defineEmits(['more'])
 
+
+// 선택 한 날짜 가져오기위한거 
+ const mealSelectedDay = useMealSelectedStore();
+
+// 먹은날 기준 데이터 가져오는거 
 const store = useMealRecordStore()
 const { eatenFoodList } = storeToRefs(store)
 
@@ -26,8 +49,33 @@ const totalFat = computed(() =>
 
 
 // 목표/소모(운동) - 필요시 스토어/프로프 연동
-const kcalGoal = computed(() => 1587)
-const burnedKcal = computed(() => 0)
+
+const kcalGoal = computed(() => {
+  const pts = bodyComposition.series?.points ?? [];
+  if (!pts.length) return 0;
+
+  // 'YYYY-MM-DD'는 사전식 비교가 시간순과 같음
+  const latest = pts.reduce((a, b) => (a.date > b.date ? a : b));
+  return latest?.values?.basal_metabolic_rate ?? 0;
+});
+
+// 칼로리 소모
+const burnedKcal = computed(() => {
+  const today = dayjs().format("YYYY-MM-DD");
+console.log("여기");
+  const pts = (exerciseRecord.records ?? []).filter(
+    (item) => dayjs(item.startAt).format("YYYY-MM-DD") === today
+  );
+  console.log("pts11 ", pts);
+
+  if (!pts.length) return 0;
+
+
+  const totalBurnKcal = pts.reduce((sum, item) => sum + (item.activityKcal ?? 0),0 );
+  console.log("pts ", pts);
+  console.log("토탈 번 ", totalBurnKcal);
+  return totalBurnKcal ?? 0;
+})
 
 const progressPct = computed(() => {
   const g = kcalGoal.value || 1
@@ -46,7 +94,16 @@ const macroPct = computed(() => {
     protein: Math.round((totalProtein.value / sum) * 100),
     fat: Math.round((totalFat.value / sum) * 100),
   }
-})
+});
+
+watch(
+  () => mealSelectedDay.selectedDay.setDay,   // ← 감시 대상 getter
+  (newDay, oldDay) => {
+    console.log('선택날', newDay, mealSelectedDay.selectedDay.setDay);
+  } 
+);
+
+
 </script>
 
 <template>
