@@ -44,3 +44,5 @@ export const deleteUser = (userId) => {
     .delete(`${path}/account`, { userId })
     .catch((e) => e.response);
 };
+
+export const getSelectedAll = () => axios.get(`${path}/missions/complete`);

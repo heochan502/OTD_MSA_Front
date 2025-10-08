@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { getPointHistory } from '@/services/user/userService';
-import { getSelectedAll } from '@/services/challenge/challengeService';
+import { getSelectedAll } from '@/services/user/userService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 
 const authStore = useAuthenticationStore();
@@ -33,27 +33,34 @@ const fetchData = async () => {
     
     // 일일 미션 완료 내역 조회
     const missionResponse = await getSelectedAll();
-    missionComplete.value = missionResponse.data.missionComplete || [];
-    dailyMission.value = missionResponse.data.dailyMission || [];
     
-    console.log('========== 데이터 확인 ==========');
-    console.log('포인트 히스토리 개수:', pointHistory.value.length);
-    console.log('미션 완료 개수:', missionComplete.value.length);
-    console.log('일일 미션 개수:', dailyMission.value.length);
+    const result = missionResponse.data.result;
     
-    // 실제 날짜 범위 확인
-    if (pointHistory.value.length > 0) {
-      console.log('포인트 첫 데이터:', pointHistory.value[0]);
-      console.log('포인트 마지막 데이터:', pointHistory.value[pointHistory.value.length - 1]);
+    // 여러 가능성 체크
+    if (result) {
+      missionComplete.value = result.missionComplete || [];
+      dailyMission.value = result.dailyMission || [];
+    
+    } else if (missionResponse.data.missionComplete) {
+ 
+      missionComplete.value = missionResponse.data.missionComplete || [];
+      dailyMission.value = missionResponse.data.dailyMission || [];
+      
     }
+  
+    
+    // 실제 데이터 내용 확인
     if (missionComplete.value.length > 0) {
-      console.log('미션 첫 데이터:', missionComplete.value[0]);
-      console.log('미션 마지막 데이터:', missionComplete.value[missionComplete.value.length - 1]);
+
     }
-    console.log('================================');
+    if (pointHistory.value.length > 0) {
+
+    }
+
     
   } catch (err) {
     console.error('에러 발생:', err);
+    console.error('에러 응답:', err.response?.data);
     
     if (err.response?.status === 401) {
       error.value = '로그인이 필요합니다.';
@@ -64,14 +71,10 @@ const fetchData = async () => {
     loading.value = false;
   }
 };
-
 // 모든 내역을 합쳐서 최신순 정렬 (전체 데이터)
 const allHistory = computed(() => {
   const combined = [];
-  
-  console.log('========== allHistory 계산 시작 ==========');
-  console.log('처리할 포인트 히스토리:', pointHistory.value.length);
-  console.log('처리할 미션 완료:', missionComplete.value.length);
+
   
   // 포인트 히스토리 추가 (전체)
   pointHistory.value.forEach(item => {
@@ -84,7 +87,6 @@ const allHistory = computed(() => {
     });
   });
   
-  console.log('포인트 히스토리 추가 후:', combined.length);
   
   // 일일 미션 완료 내역 추가 (전체)
   missionComplete.value.forEach((mission, index) => {
@@ -107,8 +109,6 @@ const allHistory = computed(() => {
     }
   });
   
-  console.log('최종 combined 개수:', combined.length);
-  console.log('========== allHistory 계산 완료 ==========');
   
   // 최신순 정렬
   return combined.sort((a, b) => {
@@ -118,7 +118,7 @@ const allHistory = computed(() => {
   });
 });
 
-// 페이징된 내역
+
 const paginatedHistory = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
   const end = start + itemsPerPage;

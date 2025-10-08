@@ -2,12 +2,12 @@ import axios from '@/services/httpRequester';
 
 const BASE_URL = 'admin';
 
-export const getUsers = () => {
-  return axios.get(`${BASE_URL}/users`).catch((e) => e.response);
+export const getUser = () => {
+  return axios.get(`${BASE_URL}/user`).catch((e) => e.response);
 };
 
-export const getChallenges = () => {
-  return axios.get(`${BASE_URL}/challenges`).catch((e) => e.response);
+export const getChallenge = () => {
+  return axios.get(`${BASE_URL}/challenge`).catch((e) => e.response);
 };
 
 export const getPointHistory = () => {
@@ -15,9 +15,7 @@ export const getPointHistory = () => {
 };
 
 export const getUserDetail = (userId) => {
-  return axios
-    .get(`${BASE_URL}/user/${userId}`)
-    .catch((e) => e.response);
+  return axios.get(`${BASE_URL}/user/${userId}`).catch((e) => e.response);
 };
 
 export const getGender = () => {
@@ -26,4 +24,20 @@ export const getGender = () => {
 
 export const getAgeCount = () => {
   return axios.get(`${BASE_URL}/agegroup`).catch((e) => e.response);
+};
+
+export const postChallenge = (params) => {
+  return axios
+    .post(`${BASE_URL}/challenge/add`, params)
+    .catch((e) => e.response);
+};
+
+export const putChallenge = (params) => {
+  return axios
+    .post(`${BASE_URL}/challenge/modify`, params)
+    .catch((e) => e.response);
+};
+
+export const deleteChallenge = (cdId) => {
+  return axios.delete(`${BASE_URL}/challenge/${cdId}`).catch((e) => e.response);
 };
