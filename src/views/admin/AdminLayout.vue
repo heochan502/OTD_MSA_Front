@@ -42,15 +42,15 @@ const logoutAccount = async () => {
           <span>대시보드</span>
         </router-link>
         <router-link
-          to="/admin/users"
+          to="/admin/user"
           class="menu-item otd-subtitle-1 d-flex"
           active-class="active"
-          :class="{ active: route.path.startsWith('/admin/users') }"
+          :class="{ active: route.path.startsWith('/admin/user') }"
         >
           <img
             class="icon"
             :src="
-              route.path.startsWith('/admin/users')
+              route.path.startsWith('/admin/user')
                 ? '/otd/image/admin_page/user-s.png'
                 : '/otd/image/admin_page/user.png'
             "
@@ -58,15 +58,15 @@ const logoutAccount = async () => {
           <span>사용자 관리</span>
         </router-link>
         <router-link
-          to="/admin/challenges"
+          to="/admin/challenge"
           class="menu-item otd-subtitle-1 d-flex"
           active-class="active"
-          :class="{ active: route.path.startsWith('/admin/challenges') }"
+          :class="{ active: route.path.startsWith('/admin/challenge') }"
         >
           <img
             class="icon"
             :src="
-              route.path.startsWith('/admin/challenges')
+              route.path.startsWith('/admin/challenge')
                 ? '/otd/image/admin_page/challenge-s.png'
                 : '/otd/image/admin_page/challenge.png'
             "
@@ -74,15 +74,15 @@ const logoutAccount = async () => {
           <span>챌린지 관리</span>
         </router-link>
         <router-link
-          to="/admin/points"
+          to="/admin/point"
           class="menu-item otd-subtitle-1 d-flex"
           active-class="active"
-          :class="{ active: route.path.startsWith('/admin/points') }"
+          :class="{ active: route.path.startsWith('/admin/point') }"
         >
           <img
             class="icon"
             :src="
-              route.path.startsWith('/admin/points')
+              route.path.startsWith('/admin/point')
                 ? '/otd/image/admin_page/point-s.png'
                 : '/otd/image/admin_page/point.png'
             "
@@ -90,7 +90,23 @@ const logoutAccount = async () => {
           <span>포인트 관리</span>
         </router-link>
         <router-link
-          to="/admin/statistics"
+          to="/admin/community"
+          class="menu-item otd-subtitle-1 d-flex"
+          active-class="active"
+          :class="{ active: route.path.startsWith('/admin/community') }"
+        >
+          <img
+            class="icon"
+            :src="
+              route.path.startsWith('/admin/community')
+                ? '/otd/image/admin_page/point-s.png'
+                : '/otd/image/admin_page/point.png'
+            "
+          />
+          <span>게시글 관리</span>
+        </router-link>
+        <router-link
+          to="/admin/statistic"
           class="menu-item otd-subtitle-1 d-flex"
           active-class="active"
           :class="{ active: route.path.startsWith('/admin/statistics') }"

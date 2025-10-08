@@ -1,39 +1,24 @@
 <script setup>
 import { onMounted, reactive, ref, computed } from 'vue';
-import { getUserDetail } from '@/services/admin/adminService';
+import { getUserDetail, putUserProfile } from '@/services/admin/adminService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { useAdminStore } from '@/stores/admin/adminStore';
 
 const authenticationStore = useAuthenticationStore();
 const adminStore = useAdminStore();
 
+const search = ref('');
 const picUrl = ref();
+const deletePicDialog = ref(false);
+const putProfileDialog = ref(false);
+const successDialog = ref(false);
 
-const plainXp = ref(0);
-const xp = computed({
-  get() {
-    return plainXp.value.toLocaleString();
-  },
-  set(num) {
-    plainXp.value = parseInt(num.replace(/,/g, '')) || 0;
-    state.userInfo.xp = plainXp.value;
-  },
-});
-
-const plainPoint = ref(0);
-const point = computed({
-  get() {
-    return plainPoint.value.toLocaleString();
-  },
-  set(num) {
-    plainPoint.value = parseInt(num.replace(/,/g, '')) || 0;
-    state.userInfo.point = plainPoint.value;
-  },
-});
 const state = reactive({
   userInfo: {},
   challengeHistory: [],
   pointHistory: [],
+  exerciseHistory: [],
+  mealHistory: [],
 });
 
 const formatBirthDate = (birthDate) => {
@@ -48,8 +33,6 @@ const formatBirthDate = (birthDate) => {
 onMounted(async () => {
   state.userInfo = adminStore.state.selectedUser;
   console.log('userInfo', state.userInfo);
-  plainXp.value = state.userInfo.xp;
-  plainPoint.value = state.userInfo.point;
   const userId = Number(state.userInfo.userId);
   const res = await getUserDetail(userId);
   console.log('res', res.data);
@@ -58,11 +41,20 @@ onMounted(async () => {
   picUrl.value = authenticationStore.formattedUserPic(state.userInfo);
 });
 
-const headers = [
+const pointHeaders = [
   { title: 'ID', key: 'chId' },
   { title: '사유', key: 'reason' },
   { title: '지급 포인트', key: 'point' },
-  { title: '날짜', key: 'createdAt' },
+  { title: '지급일', key: 'createdAt' },
+];
+
+const challengeHeaders = [
+  { title: 'ID', key: 'cpId' },
+  { title: '챌린지', key: 'name' },
+  { title: '포인트', key: 'point' },
+  { title: '시작일', key: 'startDate' },
+  { title: '종료일', key: 'endDate' },
+  { title: '성공여부', key: 'success' },
 ];
 
 const formatNumber = (n) => String(n).padStart(2, '0');
@@ -73,17 +65,95 @@ const formatDate = (date) => {
   return `${y}-${m}-${d}`;
 };
 
-const submit = () => {
+const submit = async () => {
   const jsonBody = state.userInfo;
+  console.log('json', jsonBody);
+
+  const res = await putUserProfile(jsonBody);
+
+  if (res && res.status === 200) {
+    // 성공하면 저장 완료 모달 열기
+    putProfileDialog.value = false;
+    successDialog.value = true;
+  } else {
+    alert('저장에 실패했습니다. 다시 시도해주세요.');
+  }
+};
+
+// const postPoint = () => {};
+
+const deletePic = () => {
+  deletePicDialog.value = false;
+  picUrl.value = authenticationStore.formattedUserPic('');
+  state.userInfo.pic = null;
 };
 </script>
 
 <template>
   <div class="user-detail">
+    <!-- 이미지 삭제 모달 -->
+    <v-dialog v-model="deletePicDialog" max-width="380" min-height="100">
+      <v-card>
+        <v-card-text> 프로필 이미지를 삭제하시겠습니까? </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn color="dark" text @click="deletePic()">네</v-btn>
+          <v-btn color="dark" text @click="deletePicDialog = false"
+            >아니오</v-btn
+          >
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- 프로필 저장 모달 -->
+    <v-dialog v-model="putProfileDialog" max-width="380" min-height="100">
+      <v-card>
+        <v-card-text> 내용을 저장하시겠습니까? </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn color="dark" text @click="submit()">네</v-btn>
+          <v-btn color="dark" text @click="putProfileDialog = false"
+            >아니오</v-btn
+          >
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- 수정 / 저장 완료 모달 -->
+    <v-dialog v-model="successDialog" max-width="380" min-height="100">
+      <v-card>
+        <v-card-title class="text-h8">완료</v-card-title>
+        <v-card-text> 성공적으로 완료되었습니다. </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn color="dark" text @click="successDialog = false">확인</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- 포인트 지급 모달 -->
+    <!-- <v-dialog v-model="deletePicDialog" max-width="380" min-height="100">
+      <v-card>
+        <v-card-text> 포인트 지급 </v-card-text>
+        <v-card-subtitle>포인트</v-card-subtitle>
+        <v-text-field v-model="state.userInfo.name"></v-text-field>
+        <v-card-subtitle>포인트</v-card-subtitle>
+        <v-text-field v-model="state.userInfo.name"></v-text-field>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn color="dark" text @click="cancelDialog = true">취소</v-btn>
+          <v-btn color="dark" text @click="deletePicDialog = false">저장</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog> -->
+
     <v-card>
       <span class="title">회원 정보</span>
       <v-divider></v-divider>
       <v-img :src="picUrl" alt="profile-img" class="profile-img"></v-img>
+      <v-btn v-if="state.userInfo.pic" @click="deletePicDialog = true"
+        >이미지 삭제</v-btn
+      >
       <v-card-title>{{ state.userInfo.name }}</v-card-title>
 
       <v-card-subtitle>이름</v-card-subtitle>
@@ -92,6 +162,9 @@ const submit = () => {
       <v-card-subtitle>닉네임</v-card-subtitle>
       <v-text-field v-model="state.userInfo.nickName"></v-text-field>
 
+      <v-card-subtitle>회원 아이디</v-card-subtitle>
+      <v-text-field v-model="state.userInfo.uid"></v-text-field>
+
       <v-card-subtitle>티어</v-card-subtitle>
       <v-select
         :items="['브론즈', '실버', '골드', '다이아']"
@@ -99,8 +172,19 @@ const submit = () => {
         >{{ state.userInfo.challengeRole }}</v-select
       >
 
+      <v-card-subtitle>권한</v-card-subtitle>
+      <v-select
+        v-if="state.userInfo.userRoles != null"
+        :items="['USER', 'SOCAIL', 'MANAGER', 'ADMIN']"
+        v-model="state.userInfo.userRoles"
+        >{{ state.userInfo.userRoles }}</v-select
+      >
+
       <v-card-subtitle>생년월일</v-card-subtitle>
-      <v-card-text>{{ formatBirthDate(state.userInfo.birthDate) }}</v-card-text>
+      <v-card-text>
+        <!-- {{ formatBirthDate(state.userInfo.birthDate) }} -->
+        {{ state.userInfo.birthDate }}
+      </v-card-text>
 
       <v-card-subtitle>가입일자</v-card-subtitle>
       <v-card-text>{{
@@ -118,26 +202,21 @@ const submit = () => {
       <v-card-subtitle>전화번호</v-card-subtitle>
       <v-card-text>{{ state.userInfo.phone }}</v-card-text>
 
-      <v-card-subtitle>회원 아이디</v-card-subtitle>
-      <v-card-text>{{ state.userInfo.uid }}</v-card-text>
-
       <v-card-subtitle>보유 포인트</v-card-subtitle>
-      <v-text-field v-model="point"></v-text-field>
+      <v-card-text>{{
+        Number(state.userInfo.point).toLocaleString()
+      }}</v-card-text>
+      <!-- <v-btn @click="postPointDialog = true">포인트 지급</v-btn> -->
 
       <v-card-subtitle>보유 경험치</v-card-subtitle>
-      <v-text-field v-model="xp"></v-text-field>
+      <v-card-text>{{
+        Number(state.userInfo.xp).toLocaleString()
+      }}</v-card-text>
 
-      <v-card-subtitle>권한</v-card-subtitle>
-      <v-select
-        v-if="state.userInfo.userRoles != null"
-        :items="['USER', 'SOCAIL', 'MANAGER', 'ADMIN']"
-        v-model="state.userInfo.userRoles"
-        >{{ state.userInfo.userRoles }}</v-select
-      >
-
-      <v-btn @click="submit()">저장</v-btn>
+      <v-btn @click="modifyProfileDialog = true">저장</v-btn>
     </v-card>
 
+    <!-- 포인트 -->
     <v-card>
       <v-card-title class="d-flex justify-space-between align-center">
         <span class="title">포인트 지급 내역</span>
@@ -153,15 +232,53 @@ const submit = () => {
         />
       </v-card-title>
       <v-data-table
-        :headers="headers"
+        :headers="pointHeaders"
         :items="state.pointHistory"
         :items-per-page="10"
         fixed-header
         class="styled-table"
       >
-        <!-- 가입일 -->
+        <!-- 지급일 -->
         <template #item.createdAt="{ item }">
           {{ formatDate(new Date(item.createdAt)) }}
+        </template>
+      </v-data-table>
+    </v-card>
+
+    <!-- 챌린지 -->
+    <v-card>
+      <v-card-title class="d-flex justify-space-between align-center">
+        <span class="title">챌린지 도전 내역</span>
+        <v-text-field
+          v-model="search"
+          label="검색"
+          prepend-inner-icon="mdi-magnify"
+          density="compact"
+          hide-details
+          single-line
+          variant="outlined"
+          style="max-width: 250px"
+        />
+      </v-card-title>
+      <v-data-table
+        :headers="challengeHeaders"
+        :items="state.challengeHistory"
+        :items-per-page="10"
+        fixed-header
+        class="styled-table"
+      >
+        <!-- 챌린지 이름 -->
+        <template #item.name="{ item }">
+          {{ item.challengeDefinition?.cdName }}
+        </template>
+
+        <!-- 포인트 -->
+        <template #item.point="{ item }">
+          {{ item.challengeDefinition?.cdReward }}P
+        </template>
+        <!-- 성공여부 -->
+        <template #item.success="{ item }">
+          {{ item.success === true ? '성공' : '실패' }}
         </template>
       </v-data-table>
     </v-card>
