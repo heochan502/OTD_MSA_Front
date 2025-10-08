@@ -26,16 +26,14 @@ export const useBodyCompositionStore = defineStore("bodyComposition", {
   actions: {
     // 가장 최근 데이터
     async fetchLastestBodyComposition() {
-      // console.log("getLastestBodyComposition : ");
       const res = await getLastestBodyComposition();
-      // console.log("getLastestBodyComposition : ", res.data);
+      console.log("getLastestBodyComposition : ", res.data);
       this.lastest = res.data;
     },
 
     // 그래프에 사용할 전체 데이터
     async fetchSeriesBodyComposition() {
       // console.log("fetchSeriesBodyComposition : ");
-
       try {
         const res = await getSeries();
         this.series = res.data;
@@ -44,7 +42,7 @@ export const useBodyCompositionStore = defineStore("bodyComposition", {
         console.log("fetchSeriesBodyComposition error: ", error);
         this.metrics = [];
       }
-      console.log("체성분 series", this.series);
+      // console.log("체성분 series", this.series);
     },
 
     // 측정 항목들
@@ -58,10 +56,9 @@ export const useBodyCompositionStore = defineStore("bodyComposition", {
         this.metrics = [];
       }
     },
-
     clearSeries() {
       this.series = [];
     },
   },
-  persist: true,
+  persist: false,
 });

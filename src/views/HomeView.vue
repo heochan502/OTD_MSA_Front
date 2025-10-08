@@ -86,6 +86,8 @@ const weeklySettlementDialog = ref(false);
 const challengeStore = useChallengeStore();
 const bodyCompositionStore = useBodyCompositionStore();
 
+const selectedField = ref("");
+
 onMounted(async () => {
   console.log("여기");
   await fetchMonthlySettlement(todayDate);
@@ -106,6 +108,7 @@ onMounted(async () => {
   await bodyCompositionStore.fetchBodyCompositionMetrics();
   await bodyCompositionStore.fetchLastestBodyComposition();
   await bodyCompositionStore.fetchSeriesBodyComposition();
+  selectedField.value = bodyCompositionStore.filteredMetrics[0].metricCode;
 });
 
 const challengeHome = () => {
@@ -178,14 +181,6 @@ const setModal = () => {
     weeklySettlementDialog.value = true;
   }
 };
-
-const selectedField = ref("");
-if (bodyCompositionStore.filteredMetrics.length > 0) {
-  selectedField.value = bodyCompositionStore.filteredMetrics[0].metricCode;
-  console.log("✅ 초기 metricCode:", selectedField.value);
-} else {
-  console.warn("⚠️ filteredMetrics 비어있음, 차트 렌더링 안됨");
-}
 </script>
 
 <template>
@@ -342,6 +337,7 @@ if (bodyCompositionStore.filteredMetrics.length > 0) {
         <div class="otd-top-margin">
           <StaticChart
             :series="bodyCompositionStore.series"
+            :metrics="bodyCompositionStore.metrics"
             :selectedMetric="selectedField"
           />
         </div>

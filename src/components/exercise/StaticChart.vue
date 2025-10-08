@@ -41,7 +41,7 @@ const props = defineProps({
   selectedMetric: String,
 });
 
-// ✅ [추가] selectedMetric에 따라 표시할 metric 목록 계산
+// 선택된 측정항목이 있으면 그것만 화면에 보여짐. 없으면 전체 항목
 const displayMetrics = computed(() => {
   if (!props.selectedMetric) return props.metrics;
   return props.metrics.filter((m) => m.metricCode === props.selectedMetric);
@@ -51,8 +51,6 @@ const displayMetrics = computed(() => {
 const labels = computed(() =>
   props.series.points.map((p) => dayjs(p.date).format("YY/MM/DD"))
 );
-
-console.log("변경되나", displayMetrics.value);
 
 // 항목별 데이터셋 생성
 const makeChartData = (metric) => {
