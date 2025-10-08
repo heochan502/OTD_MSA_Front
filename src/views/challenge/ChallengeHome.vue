@@ -176,7 +176,7 @@ const settlementButton = async () => {
 <template>
   <div class="wrap">
     <!-- 내정보 -->
-    <div @click="settlementButton()">월간 정산</div>
+    <!-- <div @click="settlementButton()">월간 정산</div> -->
     <div>
       <div class="first-title">내 정보</div>
       <div>
