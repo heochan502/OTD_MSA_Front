@@ -38,7 +38,13 @@ ChartJS.register(
 const props = defineProps({
   series: { type: Object, default: () => ({ points: [] }) },
   metrics: { type: Array, default: () => [] },
-  metricCode: String,
+  selectedMetric: String,
+});
+
+// ✅ [추가] selectedMetric에 따라 표시할 metric 목록 계산
+const displayMetrics = computed(() => {
+  if (!props.selectedMetric) return props.metrics;
+  return props.metrics.filter((m) => m.metricCode === props.selectedMetric);
 });
 
 // 날짜 라벨
@@ -46,7 +52,7 @@ const labels = computed(() =>
   props.series.points.map((p) => dayjs(p.date).format("YY/MM/DD"))
 );
 
-console.log("data", props.series);
+console.log("변경되나", displayMetrics.value);
 
 // 항목별 데이터셋 생성
 const makeChartData = (metric) => {
@@ -126,8 +132,24 @@ const hasData = computed(() => {
       <span class="otd-subtitle-2"> 체성분 측정 데이터가 없어요 </span>
     </v-card>
   </div>
-  <div v-else>
+  <!-- <div v-else>
     <div v-for="metric in props.metrics" :key="metric">
+      <div>
+        <span class="otd-subtitle-1 ml-2">{{ metric.metricName }}</span>
+        <v-card class="chart otd-border otd-shadow otd-box-style">
+          <Line
+            :data="makeChartData(metric.metricCode)"
+            :options="makeChartOptions(metric.metricCode)"
+            style="width: 100%"
+          />
+        </v-card>
+      </div>
+    </div>
+  </div> -->
+
+  <!-- ✅ selectedMetric 유무에 따라 표시할 metric 다르게 -->
+  <div v-else>
+    <div v-for="metric in displayMetrics" :key="metric.metricCode">
       <div>
         <span class="otd-subtitle-1 ml-2">{{ metric.metricName }}</span>
         <v-card class="chart otd-border otd-shadow otd-box-style">

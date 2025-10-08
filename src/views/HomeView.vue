@@ -103,8 +103,9 @@ onMounted(async () => {
 
   console.log("homechallenge", challengeInfo.value);
   selectedDay.selectedDay.setDay = dayjs().format("YYYY-MM-DD");
-  await bodyCompositionStore.fetchSeriesBodyComposition();
   await bodyCompositionStore.fetchBodyCompositionMetrics();
+  await bodyCompositionStore.fetchLastestBodyComposition();
+  await bodyCompositionStore.fetchSeriesBodyComposition();
 });
 
 const challengeHome = () => {
@@ -179,7 +180,12 @@ const setModal = () => {
 };
 
 const selectedField = ref("");
-// watch("선택됨", selectedField.value);
+if (bodyCompositionStore.filteredMetrics.length > 0) {
+  selectedField.value = bodyCompositionStore.filteredMetrics[0].metricCode;
+  console.log("✅ 초기 metricCode:", selectedField.value);
+} else {
+  console.warn("⚠️ filteredMetrics 비어있음, 차트 렌더링 안됨");
+}
 </script>
 
 <template>
@@ -336,7 +342,7 @@ const selectedField = ref("");
         <div class="otd-top-margin">
           <StaticChart
             :series="bodyCompositionStore.series"
-            :selectedMetric="bodyCompositionStore.filteredMetrics"
+            :selectedMetric="selectedField"
           />
         </div>
       </section>
