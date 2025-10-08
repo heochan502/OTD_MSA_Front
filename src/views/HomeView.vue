@@ -1,29 +1,28 @@
 <script setup>
-import { ref, onMounted, computed, reactive } from "vue";
-import Progress from "@/components/challenge/Progress.vue";
-import ProgressJs from "@/components/challenge/ProgressJs.vue";
+import { ref, onMounted, computed, reactive } from 'vue';
+import Progress from '@/components/challenge/Progress.vue';
+import ProgressJs from '@/components/challenge/ProgressJs.vue';
 
-import LineChart from "@/components/exercise/lineChart.vue";
-import StaticChart from "@/components/exercise/StaticChart.vue";
+import LineChart from '@/components/exercise/lineChart.vue';
+import StaticChart from '@/components/exercise/StaticChart.vue';
 
-import MealCard from "@/components/meal/MealDayCards.vue";
-import { useMealSelectedStore } from '@/stores/meal/mealStore.js'
+import MealCard from '@/components/meal/MealDayCards.vue';
+import { useMealSelectedStore } from '@/stores/meal/mealStore.js';
 
-import BmiProg from "@/components/exercise/BmiProg.vue";
-import { getMyChallenge } from "@/services/challenge/challengeService";
-import { useRouter } from "vue-router";
+import BmiProg from '@/components/exercise/BmiProg.vue';
+import { getMyChallenge } from '@/services/challenge/challengeService';
+import { useRouter } from 'vue-router';
 
-import { getChallengeSettlementLog } from "@/services/challenge/challengeService";
-import ChallengeSettlementCard from "@/components/challenge/ChallengeSettlementCard.vue";
-import { useChallengeStore } from "@/stores/challenge/challengeStore";
+import { getChallengeSettlementLog } from '@/services/challenge/challengeService';
+import ChallengeSettlementCard from '@/components/challenge/ChallengeSettlementCard.vue';
+import { useChallengeStore } from '@/stores/challenge/challengeStore';
 
 import dayjs from 'dayjs';
 import 'dayjs/locale/ko';
 
-
 const selectedDay = useMealSelectedStore();
 
-import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
+import { useBodyCompositionStore } from '@/stores/body_composition/bodyCompositionStore';
 
 const state = reactive({
   monthlySettlementLog: [],
@@ -34,26 +33,26 @@ const challengeInfo = ref([]);
 const router = useRouter();
 
 const healthInfo = ref([
-  { text: "체중(kg)", value: 70.5, check: true },
-  { text: "체지방률(%)", value: 15.3, check: false },
-  { text: "골격근량(kg)", value: 30.2, check: false },
+  { text: '체중(kg)', value: 70.5, check: true },
+  { text: '체지방률(%)', value: 15.3, check: false },
+  { text: '골격근량(kg)', value: 30.2, check: false },
 ]);
 
 const fields = [
-  { key: "weight", label: "체중", unit: "kg" },
-  { key: "BFP", label: "체지방률", unit: "%" },
-  { key: "SMM", label: "골격근량", unit: "kg" },
+  { key: 'weight', label: '체중', unit: 'kg' },
+  { key: 'BFP', label: '체지방률', unit: '%' },
+  { key: 'SMM', label: '골격근량', unit: 'kg' },
 ];
 const selectedField = ref(fields[0].key);
 
 const inbodyData = ref([
-  { dataTime: "2025-09-22", weight: "62.4", BFP: "20", SMM: "23" },
-  { dataTime: "2025-09-23", weight: "62.1", BFP: "20.2", SMM: "22.9" },
-  { dataTime: "2025-09-24", weight: "60.9", BFP: "20.1", SMM: "23.1" },
-  { dataTime: "2025-09-25", weight: "62.5", BFP: "20.5", SMM: "22.8" },
-  { dataTime: "2025-09-26", weight: "62.2", BFP: "20.3", SMM: "22.9" },
-  { dataTime: "2025-09-27", weight: "61.8", BFP: "19.9", SMM: "23.2" },
-  { dataTime: "2025-09-28", weight: "60", BFP: "20.0", SMM: "23.0" },
+  { dataTime: '2025-09-22', weight: '62.4', BFP: '20', SMM: '23' },
+  { dataTime: '2025-09-23', weight: '62.1', BFP: '20.2', SMM: '22.9' },
+  { dataTime: '2025-09-24', weight: '60.9', BFP: '20.1', SMM: '23.1' },
+  { dataTime: '2025-09-25', weight: '62.5', BFP: '20.5', SMM: '22.8' },
+  { dataTime: '2025-09-26', weight: '62.2', BFP: '20.3', SMM: '22.9' },
+  { dataTime: '2025-09-27', weight: '61.8', BFP: '19.9', SMM: '23.2' },
+  { dataTime: '2025-09-28', weight: '60', BFP: '20.0', SMM: '23.0' },
 ]);
 
 const today = new Date().toISOString().slice(0, 10);
@@ -71,7 +70,7 @@ const healthToggle = (index) => {
   }
 };
 
-const formatNumber = (n) => String(n).padStart(2, "0");
+const formatNumber = (n) => String(n).padStart(2, '0');
 const formatDate = (date) => {
   const y = date.getFullYear();
   const m = formatNumber(date.getMonth() + 1);
@@ -90,11 +89,10 @@ const challengeStore = useChallengeStore();
 const bodyCompositionStore = useBodyCompositionStore();
 
 onMounted(async () => {
-
-  console.log("여기");
+  console.log('여기');
   await fetchMonthlySettlement(todayDate);
   await fetchWeeklySettlement(todayDate);
-  console.log("state", state.monthlySettlementLog, state.weeklySettlementLog);
+  console.log('state', state.monthlySettlementLog, state.weeklySettlementLog);
   const challenge = await getMyChallenge();
   challengeInfo.value = challenge.data;
   console.log('homechallenge', challengeInfo.value);
@@ -105,30 +103,29 @@ onMounted(async () => {
     weeklySettlementDialog.value = true;
   }
 
-  console.log("homechallenge", challengeInfo.value);
+  console.log('homechallenge', challengeInfo.value);
   selectedDay.selectedDay.setDay = dayjs().format('YYYY-MM-DD');
   await bodyCompositionStore.fetchSeriesBodyComposition();
   await bodyCompositionStore.fetchBodyCompositionMetrics();
-  
 });
 
 const challengeHome = () => {
-  router.push("/challenge");
+  router.push('/challenge');
 };
 
 // 월간 정산 api호출
 const fetchMonthlySettlement = async (date) => {
   const monthlyKey = formatDate(date).slice(0, 7);
-  console.log("monthlykey", monthlyKey);
+  console.log('monthlykey', monthlyKey);
   console.log(
-    "challengeStore.state.lastMonthCheck",
+    'challengeStore.state.lastMonthCheck',
     challengeStore.state.lastMonthCheck
   );
   if (challengeStore.state.lastMonthCheck === monthlyKey) {
     return;
   } else {
     const params = {
-      type: "monthly",
+      type: 'monthly',
       settlementDate: formatDate(new Date(year, month - 1, 1)),
     };
     const res = await getChallengeSettlementLog(params);
@@ -140,16 +137,16 @@ const fetchMonthlySettlement = async (date) => {
 // 주간 정산 api호출
 const fetchWeeklySettlement = async (date) => {
   const weeklyKey = setWeeklyKey(date);
-  console.log("weeklykey", weeklyKey);
+  console.log('weeklykey', weeklyKey);
   console.log(
-    "challengeStore.state.lastWeekCheck",
+    'challengeStore.state.lastWeekCheck',
     challengeStore.state.lastWeekCheck
   );
   if (challengeStore.state.lastWeekCheck === weeklyKey) {
     return;
   } else {
     const params = {
-      type: "weekly",
+      type: 'weekly',
       settlementDate: formatDate(getMonday(date)),
     };
     const res = await getChallengeSettlementLog(params);
@@ -186,11 +183,17 @@ const setModal = () => {
 
 <template>
   <div>
-    <v-dialog v-model="monthlySettlementDialog" max-width="300" min-height="100">
+    <v-dialog
+      v-model="monthlySettlementDialog"
+      max-width="300"
+      min-height="100"
+    >
       <v-card>
         <v-card-title class="text-h8">월간 정산이 완료되었어요!</v-card-title>
         <v-card-text v-for="data in state.monthlySettlementLog">
-          <ChallengeSettlementCard :settlement-data="data"></ChallengeSettlementCard>
+          <ChallengeSettlementCard
+            :settlement-data="data"
+          ></ChallengeSettlementCard>
         </v-card-text>
         <v-card-actions>
           <v-spacer />
@@ -200,13 +203,19 @@ const setModal = () => {
     </v-dialog>
     <v-dialog v-model="weeklySettlementDialog" max-width="300" min-height="100">
       <v-card>
-        <v-card-title class="text-h8">지난 주 정산이 완료되었어요!</v-card-title>
+        <v-card-title class="text-h8"
+          >지난 주 정산이 완료되었어요!</v-card-title
+        >
         <v-card-text v-for="data in state.weeklySettlementLog">
-          <ChallengeSettlementCard :settlement-data="data"></ChallengeSettlementCard>
+          <ChallengeSettlementCard
+            :settlement-data="data"
+          ></ChallengeSettlementCard>
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn color="dark" text @click="weeklySettlementDialog = false">확인</v-btn>
+          <v-btn color="dark" text @click="weeklySettlementDialog = false"
+            >확인</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -220,21 +229,32 @@ const setModal = () => {
     <div class="wrap_content">
       <section class="challenge-progress otd-top-margin">
         <span class="otd-subtitle-1">챌린지 달성률</span>
-        <div class="challenge-progress-card otd-top-margin" @click="challengeHome">
+        <div
+          class="challenge-progress-card otd-top-margin"
+          @click="challengeHome"
+        >
           <div class=" " v-if="challengeInfo.length > 0">
-            <div v-for="value in challengeInfo"
-              class="d-flex justify-content-around align-items-center challenge-progress-container">
-              <span class="otd-body-3 space-span-start">{{ value.formatedName }}
+            <div
+              v-for="value in challengeInfo"
+              class="d-flex justify-content-around align-items-center challenge-progress-container"
+            >
+              <span class="otd-body-3 space-span-start"
+                >{{ value.formatedName }}
               </span>
               <!-- 차트에 해당하는 데이터를 불러와서 그값을 뿌림-->
-              <Progress :class="{
+              <Progress
+                :class="{
                   'progress-chart': true,
                   'progress-chart-high': value.percent > 70,
                   'progress-chart-middle':
                     value.percent > 30 && value.percent <= 70,
                   'progress-chart-low': value.percent <= 30,
-                }" :indata-progress="value.percent" />
-              <span class="otd-body-3 space-span-end">{{ value.percent }}%</span>
+                }"
+                :indata-progress="value.percent"
+              />
+              <span class="otd-body-3 space-span-end"
+                >{{ value.percent }}%</span
+              >
             </div>
           </div>
           <div v-else>아직 진행중인 챌린지가 없어요!</div>
@@ -257,11 +277,15 @@ const setModal = () => {
           <div class="otd-top-margin item-group">
             <div v-for="(field, idx) in fields" :key="idx" class="card-wrapper">
               <v-item v-slot="{ selectedClass, toggle }" :value="field.key">
-                <v-card :class="[
+                <v-card
+                  :class="[
                     ` health-button d-flex flex-column justify-center align-center text-center`,
                     { 'health-button-active': selectedClass },
                     ,
-                  ]" @click="toggle" v-ripple="false">
+                  ]"
+                  @click="toggle"
+                  v-ripple="false"
+                >
                   <div>
                     <span class="otd-body-3">
                       {{ field.label }}({{ field.unit }})
@@ -293,7 +317,10 @@ const setModal = () => {
             :fields="fields"
             :logs="inbodyData"
           /> -->
-          <StaticChart v-if="(bodyCompositionStore.series?.length ?? 0) > 0" :series="bodyCompositionStore.series" />
+          <StaticChart
+            v-if="(bodyCompositionStore.series?.length ?? 0) > 0"
+            :series="bodyCompositionStore.series"
+          />
         </div>
       </section>
     </div>
@@ -395,7 +422,6 @@ const setModal = () => {
 }
 .challenge-progress-card {
   width: 350px;
-  height: 125px;
   padding: 10px;
   background: #fff;
   border-radius: 12px;
@@ -424,6 +450,9 @@ const setModal = () => {
 
 .space-span-start {
   width: 30%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .space-span-end {
   width: 10%;
