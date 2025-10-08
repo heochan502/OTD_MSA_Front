@@ -45,7 +45,7 @@ const validateEmail = (email) => {
 
 const validatePassword = (password) => {
   if (!password) return { isValid: false, message: '비밀번호를 입력해주세요.' };
-  if (password.length < 8) return { isValid: false, message: '비밀번호는 8자 이상이어야 합니다.' };
+  if (password.length < 10) return { isValid: false, message: '비밀번호는 10자 이상이어야 합니다.' };
 
   const hasLetter = /[a-zA-Z]/.test(password);
   const hasNumber = /[0-9]/.test(password);    

@@ -22,7 +22,7 @@ import Join from "@/views/user/Join.vue";
 import Profile from "@/views/user/Profile.vue";
 import Signal from "@/views/user/Signal.vue";
 import QnA from "@/views/user/QnA.vue";
-import Munhe from "@/views/user/Munhe.vue";
+import Inquiry from "@/views/user/Inquiry.vue";
 import NickName from '@/views/user/Nickname.vue';
 import Email from '@/views/user/Email.vue';
 import Password from '@/views/user/password.vue';
@@ -196,9 +196,9 @@ const router = createRouter({
       component: QnA,
     },
     {
-      path: "/user/email/munhe",
-      name: "munhe",
-      component: Munhe,
+      path: "/user/email/inquiry",
+      name: "Inquiry",
+      component: Inquiry,
     },
     {
       path: "/user/modifiProfile",
