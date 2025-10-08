@@ -27,6 +27,10 @@ import PointHistory from "@/views/user/pointHistory.vue";
 import Term from "@/views/user/Term.vue";
 import Oauth2 from "@/views/auth/OAuth2Handler.vue";
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 8df9c644990db1240598f4c94549ab0409c06464
 // 포인트샵
 import PointShopListView from '@/views/pointshop/PointShopListView.vue';
 import PointUserPurchaseHistoryView from '@/views/pointshop/PointUserPurchaseHistoryView.vue';
@@ -215,7 +219,11 @@ const router = createRouter({
       path: '/fe/redirect',
       name: 'oauth2',
       component: Oauth2,
+<<<<<<< HEAD
     },
+=======
+    },    
+>>>>>>> 8df9c644990db1240598f4c94549ab0409c06464
     {
       path: '/pointshop',
       name: 'PointShopList',

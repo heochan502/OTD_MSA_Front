@@ -59,7 +59,6 @@ const formatPoint = (point) => {
   return point?.toLocaleString() || '0';
 };
 onMounted(() => {
-  console.log('bread',userInfo.value)
 })
 </script>
 
