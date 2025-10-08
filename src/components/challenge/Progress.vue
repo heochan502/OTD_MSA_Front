@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, defineExpose } from 'vue';
+import { ref, onMounted, defineExpose, watch } from 'vue';
 import { useRoute } from 'vue-router';
 const route = useRoute();
 
@@ -47,12 +47,22 @@ const animateProgress = (target) => {
       displayValue.value = current.toFixed(1);
     }
   }, stepTime);
-
 };
 
 defineExpose({
   animateProgress,
 });
+
+watch(
+  () => props.indataProgress,
+  (data) => {
+    if (data !== undefined && data !== null) {
+      targetValue.value = data;
+      animateProgress(data);
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>

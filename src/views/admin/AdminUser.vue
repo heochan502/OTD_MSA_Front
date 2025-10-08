@@ -1,5 +1,5 @@
 <script setup>
-import { getUsers } from '@/services/admin/adminService';
+import { getUser } from '@/services/admin/adminService';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAdminStore } from '@/stores/admin/adminStore';
@@ -11,7 +11,7 @@ const users = ref([]);
 const search = ref('');
 
 onMounted(async () => {
-  const res = await getUsers();
+  const res = await getUser();
   users.value = res.data.map((user) => ({
     ...user,
     userRoles: user.userRoles[0]?.userRoleIds.roleCode ?? '없음',
@@ -101,7 +101,7 @@ const toUserDetial = (user) => {
                   ? '#00D5DF'
                   : item.userRoles === 'ADMIN'
                   ? '#303030'
-                  : '#FFE0B2'
+                  : '#ff8a80'
               "
               small
               class="ma-1"
@@ -122,7 +122,7 @@ const toUserDetial = (user) => {
                 ? '#ffba57'
                 : item.challengeRole === '다이아'
                 ? '#00c6ff'
-                : '#FFE0B2' // 그 외
+                : '#ff8a80' // 그 외
             "
             small
           >

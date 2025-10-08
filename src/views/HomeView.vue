@@ -109,6 +109,7 @@ onMounted(async () => {
   selectedDay.selectedDay.setDay = dayjs().format('YYYY-MM-DD');
   await bodyCompositionStore.fetchSeriesBodyComposition();
   await bodyCompositionStore.fetchBodyCompositionMetrics();
+  
 });
 
 const challengeHome = () => {
