@@ -1,33 +1,36 @@
 import axios from 'axios';
 
-axios.defaults.baseURL = '/api/OTD/pointshop';
-axios.defaults.withCredentials = true;
-
 const PointPurchaseService = {
   // [GET] 사용자 구매 내역 조회
-  async fetchPurchaseHistory() {
+  async getUserPurchaseHistory() {
     try {
-      return await axios.get('/user/purchases');
+      const res = await axios.get('/pointshop/purchase/history');
+      return res;
     } catch (e) {
-      return e.response;
+      console.error('[PointPurchaseService] 구매 이력 조회 실패:', e);
+      return e?.response || null;
     }
   },
 
   // [POST] 아이템 구매 요청
-  async createPurchase(pointItemName) {
+  async createPurchase(pointId) {
     try {
-      return await axios.post(`/purchase/${pointItemName}`);
+      const res = await axios.post(`/pointshop/purchase/${pointId}`);
+      return res;
     } catch (e) {
-      return e.response;
+      console.error('[PointPurchaseService] 구매 요청 실패:', e);
+      return e?.response || null;
     }
   },
 
   // [DELETE] 구매 취소
   async deletePurchase(purchaseId) {
     try {
-      return await axios.delete(`/user/purchases/${purchaseId}`);
+      const res = await axios.delete(`/pointshop/purchase/${purchaseId}`);
+      return res;
     } catch (e) {
-      return e.response;
+      console.error('[PointPurchaseService] 구매 취소 실패:', e);
+      return e?.response || null;
     }
   }
 };

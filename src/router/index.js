@@ -27,16 +27,12 @@ import PointHistory from "@/views/user/pointHistory.vue";
 import Term from "@/views/user/Term.vue";
 import Oauth2 from "@/views/auth/OAuth2Handler.vue";
 
-import PayApproval from "@/views/pay/PayApproval.vue";
-import PayCancel from "@/views/pay/PayCancel.vue";
-import PayCompleted from "@/views/pay/PayCompleted.vue";
-import PayFail from "@/views/pay/PayFail.vue";
-
 // 포인트샵
-import PointShopListView from '@/views/point/PointShopListView.vue';
-import PointUserPurchaseHistoryView from '@/views/point/PointUserPurchaseHistoryView.vue';
-import PointUserView from '@/views/point/PointUserView.vue';
+import PointShopListView from '@/views/pointshop/PointShopListView.vue';
+import PointUserPurchaseHistoryView from '@/views/pointshop/PointUserPurchaseHistoryView.vue';
+import PointUserView from '@/views/pointshop/PointUserView.vue';
 import PointPurchaseHistoryTable from '@/components/pointshop/PointPurchaseHistoryTable.vue';
+import PointRechargeView from '@/views/pointshop/PointRechargeView.vue';
 
 //식단
 import MealMainView from '@/views/meal/MealMainView.vue';
@@ -221,27 +217,6 @@ const router = createRouter({
       component: Oauth2,
     },
     {
-      path: "/pay/approval",
-      name: "pay-approval",
-      component: PayApproval,
-    },
-    {
-      path: "/pay/cancel",
-      name: "pay-cancel",
-      component: PayCancel,
-    },
-    {
-      path: "/pay/completed",
-      name: "pay-completed",
-      component: PayCompleted,
-    },
-    {
-      path: "/pay/fail",
-      name: "pay-fail",
-      component: PayFail,
-    },
-    
-    {
       path: '/pointshop',
       name: 'PointShopList',
       component: PointShopListView,
@@ -255,6 +230,12 @@ const router = createRouter({
       path: '/point/user',
       name: 'PointUserView',
       component: PointUserView,
+    },
+    {
+      path: '/pointshop/recharge',
+      name: 'PointRechargeView',
+      component: PointRechargeView.vue,
+      meta: { headerType: 'title', title: '포인트 충전', showUserPanel: false },
     },
     {
       path: '/meal',
