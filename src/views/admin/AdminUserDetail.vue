@@ -1,6 +1,8 @@
 <script setup>
 import { onMounted, reactive, ref, computed } from 'vue';
 import { getUserDetail, putUserProfile } from '@/services/admin/adminService';
+import { getUserExerciseRecord } from '@/services/exercise/exerciseService';
+import { getUserMealRecord } from '@/services/meal/mealService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { useAdminStore } from '@/stores/admin/adminStore';
 
@@ -34,10 +36,17 @@ onMounted(async () => {
   state.userInfo = adminStore.state.selectedUser;
   console.log('userInfo', state.userInfo);
   const userId = Number(state.userInfo.userId);
-  const res = await getUserDetail(userId);
-  console.log('res', res.data);
-  state.challengeHistory = res.data.challengeProgress;
-  state.pointHistory = res.data.challengePointHistory;
+  const resUser = await getUserDetail(userId);
+  const resExercise = await getUserExerciseRecord(userId);
+  const resMeal = await getUserMealRecord(userId);
+  console.log('1', resUser.data);
+  console.log('2', resExercise.data);
+  console.log('3', resMeal.data);
+  state.challengeHistory = resUser.data.challengeProgress;
+  state.pointHistory = resUser.data.challengePointHistory;
+  state.exerciseHistory = resExercise.data.exerciseRecord;
+  state.mealHistory = resMeal.data.mealRecord;
+
   picUrl.value = authenticationStore.formattedUserPic(state.userInfo);
 });
 
@@ -213,7 +222,7 @@ const deletePic = () => {
         Number(state.userInfo.xp).toLocaleString()
       }}</v-card-text>
 
-      <v-btn @click="modifyProfileDialog = true">저장</v-btn>
+      <v-btn @click="putProfileDialog = true">저장</v-btn>
     </v-card>
 
     <!-- 포인트 -->

@@ -30,3 +30,8 @@ export const getMealRecord = async (mealDay) => {
   console.log("식단 기록 데이터", res.data);
   return res.data;
 };
+
+// admin
+export const getUserMealRecord = (userId) => {
+  return axios.get(`${path}/${userId}`).catch((e) => e.response);
+};
