@@ -4,9 +4,9 @@ import {
   getUserDetail,
   putUserProfile,
   deleteUser,
+  getUserExerciseRecord,
+  getUserMealRecord,
 } from '@/services/admin/adminService';
-import { getUserExerciseRecord } from '@/services/exercise/exerciseService';
-import { getUserMealRecord } from '@/services/meal/mealService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { useAdminStore } from '@/stores/admin/adminStore';
 
@@ -43,15 +43,15 @@ onMounted(async () => {
   console.log('userInfo', state.userInfo);
   const userId = Number(state.userInfo.userId);
   const resUser = await getUserDetail(userId);
-  // const resExercise = await getUserExerciseRecord(userId);
-  // const resMeal = await getUserMealRecord(userId);
   console.log('1', resUser.data);
-  // console.log('2', resExercise.data);
-  // console.log('3', resMeal.data);
+  const resExercise = await getUserExerciseRecord(userId);
+  console.log('2', resExercise);
+  const resMeal = await getUserMealRecord(userId);
+  console.log('3', resMeal);
   state.challengeHistory = resUser.data.challengeProgress;
   state.pointHistory = resUser.data.challengePointHistory;
-  // state.exerciseHistory = resExercise.data.exerciseRecord;
-  // state.mealHistory = resMeal.data.mealRecord;
+  state.exerciseHistory = resExercise.data.exerciseRecord;
+  state.mealHistory = resMeal.data.mealRecord;
 
   picUrl.value = authenticationStore.formattedUserPic(state.userInfo);
 });

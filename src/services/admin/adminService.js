@@ -1,7 +1,7 @@
 import axios from '@/services/httpRequester';
 
 const BASE_URL = 'admin';
-
+const LIFE_URL = 'admin2';
 // 대시보드 페이지
 export const getGender = () => {
   return axios.get(`${BASE_URL}/gender`).catch((e) => e.response);
@@ -61,4 +61,13 @@ export const getQna = () => {
 
 export const putQna = (params) => {
   return axios.put(`${BASE_URL}/qna/modify`, params).catch((e) => e.response);
+};
+
+// life 서버
+export const getUserMealRecord = (userId) => {
+  return axios.get(`${LIFE_URL}/meal/${userId}`).catch((e) => e.response);
+};
+
+export const getUserExerciseRecord = (userId) => {
+  return axios.get(`${LIFE_URL}/exercise/${userId}`).catch((e) => e.response);
 };
