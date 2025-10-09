@@ -106,7 +106,7 @@ const logoutAccount = async () => {
           <span>게시글 관리</span>
         </router-link>
         <router-link
-          to="/admin/statistic"
+          to="/admin/statistics"
           class="menu-item otd-subtitle-1 d-flex"
           active-class="active"
           :class="{ active: route.path.startsWith('/admin/statistics') }"

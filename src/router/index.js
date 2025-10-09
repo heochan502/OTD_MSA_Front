@@ -16,21 +16,22 @@ import ChallengeCategoryList from '@/views/challenge/ChallengeCategoryList.vue';
 import ChallengePer from '@/views/challenge/ChallengePer.vue';
 import ChallengeDay from '@/views/challenge/ChallengeDay.vue';
 
-import Login from "@/views/user/Login.vue";
-import Join from "@/views/user/Join.vue";
-import Profile from "@/views/user/Profile.vue";
-import Signal from "@/views/user/Signal.vue";
-import QnA from "@/views/user/QnA.vue";
-import Munhe from "@/views/user/Munhe.vue";
-import ModifiProfile from "@/views/user/ModifiProfile.vue";
-import PointHistory from "@/views/user/pointHistory.vue";
-import Term from "@/views/user/Term.vue";
-import Oauth2 from "@/views/auth/OAuth2Handler.vue";
-
-import PayApproval from "@/views/pay/PayApproval.vue";
-import PayCancel from "@/views/pay/PayCancel.vue";
-import PayCompleted from "@/views/pay/PayCompleted.vue";
-import PayFail from "@/views/pay/PayFail.vue";
+//유저
+import Login from '@/views/user/Login.vue';
+import Join from '@/views/user/Join.vue';
+import Profile from '@/views/user/Profile.vue';
+import Signal from '@/views/user/Signal.vue';
+import Inquiry from '@/views/user/Inquiry.vue';
+import NickName from '@/views/user/Nickname.vue';
+import Email from '@/views/user/Email.vue';
+import Password from '@/views/user/password.vue';
+import FindId from '@/views/user/FindId.vue';
+import MyInquiries from '@/views/user/InquiryList.vue';
+import ModifyProfile from '@/views/user/ModifyProfile.vue';
+import ModifyPassword from '@/views/user/ModifyPassword.vue';
+import PointHistory from '@/views/user/pointHistory.vue';
+import Term from '@/views/user/Term.vue';
+import Oauth2 from '@/views/auth/OAuth2Handler.vue';
 
 // 포인트샵
 import PointShopListView from '@/views/point/PointShopListView.vue';
@@ -191,8 +192,8 @@ const router = createRouter({
       component: Signal,
     },
     {
-      path: "/user/email/inquiry",
-      name: "Inquiry",
+      path: '/user/email/inquiry',
+      name: 'Inquiry',
       component: Inquiry,
     },
     {
@@ -221,26 +222,30 @@ const router = createRouter({
       component: Oauth2,
     },
     {
-      path: "/pay/approval",
-      name: "pay-approval",
-      component: PayApproval,
+      path: '/user/my-inquiries',
+      name: 'myInquiries',
+      component: MyInquiries,
     },
     {
-      path: "/pay/cancel",
-      name: "pay-cancel",
-      component: PayCancel,
+      path: '/user/nickname',
+      name: 'nickName',
+      component: NickName,
     },
     {
-      path: "/pay/completed",
-      name: "pay-completed",
-      component: PayCompleted,
+      path: '/user/email',
+      name: 'email',
+      component: Email,
     },
     {
-      path: "/pay/fail",
-      name: "pay-fail",
-      component: PayFail,
+      path: '/user/modifypassword',
+      name: 'modifyPassword',
+      component: ModifyPassword,
     },
-    
+    {
+      path: '/user/password',
+      name: 'password',
+      component: Password,
+    },
     {
       path: '/pointshop',
       name: 'PointShopList',
@@ -333,7 +338,7 @@ const router = createRouter({
         },
         {
           path: 'challenge',
-          name: 'AdminChallenges',
+          name: 'AdminChallenge',
           component: () => import('@/views/admin/AdminChallenge.vue'),
         },
         {
@@ -347,8 +352,8 @@ const router = createRouter({
           component: () => import('@/views/admin/AdminQnA.vue'),
         },
         {
-          path: 'statistic',
-          name: 'AdminStatistic',
+          path: 'statistics',
+          name: 'AdminStatistics',
           component: () => import('@/views/admin/AdminStatistic.vue'),
         },
         {
@@ -356,18 +361,19 @@ const router = createRouter({
           name: 'AdminUserDetail',
           component: () => import('@/views/admin/AdminUserDetail.vue'),
         },
-        {
-          path: 'community',
-          name: 'AdminCommunity',
-          component: () => import('@/views/admin/AdminCommunity.vue'),
-        },
       ],
     },
   ],
 });
 
 // 로그인 하지 않아도 이용할 수 있는 Path들
-const unSignedPathList = ["/user/login", "/user/join", "/fe/redirect"];
+const unSignedPathList = [
+  '/user/login',
+  '/user/join',
+  '/fe/redirect',
+  '/user/password',
+  '/user/findid',
+];
 
 //navigation guard
 router.beforeEach((to, from) => {
