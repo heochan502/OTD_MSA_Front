@@ -1,5 +1,5 @@
 <script setup>
-import { computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useMealSelectedStore, useMealRecordStore } from '@/stores/meal/mealStore'
 
@@ -14,6 +14,8 @@ import dayjs from 'dayjs';
 
 import 'dayjs/locale/ko';
 
+import { getMyDay } from '@/services/meal/mealService';
+
 dayjs.locale('ko');
 
 
@@ -23,6 +25,13 @@ const exerciseRecord = useExerciseRecordStore();
 
 const emit = defineEmits(['more'])
 
+//먹을 수 있는 칼로리 및 사용한 칼로리 
+const myDayData = ref({
+  selectDay : '',
+  activityKcal: 0, // 칼로리 소모
+
+  basalMetabolicRate : 0  // 기초 대사량 
+});
 
 // 선택 한 날짜 가져오기위한거 
  const mealSelectedDay = useMealSelectedStore();
@@ -49,33 +58,21 @@ const totalFat = computed(() =>
 
 
 // 목표/소모(운동) - 필요시 스토어/프로프 연동
-
 const kcalGoal = computed(() => {
   const pts = bodyComposition.series?.points ?? [];
-  if (!pts.length) return 0;
+  if (!pts.length) return myDayData.value.basalMetabolicRate || 0;
 
-  // 'YYYY-MM-DD'는 사전식 비교가 시간순과 같음
+  // 우선 myDayData에 값이 있으면 그걸 우선 사용
+  if ((myDayData.value?.basalMetabolicRate ?? 0) > 0) {
+    return myDayData.value.basalMetabolicRate;
+  }
+
+  // 아니면 최신 측정치
   const latest = pts.reduce((a, b) => (a.date > b.date ? a : b));
   return latest?.values?.basal_metabolic_rate ?? 0;
 });
 
-// 칼로리 소모
-const burnedKcal = computed(() => {
-  const today = dayjs().format("YYYY-MM-DD");
-console.log("여기");
-  const pts = (exerciseRecord.records ?? []).filter(
-    (item) => dayjs(item.startAt).format("YYYY-MM-DD") === today
-  );
-  console.log("pts11 ", pts);
 
-  if (!pts.length) return 0;
-
-
-  const totalBurnKcal = pts.reduce((sum, item) => sum + (item.activityKcal ?? 0),0 );
-  console.log("pts ", pts);
-  console.log("토탈 번 ", totalBurnKcal);
-  return totalBurnKcal ?? 0;
-})
 
 const progressPct = computed(() => {
   const g = kcalGoal.value || 1
@@ -83,8 +80,8 @@ const progressPct = computed(() => {
 })
 
 const remainKcal = computed(() =>
-  Math.max(0, kcalGoal.value - totalKcal.value + burnedKcal.value)
-)
+  Math.max(0, (kcalGoal.value - totalKcal.value + (myDayData.value.activityKcal ?? 0)))
+);
 
 const macroPct = computed(() => {
   const sum = totalCarb.value + totalProtein.value + totalFat.value
@@ -98,8 +95,10 @@ const macroPct = computed(() => {
 
 watch(
   () => mealSelectedDay.selectedDay.setDay,   // ← 감시 대상 getter
-  (newDay, oldDay) => {
-    console.log('선택날', newDay, mealSelectedDay.selectedDay.setDay);
+  async (newDay, oldDay) => {
+    
+    myDayData.value = await getMyDay(mealSelectedDay.selectedDay.setDay);
+    console.log('선택', myDayData.value);
   } 
 );
 
@@ -131,7 +130,7 @@ watch(
     </div>
 
     <div class="meta">
-      <div class="otd-body-1"><span class="otd-subtitle-1">{{ burnedKcal.toFixed(0) }}kcal</span> 소모</div>
+      <div class="otd-body-1"><span class="otd-subtitle-1">{{ myDayData.activityKcal }}kcal</span> 소모</div>
       <div class="otd-body-1"><span class="otd-subtitle-1">{{ remainKcal.toFixed(0) }}</span>kcal 더 먹을 수 있어요</div>
     </div>
 
