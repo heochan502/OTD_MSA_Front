@@ -284,8 +284,8 @@ const validatePassword = (password) => {
   if (!password) {
     return { isValid: false, message: '비밀번호를 입력해주세요.' };
   }
-  if (password.length < 8) {
-    return { isValid: false, message: '비밀번호는 8자 이상이어야 합니다.' };
+  if (password.length < 10) {
+    return { isValid: false, message: '비밀번호는 10자 이상이어야 합니다.' };
   }
   if (password.length > 20) {
     return { isValid: false, message: '비밀번호는 최대 20자까지 입력 가능합니다.' };
@@ -964,7 +964,7 @@ const loadTermsContent = (type) => {
               <input
                 :type="showPassword ? 'text' : 'password'"
                 id="upw"
-                placeholder="비밀번호를 입력해주세요(8자 이상)"
+                placeholder="비밀번호를 입력해주세요(10자 이상)"
                 v-model="accountInfo.upw"
                 :class="{
                   'input-field-with-icon': true,
