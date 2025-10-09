@@ -26,6 +26,10 @@ export const getAgeCount = () => {
   return axios.get(`${BASE_URL}/agegroup`).catch((e) => e.response);
 };
 
+export const getQnA = () => {
+  return axios.get(`${BASE_URL}/qna`).catch((e) => e.response);
+};
+
 export const postChallenge = (params) => {
   return axios
     .post(`${BASE_URL}/challenge/add`, params)
@@ -34,7 +38,7 @@ export const postChallenge = (params) => {
 
 export const putChallenge = (params) => {
   return axios
-    .post(`${BASE_URL}/challenge/modify`, params)
+    .put(`${BASE_URL}/challenge/modify`, params)
     .catch((e) => e.response);
 };
 
