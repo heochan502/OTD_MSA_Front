@@ -43,3 +43,8 @@ export const deleteExerciseRecord = (exerciseRecordId) => {
 export const getExercise = () => {
   return axios.get("/exercise").catch((e) => e.response);
 };
+
+// admin
+export const getUserExerciseRecord = (userId) => {
+  return axios.get(`${BASE_URL}/${userId}`).catch((e) => e.response);
+};

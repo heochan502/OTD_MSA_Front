@@ -12,6 +12,8 @@ const search = ref('');
 
 onMounted(async () => {
   const res = await getUser();
+  console.log('res:', res);
+  console.log(typeof res.data);
   users.value = res.data.map((user) => ({
     ...user,
     userRoles: user.userRoles[0]?.userRoleIds.roleCode ?? '없음',
@@ -137,7 +139,8 @@ const toUserDetial = (user) => {
 
         <!-- 생년월일 -->
         <template #item.birthDate="{ item }">
-          {{ formatBirthDate(item.birthDate) }}
+          <!-- {{ formatBirthDate(item.birthDate) }} -->
+          {{ item.birthDate }}
         </template>
       </v-data-table>
     </v-card>
