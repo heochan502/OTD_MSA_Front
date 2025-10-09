@@ -1,6 +1,6 @@
 <script setup>
 import { getUser } from '@/services/admin/adminService';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAdminStore } from '@/stores/admin/adminStore';
 
@@ -60,6 +60,10 @@ const toUserDetial = (user) => {
   console.log(adminStore.state.selectedUser);
   router.push({ path: '/admin/user/detail' });
 };
+
+const reversedUser = computed(() => {
+  return [...users.value].reverse();
+});
 </script>
 
 <template>
@@ -81,7 +85,7 @@ const toUserDetial = (user) => {
 
       <v-data-table
         :headers="headers"
-        :items="users"
+        :items="reversedUser"
         :search="search"
         :items-per-page="10"
         fixed-header

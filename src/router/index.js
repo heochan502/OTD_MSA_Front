@@ -347,6 +347,11 @@ const router = createRouter({
           component: () => import('@/views/admin/AdminPoint.vue'),
         },
         {
+          path: 'community',
+          name: 'AdminCommunity',
+          component: () => import('@/views/admin/AdminCommunity.vue'),
+        },
+        {
           path: 'qna',
           name: 'AdminQnA',
           component: () => import('@/views/admin/AdminQnA.vue'),
