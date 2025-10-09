@@ -19,7 +19,7 @@ const router = useRouter();
 // 전달된 음식 목록
 // const foods = selectedFoods.selectedFoods.value ;
 // ✅ 합계들
-const foods = computed(() => selectedFoods.value ?? []) // null 방어
+const foods = computed(() => selectedFoods.value ?? []); // null 방어
 // const foods =
 //   Array.isArray(selectedFoods?.selectedFoods?.value)
 //     ? selectedFoods.selectedFoods.value
