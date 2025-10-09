@@ -59,3 +59,8 @@ export const getSummaryMonth = async (month) => {
   // console.log("식단 월간 요약 데이터", res.data);
   return res.data;
 };
+
+// admin
+export const getUserMealRecord = (userId) => {
+  return axios.get(`${path}/${userId}`).catch((e) => e.response);
+};

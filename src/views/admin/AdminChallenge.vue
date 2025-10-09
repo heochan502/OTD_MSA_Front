@@ -153,10 +153,10 @@ const submit = async () => {
   console.log('json', editChallenge.value);
   let res = null;
   if (editChallenge.value.cdId) {
-    res = await postChallenge(editChallenge.value);
+    res = await putChallenge(editChallenge.value);
     console.log('수정');
   } else {
-    res = await putChallenge(editChallenge.value);
+    res = await postChallenge(editChallenge.value);
   }
   if (res && res.status === 200) {
     // 성공하면 저장 완료 모달 열기
@@ -178,9 +178,14 @@ const remove = async () => {
   const res = await deleteChallenge(id);
   if (res && res.status === 200) {
     successDialog.value = true;
+    formDialog.value = false;
+    const refresh = await getChallenge();
+    setIdType(refresh.data);
+    setChallengeUnit(refresh.data);
   } else {
     alert('삭제에 실패했습니다. 다시 시도해주세요.');
   }
+  deleteDialog.value = false;
 };
 </script>
 

@@ -2,6 +2,7 @@
 import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthenticationStore } from '@/stores/user/authentication';
+import { sendInquiry } from '@/services/user/inquiryService';
 import AlertModal from '@/components/user/Modal.vue';
 
 const router = useRouter();
@@ -60,7 +61,7 @@ const validateInput = () => {
   return true;
 };
 
-// 직접 이메일 전송 함수
+// 이메일 전송 함수 (개선됨)
 const sendEmailInquiry = async () => {
   if (!validateInput()) return;
 
@@ -86,37 +87,7 @@ const sendEmailInquiry = async () => {
       timestamp: new Date().toISOString()
     };
 
-    const response = await fetch('http://localhost:8080/api/OTD/email/sendMunhe', { 
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include',
-      body: JSON.stringify(emailData)
-    });
-
-    if (!response.ok) {
-      const text = await response.text();
-      console.error('서버 응답:', text);
-      
-      if (response.status === 401) {
-        showModal(
-          '세션 만료',
-          '로그인 세션이 만료되었습니다.\n다시 로그인해주세요.',
-          'warning',
-          async () => {
-            await authStore.logout();
-            router.push('/login');
-          }
-        );
-        return;
-      }
-      
-      showModal('전송 실패', '문의 전송 중 오류가 발생했습니다.', 'error');
-      return;
-    }
-
-    const result = await response.json();
+    const result = await sendInquiry(emailData);
 
     if (result.result?.success) {
       showModal(
@@ -133,6 +104,21 @@ const sendEmailInquiry = async () => {
     }
   } catch (error) {
     console.error('이메일 전송 오류:', error);
+    
+    // 인증 오류 처리
+    if (error.message.includes('401')) {
+      showModal(
+        '세션 만료',
+        '로그인 세션이 만료되었습니다.\n다시 로그인해주세요.',
+        'warning',
+        async () => {
+          await authStore.logout();
+          router.push('/login');
+        }
+      );
+      return;
+    }
+    
     showModal(
       '전송 오류',
       '문의 전송 중 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.',

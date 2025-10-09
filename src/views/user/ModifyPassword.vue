@@ -185,7 +185,7 @@ const resetPassword = async () => {
 // 모달 확인 버튼 클릭 시 페이지 이동
 const handleModalConfirm = () => {
   showSuccessModal.value = false;
-  router.push('/user/ModifiProfile');
+  router.push('/user/ModifyProfile');
 };
 
 // 타이머 관리

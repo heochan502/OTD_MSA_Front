@@ -261,7 +261,7 @@ onMounted(() => {
   <div class="profile-container">
     <!-- 프로필 섹션 -->
     <div class="profile-section">
-      <router-link to="/user/ModifiProfile" class="profile-header">
+      <router-link to="/user/ModifyProfile" class="profile-header">
         <div class="profile-image otd-shadow" @click="openPhotoModal">
           <img :src="profileImage" :alt="userInfo.nickName" />
           <div class="photo-overlay">
@@ -358,14 +358,14 @@ onMounted(() => {
     <div class="support-section">
       <h3 class="section-title">고객센터</h3>
       <div class="support-list">
-        <router-link to="/user/email/munhe" class="support-item">
+        <router-link to="/user/email/inquiry" class="support-item">
           <div class="support-icon">💬</div>
           <span>1:1 문의하기</span>
           <div class="arrow">›</div>
         </router-link>
-        <router-link to="/user/qna" class="support-item">
-          <div class="support-icon">❓</div>
-          <span>자주 묻는 질문</span>
+        <router-link to="/user/my-inquiries" class="support-item">
+          <div class="support-icon">💬</div>
+          <span>문의내역</span>
           <div class="arrow">›</div>
         </router-link>
       </div>
