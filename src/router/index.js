@@ -26,6 +26,7 @@ import Inquiry from "@/views/user/Inquiry.vue";
 import NickName from '@/views/user/Nickname.vue';
 import Email from '@/views/user/Email.vue';
 import Password from '@/views/user/password.vue';
+import FindId from '@/views/user/FindId.vue';
 import ModifiProfile from "@/views/user/ModifiProfile.vue";
 import PointHistory from "@/views/user/pointHistory.vue";
 import Term from "@/views/user/Term.vue";
@@ -215,11 +216,16 @@ const router = createRouter({
       component: Term,
     },
     {
+      path: '/user/findid',
+      name: 'findId',
+      component: FindId,
+    },
+    {
       path: '/fe/redirect',
       name: 'oauth2',
       component: Oauth2,
     },    
-     {
+    {
       path: '/user/nickname',
       name: 'nickName',
       component: NickName,
@@ -355,7 +361,7 @@ const router = createRouter({
 });
 
 // 로그인 하지 않아도 이용할 수 있는 Path들
-const unSignedPathList = ["/user/login", "/user/join", "/fe/redirect"];
+const unSignedPathList = ["/user/login", "/user/join", "/fe/redirect","/user/password","/user/findid"];
 
 //navigation guard
 router.beforeEach((to, from) => {
