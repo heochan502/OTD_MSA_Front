@@ -1,6 +1,10 @@
 <script setup>
 import { onMounted, reactive, ref, computed } from 'vue';
-import { getUserDetail, putUserProfile } from '@/services/admin/adminService';
+import {
+  getUserDetail,
+  putUserProfile,
+  deleteUser,
+} from '@/services/admin/adminService';
 import { getUserExerciseRecord } from '@/services/exercise/exerciseService';
 import { getUserMealRecord } from '@/services/meal/mealService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
@@ -9,11 +13,13 @@ import { useAdminStore } from '@/stores/admin/adminStore';
 const authenticationStore = useAuthenticationStore();
 const adminStore = useAdminStore();
 
-const search = ref('');
+const searchPoint = ref('');
+const searchChallenge = ref('');
 const picUrl = ref();
 const deletePicDialog = ref(false);
 const putProfileDialog = ref(false);
 const successDialog = ref(false);
+const deleteUserDialog = ref(false);
 
 const state = reactive({
   userInfo: {},
@@ -37,15 +43,15 @@ onMounted(async () => {
   console.log('userInfo', state.userInfo);
   const userId = Number(state.userInfo.userId);
   const resUser = await getUserDetail(userId);
-  const resExercise = await getUserExerciseRecord(userId);
-  const resMeal = await getUserMealRecord(userId);
+  // const resExercise = await getUserExerciseRecord(userId);
+  // const resMeal = await getUserMealRecord(userId);
   console.log('1', resUser.data);
-  console.log('2', resExercise.data);
-  console.log('3', resMeal.data);
+  // console.log('2', resExercise.data);
+  // console.log('3', resMeal.data);
   state.challengeHistory = resUser.data.challengeProgress;
   state.pointHistory = resUser.data.challengePointHistory;
-  state.exerciseHistory = resExercise.data.exerciseRecord;
-  state.mealHistory = resMeal.data.mealRecord;
+  // state.exerciseHistory = resExercise.data.exerciseRecord;
+  // state.mealHistory = resMeal.data.mealRecord;
 
   picUrl.value = authenticationStore.formattedUserPic(state.userInfo);
 });
@@ -74,6 +80,31 @@ const formatDate = (date) => {
   return `${y}-${m}-${d}`;
 };
 
+const tableSet = computed(() => {
+  console.log('test', state.challengeHistory);
+  const rows = state.challengeHistory.map((item, i) => {
+    const name = String(item.challengeDefinition?.cdName ?? '').trim();
+    const point = Number(item.challengeDefinition?.cdReward ?? 0);
+    const startDate = String(item.startDate ?? '').trim();
+    const endDate = String(item.endDate ?? '').trim();
+    const success = item.success === true ? '성공' : '실패';
+
+    return {
+      cpId: item.cpId ?? i, // id 없을 경우 index로 보정
+      name: name.normalize('NFC'),
+      point,
+      startDate,
+      endDate,
+      success,
+    };
+  });
+
+  // 최신순 (endDate DESC)
+  rows.sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
+  console.log('row', rows);
+  return rows;
+});
+
 const submit = async () => {
   const jsonBody = state.userInfo;
   console.log('json', jsonBody);
@@ -89,7 +120,16 @@ const submit = async () => {
   }
 };
 
-// const postPoint = () => {};
+const deleteUserProfile = async () => {
+  const res = await deleteUser(state.userInfo.userId);
+  if (res && res.status === 200) {
+    // 성공하면 저장 완료 모달 열기
+    deleteUserDialog.value = false;
+    successDialog.value = true;
+  } else {
+    alert('차단에 실패했습니다. 다시 시도해주세요.');
+  }
+};
 
 const deletePic = () => {
   deletePicDialog.value = false;
@@ -108,6 +148,20 @@ const deletePic = () => {
           <v-spacer />
           <v-btn color="dark" text @click="deletePic()">네</v-btn>
           <v-btn color="dark" text @click="deletePicDialog = false"
+            >아니오</v-btn
+          >
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- 사용자 차단 모달 -->
+    <v-dialog v-model="deleteUserDialog" max-width="380" min-height="100">
+      <v-card>
+        <v-card-text> 해당 사용자를 차단하시겠습니까? </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn color="dark" text @click="deleteUserProfile()">네</v-btn>
+          <v-btn color="dark" text @click="deleteUserDialog = false"
             >아니오</v-btn
           >
         </v-card-actions>
@@ -140,24 +194,9 @@ const deletePic = () => {
       </v-card>
     </v-dialog>
 
-    <!-- 포인트 지급 모달 -->
-    <!-- <v-dialog v-model="deletePicDialog" max-width="380" min-height="100">
-      <v-card>
-        <v-card-text> 포인트 지급 </v-card-text>
-        <v-card-subtitle>포인트</v-card-subtitle>
-        <v-text-field v-model="state.userInfo.name"></v-text-field>
-        <v-card-subtitle>포인트</v-card-subtitle>
-        <v-text-field v-model="state.userInfo.name"></v-text-field>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn color="dark" text @click="cancelDialog = true">취소</v-btn>
-          <v-btn color="dark" text @click="deletePicDialog = false">저장</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog> -->
-
     <v-card>
       <span class="title">회원 정보</span>
+      <v-btn @click="deleteUserDialog = true">회원 차단</v-btn>
       <v-divider></v-divider>
       <v-img :src="picUrl" alt="profile-img" class="profile-img"></v-img>
       <v-btn v-if="state.userInfo.pic" @click="deletePicDialog = true"
@@ -178,16 +217,14 @@ const deletePic = () => {
       <v-select
         :items="['브론즈', '실버', '골드', '다이아']"
         v-model="state.userInfo.challengeRole"
-        >{{ state.userInfo.challengeRole }}</v-select
-      >
+      ></v-select>
 
       <v-card-subtitle>권한</v-card-subtitle>
       <v-select
         v-if="state.userInfo.userRoles != null"
-        :items="['USER', 'SOCAIL', 'MANAGER', 'ADMIN']"
+        :items="['USER', 'SOCIAL', 'MANAGER', 'ADMIN']"
         v-model="state.userInfo.userRoles"
-        >{{ state.userInfo.userRoles }}</v-select
-      >
+      ></v-select>
 
       <v-card-subtitle>생년월일</v-card-subtitle>
       <v-card-text>
@@ -230,7 +267,7 @@ const deletePic = () => {
       <v-card-title class="d-flex justify-space-between align-center">
         <span class="title">포인트 지급 내역</span>
         <v-text-field
-          v-model="search"
+          v-model="searchPoint"
           label="검색"
           prepend-inner-icon="mdi-magnify"
           density="compact"
@@ -244,9 +281,12 @@ const deletePic = () => {
         :headers="pointHeaders"
         :items="state.pointHistory"
         :items-per-page="10"
+        :search="searchPoint"
         fixed-header
         class="styled-table"
       >
+        <!-- 포인트 -->
+        <template #item.point="{ item }"> {{ item.point }}P </template>
         <!-- 지급일 -->
         <template #item.createdAt="{ item }">
           {{ formatDate(new Date(item.createdAt)) }}
@@ -259,7 +299,7 @@ const deletePic = () => {
       <v-card-title class="d-flex justify-space-between align-center">
         <span class="title">챌린지 도전 내역</span>
         <v-text-field
-          v-model="search"
+          v-model="searchChallenge"
           label="검색"
           prepend-inner-icon="mdi-magnify"
           density="compact"
@@ -271,24 +311,14 @@ const deletePic = () => {
       </v-card-title>
       <v-data-table
         :headers="challengeHeaders"
-        :items="state.challengeHistory"
+        :items="tableSet"
         :items-per-page="10"
+        :search="searchChallenge"
         fixed-header
         class="styled-table"
       >
-        <!-- 챌린지 이름 -->
-        <template #item.name="{ item }">
-          {{ item.challengeDefinition?.cdName }}
-        </template>
-
         <!-- 포인트 -->
-        <template #item.point="{ item }">
-          {{ item.challengeDefinition?.cdReward }}P
-        </template>
-        <!-- 성공여부 -->
-        <template #item.success="{ item }">
-          {{ item.success === true ? '성공' : '실패' }}
-        </template>
+        <template #item.point="{ item }"> {{ item.point }}P </template>
       </v-data-table>
     </v-card>
   </div>

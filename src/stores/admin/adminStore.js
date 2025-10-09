@@ -5,8 +5,8 @@ export const useAdminStore = defineStore(
   'admin',
   () => {
     const state = reactive({
-      selectedUser: {
-      },
+      selectedUser: {},
+      selectedQna: {},
     });
 
     const setSelectedUser = (data) => (state.selectedUser = data);
