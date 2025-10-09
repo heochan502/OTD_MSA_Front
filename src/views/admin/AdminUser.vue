@@ -83,7 +83,7 @@ const reversedUser = computed(() => {
         />
       </v-card-title>
 
-      <v-data-table
+      <v-data-table 
         :headers="headers"
         :items="reversedUser"
         :search="search"

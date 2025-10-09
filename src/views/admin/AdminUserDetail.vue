@@ -15,6 +15,9 @@ const adminStore = useAdminStore();
 
 const searchPoint = ref('');
 const searchChallenge = ref('');
+const searchExercise = ref('');
+const searchMeal = ref('');
+
 const picUrl = ref();
 const deletePicDialog = ref(false);
 const putProfileDialog = ref(false);
@@ -71,6 +74,10 @@ const challengeHeaders = [
   { title: '종료일', key: 'endDate' },
   { title: '성공여부', key: 'success' },
 ];
+
+const exerciseHeaders = [];
+
+const mealHeaders = [];
 
 const formatNumber = (n) => String(n).padStart(2, '0');
 const formatDate = (date) => {
@@ -321,6 +328,58 @@ const deletePic = () => {
         <template #item.point="{ item }"> {{ item.point }}P </template>
       </v-data-table>
     </v-card>
+
+    <!-- 운동기록 -->
+    <!-- <v-card>
+      <v-card-title class="d-flex justify-space-between align-center">
+        <span class="title">운동 기록</span>
+        <v-text-field
+          v-model="searchExercise"
+          label="검색"
+          prepend-inner-icon="mdi-magnify"
+          density="compact"
+          hide-details
+          single-line
+          variant="outlined"
+          style="max-width: 250px"
+        />
+      </v-card-title>
+      <v-data-table
+        :headers="exerciseHeaders"
+        :items="exerciseHistory"
+        :items-per-page="10"
+        :search="searchExercise"
+        fixed-header
+        class="styled-table"
+      >
+      </v-data-table>
+    </v-card> -->
+
+    <!-- 식단기록 -->
+    <!-- <v-card>
+      <v-card-title class="d-flex justify-space-between align-center">
+        <span class="title">식단 기록</span>
+        <v-text-field
+          v-model="searchMeal"
+          label="검색"
+          prepend-inner-icon="mdi-magnify"
+          density="compact"
+          hide-details
+          single-line
+          variant="outlined"
+          style="max-width: 250px"
+        />
+      </v-card-title>
+      <v-data-table
+        :headers="mealHeaders"
+        :items="mealHistory"
+        :items-per-page="10"
+        :search="searchMeal"
+        fixed-header
+        class="styled-table"
+      >
+      </v-data-table>
+    </v-card> -->
   </div>
 </template>
 
