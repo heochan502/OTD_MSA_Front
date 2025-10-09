@@ -21,13 +21,14 @@ import Login from "@/views/user/Login.vue";
 import Join from "@/views/user/Join.vue";
 import Profile from "@/views/user/Profile.vue";
 import Signal from "@/views/user/Signal.vue";
-import QnA from "@/views/user/QnA.vue";
 import Inquiry from "@/views/user/Inquiry.vue";
 import NickName from '@/views/user/Nickname.vue';
 import Email from '@/views/user/Email.vue';
 import Password from '@/views/user/password.vue';
 import FindId from '@/views/user/FindId.vue';
-import ModifiProfile from "@/views/user/ModifiProfile.vue";
+import MyInquiries from '@/views/user/InquiryList.vue';
+import ModifyProfile from "@/views/user/ModifyProfile.vue";
+import ModifyPassword from "@/views/user/ModifyPassword.vue";
 import PointHistory from "@/views/user/pointHistory.vue";
 import Term from "@/views/user/Term.vue";
 import Oauth2 from "@/views/auth/OAuth2Handler.vue";
@@ -191,19 +192,14 @@ const router = createRouter({
       component: Signal,
     },
     {
-      path: '/user/qna',
-      name: 'QnA',
-      component: QnA,
-    },
-    {
       path: "/user/email/inquiry",
       name: "Inquiry",
       component: Inquiry,
     },
     {
-      path: '/user/modifiProfile',
-      name: 'modifiProfile',
-      component: ModifiProfile,
+      path: '/user/modifyProfile',
+      name: 'modifyProfile',
+      component: ModifyProfile,
     },
     {
       path: '/user/pointhistory',
@@ -226,6 +222,11 @@ const router = createRouter({
       component: Oauth2,
     },    
     {
+      path: '/user/my-inquiries',
+      name: 'myInquiries',
+      component: MyInquiries,
+    },
+    {
       path: '/user/nickname',
       name: 'nickName',
       component: NickName,
@@ -234,6 +235,11 @@ const router = createRouter({
       path: '/user/email',
       name: 'email',
       component: Email,
+    },
+    {
+      path: '/user/modifypassword',
+      name: 'modifyPassword',
+      component: ModifyPassword,
     },
     {
       path: '/user/password',
