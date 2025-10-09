@@ -103,7 +103,7 @@ const remove = async () => {
       </div>
       
       <div class="settings-list">
-        <router-link to="/user/password" class="settings-item">
+        <router-link to="/user/modifypassword" class="settings-item">
           <div class="settings-icon">🔒</div>
           <span>비밀번호 재설정</span>
           <div class="arrow">›</div>
