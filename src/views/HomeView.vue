@@ -22,6 +22,10 @@ import "dayjs/locale/ko";
 const selectedDay = useMealSelectedStore();
 
 import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
+import {
+  getSeries,
+  getLastestBodyComposition,
+} from "@/services/body_composition/bodyCompositionService";
 
 const state = reactive({
   monthlySettlementLog: [],
@@ -86,7 +90,7 @@ const weeklySettlementDialog = ref(false);
 const challengeStore = useChallengeStore();
 const bodyCompositionStore = useBodyCompositionStore();
 
-const selectedField = ref("");
+const selectedField = ref(bodyCompositionStore.selectionMetrics[0].metricCode);
 
 onMounted(async () => {
   console.log("여기");
@@ -105,10 +109,10 @@ onMounted(async () => {
 
   console.log("homechallenge", challengeInfo.value);
   selectedDay.selectedDay.setDay = dayjs().format("YYYY-MM-DD");
+
   await bodyCompositionStore.fetchBodyCompositionMetrics();
-  await bodyCompositionStore.fetchLastestBodyComposition();
-  await bodyCompositionStore.fetchSeriesBodyComposition();
-  selectedField.value = bodyCompositionStore.filteredMetrics[0].metricCode;
+  fetchBodyCompositionSeries();
+  fetchLastestBodyComposition();
 });
 
 const challengeHome = () => {
@@ -180,6 +184,25 @@ const setModal = () => {
   if (state.weeklySettlementLog.length > 0) {
     weeklySettlementDialog.value = true;
   }
+};
+
+// 체성분 데이터 받기
+const fetchBodyCompositionSeries = async () => {
+  const res = await getSeries();
+  if (res === undefined || res.status !== 200) {
+    alert(`에러발생? ${res.status}`);
+    return;
+  }
+  bodyCompositionStore.series = res.data;
+};
+
+const fetchLastestBodyComposition = async () => {
+  const res = await getLastestBodyComposition();
+  if (res === undefined || res.status !== 200) {
+    alert(`에러발생? ${res.status}`);
+    return;
+  }
+  bodyCompositionStore.lastest = res.data;
 };
 </script>
 
@@ -275,36 +298,10 @@ const setModal = () => {
           </div>
         </div>
         <!-- 선형 그래프 선택 부분 -->
-        <!-- <v-item-group v-model="selectedField">
-          <div class="otd-top-margin item-group">
-            <div v-for="(field, idx) in fields" :key="idx" class="card-wrapper">
-              <v-item v-slot="{ selectedClass, toggle }" :value="field.key">
-                <v-card
-                  :class="[
-                    ` health-button d-flex flex-column justify-center align-center text-center`,
-                    { 'health-button-active': selectedClass },
-                    ,
-                  ]"
-                  @click="toggle"
-                  v-ripple="false"
-                >
-                  <div>
-                    <span class="otd-body-3">
-                      {{ field.label }}({{ field.unit }})
-                    </span>
-                  </div>
-                  <div class="otd-subtitle-1 text-center">
-                    {{ todayData?.[field.key] }}
-                  </div>
-                </v-card>
-              </v-item>
-            </div>
-          </div>
-        </v-item-group> -->
         <v-item-group v-model="selectedField">
           <div class="otd-top-margin item-group">
             <div
-              v-for="field in bodyCompositionStore.filteredMetrics"
+              v-for="field in bodyCompositionStore.selectionMetrics"
               :key="field.metricId"
               class="card-wrapper"
             >
