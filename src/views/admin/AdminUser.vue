@@ -103,7 +103,7 @@ const reversedUser = computed(() => {
           <template v-if="item.userRoles != null">
             <v-chip
               :color="
-                item.userRoles === 'USER' || item.userRoles === 'SOCIAL'
+                item.userRoles === 'USER_1' || item.userRoles === 'USER_2'
                   ? '#00D5DF'
                   : item.userRoles === 'ADMIN'
                   ? '#303030'

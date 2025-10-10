@@ -6,9 +6,11 @@ import {
   deleteUser,
   getUserExerciseRecord,
   getUserMealRecord,
+  getUser,
 } from '@/services/admin/adminService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { useAdminStore } from '@/stores/admin/adminStore';
+import router from '@/router';
 
 const authenticationStore = useAuthenticationStore();
 const adminStore = useAdminStore();
@@ -45,9 +47,9 @@ onMounted(async () => {
   const resUser = await getUserDetail(userId);
   console.log('1', resUser.data);
   const resExercise = await getUserExerciseRecord(userId);
-  console.log('2', resExercise);
+  console.log('2', resExercise.data);
   const resMeal = await getUserMealRecord(userId);
-  console.log('3', resMeal);
+  console.log('3', resMeal.data);
   state.challengeHistory = resUser.data.challengeProgress;
   state.pointHistory = resUser.data.challengePointHistory;
   state.exerciseHistory = resExercise.data.exerciseRecord;
@@ -126,6 +128,7 @@ const deleteUserProfile = async () => {
     // 성공하면 저장 완료 모달 열기
     deleteUserDialog.value = false;
     successDialog.value = true;
+    router.push('/admin/user');
   } else {
     alert('차단에 실패했습니다. 다시 시도해주세요.');
   }
@@ -222,7 +225,7 @@ const deletePic = () => {
       <v-card-subtitle>권한</v-card-subtitle>
       <v-select
         v-if="state.userInfo.userRoles != null"
-        :items="['USER', 'SOCIAL', 'MANAGER', 'ADMIN']"
+        :items="['USER_1', 'USER_2', 'MANAGER', 'ADMIN']"
         v-model="state.userInfo.userRoles"
       ></v-select>
 

@@ -71,3 +71,7 @@ export const getUserMealRecord = (userId) => {
 export const getUserExerciseRecord = (userId) => {
   return axios.get(`${LIFE_URL}/exercise/${userId}`).catch((e) => e.response);
 };
+
+export const getCommunity = () => {
+  return axios.get(`${LIFE_URL}/community`).catch((e) => e.response);
+};
