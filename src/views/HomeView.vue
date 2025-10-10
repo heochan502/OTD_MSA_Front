@@ -98,7 +98,8 @@ onMounted(async () => {
   await fetchWeeklySettlement(todayDate);
   console.log("state", state.monthlySettlementLog, state.weeklySettlementLog);
   const challenge = await getMyChallenge();
-  challengeInfo.value = challenge.data;
+  console.log("챌린지 : ", challenge);
+  challengeInfo.value = challenge?.data || null ;
   console.log("homechallenge", challengeInfo.value);
 
   if (state.monthlySettlementLog.length > 0) {
@@ -134,7 +135,8 @@ const fetchMonthlySettlement = async (date) => {
       settlementDate: formatDate(new Date(year, month - 1, 1)),
     };
     const res = await getChallengeSettlementLog(params);
-    state.monthlySettlementLog = res.data;
+    console.log("res :",  res);
+    state.monthlySettlementLog = res?.data || null;
     challengeStore.state.lastMonthCheck = monthlyKey;
   }
 };
@@ -155,6 +157,7 @@ const fetchWeeklySettlement = async (date) => {
       settlementDate: formatDate(getMonday(date)),
     };
     const res = await getChallengeSettlementLog(params);
+    // console.log("res :",  res?.data || null);
     state.weeklySettlementLog = res.data;
     challengeStore.state.lastWeekCheck = weeklyKey;
   }
@@ -257,7 +260,7 @@ const fetchLastestBodyComposition = async () => {
           class="challenge-progress-card otd-top-margin"
           @click="challengeHome"
         >
-          <div class=" " v-if="challengeInfo.length > 0">
+          <div class=" " v-if="challengeInfo?.length || 0 > 0">
             <div
               v-for="value in challengeInfo"
               class="d-flex justify-content-around align-items-center challenge-progress-container"
