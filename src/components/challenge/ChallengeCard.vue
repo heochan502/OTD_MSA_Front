@@ -16,7 +16,7 @@ const FILE_URL = import.meta.env.VITE_BASE_URL;
 <template>
   <div class="challenge-card otd-box-shadow">
     <img
-      :src="`${FILE_URL}${props.image}`"
+      :src="`${FILE_URL}/${props.image}`"
       :alt="`${props.name}`"
       class="challenge-img"
     />
