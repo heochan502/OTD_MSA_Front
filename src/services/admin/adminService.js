@@ -2,6 +2,19 @@ import axios from '@/services/httpRequester';
 
 const BASE_URL = 'admin';
 
+// 대쉬보드
+export const getUserCount = () => {
+  return axios.get(`${BASE_URL}/dash/user`).catch((e) => e.response);
+};
+
+export const getPointCount = () => {
+  return axios.get(`${BASE_URL}/dash/point`).catch((e) => e.response);
+};
+
+export const getRecentJoin = () => {
+  return axios.get(`${BASE_URL}/dash/join`).catch((e) => e.response);
+};
+
 // 사용자 관리 페이지
 export const getUser = () => {
   return axios.get(`${BASE_URL}/user`).catch((e) => e.response);
