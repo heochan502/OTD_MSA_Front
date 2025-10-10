@@ -8,6 +8,7 @@ import Home from '@/views/HomeView.vue';
 import Community from '@/views/community/CommunityView.vue';
 import CategoryFeedView from '@/views/community/categories/CategoryFeedView.vue';
 import PostDetailView from '@/views/community/PostDetailView.vue';
+import WritePostView from '@/views/community/WritePostView.vue';
 
 // 챌린지
 import ChallengeHome from '@/views/challenge/ChallengeHome.vue';
@@ -16,16 +17,22 @@ import ChallengeCategoryList from '@/views/challenge/ChallengeCategoryList.vue';
 import ChallengePer from '@/views/challenge/ChallengePer.vue';
 import ChallengeDay from '@/views/challenge/ChallengeDay.vue';
 
-import Login from "@/views/user/Login.vue";
-import Join from "@/views/user/Join.vue";
-import Profile from "@/views/user/Profile.vue";
-import Signal from "@/views/user/Signal.vue";
-import QnA from "@/views/user/QnA.vue";
-import Munhe from "@/views/user/Munhe.vue";
-import ModifiProfile from "@/views/user/ModifiProfile.vue";
-import PointHistory from "@/views/user/pointHistory.vue";
-import Term from "@/views/user/Term.vue";
-import Oauth2 from "@/views/auth/OAuth2Handler.vue";
+//유저
+import Login from '@/views/user/Login.vue';
+import Join from '@/views/user/Join.vue';
+import Profile from '@/views/user/Profile.vue';
+import Signal from '@/views/user/Signal.vue';
+import Inquiry from '@/views/user/Inquiry.vue';
+import NickName from '@/views/user/Nickname.vue';
+import Email from '@/views/user/Email.vue';
+import Password from '@/views/user/password.vue';
+import FindId from '@/views/user/FindId.vue';
+import MyInquiries from '@/views/user/InquiryList.vue';
+import ModifyProfile from '@/views/user/ModifyProfile.vue';
+import ModifyPassword from '@/views/user/ModifyPassword.vue';
+import PointHistory from '@/views/user/pointHistory.vue';
+import Term from '@/views/user/Term.vue';
+import Oauth2 from '@/views/auth/OAuth2Handler.vue';
 
 // 포인트샵
 import PointShopListView from '@/views/pointshop/PointShopListView.vue';
@@ -49,6 +56,9 @@ import ExerciseRecordDetail from '@/views/exercise/ExerciseRecordDetail.vue';
 // 체성분
 import BodyCompositionStatics from '@/views/body_composition/BodyCompositionStatics.vue';
 
+// 알람
+import Notifications from '@/views/notification/NotificationsView.vue';
+
 // 카테고리 라벨 맵
 const CATEGORY_LABEL = {
   free: '자유수다',
@@ -71,6 +81,19 @@ const router = createRouter({
       name: 'Community',
       component: Community,
       meta: { headerType: 'title', title: '커뮤니티', showUserPanel: false },
+    },
+    {
+      path: '/community/write',
+      name: 'CommunityWrite',
+      component: WritePostView,
+      meta: { headerType: 'title', title: '게시글 작성', showUserPanel: false },
+    },
+    {
+      path: '/community/post/:id(\\d+)/edit',
+      name: 'CommunityEdit',
+      component: WritePostView,
+      props: (route) => ({ id: Number(route.params.id), mode: 'edit' }),
+      meta: { headerType: 'title', title: '게시글 수정', showUserPanel: false },
     },
     {
       path: '/community/:category(free|diet|work|love)',
@@ -187,19 +210,14 @@ const router = createRouter({
       component: Signal,
     },
     {
-      path: '/user/qna',
-      name: 'QnA',
-      component: QnA,
+      path: '/user/email/inquiry',
+      name: 'Inquiry',
+      component: Inquiry,
     },
     {
-      path: '/user/email/munhe',
-      name: 'munhe',
-      component: Munhe,
-    },
-    {
-      path: '/user/modifiProfile',
-      name: 'modifiProfile',
-      component: ModifiProfile,
+      path: '/user/modifyProfile',
+      name: 'modifyProfile',
+      component: ModifyProfile,
     },
     {
       path: '/user/pointhistory',
@@ -212,10 +230,40 @@ const router = createRouter({
       component: Term,
     },
     {
+      path: '/user/findid',
+      name: 'findId',
+      component: FindId,
+    },
+    {
       path: '/fe/redirect',
       name: 'oauth2',
       component: Oauth2,
-    },    
+    },
+    {
+      path: '/user/my-inquiries',
+      name: 'myInquiries',
+      component: MyInquiries,
+    },
+    {
+      path: '/user/nickname',
+      name: 'nickName',
+      component: NickName,
+    },
+    {
+      path: '/user/email',
+      name: 'email',
+      component: Email,
+    },
+    {
+      path: '/user/modifypassword',
+      name: 'modifyPassword',
+      component: ModifyPassword,
+    },
+    {
+      path: '/user/password',
+      name: 'password',
+      component: Password,
+    },
     {
       path: '/pointshop',
       name: 'PointShopList',
@@ -308,19 +356,24 @@ const router = createRouter({
           component: () => import('@/views/admin/AdminDashboard.vue'),
         },
         {
-          path: 'users',
-          name: 'AdminUsers',
+          path: 'user',
+          name: 'AdminUser',
           component: () => import('@/views/admin/AdminUser.vue'),
         },
         {
-          path: 'challenges',
-          name: 'AdminChallenges',
+          path: 'challenge',
+          name: 'AdminChallenge',
           component: () => import('@/views/admin/AdminChallenge.vue'),
         },
         {
-          path: 'points',
-          name: 'AdminPoints',
+          path: 'point',
+          name: 'AdminPoint',
           component: () => import('@/views/admin/AdminPoint.vue'),
+        },
+        {
+          path: 'community',
+          name: 'AdminCommunity',
+          component: () => import('@/views/admin/AdminCommunity.vue'),
         },
         {
           path: 'qna',
@@ -337,13 +390,25 @@ const router = createRouter({
           name: 'AdminUserDetail',
           component: () => import('@/views/admin/AdminUserDetail.vue'),
         },
+        {
+          path: '/notification',
+          name: 'NotificationsView',
+          component: Notifications,
+          meta: { title: '내 소식' },
+        },
       ],
     },
   ],
 });
 
 // 로그인 하지 않아도 이용할 수 있는 Path들
-const unSignedPathList = ["/user/login", "/user/join", "/fe/redirect"];
+const unSignedPathList = [
+  '/user/login',
+  '/user/join',
+  '/fe/redirect',
+  '/user/password',
+  '/user/findid',
+];
 
 //navigation guard
 router.beforeEach((to, from) => {
@@ -351,30 +416,30 @@ router.beforeEach((to, from) => {
   const isUnsignedPath = unSignedPathList.some((path) =>
     to.path.startsWith(path)
   );
-  
+
   // body 클래스 분기
   if (to.path.startsWith('/admin')) {
     document.body.classList.add('is-admin');
   } else {
     document.body.classList.remove('is-admin');
   }
-  if (to.path.startsWith("/admin")) {
+  if (to.path.startsWith('/admin')) {
     const user = authentcationStore.state.signedUser;
-    if (!user || user.userRole !== "ADMIN") {
-      alert("관리자만 접근 가능합니다.");
-      return { path: "/" }; // 일반 유저는 홈으로 돌려보내기
+    if (!user || user.userRole !== 'ADMIN') {
+      alert('관리자만 접근 가능합니다.');
+      return { path: '/' }; // 일반 유저는 홈으로 돌려보내기
     }
   }
   if (unSignedPathList.includes(to.path) && authentcationStore.state.isSigned) {
     //로그인 상태에서 /user/login, /user/join 경로로 이동하려고 하면
-    return { path: "/" };
+    return { path: '/' };
   } else if (
     !authentcationStore.state.isSigned &&
     !unSignedPathList.includes(to.path)
   ) {
-    console.log("로그아웃 상태에서 접근 불가 경로");
+    console.log('로그아웃 상태에서 접근 불가 경로');
     //로그아웃 상태에서 /user/login, /user/join 경로가 아닌 경우
-    return { path: "/user/login" };
+    return { path: '/user/login' };
   }
 });
 

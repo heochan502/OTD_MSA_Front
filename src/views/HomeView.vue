@@ -1,13 +1,12 @@
 <script setup>
-import { ref, onMounted, computed, reactive } from "vue";
+import { ref, onMounted, computed, reactive, watch } from "vue";
 import Progress from "@/components/challenge/Progress.vue";
 import ProgressJs from "@/components/challenge/ProgressJs.vue";
 
-import LineChart from "@/components/exercise/lineChart.vue";
 import StaticChart from "@/components/exercise/StaticChart.vue";
 
 import MealCard from "@/components/meal/MealDayCards.vue";
-import { useMealSelectedStore } from '@/stores/meal/mealStore.js'
+import { useMealSelectedStore } from "@/stores/meal/mealStore.js";
 
 import BmiProg from "@/components/exercise/BmiProg.vue";
 import { getMyChallenge } from "@/services/challenge/challengeService";
@@ -17,13 +16,16 @@ import { getChallengeSettlementLog } from "@/services/challenge/challengeService
 import ChallengeSettlementCard from "@/components/challenge/ChallengeSettlementCard.vue";
 import { useChallengeStore } from "@/stores/challenge/challengeStore";
 
-import dayjs from 'dayjs';
-import 'dayjs/locale/ko';
-
+import dayjs from "dayjs";
+import "dayjs/locale/ko";
 
 const selectedDay = useMealSelectedStore();
 
 import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
+import {
+  getSeries,
+  getLastestBodyComposition,
+} from "@/services/body_composition/bodyCompositionService";
 
 const state = reactive({
   monthlySettlementLog: [],
@@ -44,7 +46,6 @@ const fields = [
   { key: "BFP", label: "체지방률", unit: "%" },
   { key: "SMM", label: "골격근량", unit: "kg" },
 ];
-const selectedField = ref(fields[0].key);
 
 const inbodyData = ref([
   { dataTime: "2025-09-22", weight: "62.4", BFP: "20", SMM: "23" },
@@ -89,15 +90,17 @@ const weeklySettlementDialog = ref(false);
 const challengeStore = useChallengeStore();
 const bodyCompositionStore = useBodyCompositionStore();
 
-onMounted(async () => {
+const selectedField = ref(bodyCompositionStore.selectionMetrics[0]?.metricCode || null);
 
+onMounted(async () => {
   console.log("여기");
   await fetchMonthlySettlement(todayDate);
   await fetchWeeklySettlement(todayDate);
   console.log("state", state.monthlySettlementLog, state.weeklySettlementLog);
   const challenge = await getMyChallenge();
-  challengeInfo.value = challenge.data;
-  console.log('homechallenge', challengeInfo.value);
+  console.log("챌린지 : ", challenge);
+  challengeInfo.value = challenge?.data || null ;
+  console.log("homechallenge", challengeInfo.value);
 
   if (state.monthlySettlementLog.length > 0) {
     monthlySettlementDialog.value = true;
@@ -106,10 +109,10 @@ onMounted(async () => {
   }
 
   console.log("homechallenge", challengeInfo.value);
-  selectedDay.selectedDay.setDay = dayjs().format('YYYY-MM-DD');
-  await bodyCompositionStore.fetchSeriesBodyComposition();
+  selectedDay.selectedDay.setDay = dayjs().format("YYYY-MM-DD");
   await bodyCompositionStore.fetchBodyCompositionMetrics();
-  
+  fetchBodyCompositionSeries();
+  fetchLastestBodyComposition();
 });
 
 const challengeHome = () => {
@@ -132,7 +135,8 @@ const fetchMonthlySettlement = async (date) => {
       settlementDate: formatDate(new Date(year, month - 1, 1)),
     };
     const res = await getChallengeSettlementLog(params);
-    state.monthlySettlementLog = res.data;
+    console.log("res :",  res);
+    state.monthlySettlementLog = res?.data || null;
     challengeStore.state.lastMonthCheck = monthlyKey;
   }
 };
@@ -153,6 +157,7 @@ const fetchWeeklySettlement = async (date) => {
       settlementDate: formatDate(getMonday(date)),
     };
     const res = await getChallengeSettlementLog(params);
+    // console.log("res :",  res?.data || null);
     state.weeklySettlementLog = res.data;
     challengeStore.state.lastWeekCheck = weeklyKey;
   }
@@ -182,15 +187,40 @@ const setModal = () => {
     weeklySettlementDialog.value = true;
   }
 };
+
+// 체성분 데이터 받기
+const fetchBodyCompositionSeries = async () => {
+  const res = await getSeries();
+  if (res === undefined || res.status !== 200) {
+    alert(`에러발생? ${res.status}`);
+    return;
+  }
+  bodyCompositionStore.series = res.data;
+};
+
+const fetchLastestBodyComposition = async () => {
+  const res = await getLastestBodyComposition();
+  if (res === undefined || res.status !== 200) {
+    alert(`에러발생? ${res.status}`);
+    return;
+  }
+  bodyCompositionStore.lastest = res.data;
+};
 </script>
 
 <template>
   <div>
-    <v-dialog v-model="monthlySettlementDialog" max-width="300" min-height="100">
+    <v-dialog
+      v-model="monthlySettlementDialog"
+      max-width="300"
+      min-height="100"
+    >
       <v-card>
         <v-card-title class="text-h8">월간 정산이 완료되었어요!</v-card-title>
         <v-card-text v-for="data in state.monthlySettlementLog">
-          <ChallengeSettlementCard :settlement-data="data"></ChallengeSettlementCard>
+          <ChallengeSettlementCard
+            :settlement-data="data"
+          ></ChallengeSettlementCard>
         </v-card-text>
         <v-card-actions>
           <v-spacer />
@@ -200,13 +230,19 @@ const setModal = () => {
     </v-dialog>
     <v-dialog v-model="weeklySettlementDialog" max-width="300" min-height="100">
       <v-card>
-        <v-card-title class="text-h8">지난 주 정산이 완료되었어요!</v-card-title>
+        <v-card-title class="text-h8"
+          >지난 주 정산이 완료되었어요!</v-card-title
+        >
         <v-card-text v-for="data in state.weeklySettlementLog">
-          <ChallengeSettlementCard :settlement-data="data"></ChallengeSettlementCard>
+          <ChallengeSettlementCard
+            :settlement-data="data"
+          ></ChallengeSettlementCard>
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn color="dark" text @click="weeklySettlementDialog = false">확인</v-btn>
+          <v-btn color="dark" text @click="weeklySettlementDialog = false"
+            >확인</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -220,21 +256,32 @@ const setModal = () => {
     <div class="wrap_content">
       <section class="challenge-progress otd-top-margin">
         <span class="otd-subtitle-1">챌린지 달성률</span>
-        <div class="challenge-progress-card otd-top-margin" @click="challengeHome">
-          <div class=" " v-if="challengeInfo.length > 0">
-            <div v-for="value in challengeInfo"
-              class="d-flex justify-content-around align-items-center challenge-progress-container">
-              <span class="otd-body-3 space-span-start">{{ value.formatedName }}
+        <div
+          class="challenge-progress-card otd-top-margin"
+          @click="challengeHome"
+        >
+          <div class=" " v-if="challengeInfo?.length || 0 > 0">
+            <div
+              v-for="value in challengeInfo"
+              class="d-flex justify-content-around align-items-center challenge-progress-container"
+            >
+              <span class="otd-body-3 space-span-start"
+                >{{ value.formatedName }}
               </span>
               <!-- 차트에 해당하는 데이터를 불러와서 그값을 뿌림-->
-              <Progress :class="{
+              <Progress
+                :class="{
                   'progress-chart': true,
                   'progress-chart-high': value.percent > 70,
                   'progress-chart-middle':
                     value.percent > 30 && value.percent <= 70,
                   'progress-chart-low': value.percent <= 30,
-                }" :indata-progress="value.percent" />
-              <span class="otd-body-3 space-span-end">{{ value.percent }}%</span>
+                }"
+                :indata-progress="value.percent"
+              />
+              <span class="otd-body-3 space-span-end"
+                >{{ value.percent }}%</span
+              >
             </div>
           </div>
           <div v-else>아직 진행중인 챌린지가 없어요!</div>
@@ -255,45 +302,43 @@ const setModal = () => {
         <!-- 선형 그래프 선택 부분 -->
         <v-item-group v-model="selectedField">
           <div class="otd-top-margin item-group">
-            <div v-for="(field, idx) in fields" :key="idx" class="card-wrapper">
-              <v-item v-slot="{ selectedClass, toggle }" :value="field.key">
-                <v-card :class="[
+            <div
+              v-for="field in bodyCompositionStore.selectionMetrics"
+              :key="field.metricId"
+              class="card-wrapper"
+            >
+              <v-item
+                v-slot="{ selectedClass, toggle }"
+                :value="field.metricCode"
+              >
+                <v-card
+                  :class="[
                     ` health-button d-flex flex-column justify-center align-center text-center`,
                     { 'health-button-active': selectedClass },
                     ,
-                  ]" @click="toggle" v-ripple="false">
+                  ]"
+                  @click="toggle"
+                  v-ripple="false"
+                >
                   <div>
                     <span class="otd-body-3">
-                      {{ field.label }}({{ field.unit }})
+                      {{ field.metricName }}({{ field.unit }})
                     </span>
                   </div>
-                  <div class="otd-subtitle-1 text-center">
-                    {{ todayData?.[field.key] }}
-                  </div>
+                  <span class="otd-subtitle-1 text-center">
+                    {{ bodyCompositionStore.lastest[field.metricCode] || "-" }}
+                  </span>
                 </v-card>
               </v-item>
             </div>
           </div>
         </v-item-group>
-
-        <!-- <div class="otd-top-margin d-flex justify-content-between ">
-        <button v-for="(value, index) in healthInfo" :key="index" :class="{ 'health-button': true, 'health-button-active': value.check }" @click="healthToggle(index)">
-
-          <div class="d-flex flex-column align-items-center">
-            <span class="otd-body-3">{{ value.text }}</span>
-            <span class="otd-subtitle-1">{{ value.value }}</span>
-          </div>
-        </button>
-      </div> -->
-
         <div class="otd-top-margin">
-          <!-- <LineChart
-            :selected-date="today"
-            :selectedField="selectedField"
-            :fields="fields"
-            :logs="inbodyData"
-          /> -->
-          <StaticChart v-if="(bodyCompositionStore.series?.length ?? 0) > 0" :series="bodyCompositionStore.series" />
+          <StaticChart
+            :series="bodyCompositionStore.series"
+            :metrics="bodyCompositionStore.metrics"
+            :selectedMetric="selectedField"
+          />
         </div>
       </section>
     </div>
@@ -395,7 +440,6 @@ const setModal = () => {
 }
 .challenge-progress-card {
   width: 350px;
-  height: 125px;
   padding: 10px;
   background: #fff;
   border-radius: 12px;
@@ -424,6 +468,9 @@ const setModal = () => {
 
 .space-span-start {
   width: 30%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .space-span-end {
   width: 10%;
@@ -438,6 +485,8 @@ const setModal = () => {
 }
 
 .bmi-prog {
+  display: flex;
+  justify-content: center;
   padding: 10px;
 }
 
@@ -445,6 +494,7 @@ const setModal = () => {
   display: flex;
   flex-wrap: nowrap;
   gap: 10px;
+  width: 350px;
 }
 .health-button {
   width: 110px;

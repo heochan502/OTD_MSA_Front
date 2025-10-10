@@ -52,7 +52,7 @@ function onSubmit() {
   gap: 8px;
   background: #fff;
   border-radius: 14px;
-  padding: 0px 10px;
+  padding-left: 10px;
   border: 1px solid #e8ebef;
   box-shadow: 0 2px 8px rgba(17, 24, 39, 0.05);
 }

@@ -1,23 +1,31 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useCommentsStore } from '@/stores/community/comments';
+import { useAuthenticationStore } from '@/stores/user/authentication'; // ✅ 내 로그인 정보 가져오기
 
 const props = defineProps({
   postId: { type: [String, Number], required: true },
-  // 작성자 닉네임 보여줄 때 필요하면 부모에서 내려줄 수도 있음
 });
 
 const commentsStore = useCommentsStore();
+const auth = useAuthenticationStore(); // ✅ 로그인 정보
+
 const loading = computed(() => commentsStore.isLoading(props.postId));
 const comments = computed(() => commentsStore.list(props.postId));
 const count = computed(() => commentsStore.count(props.postId));
 
 const input = ref('');
+const meUserId = computed(() => auth.state.signedUser?.userId || 0);
+const meNickName = computed(() => auth.state.signedUser?.nickName || '회원');
 
 async function submit() {
   const v = input.value.trim();
   if (!v) return;
-  await commentsStore.add(props.postId, v);
+  // ✅ 닉네임 포함해서 댓글 생성 요청
+  await commentsStore.add(props.postId, v, {
+    nickName: meNickName.value,
+    rolesCsv: 'ROLE_USER',
+  });
   input.value = '';
 }
 async function removeOne(c) {
@@ -50,7 +58,12 @@ onMounted(() => {
       <div v-for="c in comments" :key="c.commentId" class="item">
         <div class="meta">
           <span class="avatar" aria-hidden="true"></span>
-          <span class="nick">{{ c.authorNickname ?? '익명' }}</span>
+          <!-- ✅ 닉네임 표시 로직 -->
+          <span class="nick">
+            {{
+              c.authorNickname || (c.userId === meUserId ? meNickName : '익명')
+            }}
+          </span>
           <span class="time">{{ c.createdAt }}</span>
           <button class="del" @click="removeOne(c)">삭제</button>
         </div>
