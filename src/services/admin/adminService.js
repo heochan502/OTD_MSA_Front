@@ -65,7 +65,7 @@ export const getChallengeRate = () => {
 
 export const getSignInCount = () => {
   return axios.get(`${BASE_URL}/signin`).catch((e) => e.response);
-}
+};
 
 // 문의 관리 페이지
 export const getQna = () => {

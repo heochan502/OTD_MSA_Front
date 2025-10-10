@@ -223,12 +223,11 @@ const remove = async () => {
         />
 
         <v-card-subtitle>이미지</v-card-subtitle>
-        <v-text-field v-model="editChallenge.cdImage" />
-        <!-- <v-card-subtitle>이미지</v-card-subtitle>
         <v-file-input
-          v-model="editChallenge.cdImage"
-          clearable
-        /> -->
+          accept="image/*"
+          label="이미지 선택"
+          @change="onFileChange"
+        />
 
         <v-card-actions>
           <v-spacer />
