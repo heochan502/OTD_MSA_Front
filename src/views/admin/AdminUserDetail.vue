@@ -229,7 +229,7 @@ const deletePic = () => {
       <v-card-subtitle>권한</v-card-subtitle>
       <v-select
         v-if="state.userInfo.userRoles != null"
-        :items="['USER', 'SOCIAL', 'MANAGER', 'ADMIN']"
+        :items="['USER_1', 'USER_2', 'MANAGER', 'ADMIN']"
         v-model="state.userInfo.userRoles"
       ></v-select>
 
