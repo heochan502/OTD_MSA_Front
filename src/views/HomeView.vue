@@ -90,7 +90,7 @@ const weeklySettlementDialog = ref(false);
 const challengeStore = useChallengeStore();
 const bodyCompositionStore = useBodyCompositionStore();
 
-const selectedField = ref(bodyCompositionStore.selectionMetrics[0].metricCode);
+const selectedField = ref(bodyCompositionStore.selectionMetrics[0]?.metricCode || null);
 
 onMounted(async () => {
   console.log("여기");
