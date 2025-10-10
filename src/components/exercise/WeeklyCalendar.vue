@@ -161,7 +161,8 @@ const applyDate = (date) => {
 .weekly-calendar {
   display: flex;
   justify-content: center;
-  max-width: 330px;
+  max-width: 300px;
+  width: 100%;
   margin: 0 auto;
   padding: 16px;
 
@@ -175,7 +176,7 @@ const applyDate = (date) => {
     .day-cell {
       position: relative;
       text-align: center;
-      padding: 8px 15px;
+      padding: 8px 1rem;
 
       cursor: pointer;
 

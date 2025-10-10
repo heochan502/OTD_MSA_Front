@@ -341,7 +341,7 @@ const remove = async () => {
               item.tier === '브론즈'
                 ? '#ce7430'
                 : item.tier === '실버'
-                ? '#9e9e9e'
+                ? '#7a7a7a'
                 : item.tier === '골드'
                 ? '#ffba57'
                 : item.tier === '다이아'

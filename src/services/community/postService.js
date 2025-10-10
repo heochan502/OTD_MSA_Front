@@ -32,9 +32,39 @@ export const deletePost = (postId) => {
 };
 
 export const toggleLike = (postId, userId) =>
-  axios.post(`/community/posts/${postId}/likes/toggle`, null, {
+  axios.post(`${BASE}/${postId}/likes/toggle`, null, {
     headers: {
       'Content-Type': 'application/json',
-      'X-MEMBER-ID': String(userId ?? 0), // ★ 이게 꼭 들어가야 함
+      'X-MEMBER-ID': String(userId ?? 0),
     },
   });
+
+export const uploadPostFiles = (postId, files, memberId) => {
+  const fd = new FormData();
+  files.forEach((f) => fd.append('files', f));
+  return axios.post(`${BASE}/${postId}/files`, fd, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      'X-MEMBER-ID': String(memberId ?? 0),
+    },
+    onUploadProgress: (e) => {
+      const pct = e.total ? Math.round((e.loaded * 100) / e.total) : 0;
+      console.info('[uploadPostFiles] progress', pct, '%');
+    },
+  });
+};
+
+// 첨부 파일 목록 조회
+export const fetchPostFiles = async (postId) => {
+  try {
+    return await axios.get(`/community/posts/${postId}/files`);
+  } catch (e) {
+    if (e?.response?.status === 404) {
+      console.warn(
+        '[postService] fallback -> /community/files?postId=' + postId
+      );
+      return await axios.get('/community/files', { params: { postId } });
+    }
+    throw e;
+  }
+};

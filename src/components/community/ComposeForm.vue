@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onBeforeUnmount } from 'vue';
 import { useCommunityStore } from '@/stores/community/community';
 
 const props = defineProps({
@@ -20,6 +20,7 @@ const store = useCommunityStore();
 const title = ref('');
 const content = ref('');
 const files = ref([]);
+const previews = ref([]);
 const submitting = ref(false);
 const errorMsg = ref('');
 
@@ -42,8 +43,59 @@ function chooseCategory(key) {
   emit('update:category', key);
   pickerOpen.value = false;
 }
+
+function revokeAll() {
+  previews.value.forEach((p) => URL.revokeObjectURL(p.url));
+  previews.value = [];
+}
+onBeforeUnmount(revokeAll);
+
 function onFileChange(e) {
-  files.value = Array.from(e.target.files || []);
+  const sel = Array.from(e.target.files || []);
+  console.info(
+    '[ComposeForm] 선택된 파일 수:',
+    sel.length,
+    sel.map((f) => ({ name: f.name, size: f.size, type: f.type }))
+  );
+  const next = [];
+  const nextPreviews = [];
+  const MAX_MB = 15;
+  const MAX_SIZE = MAX_MB * 1024 * 1024;
+  for (const f of sel) {
+    if (!f.type?.startsWith('image/')) {
+      console.warn('[ComposeForm] 이미지 아님, 무시:', f.name, f.type);
+      continue;
+    }
+    if (f.size > MAX_SIZE) {
+      console.error('[ComposeForm] 용량 초과:', f.name, f.size, '>', MAX_SIZE);
+      continue;
+    }
+    next.push(f);
+    nextPreviews.push({
+      url: URL.createObjectURL(f),
+      name: f.name,
+      size: f.size,
+    });
+  }
+  if (next.length === 0) {
+    console.warn('[ComposeForm] 유효한 첨부 없음');
+  }
+  files.value = next;
+  revokeAll();
+  previews.value = nextPreviews;
+  e.target.value = '';
+}
+
+function removeAt(i) {
+  const list = files.value.slice();
+  const pv = previews.value.slice();
+  const removed = pv[i];
+  if (removed) URL.revokeObjectURL(removed.url);
+  list.splice(i, 1);
+  pv.splice(i, 1);
+  files.value = list;
+  previews.value = pv;
+  console.info('[ComposeForm] 제거 후 남은 파일 수:', files.value.length);
 }
 
 async function submit() {
@@ -55,11 +107,19 @@ async function submit() {
       categoryKey: props.category,
       title: title.value.trim(),
       content: content.value.trim(),
+      files: files.value,
     };
+    console.info('[ComposeForm] 게시글 등록 요청:', {
+      ...payload,
+      files: files.value?.length,
+    });
     await store.createNewPost(payload);
     emit('submitted', { categoryKey: props.category });
   } catch (e) {
-    console.error('[ComposeForm] createNewPost failed:', e);
+    console.error(
+      '[ComposeForm] createNewPost failed:',
+      e?.response?.data || e
+    );
     errorMsg.value =
       e?.response?.data?.message ||
       e?.message ||
@@ -73,7 +133,7 @@ async function submit() {
 <template>
   <div class="form-card">
     <div class="header">
-      <button class="back" @click="emit('cancel')" aria-label="닫기">‹</button>
+      <button class="back"></button>
       <div class="h-title">게시글 작성</div>
       <div style="width: 24px" />
     </div>
@@ -123,9 +183,18 @@ async function submit() {
     />
 
     <label class="label">이미지 첨부</label>
-    <div class="uploader">
-      <input type="file" multiple accept="image/*" @change="onFileChange" />
-      <div class="plus">＋</div>
+    <div class="attach">
+      <div class="thumb" v-for="(p, i) in previews" :key="p.url">
+        <img :src="p.url" alt="" />
+        <button class="rm" type="button" aria-label="삭제" @click="removeAt(i)">
+          ×
+        </button>
+      </div>
+
+      <label class="uploader" aria-label="이미지 선택">
+        <input type="file" multiple accept="image/*" @change="onFileChange" />
+        <div class="plus">＋</div>
+      </label>
     </div>
 
     <button
@@ -137,6 +206,8 @@ async function submit() {
       게시글 등록
     </button>
     <button class="ghost" @click="emit('cancel')">취소</button>
+
+    <div v-if="errorMsg" class="err">{{ errorMsg }}</div>
   </div>
 </template>
 
@@ -188,7 +259,7 @@ async function submit() {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 10px 0 10px;
+  margin: 10px 0;
 }
 .badge {
   display: inline-flex;
@@ -232,16 +303,54 @@ async function submit() {
 .textarea {
   resize: vertical;
 }
+
+/* 썸네일 그리드 (시안 스타일) */
+.attach {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.thumb {
+  position: relative;
+  width: 100%;
+  padding-top: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #eee;
+  background: #f7f7f7;
+}
+.thumb img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.rm {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 50%;
+  background: #0009;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* 플러스 카드 */
 .uploader {
   position: relative;
-  height: 84px;
+  width: 100%;
+  padding-top: 100%;
   border: 2px dashed #e8e8e8;
   border-radius: 12px;
+  background: #fcfcfc;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 12px;
-  background: #fcfcfc;
 }
 .uploader input {
   position: absolute;
@@ -250,9 +359,15 @@ async function submit() {
   cursor: pointer;
 }
 .plus {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 32px;
   color: #bdbdbd;
 }
+
 .submit {
   width: 100%;
   padding: 14px;
