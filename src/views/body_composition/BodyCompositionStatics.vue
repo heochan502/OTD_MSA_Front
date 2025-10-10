@@ -1,6 +1,5 @@
 <script setup>
 import { onMounted, ref } from "vue";
-import lineChart from "@/components/exercise/lineChart.vue";
 import StaticChart from "@/components/exercise/StaticChart.vue";
 import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
 
@@ -11,9 +10,11 @@ const bodyCompositionStore = useBodyCompositionStore();
 <template>
   <div class="wrap">
     <div class="d-flex align-center justify-space-between">
-      <div class="day_picker otd-border">
-        <div class="otd-body-2">{{ "2024.10.16 ~ 최근" }}</div>
-      </div>
+      <router-link to="/exercise/body_composition/filter">
+        <div class="day_picker otd-border">
+          <div class="otd-body-2">{{ "2024.10.16 ~ 최근" }}</div>
+        </div>
+      </router-link>
       <div class="d-flex align-center ga-2">
         <span>최근</span>
         <v-switch
