@@ -1,6 +1,6 @@
 <script setup>
 import { useRouter, useRoute } from 'vue-router';
-import ComposeForm from '@/components/ComposeForm.vue';
+import ComposeForm from '@/components/community/ComposeForm.vue';
 
 const router = useRouter();
 const route = useRoute();

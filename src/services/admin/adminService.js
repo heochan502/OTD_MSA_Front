@@ -1,6 +1,7 @@
 import axios from '@/services/httpRequester';
 
 const BASE_URL = 'admin';
+const LIFE_URL = 'admin2';
 
 // 사용자 관리 페이지
 export const getUser = () => {
@@ -62,6 +63,10 @@ export const getChallengeRate = () => {
   return axios.get(`${BASE_URL}/challengerate`).catch((e) => e.response);
 };
 
+export const getSignInCount = () => {
+  return axios.get(`${BASE_URL}/signin`).catch((e) => e.response);
+}
+
 // 문의 관리 페이지
 export const getQna = () => {
   return axios.get(`${BASE_URL}/qna`).catch((e) => e.response);
@@ -69,4 +74,17 @@ export const getQna = () => {
 
 export const putQna = (params) => {
   return axios.put(`${BASE_URL}/qna/modify`, params).catch((e) => e.response);
+};
+
+// life 서버
+export const getUserMealRecord = (userId) => {
+  return axios.get(`${LIFE_URL}/meal/${userId}`).catch((e) => e.response);
+};
+
+export const getUserExerciseRecord = (userId) => {
+  return axios.get(`${LIFE_URL}/exercise/${userId}`).catch((e) => e.response);
+};
+
+export const getCommunity = () => {
+  return axios.get(`${LIFE_URL}/community`).catch((e) => e.response);
 };

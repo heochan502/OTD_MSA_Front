@@ -48,6 +48,7 @@ onMounted(async () => {
             :goal="challenge.goal"
             :unit="challenge.unit"
             :exp="challenge.xp"
+            :note="challenge.note"
             :reward="challenge.reward"
           ></FlippableChallengeCard>
         </SwiperSlide>
@@ -77,6 +78,7 @@ onMounted(async () => {
               :goal="challenge.goal"
               :unit="challenge.unit"
               :exp="challenge.xp"
+              :note="challenge.note"
               :reward="challenge.reward"
             ></FlippableChallengeCard>
           </SwiperSlide>
@@ -104,6 +106,7 @@ onMounted(async () => {
               :goal="challenge.goal"
               :unit="challenge.unit"
               :exp="challenge.xp"
+              :note="challenge.note"
               :reward="challenge.reward"
             ></FlippableChallengeCard>
           </SwiperSlide>
