@@ -25,15 +25,19 @@ export const getChallenge = () => {
   return axios.get(`${BASE_URL}/challenge`).catch((e) => e.response);
 };
 
-export const postChallenge = (params) => {
+export const postChallenge = (formData) => {
   return axios
-    .post(`${BASE_URL}/challenge/add`, params)
+    .post(`${BASE_URL}/challenge/add`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
     .catch((e) => e.response);
 };
 
-export const putChallenge = (params) => {
+export const putChallenge = (formData) => {
   return axios
-    .put(`${BASE_URL}/challenge/modify`, params)
+    .put(`${BASE_URL}/challenge/modify`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
     .catch((e) => e.response);
 };
 
