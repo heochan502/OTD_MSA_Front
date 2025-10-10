@@ -25,11 +25,14 @@ export const useAuthenticationStore = defineStore(
       state.isSigned = true;
       state.signedUser = {
         ...signedUser,
-        pic:
-          signedUser.pic && signedUser.pic.trim() !== ''
-            ? `${FILE_URL}/profile/${signedUser.userId}/${signedUser.pic}`
-            : DEFAULT_PROFILE,
+        pic: formattedUserPic(signedUser),
       };
+    };
+
+    const formattedUserPic = (user) => {
+      return user.pic && user.pic.trim() !== ''
+        ? `${FILE_URL}/profile/${user.userId}/${user.pic}`
+        : DEFAULT_PROFILE;
     };
 
     const setSignedUserPic = (pic) => {
@@ -42,6 +45,10 @@ export const useAuthenticationStore = defineStore(
 
     const setChallengeRole = (challengeRole) => {
       state.signedUser.challengeRole = challengeRole;
+    };
+
+       const setNickname = (nickname) => {
+      state.signedUser.nickName = nickname;
     };
 
     const logout = async () => {
@@ -57,6 +64,8 @@ export const useAuthenticationStore = defineStore(
       logout,
       setPoint,
       setChallengeRole,
+      formattedUserPic,
+      setNickname,
     };
   },
   { persist: true }

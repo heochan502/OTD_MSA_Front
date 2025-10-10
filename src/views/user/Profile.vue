@@ -1,7 +1,7 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import { logout, getPointHistory, patchUserProfilePic, deleteUserProfilePic } from '@/services/user/userService';
-import { getSelectedAll } from '@/services/challenge/challengeService';
+import { getSelectedAll } from '@/services/user/userService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { ref, computed, onMounted } from 'vue';
 
@@ -14,7 +14,6 @@ const showPhotoModal = ref(false);
 const selectedFile = ref(null);
 const previewUrl = ref(null);
 
-console.log(authStore.state.signedUser);
 
 const defaultProfile = '/otd/image/main/default-profile.png';
 
@@ -34,6 +33,7 @@ const userInfo = computed(() => {
     userId: authStore.state.signedUser?.userId,
   };
 });
+
 
 // 프로필 사진 클릭 시 모달 열기
 const openPhotoModal = (e) => {
@@ -77,24 +77,16 @@ const saveProfilePhoto = async () => {
     
     console.log('프로필 사진 업로드 시작...');
     
-    // userService의 API 함수 사용
     const response = await patchUserProfilePic(formData);
     
     console.log('업로드 응답:', response);
     
-    // 서버에서 받은 파일명으로 업데이트
     if (response.data && response.data.result) {
       const fileName = response.data.result;
-      // 백엔드 서버 주소 포함
       const imagePath = `http://localhost:8082/profile/${userInfo.value.userId}/${fileName}`;
-      
-      console.log('=== 이미지 경로 디버깅 ===');
-      console.log('1. 서버에서 받은 파일명:', fileName);
-      console.log('2. 생성된 이미지 경로:', imagePath);
-      
+       
       authStore.state.signedUser.pic = imagePath;
       
-      console.log('3. Store에 저장된 값:', authStore.state.signedUser.pic);
       
       alert('프로필 사진이 변경되었습니다.');
       closePhotoModal();
@@ -108,25 +100,32 @@ const saveProfilePhoto = async () => {
 
 // 프로필 사진 삭제
 const deleteProfilePhoto = async () => {
-  if (!confirm('프로필 사진을 삭제하시겠습니까?')) {
-    return;
-  }
+  if (!confirm('프로필 사진을 삭제하시겠습니까?')) return;
 
   try {
-    await deleteUserProfilePic();
-
-    // 기본 이미지로 변경
-    authStore.state.signedUser.pic = null;
+    console.log('프로필 사진 삭제 시작...');
     
-    alert('프로필 사진이 삭제되었습니다.');
-    closePhotoModal();
+    const response = await deleteUserProfilePic();
+    
+    console.log('삭제 응답:', response);
+    
+    if (response.status === 200) {
+
+      authStore.state.signedUser.pic = null;
+      
+      console.log('프로필 사진이 삭제되었습니다.');
+      
+      alert('프로필 사진이 삭제되었습니다.');
+      closePhotoModal();
+    }
   } catch (error) {
     console.error('프로필 사진 삭제 실패:', error);
+    console.error('에러 상세:', error.response);
     alert('프로필 사진 삭제에 실패했습니다.');
   }
 };
 
-// 최근 포인트 히스토리 가져오기 (포인트 히스토리 + 일일 미션)
+// 최근 포인트 히스토리 가져오기
 const fetchRecentHistory = async () => {
   try {
     loadingHistory.value = true;
@@ -136,16 +135,25 @@ const fetchRecentHistory = async () => {
       return;
     }
 
-    // 포인트 히스토리 조회
     const response = await getPointHistory(userId);
     const pointHistory = response.data.result?.pointHistory || [];
     
-    // 일일 미션 완료 내역 조회
     const missionResponse = await getSelectedAll();
-    const missionComplete = missionResponse.data.missionComplete || [];
-    const dailyMission = missionResponse.data.dailyMission || [];
     
-    // 데이터 병합
+    const result = missionResponse.data.result;
+    let missionComplete = [];
+    let dailyMission = [];
+    
+    if (result) {
+      missionComplete = result.missionComplete || [];
+      dailyMission = result.dailyMission || [];
+    
+    } else if (missionResponse.data.missionComplete) {
+      missionComplete = missionResponse.data.missionComplete || [];
+      dailyMission = missionResponse.data.dailyMission || [];
+
+    }
+    
     const combined = [];
     
     // 포인트 히스토리 추가
@@ -159,13 +167,13 @@ const fetchRecentHistory = async () => {
       });
     });
     
-    // 일일 미션 완료 내역 추가
+    // 미션 완료 내역 추가
     missionComplete.forEach(mission => {
       const missionDetail = dailyMission.find(m => String(m.cdId) === String(mission.cdId));
       if (missionDetail) {
         combined.push({
           type: 'mission',
-          reason: ' 일일 미션: ' + missionDetail.cdName,
+          reason: '✅ 일일 미션: ' + missionDetail.cdName,
           point: missionDetail.cdReward,
           createdAt: mission.successDate,
           id: `mission-${mission.cdId}-${mission.successDate}`
@@ -173,20 +181,22 @@ const fetchRecentHistory = async () => {
       }
     });
     
+    
     // 최신순 정렬 후 최근 2개만
     recentHistory.value = combined
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, 2);
       
+      
   } catch (err) {
-    console.error('포인트 히스토리 조회 실패:', err);
+    console.error('포인트 히스토리 조회 실패 백켰나?쿠키있나?:', err);
+    console.error('에러 응답:', err.response?.data);
     recentHistory.value = [];
   } finally {
     loadingHistory.value = false;
   }
 };
 
-// reason 포맷팅
 const formatPointReason = (reason) => {
   if (!reason) return '';
   
@@ -221,7 +231,6 @@ const formatPointReason = (reason) => {
   return reason;
 };
 
-// 날짜 포맷팅
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   return date.toLocaleDateString('ko-KR', {
@@ -243,7 +252,6 @@ const formatPoint = (point) => {
   return point?.toLocaleString() || '0';
 };
 
-// 컴포넌트 마운트 시 최근 포인트 히스토리 가져오기
 onMounted(() => {
   fetchRecentHistory();
 });
@@ -253,7 +261,7 @@ onMounted(() => {
   <div class="profile-container">
     <!-- 프로필 섹션 -->
     <div class="profile-section">
-      <router-link to="/user/ModifiProfile" class="profile-header">
+      <router-link to="/user/ModifyProfile" class="profile-header">
         <div class="profile-image otd-shadow" @click="openPhotoModal">
           <img :src="profileImage" :alt="userInfo.nickName" />
           <div class="photo-overlay">
@@ -263,11 +271,11 @@ onMounted(() => {
         <div class="profile-info">
           <h2 class="nickname">{{ userInfo.nickName }}</h2>
           <p class="email">{{ userInfo.email }}</p>
-          <div class="arrow">›</div>
+          <div class="arrowpic">›</div>
         </div>
       </router-link>
     </div>
-
+    
     <!-- 활동 섹션 -->
     <div class="activity-section">
       <h3 class="section-title">나의 활동</h3>
@@ -350,14 +358,14 @@ onMounted(() => {
     <div class="support-section">
       <h3 class="section-title">고객센터</h3>
       <div class="support-list">
-        <router-link to="/user/email/munhe" class="support-item">
+        <router-link to="/user/email/inquiry" class="support-item">
           <div class="support-icon">💬</div>
           <span>1:1 문의하기</span>
           <div class="arrow">›</div>
         </router-link>
-        <router-link to="/user/qna" class="support-item">
-          <div class="support-icon">❓</div>
-          <span>자주 묻는 질문</span>
+        <router-link to="/user/my-inquiries" class="support-item">
+          <div class="support-icon">💬</div>
+          <span>문의내역</span>
           <div class="arrow">›</div>
         </router-link>
       </div>
@@ -507,7 +515,7 @@ onMounted(() => {
         color: #393e46;
       }
       .arrow {
-      position: absolute;
+        position: absolute;
       right: 20px;
       top: 50%; 
       font-size: 24px;
@@ -951,5 +959,12 @@ onMounted(() => {
     width: 95%;
   }
 }
-
+.arrowpic {
+      position: absolute; 
+      right: 20px; 
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 24px; 
+      color: #ccc; 
+}
 </style>

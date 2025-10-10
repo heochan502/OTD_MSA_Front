@@ -2,10 +2,12 @@
 import { useRouter } from 'vue-router';
 
 const props = defineProps({
-  todayAmount: { type: Number, default: 0 }, // L 단위 (예: 0.8)
+  todayAmount: {  }, // L 단위 (예: 0.8)
 });
 const router = useRouter();
-const goLog = () => router.push({ name: 'WaterLog' });
+const goLog = () => router.push({ name: 'WaterLog', query: { amount: Number(props.todayAmount.amountLiter),
+  dailyWaterIntakeId: props.todayAmount.dailyWaterIntakeId
+ } });
 </script>
 
 <template>
@@ -23,7 +25,7 @@ const goLog = () => router.push({ name: 'WaterLog' });
       <div class="right">
         <div class="q otd-body-3">오늘 물 섭취량은?</div>
         <div class="amount">
-          <span class="num otd-title">{{ todayAmount.toFixed(2) }}</span>
+          <span class="num otd-title">{{ todayAmount.amountLiter }}</span>
           <span class="unit otd-subtitle-2">L</span>
         </div>
 

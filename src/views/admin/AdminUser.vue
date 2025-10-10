@@ -1,13 +1,23 @@
 <script setup>
-import { getUsers } from '@/services/admin/adminService';
-import { onMounted, ref } from 'vue';
+import { getUser } from '@/services/admin/adminService';
+import { onMounted, ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAdminStore } from '@/stores/admin/adminStore';
+
+const router = useRouter();
+const adminStore = useAdminStore();
 
 const users = ref([]);
 const search = ref('');
 
 onMounted(async () => {
-  const res = await getUsers();
-  users.value = res.data;
+  const res = await getUser();
+  console.log('res:', res);
+  console.log(typeof res.data);
+  users.value = res.data.map((user) => ({
+    ...user,
+    userRoles: user.userRoles[0]?.userRoleIds.roleCode ?? '없음',
+  }));
   console.log('adminUser', users.value);
 });
 
@@ -20,6 +30,14 @@ const formatBirthDate = (birthDate) => {
   return str;
 };
 
+const formatNumber = (n) => String(n).padStart(2, '0');
+const formatDate = (date) => {
+  const y = date.getFullYear();
+  const m = formatNumber(date.getMonth() + 1);
+  const d = formatNumber(date.getDate());
+  return `${y}-${m}-${d}`;
+};
+
 // ✅ Vuetify v-data-table headers
 const headers = [
   { title: 'ID', key: 'userId' },
@@ -30,6 +48,22 @@ const headers = [
   { title: '가입일', key: 'createdAt' },
   { title: '생년월일', key: 'birthDate' },
 ];
+
+const rowProps = ({ item }) => ({
+  onClick: () => toUserDetial(item),
+  style: 'cursor: pointer;',
+});
+
+const toUserDetial = (user) => {
+  console.log('user', user);
+  adminStore.setSelectedUser(user);
+  console.log(adminStore.state.selectedUser);
+  router.push({ path: '/admin/user/detail' });
+};
+
+const reversedUser = computed(() => {
+  return [...users.value].reverse();
+});
 </script>
 
 <template>
@@ -51,12 +85,12 @@ const headers = [
 
       <v-data-table
         :headers="headers"
-        :items="users"
+        :items="reversedUser"
         :search="search"
         :items-per-page="10"
-        height="580"
         fixed-header
         class="styled-table"
+        :row-props="rowProps"
       >
         <!-- 닉네임 (이름) -->
         <template #item.nickName="{ item }">
@@ -66,25 +100,21 @@ const headers = [
 
         <!-- 권한 -->
         <template #item.userRoles="{ item }">
-          <template v-if="item.userRoles && item.userRoles.length">
+          <template v-if="item.userRoles != null">
             <v-chip
-              v-for="role in item.userRoles"
-              :key="role.userRoleIds.roleCode"
               :color="
-                role.userRoleIds.roleCode.toLowerCase() === 'user'
+                item.userRoles === 'USER' || item.userRoles === 'SOCIAL'
                   ? '#00D5DF'
-                  : role.userRoleIds.roleCode.toLowerCase() === 'admin'
+                  : item.userRoles === 'ADMIN'
                   ? '#303030'
-                  : '#fff'
+                  : '#ff8a80'
               "
-              text-color="black"
               small
               class="ma-1"
             >
-              {{ role.userRoleIds.roleCode }}
+              {{ item.userRoles }}
             </v-chip>
           </template>
-          <v-chip v-else color="#fff" text-color="white" small>없음</v-chip>
         </template>
         <!-- 챌린지 등급 -->
         <template #item.challengeRole="{ item }">
@@ -98,12 +128,7 @@ const headers = [
                 ? '#ffba57'
                 : item.challengeRole === '다이아'
                 ? '#00c6ff'
-                : '#fff' // 그 외
-            "
-            :text-color="
-              item.challengeRole === '골드'
-                ? 'black' // 금색은 검정 글씨가 더 잘 보임
-                : 'white' // 기본은 흰 글씨
+                : '#ff8a80' // 그 외
             "
             small
           >
@@ -113,12 +138,13 @@ const headers = [
 
         <!-- 가입일 -->
         <template #item.createdAt="{ item }">
-          {{ new Date(item.createdAt).toLocaleDateString() }}
+          {{ formatDate(new Date(item.createdAt)) }}
         </template>
 
         <!-- 생년월일 -->
         <template #item.birthDate="{ item }">
-          {{ formatBirthDate(item.birthDate) }}
+          <!-- {{ formatBirthDate(item.birthDate) }} -->
+          {{ item.birthDate }}
         </template>
       </v-data-table>
     </v-card>

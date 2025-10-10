@@ -1,14 +1,14 @@
 <script setup>
 const props = defineProps({
-  totalKcal: { type: Number, default: 757 },
+  totalKcal: { type: Number, default: 0 },  //  숫자
   rows: {
     type: Array,
     default: () => [
-      { label: '탄수화물', value: '39.9g' },
-      { label: '단백질', value: '16.8g' },
-      { label: '지방', value: '24.9g' },
-      { label: '당류', value: '50g' },
-      { label: '나트륨', value: '523mg' },
+      { label: '탄수화물', value: '0' },
+      { label: '단백질', value: '0' },
+      { label: '지방', value: '0' },
+      { label: '당류', value: '0' },
+      { label: '나트륨', value: '0' },
     ],
   },
 });
@@ -25,7 +25,7 @@ const props = defineProps({
     <ul class="table">
       <li class="row" v-for="r in rows" :key="r.label">
         <span class="label">{{ r.label }}</span>
-        <span class="value">{{ r.value }}</span>
+        <span class="value">{{ r.value }} g/ml</span>
       </li>
     </ul>
   </div>

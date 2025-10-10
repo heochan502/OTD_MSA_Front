@@ -1,15 +1,14 @@
 <script setup>
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { login } from '@/services/user/userService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { checkValidation } from '@/utils/validation';
+import AlertModal from '@/components/user/Modal.vue';
 
 const router = useRouter();
-
 const authentication = useAuthenticationStore();
 const beBaseUrl = import.meta.env.VITE_BASE_URL;
-
 const feBaseUrl = window.location.origin;
 const redirectUrl = `${feBaseUrl}/fe/redirect`;
 
@@ -20,6 +19,36 @@ const state = reactive({
   },
 });
 
+// 모달 상태
+const modalState = ref({
+  show: false,
+  title: '',
+  message: '',
+  type: 'info',
+  onConfirm: null
+});
+
+const showModal = (title, message, type = 'info', onConfirm = null) => {
+  modalState.value = {
+    show: true,
+    title,
+    message,
+    type,
+    onConfirm
+  };
+};
+
+const closeModal = () => {
+  modalState.value.show = false;
+};
+
+const handleModalConfirm = () => {
+  if (modalState.value.onConfirm) {
+    modalState.value.onConfirm();
+  }
+  closeModal();
+};
+
 const submit = async () => {
   if (checkValidation()) {
     return;
@@ -28,7 +57,6 @@ const submit = async () => {
   try {
     const res = await login(state.form);
 
-    console.log('응답 데이터:', JSON.stringify(res.data.result, null, 2));
 
     if (res.status === 200) {
       const result = res.data.result;
@@ -38,6 +66,7 @@ const submit = async () => {
 
       // store 상태 확인
       console.log('업데이트 후 store 상태:', authentication.state.signedUser);
+      
       if (result.userRole === 'ADMIN') {
         await router.push('/admin');
       } else {
@@ -47,7 +76,11 @@ const submit = async () => {
   } catch (error) {
     console.error('로그인 오류:', error);
     console.error('오류 상세:', error.response?.data);
-    alert('로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.');
+    showModal(
+      '로그인 실패',
+      '로그인에 실패했습니다.\n아이디와 비밀번호를 확인해주세요.',
+      'error'
+    );
   }
 };
 </script>
@@ -92,7 +125,6 @@ const submit = async () => {
         <router-link class="buttonjoin" to="/user/join">회원가입</router-link>
       </div>
       <!-- API 로그인 -->
-
       <div class="API">
         <span class="naver"
           ><a
@@ -110,11 +142,21 @@ const submit = async () => {
     </div>
     <div class="additional-links">
       <div class="link-row">
-        <a href="#" class="link">아이디 찾기</a>
+        <router-link to="/user/findid" class="link">아이디 찾기</router-link>
         <span class="link-separator">|</span>
-        <a href="#" class="link">비밀번호 찾기</a>
+        <router-link to="/user/password" class="link">비밀번호 찾기</router-link>
       </div>
     </div>
+
+    <!-- Alert 모달 컴포넌트 -->
+    <AlertModal
+      :show="modalState.show"
+      :title="modalState.title"
+      :message="modalState.message"
+      :type="modalState.type"
+      @close="closeModal"
+      @confirm="handleModalConfirm"
+    />
   </div>
 </template>
 
@@ -216,5 +258,33 @@ const submit = async () => {
 .API {
   padding-bottom: 20px;
   text-align: center;
+  
+}
+.additional-links {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.link-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.link {
+  color: #393e46;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.link:hover {
+  color: #000;
+  text-decoration: underline;
+}
+
+.link-separator {
+  color: #d1d5db;
 }
 </style>

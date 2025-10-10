@@ -16,21 +16,22 @@ import ChallengeCategoryList from '@/views/challenge/ChallengeCategoryList.vue';
 import ChallengePer from '@/views/challenge/ChallengePer.vue';
 import ChallengeDay from '@/views/challenge/ChallengeDay.vue';
 
+//유저
 import Login from '@/views/user/Login.vue';
 import Join from '@/views/user/Join.vue';
 import Profile from '@/views/user/Profile.vue';
 import Signal from '@/views/user/Signal.vue';
-import QnA from '@/views/user/QnA.vue';
-import Munhe from '@/views/user/Munhe.vue';
-import ModifiProfile from '@/views/user/ModifiProfile.vue';
+import Inquiry from '@/views/user/Inquiry.vue';
+import NickName from '@/views/user/Nickname.vue';
+import Email from '@/views/user/Email.vue';
+import Password from '@/views/user/password.vue';
+import FindId from '@/views/user/FindId.vue';
+import MyInquiries from '@/views/user/InquiryList.vue';
+import ModifyProfile from '@/views/user/ModifyProfile.vue';
+import ModifyPassword from '@/views/user/ModifyPassword.vue';
 import PointHistory from '@/views/user/pointHistory.vue';
 import Term from '@/views/user/Term.vue';
 import Oauth2 from '@/views/auth/OAuth2Handler.vue';
-
-import PayApproval from '@/views/pay/PayApproval.vue';
-import PayCancel from '@/views/pay/PayCancel.vue';
-import PayCompleted from '@/views/pay/PayCompleted.vue';
-import PayFail from '@/views/pay/PayFail.vue';
 
 // 포인트샵
 import PointShopListView from '@/views/point/PointShopListView.vue';
@@ -41,9 +42,8 @@ import PointPurchaseHistoryTable from '@/components/pointshop/PointPurchaseHisto
 //식단
 import MealMainView from '@/views/meal/MealMainView.vue';
 import MealDetailView from '@/views/meal/MealDetailView.vue';
-import MealRecordView from '@/views/meal/MealRecordView.vue'  
-import MealFoodSearchView from '@/views/meal/MealFoodSearchView.vue'
-
+import MealRecordView from '@/views/meal/MealRecordView.vue';
+import MealFoodSearchView from '@/views/meal/MealFoodSearchView.vue';
 
 // 운동
 import ExerciseMain from '@/views/exercise/ExerciseMain.vue';
@@ -51,6 +51,8 @@ import ExerciseRecord from '@/views/exercise/ExerciseRecord.vue';
 import ExerciseRecordForm from '@/views/exercise/ExerciseRecordForm.vue';
 import ExerciseRecordDetail from '@/views/exercise/ExerciseRecordDetail.vue';
 
+// 체성분
+import BodyCompositionStatics from '@/views/body_composition/BodyCompositionStatics.vue';
 
 // 카테고리 라벨 맵
 const CATEGORY_LABEL = {
@@ -112,17 +114,6 @@ const router = createRouter({
       component: ChallengeAllList,
       meta: { headerType: 'title', title: '챌린지 목록', showUserPanel: false },
     },
-    // {
-    //   path: '/challenge/dailylist',
-    //   name: 'ChallengedailyList',
-    //   component: ChallengeWeeklyList,
-    //   meta: {
-    //     headerType: 'title',
-    //     title: '일일 미션 목록',
-
-    //     showUserPanel: false,
-    //   },
-    // },
     {
       path: '/challenge/weeklylist',
       name: 'ChallengeweeklyList',
@@ -201,30 +192,29 @@ const router = createRouter({
       component: Signal,
     },
     {
-      path: '/user/qna',
-      name: 'QnA',
-      component: QnA,
+      path: '/user/email/inquiry',
+      name: 'Inquiry',
+      component: Inquiry,
     },
     {
-      path: '/user/email/munhe',
-      name: 'munhe',
-      component: Munhe,
-    },
-    {
-      path: '/user/modifiProfile',
-      name: 'modifiProfile',
-      component: ModifiProfile,
+      path: '/user/modifyProfile',
+      name: 'modifyProfile',
+      component: ModifyProfile,
     },
     {
       path: '/user/pointhistory',
       name: 'pointHistory',
       component: PointHistory,
     },
-
     {
       path: '/user/term',
       name: 'term',
       component: Term,
+    },
+    {
+      path: '/user/findid',
+      name: 'findId',
+      component: FindId,
     },
     {
       path: '/fe/redirect',
@@ -232,24 +222,29 @@ const router = createRouter({
       component: Oauth2,
     },
     {
-      path: '/pay/approval',
-      name: 'pay-approval',
-      component: PayApproval,
+      path: '/user/my-inquiries',
+      name: 'myInquiries',
+      component: MyInquiries,
     },
     {
-      path: '/pay/cancel',
-      name: 'pay-cancel',
-      component: PayCancel,
+      path: '/user/nickname',
+      name: 'nickName',
+      component: NickName,
     },
     {
-      path: '/pay/completed',
-      name: 'pay-completed',
-      component: PayCompleted,
+      path: '/user/email',
+      name: 'email',
+      component: Email,
     },
     {
-      path: '/pay/fail',
-      name: 'pay-fail',
-      component: PayFail,
+      path: '/user/modifypassword',
+      name: 'modifyPassword',
+      component: ModifyPassword,
+    },
+    {
+      path: '/user/password',
+      name: 'password',
+      component: Password,
     },
     {
       path: '/pointshop',
@@ -297,6 +292,12 @@ const router = createRouter({
       meta: { headerType: 'title', title: '운동 기록', showUserPanel: false },
     },
     {
+      path: '/exercise/body_composition',
+      name: 'BodyCompositionStatics',
+      component: BodyCompositionStatics,
+      meta: { headerType: 'title', title: '체성분 변화', showUserPanel: false },
+    },
+    {
       path: '/meal/detail',
       name: 'MealDetailView',
       component: MealDetailView,
@@ -319,7 +320,7 @@ const router = createRouter({
       name: 'MealRecordView',
       component: MealRecordView,
       meta: { headerType: 'title', title: '식단 기록', showUserPanel: false },
-    },    
+    },
     {
       path: '/admin',
       // component: () => import('@/views/admin/AdminLayout.vue'),
@@ -331,19 +332,24 @@ const router = createRouter({
           component: () => import('@/views/admin/AdminDashboard.vue'),
         },
         {
-          path: 'users',
-          name: 'AdminUsers',
-          component: () => import('@/views/admin/AdminUsers.vue'),
+          path: 'user',
+          name: 'AdminUser',
+          component: () => import('@/views/admin/AdminUser.vue'),
         },
         {
-          path: 'challenges',
-          name: 'AdminChallenges',
-          component: () => import('@/views/admin/AdminChallenges.vue'),
+          path: 'challenge',
+          name: 'AdminChallenge',
+          component: () => import('@/views/admin/AdminChallenge.vue'),
         },
         {
-          path: 'points',
-          name: 'AdminPoints',
-          component: () => import('@/views/admin/AdminPoints.vue'),
+          path: 'point',
+          name: 'AdminPoint',
+          component: () => import('@/views/admin/AdminPoint.vue'),
+        },
+        {
+          path: 'community',
+          name: 'AdminCommunity',
+          component: () => import('@/views/admin/AdminCommunity.vue'),
         },
         {
           path: 'qna',
@@ -353,7 +359,12 @@ const router = createRouter({
         {
           path: 'statistics',
           name: 'AdminStatistics',
-          component: () => import('@/views/admin/AdminStatistics.vue'),
+          component: () => import('@/views/admin/AdminStatistic.vue'),
+        },
+        {
+          path: 'user/detail',
+          name: 'AdminUserDetail',
+          component: () => import('@/views/admin/AdminUserDetail.vue'),
         },
       ],
     },
@@ -361,7 +372,13 @@ const router = createRouter({
 });
 
 // 로그인 하지 않아도 이용할 수 있는 Path들
-const unSignedPathList = ['/user/login', '/user/join', '/fe/redirect'];
+const unSignedPathList = [
+  '/user/login',
+  '/user/join',
+  '/fe/redirect',
+  '/user/password',
+  '/user/findid',
+];
 
 //navigation guard
 router.beforeEach((to, from) => {
@@ -369,6 +386,7 @@ router.beforeEach((to, from) => {
   const isUnsignedPath = unSignedPathList.some((path) =>
     to.path.startsWith(path)
   );
+
   // body 클래스 분기
   if (to.path.startsWith('/admin')) {
     document.body.classList.add('is-admin');
