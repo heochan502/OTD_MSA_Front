@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from '@/services/httpRequester';
 
 const PointUserService = {
   // [GET] 사용자 포인트 조회

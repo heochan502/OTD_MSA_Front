@@ -1,10 +1,10 @@
-import axios from 'axios';
+import axios from '@/services/httpRequester';
 
 const PointShopService = {
   // [GET] 전체 아이템 목록 조회
   async getAllItems() {
     try {
-      const res = await axios.get('/pointshop/point/list');
+      const res = await axios.get('/pointshop/list');
       return res;
     } catch (e) {
       console.error('[PointShopService] 아이템 목록 요청 실패:', e);
