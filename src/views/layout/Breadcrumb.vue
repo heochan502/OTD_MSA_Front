@@ -6,7 +6,16 @@ import { useHeaderStore } from '@/stores/challenge/headerStore';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { reissue } from '@/services/user/userService';
 
+// 알림 스토어
+import { storeToRefs } from 'pinia'
+import { useNotificationStore } from '@/stores/notification/notification';
+
+// 알림 스토어 인스턴스/배지 개수
+const n = useNotificationStore()
+const { unreadCount } = storeToRefs(n)
+
 const route = useRoute();
+const router = useRouter();
 const headerStore = useHeaderStore();
 const authentication = useAuthenticationStore();
 const userInfo = computed(() => ({
@@ -50,10 +59,26 @@ const defaultProfile = '/otd/image/main/default-profile.png';
 const profileImage = computed(() => {
   return userInfo.value?.pic ? userInfo.value.pic : defaultProfile;
 });
-const handleClick = async()=>{
-  console.log("알람 클릭");
-  await reissue();
+
+// 알람 클릭
+const handleClick = async () => {
+  try {
+    await reissue()
+  } catch (_) {
+    console.warn('토큰 재발급 실패, 게스트 상태로 계속 진행')
+  }
+
+  // 알림 목록 새로 불러오기
+  try {
+    await n.load()
+  } catch (err) {
+    console.error('알림 불러오기 실패:', err)
+  }
+
+  // 알림 페이지로 이동
+  router.push({ name: 'NotificationsView' })
 }
+
 // 포인트 포맷팅
 const formatPoint = (point) => {
   return point?.toLocaleString() || '0';

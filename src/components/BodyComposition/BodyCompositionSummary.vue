@@ -7,9 +7,7 @@ import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositi
 
 const bodyCompositionStore = useBodyCompositionStore();
 
-onMounted(async () => {
-  await bodyCompositionStore.fetchLastestBodyComposition();
-});
+onMounted(async () => {});
 </script>
 
 <template>
@@ -18,7 +16,7 @@ onMounted(async () => {
     <div class="content_main otd-box-style">
       <!-- 체성분 기록일 -->
       <div class="current_date otd-body-3">
-        {{ formatDateKR(bodyCompositionStore.lastest.createdAt) }}
+        {{ formatDateKR(bodyCompositionStore.lastest.created_at) }}
       </div>
       <div class="d-flex flex-column align-center">
         <!-- 체성분 정보 -->
@@ -32,13 +30,13 @@ onMounted(async () => {
           <div class="item">
             <div class="otd-body-1">체지방률(%)</div>
             <div class="otd-subtitle-1">
-              {{ bodyCompositionStore.lastest.percentBodyFat }}
+              {{ bodyCompositionStore.lastest.percent_body_fat }}
             </div>
           </div>
           <div class="item">
             <div class="otd-body-1">골격근량(kg)</div>
             <div class="otd-subtitle-1">
-              {{ bodyCompositionStore.lastest.skeletalMuscleMass }}
+              {{ bodyCompositionStore.lastest.skeletal_muscle_mass }}
             </div>
           </div>
         </div>
