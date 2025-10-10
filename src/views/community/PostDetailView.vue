@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useCommunityStore } from '@/stores/community/community';
 import { fetchPostFiles } from '@/services/community/postService';
 import CommentSection from '@/components/community/CommentSection.vue';
+import { formatYMDHM } from '@/stores/community/date';
 
 const route = useRoute();
 const router = useRouter();
@@ -107,7 +108,9 @@ const editPost = () => {
           <span class="otd-body-3" style="font-weight: 600">{{
             post.author
           }}</span>
-          <span class="otd-body-3">· {{ post.time }}</span>
+          <span class="otd-body-3"
+            >· {{ formatYMDHM(post.createdAt || post.time) }}</span
+          >
         </div>
 
         <div class="meta-right" v-if="canEdit">

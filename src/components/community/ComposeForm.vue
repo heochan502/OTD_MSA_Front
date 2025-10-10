@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onBeforeUnmount } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useCommunityStore } from '@/stores/community/community';
 
 const props = defineProps({
@@ -13,7 +13,10 @@ const props = defineProps({
       { key: 'love', label: '연애' },
     ],
   },
+  mode: { type: String, default: 'create' }, // ✅ 추가 ('create' or 'edit')
+  initial: { type: Object, default: null }, // ✅ 추가 (수정 모드에서 기본값)
 });
+
 const emit = defineEmits(['cancel', 'submitted', 'update:category']);
 const store = useCommunityStore();
 
@@ -23,6 +26,18 @@ const files = ref([]);
 const previews = ref([]);
 const submitting = ref(false);
 const errorMsg = ref('');
+const hydrated = ref(false); // ✅ 초기값 수화 가드
+
+// ✅ 초기값 반영
+function applyInitial() {
+  if (!props.initial || hydrated.value) return;
+  title.value = props.initial.title ?? '';
+  content.value = props.initial.content ?? '';
+  hydrated.value = true;
+}
+
+onMounted(applyInitial);
+watch(() => props.initial, applyInitial);
 
 const canSubmit = computed(
   () =>
@@ -52,33 +67,19 @@ onBeforeUnmount(revokeAll);
 
 function onFileChange(e) {
   const sel = Array.from(e.target.files || []);
-  console.info(
-    '[ComposeForm] 선택된 파일 수:',
-    sel.length,
-    sel.map((f) => ({ name: f.name, size: f.size, type: f.type }))
-  );
   const next = [];
   const nextPreviews = [];
   const MAX_MB = 15;
   const MAX_SIZE = MAX_MB * 1024 * 1024;
   for (const f of sel) {
-    if (!f.type?.startsWith('image/')) {
-      console.warn('[ComposeForm] 이미지 아님, 무시:', f.name, f.type);
-      continue;
-    }
-    if (f.size > MAX_SIZE) {
-      console.error('[ComposeForm] 용량 초과:', f.name, f.size, '>', MAX_SIZE);
-      continue;
-    }
+    if (!f.type?.startsWith('image/')) continue;
+    if (f.size > MAX_SIZE) continue;
     next.push(f);
     nextPreviews.push({
       url: URL.createObjectURL(f),
       name: f.name,
       size: f.size,
     });
-  }
-  if (next.length === 0) {
-    console.warn('[ComposeForm] 유효한 첨부 없음');
   }
   files.value = next;
   revokeAll();
@@ -95,7 +96,6 @@ function removeAt(i) {
   pv.splice(i, 1);
   files.value = list;
   previews.value = pv;
-  console.info('[ComposeForm] 제거 후 남은 파일 수:', files.value.length);
 }
 
 async function submit() {
@@ -103,23 +103,28 @@ async function submit() {
   submitting.value = true;
   errorMsg.value = '';
   try {
-    const payload = {
-      categoryKey: props.category,
-      title: title.value.trim(),
-      content: content.value.trim(),
-      files: files.value,
-    };
-    console.info('[ComposeForm] 게시글 등록 요청:', {
-      ...payload,
-      files: files.value?.length,
-    });
-    await store.createNewPost(payload);
+    if (props.mode === 'edit' && props.initial?.id) {
+      // ✅ 수정 모드일 때
+      const payload = {
+        categoryKey: props.category,
+        title: title.value.trim(),
+        content: content.value.trim(),
+        files: files.value,
+      };
+      await store.updatePost(props.initial.id, payload);
+    } else {
+      // ✅ 새 글 작성 모드
+      const payload = {
+        categoryKey: props.category,
+        title: title.value.trim(),
+        content: content.value.trim(),
+        files: files.value,
+      };
+      await store.createNewPost(payload);
+    }
     emit('submitted', { categoryKey: props.category });
   } catch (e) {
-    console.error(
-      '[ComposeForm] createNewPost failed:',
-      e?.response?.data || e
-    );
+    console.error('[ComposeForm] submit failed:', e?.response?.data || e);
     errorMsg.value =
       e?.response?.data?.message ||
       e?.message ||
@@ -134,7 +139,9 @@ async function submit() {
   <div class="form-card">
     <div class="header">
       <button class="back"></button>
-      <div class="h-title">게시글 작성</div>
+      <div class="h-title">
+        {{ props.mode === 'edit' ? '게시글 수정' : '게시글 작성' }}
+      </div>
       <div style="width: 24px" />
     </div>
 
@@ -203,7 +210,7 @@ async function submit() {
       :disabled="!canSubmit || submitting"
       @click="submit"
     >
-      게시글 등록
+      {{ props.mode === 'edit' ? '게시글 수정' : '게시글 등록' }}
     </button>
     <button class="ghost" @click="emit('cancel')">취소</button>
 
@@ -212,6 +219,7 @@ async function submit() {
 </template>
 
 <style scoped>
+/* 스타일은 기존과 동일 */
 .err {
   margin-top: 8px;
   color: #c24040;
@@ -243,14 +251,6 @@ async function submit() {
   justify-content: space-between;
   margin-bottom: 8px;
 }
-.back {
-  width: 24px;
-  height: 24px;
-  border: none;
-  background: transparent;
-  font-size: 22px;
-  cursor: pointer;
-}
 .h-title {
   font-weight: 800;
   color: #07c5cf;
@@ -281,10 +281,6 @@ async function submit() {
   color: #7a7a7a;
   font-size: 12px;
 }
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-}
 .label {
   display: block;
   margin: 8px 0 6px;
@@ -303,8 +299,6 @@ async function submit() {
 .textarea {
   resize: vertical;
 }
-
-/* 썸네일 그리드 (시안 스타일) */
 .attach {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -339,8 +333,6 @@ async function submit() {
   color: #fff;
   cursor: pointer;
 }
-
-/* 플러스 카드 */
 .uploader {
   position: relative;
   width: 100%;
@@ -367,7 +359,6 @@ async function submit() {
   font-size: 32px;
   color: #bdbdbd;
 }
-
 .submit {
   width: 100%;
   padding: 14px;

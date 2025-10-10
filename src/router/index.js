@@ -112,7 +112,11 @@ const router = createRouter({
       meta: { headerType: 'title', title: '커뮤니티', showUserPanel: false },
       props: true,
     },
-
+    {
+      path: '/community/post/:id/edit',
+      name: 'CommunityEdit',
+      component: () => import('@/views/community/EditPostView.vue'),
+    },
     {
       path: '/test',
       name: 'Test',
