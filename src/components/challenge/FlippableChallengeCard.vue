@@ -9,9 +9,12 @@ const props = defineProps({
   reward: Number,
   goal: Number,
   unit: String,
+  note: String,
   exp: Number,
 });
-
+const formatNote = (note) => {
+  
+}
 const isFlipped = ref(false);
 const toggleFlip = () => {
   isFlipped.value = !isFlipped.value;
@@ -31,6 +34,7 @@ const toggleFlip = () => {
         <span>목표 : {{ goal + unit }}</span>
         <span>경험치 : {{ exp }}xp</span>
         <span>보상 : {{ reward }}p</span>
+        <span>설명 : {{ note }}</span>
       </div>
     </div>
   </div>

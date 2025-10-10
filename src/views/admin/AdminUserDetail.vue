@@ -4,11 +4,13 @@ import {
   getUserDetail,
   putUserProfile,
   deleteUser,
+  getUserExerciseRecord,
+  getUserMealRecord,
+  getUser,
 } from '@/services/admin/adminService';
-import { getUserExerciseRecord } from '@/services/exercise/exerciseService';
-import { getUserMealRecord } from '@/services/meal/mealService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { useAdminStore } from '@/stores/admin/adminStore';
+import router from '@/router';
 
 const authenticationStore = useAuthenticationStore();
 const adminStore = useAdminStore();
@@ -46,15 +48,15 @@ onMounted(async () => {
   console.log('userInfo', state.userInfo);
   const userId = Number(state.userInfo.userId);
   const resUser = await getUserDetail(userId);
-  // const resExercise = await getUserExerciseRecord(userId);
-  // const resMeal = await getUserMealRecord(userId);
   console.log('1', resUser.data);
-  // console.log('2', resExercise.data);
-  // console.log('3', resMeal.data);
+  const resExercise = await getUserExerciseRecord(userId);
+  console.log('2', resExercise.data);
+  const resMeal = await getUserMealRecord(userId);
+  console.log('3', resMeal.data);
   state.challengeHistory = resUser.data.challengeProgress;
   state.pointHistory = resUser.data.challengePointHistory;
-  // state.exerciseHistory = resExercise.data.exerciseRecord;
-  // state.mealHistory = resMeal.data.mealRecord;
+  state.exerciseHistory = resExercise.data.exerciseRecord;
+  state.mealHistory = resMeal.data.mealRecord;
 
   picUrl.value = authenticationStore.formattedUserPic(state.userInfo);
 });
@@ -133,6 +135,7 @@ const deleteUserProfile = async () => {
     // 성공하면 저장 완료 모달 열기
     deleteUserDialog.value = false;
     successDialog.value = true;
+    router.push('/admin/user');
   } else {
     alert('차단에 실패했습니다. 다시 시도해주세요.');
   }
