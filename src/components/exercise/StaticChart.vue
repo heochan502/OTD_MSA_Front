@@ -125,7 +125,7 @@ const hasData = computed(() => {
 
 <template>
   <div v-if="!hasData" class="no-data">
-    <v-card class="chart flex-column otd-border otd-shadow otd-box-style">
+    <v-card class="chart otd-border otd-shadow otd-box-style">
       <span class="text-h4">☹️</span>
       <span class="otd-subtitle-2"> 체성분 측정 데이터가 없어요 </span>
     </v-card>
@@ -152,6 +152,7 @@ const hasData = computed(() => {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  text-align: center;
   height: 250px;
   padding: 20px 10px;
   margin: 0 0 15px 0;
