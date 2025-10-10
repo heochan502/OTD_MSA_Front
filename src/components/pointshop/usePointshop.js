@@ -16,14 +16,16 @@ export function usePointShop() {
   const fetchAllItems = async () => {
     try {
       const res = await PointShopService.getAllItems();
-      if (res?.status === 200) {
-        allItems.value = res.data;
+      if (res?.status === 200 && res.data?.success) {
+      allItems.value = Array.isArray(res.data.data) ? res.data.data : [];
       } else {
         console.warn('[usePointShop] 아이템 목록 응답 오류:', res);
-        alert('아이템 목록을 불러오지 못했습니다.');
+        allItems.value = [];
+        alert('아이템 목록을 불러올 수 없습니다.');
       }
     } catch (err) {
       console.error('[usePointShop] 아이템 목록 요청 실패:', err);
+      allItems.value = [];
       alert('서버와 연결할 수 없습니다. 잠시 후 다시 시도해주세요.');
     }
   };
@@ -32,8 +34,8 @@ export function usePointShop() {
   const fetchUserPoints = async () => {
     try {
       const res = await PointUserService.getUserPoints();
-      if (res?.status === 200 && res.data?.pointBalance != null) {
-        userPoints.value = res.data.pointBalance;
+      if (res?.status === 200 && res.data?.success) {
+        userPoints.value = res.data.data;
       } else {
         console.warn('[usePointShop] 포인트 정보 응답 오류:', res);
         alert('포인트 정보를 불러올 수 없습니다.');
@@ -48,8 +50,8 @@ export function usePointShop() {
   const fetchPurchasedItems = async () => {
     try {
       const res = await PointPurchaseService.getUserPurchaseHistory();
-      if (res?.status === 200 && Array.isArray(res.data)) {
-        purchasedItemIds.value = res.data.map(p => p.itemId);
+      if (res?.status === 200 && res.data?.success) {
+        purchasedItemIds.value = res.data.data.map(item => item.pointId);
       } else {
         console.warn('[usePointShop] 구매 내역 응답 오류:', res);
         alert('구매 내역을 불러올 수 없습니다.');

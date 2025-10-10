@@ -39,6 +39,7 @@ const state = reactive({
 });
 
 const filteredItems = computed(() => {
+  if (!Array.isArray(allItems.value)) return [];
   const query = state.search.trim().toLowerCase();
   return query === ''
     ? allItems.value
@@ -48,6 +49,7 @@ const filteredItems = computed(() => {
 });
 
 const searchList = computed(() => {
+  if (!Array.isArray(filteredItems.value)) return [];
   const names = filteredItems.value.map(item => item.name);
   return [...new Set(names)].slice(0, 5); // 중복 제거
 });
@@ -98,7 +100,7 @@ const purchase = async (item) => {
 
     <div class="pointshop-container">
       <PointItemCard
-        v-for="item in filteredItems"
+        v-for="item in (Array.isArray(filteredItems) ? filteredItems : [])"
         :key="item.id"
         :item="item"
         :userPoints="userPoints.value"
