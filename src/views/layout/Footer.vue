@@ -138,17 +138,16 @@ const isActive = computed(() => route.path === "/");
 }
 
 .nav_container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   width: 54px;
   height: 58px;
   min-width: 22px;
   background: none;
   border: none;
   font-size: 14px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 0 0 0 5px;
 }
 
 .nav .active {

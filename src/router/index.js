@@ -8,7 +8,7 @@ import Home from "@/views/HomeView.vue";
 import Community from "@/views/community/CommunityView.vue";
 import CategoryFeedView from "@/views/community/categories/CategoryFeedView.vue";
 import PostDetailView from "@/views/community/PostDetailView.vue";
-import WritePostView from '@/views/community/WritePostView.vue';
+import WritePostView from "@/views/community/WritePostView.vue";
 
 // 챌린지
 import ChallengeHome from "@/views/challenge/ChallengeHome.vue";
@@ -53,7 +53,11 @@ import ExerciseRecordForm from "@/views/exercise/ExerciseRecordForm.vue";
 import ExerciseRecordDetail from "@/views/exercise/ExerciseRecordDetail.vue";
 
 // 체성분
-import BodyCompositionStatics from '@/views/body_composition/BodyCompositionStatics.vue';
+import BodyCompositionStatics from "@/views/body_composition/BodyCompositionStatics.vue";
+import RecordFilterList from "@/views/body_composition/RecordFilterList.vue";
+
+// 알람
+import Notifications from "@/views/notification/NotificationsView.vue";
 
 // 카테고리 라벨 맵
 const CATEGORY_LABEL = {
@@ -79,17 +83,17 @@ const router = createRouter({
       meta: { headerType: "title", title: "커뮤니티", showUserPanel: false },
     },
     {
-      path: '/community/write',
-      name: 'CommunityWrite',
+      path: "/community/write",
+      name: "CommunityWrite",
       component: WritePostView,
-      meta: { headerType: 'title', title: '게시글 작성', showUserPanel: false },
+      meta: { headerType: "title", title: "게시글 작성", showUserPanel: false },
     },
     {
-      path: '/community/post/:id(\\d+)/edit',
-      name: 'CommunityEdit',
+      path: "/community/post/:id(\\d+)/edit",
+      name: "CommunityEdit",
       component: WritePostView,
-      props: (route) => ({ id: Number(route.params.id), mode: 'edit' }),
-      meta: { headerType: 'title', title: '게시글 수정', showUserPanel: false },
+      props: (route) => ({ id: Number(route.params.id), mode: "edit" }),
+      meta: { headerType: "title", title: "게시글 수정", showUserPanel: false },
     },
     {
       path: "/community/:category(free|diet|work|love)",
@@ -387,10 +391,10 @@ const router = createRouter({
           component: () => import("@/views/admin/AdminUserDetail.vue"),
         },
         {
-          path: '/notification',
-          name: 'NotificationsView',
+          path: "/notification",
+          name: "NotificationsView",
           component: Notifications,
-          meta: { title: '내 소식' },
+          meta: { title: "내 소식" },
         },
       ],
     },
