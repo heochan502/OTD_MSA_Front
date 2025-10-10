@@ -55,6 +55,9 @@ import ExerciseRecordDetail from '@/views/exercise/ExerciseRecordDetail.vue';
 // 체성분
 import BodyCompositionStatics from '@/views/body_composition/BodyCompositionStatics.vue';
 
+// 알람
+import Notifications from '@/views/notification/NotificationsView.vue';
+
 // 카테고리 라벨 맵
 const CATEGORY_LABEL = {
   free: '자유수다',
@@ -379,6 +382,12 @@ const router = createRouter({
           path: 'user/detail',
           name: 'AdminUserDetail',
           component: () => import('@/views/admin/AdminUserDetail.vue'),
+        },
+        {
+          path: '/notification',
+          name: 'NotificationsView',
+          component: Notifications,
+          meta: { title: '내 소식' },
         },
       ],
     },

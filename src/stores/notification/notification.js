@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { LocalNotificationProvider } from '@/services/notifications/provider.local';
+import { LocalNotificationProvider } from '@/services/notification/provider.local';
 // import { HttpNotificationProvider } from '@/services/notifications/provider.http'
 
 const provider = LocalNotificationProvider;

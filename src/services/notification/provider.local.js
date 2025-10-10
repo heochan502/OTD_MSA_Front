@@ -1,7 +1,10 @@
-import { v4 as uuid } from 'uuid';
-
 const KEY = 'demo_notifications';
 
+function genId() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID)
+    return crypto.randomUUID();
+  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
 function load() {
   try {
     return JSON.parse(localStorage.getItem(KEY) || '[]');
