@@ -73,7 +73,7 @@ async function submit() {
 <template>
   <div class="form-card">
     <div class="header">
-      <button class="back" @click="emit('cancel')" aria-label="닫기">‹</button>
+      <button class="back"></button>
       <div class="h-title">게시글 작성</div>
       <div style="width: 24px" />
     </div>
