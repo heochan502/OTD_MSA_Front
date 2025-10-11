@@ -5,7 +5,6 @@ import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
 import ExerciseRecordList from "@/components/exercise/ExerciseRecordList.vue";
 import { getExerciseRecordList } from "@/services/exercise/exerciseService";
 import { formatDateYearMonthKR } from "@/utils/dateTimeUtils";
-import { calcDuration } from "@/utils/exerciseUtils";
 
 const route = useRoute();
 const exerciseRecordStore = useExerciseRecordStore();
@@ -14,7 +13,6 @@ const now = formatDateYearMonthKR(route.query.date);
 onMounted(async () => {
   exerciseRecordStore.clearRecords();
   const date = route.query.date;
-
   const params = {
     page: 1,
     row_per_page: 10,

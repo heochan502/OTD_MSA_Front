@@ -50,6 +50,8 @@ const isToday = (day) => day.isSame(today, "day");
 const isSelected = (day) => day.isSame(currentDate.value, "day");
 
 const selectDate = (day) => {
+  if (day.isAfter(today, "day")) return; // 미래 날짜 선택 불가
+
   currentDate.value = day;
   emit("click-date", day.format("YYYY-MM-DD"));
 };
@@ -71,13 +73,6 @@ const goNow = () => {
   weekStart.value = today.startOf("isoWeek"); // 이번 주 시작일 갱신
   emit("click-date", today.format("YYYY-MM-DD"));
 };
-
-// exerciseCalendar에서 emit 한 이벤를 받는 함수
-// const applyDate = (date) => {
-//   // 부모(ExerciseMain.vue)에 선택된 날짜 전달
-//   emit("click-date", date);
-//   openCalendar.value = false; // 모달 닫기
-// };
 
 // 날짜 선택 시 (단순히 날짜만 업데이트)
 const onSelectDate = (date) => {
@@ -114,7 +109,10 @@ const applyDate = (date) => {
         v-for="day in weekDays"
         :key="day.format('YYYY-MM-DD')"
         class="day-cell"
-        :class="{ today: isToday(day), selected: isSelected(day) }"
+        :class="{
+          today: isToday(day),
+          selected: isSelected(day),
+        }"
         @click="selectDate(day)"
       >
         <span class="date">{{ day.format("D") }}</span>

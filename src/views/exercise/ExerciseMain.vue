@@ -1,9 +1,9 @@
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, computed } from "vue";
 import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
 import { getExerciseRecordList } from "@/services/exercise/exerciseService";
 import { formatDateISO, formatDateYearMonthISO } from "@/utils/dateTimeUtils";
-
+import { useRoute } from "vue-router";
 import btnAdd from "/image/exercise/btn_add_grey.png";
 
 import ExerciseRecordList from "@/components/exercise/ExerciseRecordList.vue";
@@ -11,9 +11,10 @@ import BodyCompositionSummary from "@/components/BodyComposition/BodyComposition
 import WeeklyCalendar from "@/components/exercise/WeeklyCalendar.vue";
 import BodyCompositionStatics from "../body_composition/BodyCompositionStatics.vue";
 
+const route = useRoute();
 const exerciseRecordStore = useExerciseRecordStore();
 const selectedDate = ref(formatDateISO(new Date()));
-const monthly = formatDateYearMonthISO(selectedDate.value);
+const monthly = computed(() => formatDateYearMonthISO(selectedDate.value));
 
 onMounted(async () => {
   await exerciseRecordStore.fetchExercises();
