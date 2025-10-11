@@ -3,8 +3,12 @@ import { onMounted, ref } from "vue";
 import StaticChart from "@/components/exercise/StaticChart.vue";
 import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
 
-const model = ref(true);
 const bodyCompositionStore = useBodyCompositionStore();
+const toggle = ref(true);
+const filterRange = ref({
+  start_date: "",
+  end_date: "",
+});
 </script>
 
 <template>
@@ -12,13 +16,13 @@ const bodyCompositionStore = useBodyCompositionStore();
     <div class="d-flex align-center justify-space-between">
       <router-link to="/exercise/body_composition/filter">
         <div class="day_picker otd-border">
-          <div class="otd-body-2">{{ "2024.10.16 ~ 최근" }}</div>
+          <div class="otd-body-2">조회 필터링</div>
         </div>
       </router-link>
       <div class="d-flex align-center ga-2">
         <span>최근</span>
         <v-switch
-          v-model="model"
+          v-model="toggle"
           hide-details
           inset
           density="compact"
@@ -38,6 +42,9 @@ const bodyCompositionStore = useBodyCompositionStore();
 </template>
 
 <style lang="scss" scoped>
+* {
+  text-decoration: none;
+}
 .day_picker {
   display: flex;
   justify-content: center;
@@ -47,5 +54,6 @@ const bodyCompositionStore = useBodyCompositionStore();
   background-color: #fff;
 
   border-radius: 10px;
+  cursor: pointer;
 }
 </style>

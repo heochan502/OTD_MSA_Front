@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
 import { getList } from "@/services/body_composition/bodyCompositionService";
 import { formatDateDayTime, formatDateISO } from "@/utils/dateTimeUtils";
+import dayjs from "dayjs";
 
 const bodyCompositionStore = useBodyCompositionStore();
 const selectedStartDate = ref("");
@@ -11,16 +12,21 @@ const seletedDeviceType = ref("");
 const params = reactive({
   page: 1,
   row_per_page: 10,
-  start_date: selectedStartDate,
-  end_date: selectedEndDate,
-  device: seletedDeviceType,
+  start_date: selectedStartDate.value
+    ? dayjs(selectedStartDate.value).format("YYYY-MM-DDTHH:mm:ss")
+    : null,
+  end_date: selectedEndDate.value
+    ? dayjs(selectedEndDate.value).format("YYYY-MM-DDTHH:mm:ss")
+    : null,
+  device: seletedDeviceType.value,
 });
+
 onMounted(async () => {
   if (bodyCompositionStore.lastest) {
-    console.log("기록있음");
     await fetchBodyCompositionList(params);
   }
 });
+// 데이터 불러오기
 const fetchBodyCompositionList = async (params) => {
   const res = await getList(params);
   if (res === undefined || res.status !== 200) {
@@ -32,23 +38,45 @@ const fetchBodyCompositionList = async (params) => {
 
 // 체크박스
 const checkboxAll = ref(false); // 전체 선택
-const checkboxItem = ref(false); // 단일 선택
-watch(checkboxAll, () => {
-  //   console.log(checkboxAll.value);
-  checkboxItem.value = true;
-});
+const selectedItems = ref([]); // 단일 선택(선택된 항목의 id값을 저장함)
 
+// '전체 선택' 상태 감시
+watch(checkboxAll, async (newValue) => {
+  if (newValue) {
+    // 전체 선택 → 모든 항목 선택
+    selectedItems.value = bodyCompositionStore.filterList.map(
+      (item) => item.idx
+    );
+  } else {
+    // 전체 해제 → 선택 초기화
+    selectedItems.value = [];
+  }
+
+  // nextTick으로 렌더링 후 체크박스 반영 보장
+  await nextTick();
+});
+watch(selectedItems, () => {
+  checkboxAll.value =
+    selectedItems.value.length === bodyCompositionStore.filterList.length &&
+    bodyCompositionStore.filterList.length > 0;
+});
 // 리스트 개수
 const countList = bodyCompositionStore.filterList?.length ?? 0;
 
 // 기간 범위 목록
 const selectionDate = computed(() => {
-  return bodyCompositionStore.filterList.map((d) => formatDateISO(d.createdAt));
+  const list = bodyCompositionStore.filterList.map((d) =>
+    formatDateISO(d.createdAt)
+  );
+  const endIdx = list.length - 1;
+  selectedStartDate.value = list[endIdx];
+  selectedEndDate.value = list[0];
+  return list;
 });
 
 // 장비종류
 const selectionDeviceType = computed(() => {
-  return bodyCompositionStore.filterList.map((d) => d.deviceType);
+  return new Set(bodyCompositionStore.filterList.map((d) => d.deviceType));
 });
 </script>
 
@@ -118,13 +146,28 @@ const selectionDeviceType = computed(() => {
         </div>
       </div>
 
-      <div class="list otd-box-style">
-        <div
+      <!-- 리스트 컴포넌트 사용 -->
+      <v-list
+        class="otd-box-style"
+        v-model:selected="selectedItems"
+        select-strategy="leaf"
+      >
+        <v-list-item
           v-for="item in bodyCompositionStore.filterList"
           :key="item.idx"
+          :value="item.idx"
           class="item"
         >
-          <v-checkbox v-model="checkboxItem" hide-details> </v-checkbox>
+          <template v-slot:prepend="{ isSelected, select }">
+            <v-list-item-action start>
+              <v-checkbox-btn
+                :model-value="isSelected"
+                @update:model-value="select"
+              >
+              </v-checkbox-btn>
+            </v-list-item-action>
+          </template>
+
           <div class="d-flex flex-column">
             <span class="otd-body-1">
               {{ formatDateDayTime(item.createdAt) }}
@@ -133,8 +176,8 @@ const selectionDeviceType = computed(() => {
               {{ item.deviceType }}
             </span>
           </div>
-        </div>
-      </div>
+        </v-list-item>
+      </v-list>
     </div>
   </div>
 </template>
@@ -144,14 +187,17 @@ const selectionDeviceType = computed(() => {
   margin-bottom: 15px;
 }
 .subtitle {
-  margin-bottom: 10px;
+  margin: 0 5px;
 }
 .contents {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
 }
 
 .daypicker {
-  width: 148px;
+  width: 160px;
   height: 80px;
   padding: 10px 12px;
 
@@ -159,7 +205,7 @@ const selectionDeviceType = computed(() => {
 }
 .btn_filter {
   height: 36px;
-  margin: 0 2.5px 5px;
+  margin: 10px 2.5px;
   border-radius: 20px;
 }
 .hr {
