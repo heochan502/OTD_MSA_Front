@@ -34,6 +34,11 @@ import PointHistory from '@/views/user/pointHistory.vue';
 import Term from '@/views/user/Term.vue';
 import Oauth2 from '@/views/auth/OAuth2Handler.vue';
 
+//마이페이지
+import MyPost from '@/views/user/MyPost.vue';
+import MyLike from '@/views/user/MyLike.vue';
+import MyComment from '@/views/user/MyComment.vue';
+
 // 포인트샵
 import PointShopListView from '@/views/point/PointShopListView.vue';
 import PointUserPurchaseHistoryView from '@/views/point/PointUserPurchaseHistoryView.vue';
@@ -262,6 +267,21 @@ const router = createRouter({
       path: '/user/password',
       name: 'password',
       component: Password,
+    },
+    {
+      path: '/user/post',
+      name: 'myPost',
+      component: MyPost,
+    },
+    {
+      path: '/user/like',
+      name: 'myLike',
+      component: MyLike,
+    },
+    {
+      path: '/user/comment',
+      name: 'myComment',
+      component: MyComment,
     },
     {
       path: '/pointshop',
