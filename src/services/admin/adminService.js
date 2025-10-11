@@ -92,3 +92,8 @@ export const getUserExerciseRecord = (userId) => {
 export const getCommunity = () => {
   return axios.get(`${LIFE_URL}/community`).catch((e) => e.response);
 };
+
+// 대시보드
+export const getTodayLogin = () => {
+  return axios.get(`${BASE_URL}/dashboard/login`).catch((e) => e.response);
+};
