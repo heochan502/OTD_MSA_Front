@@ -8,7 +8,7 @@ export const getLastestBodyComposition = () => {
 
 // 체성분 변화 그래프를 위한 데이터
 export const getSeries = (jsonBody) => {
-  console.log("series : " ,jsonBody);
+  // console.log("series : ", jsonBody);
   return axios.get(`${BASE_URL}/series`, jsonBody).catch((e) => e.response);
 };
 

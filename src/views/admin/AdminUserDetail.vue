@@ -4,17 +4,22 @@ import {
   getUserDetail,
   putUserProfile,
   deleteUser,
+  getUserExerciseRecord,
+  getUserMealRecord,
+  getUser,
 } from '@/services/admin/adminService';
-import { getUserExerciseRecord } from '@/services/exercise/exerciseService';
-import { getUserMealRecord } from '@/services/meal/mealService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { useAdminStore } from '@/stores/admin/adminStore';
+import router from '@/router';
 
 const authenticationStore = useAuthenticationStore();
 const adminStore = useAdminStore();
 
 const searchPoint = ref('');
 const searchChallenge = ref('');
+const searchExercise = ref('');
+const searchMeal = ref('');
+
 const picUrl = ref();
 const deletePicDialog = ref(false);
 const putProfileDialog = ref(false);
@@ -43,15 +48,15 @@ onMounted(async () => {
   console.log('userInfo', state.userInfo);
   const userId = Number(state.userInfo.userId);
   const resUser = await getUserDetail(userId);
-  // const resExercise = await getUserExerciseRecord(userId);
-  // const resMeal = await getUserMealRecord(userId);
   console.log('1', resUser.data);
-  // console.log('2', resExercise.data);
-  // console.log('3', resMeal.data);
+  const resExercise = await getUserExerciseRecord(userId);
+  console.log('2', resExercise.data);
+  const resMeal = await getUserMealRecord(userId);
+  console.log('3', resMeal.data);
   state.challengeHistory = resUser.data.challengeProgress;
   state.pointHistory = resUser.data.challengePointHistory;
-  // state.exerciseHistory = resExercise.data.exerciseRecord;
-  // state.mealHistory = resMeal.data.mealRecord;
+  state.exerciseHistory = resExercise.data.exerciseRecord;
+  state.mealHistory = resMeal.data.mealRecord;
 
   picUrl.value = authenticationStore.formattedUserPic(state.userInfo);
 });
@@ -71,6 +76,10 @@ const challengeHeaders = [
   { title: '종료일', key: 'endDate' },
   { title: '성공여부', key: 'success' },
 ];
+
+const exerciseHeaders = [];
+
+const mealHeaders = [];
 
 const formatNumber = (n) => String(n).padStart(2, '0');
 const formatDate = (date) => {
@@ -126,6 +135,7 @@ const deleteUserProfile = async () => {
     // 성공하면 저장 완료 모달 열기
     deleteUserDialog.value = false;
     successDialog.value = true;
+    router.push('/admin/user');
   } else {
     alert('차단에 실패했습니다. 다시 시도해주세요.');
   }
@@ -222,7 +232,7 @@ const deletePic = () => {
       <v-card-subtitle>권한</v-card-subtitle>
       <v-select
         v-if="state.userInfo.userRoles != null"
-        :items="['USER', 'SOCIAL', 'MANAGER', 'ADMIN']"
+        :items="['USER_1', 'USER_2', 'MANAGER', 'ADMIN']"
         v-model="state.userInfo.userRoles"
       ></v-select>
 
@@ -321,6 +331,58 @@ const deletePic = () => {
         <template #item.point="{ item }"> {{ item.point }}P </template>
       </v-data-table>
     </v-card>
+
+    <!-- 운동기록 -->
+    <!-- <v-card>
+      <v-card-title class="d-flex justify-space-between align-center">
+        <span class="title">운동 기록</span>
+        <v-text-field
+          v-model="searchExercise"
+          label="검색"
+          prepend-inner-icon="mdi-magnify"
+          density="compact"
+          hide-details
+          single-line
+          variant="outlined"
+          style="max-width: 250px"
+        />
+      </v-card-title>
+      <v-data-table
+        :headers="exerciseHeaders"
+        :items="exerciseHistory"
+        :items-per-page="10"
+        :search="searchExercise"
+        fixed-header
+        class="styled-table"
+      >
+      </v-data-table>
+    </v-card> -->
+
+    <!-- 식단기록 -->
+    <!-- <v-card>
+      <v-card-title class="d-flex justify-space-between align-center">
+        <span class="title">식단 기록</span>
+        <v-text-field
+          v-model="searchMeal"
+          label="검색"
+          prepend-inner-icon="mdi-magnify"
+          density="compact"
+          hide-details
+          single-line
+          variant="outlined"
+          style="max-width: 250px"
+        />
+      </v-card-title>
+      <v-data-table
+        :headers="mealHeaders"
+        :items="mealHistory"
+        :items-per-page="10"
+        :search="searchMeal"
+        fixed-header
+        class="styled-table"
+      >
+      </v-data-table>
+    </v-card> -->
   </div>
 </template>
 
