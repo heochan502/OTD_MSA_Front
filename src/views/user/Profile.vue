@@ -280,15 +280,15 @@ onMounted(() => {
     <div class="activity-section">
       <h3 class="section-title">나의 활동</h3>
       <div class="activity-grid">
-        <router-link to="/user/posts" class="activity-item">
+        <router-link to="/user/post" class="activity-item">
           <div class="activity-icon">📝</div>
           <span>내가 쓴 게시글</span>
         </router-link>
-        <router-link to="/user/likes" class="activity-item">
+        <router-link to="/user/like" class="activity-item">
           <div class="activity-icon">❤️</div>
           <span>나의 좋아요</span>
         </router-link>
-        <router-link to="/user/comments" class="activity-item">
+        <router-link to="/user/comment" class="activity-item">
           <div class="activity-icon">💬</div>
           <span>내가 쓴 댓글</span>
         </router-link>
