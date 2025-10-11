@@ -6,6 +6,8 @@ import MealDayCards from '@/components/meal/MealDayCards.vue';
 import WaterCard from '@/components/meal/WaterCard.vue';  
 import MealDateStrip from '@/components/meal/MealDateStrip.vue';
 
+import { getWaterIntake, postWaterIntake } from '@/services/meal/waterIntake.js';
+
 import {useMealSelectedStore} from '@/stores/meal/mealStore.js'
 
 
@@ -20,28 +22,38 @@ const goDetail = () =>
 const todayWater = ref(0.0);
 
 
+const getTodayWater = async () => {
+todayWater.value = await getWaterIntake(selectedDay.selectedDay.setDay); // 0~2L 사이 랜덤 값
+ console.log("오늘물", todayWater.value);
+};
 
 // 쿼리(meal)로 초기화 (예: /meal-food-search?meal=2025-09-26)
 // const initial = route.query.meal ? new Date(route.query.meal) : new Date()
 const selectedDate = ref(new Date()) ;
 
 // 날짜 바뀔 때 라우터 쿼리 싱크 (선택)
-watch(selectedDate, (day) => {
+watch(selectedDate, async (day) => {
   const yyyy = day.getFullYear();
   const mm = String(day.getMonth() + 1).padStart(2, '0');
   const dd = String(day.getDate()).padStart(2, '0');
   selectedDay.selectedDay.setDay = `${yyyy}-${mm}-${dd}`;
   console.log("선택날" ,selectedDay.selectedDay.setDay);
   router.replace({ query: { ...route.query}, day: `${yyyy}-${mm}-${dd}` });
+  getTodayWater();
 });
 
 
 onMounted (async () => {
-  const day = new Date();
-  const yyyy = day.getFullYear();
-  const mm = String(day.getMonth() + 1).padStart(2, '0');
-  const dd = String(day.getDate()).padStart(2, '0');
-  selectedDay.selectedDay.setDay = `${yyyy}-${mm}-${dd}`;
+  if (!selectedDay.selectedDay.setDay ?? true ){
+    const day = new Date();
+    const yyyy = day.getFullYear();
+    const mm = String(day.getMonth() + 1).padStart(2, '0');
+    const dd = String(day.getDate()).padStart(2, '0');
+    selectedDay.selectedDay.setDay = `${yyyy}-${mm}-${dd}`;
+  }
+  console.log("선택날" ,selectedDay.selectedDay.setDay);
+
+  getTodayWater();
 });
 </script>
 

@@ -1,13 +1,33 @@
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 
+import { getWaterIntake, postWaterIntake, putWaterIntake } from '@/services/meal/waterIntake.js';
+
+import { useMealSelectedStore } from '@/stores/meal/mealStore.js'
+const selectedDay = useMealSelectedStore();
 const router = useRouter();
+const route = useRoute();
 
-// 기본 0.80L, 0.05L 단위 증감
-const step = 0.05;
-const amount = ref(0.8);
+// 기본 0.10L, 0.05L 단위 증감
+const step = 0.10;
 const target = 2.0;
+
+// 쿼리에서 읽기 (없으면 0.8)
+const parseAmount = (input, fallback = 0.8) => {
+  // null/undefined/빈문자 처리
+  if (input === null || input === undefined || input === '') return fallback;
+
+  // 숫자 or 숫자문자 파싱
+  const n = typeof input === 'number' ? input : Number(String(input).trim());
+
+  // 유효 숫자면 그대로, 아니면 기본값
+  return Number.isFinite(n) ? n : fallback;
+};
+
+
+const amount = ref(parseAmount(route.query.amount));
+
 
 const minus = () => {
   amount.value = Math.max(0, +(amount.value - step).toFixed(2));
@@ -16,9 +36,26 @@ const plus = () => {
   amount.value = +(amount.value + step).toFixed(2);
 };
 
-const submit = () => {
-  // TODO: API 연동하여 오늘 섭취량 저장
-  // await api.post('/api/meal/water', { amount: amount.value })
+
+//입력 부분
+const submit = async () => {
+  if (route.query.dailyWaterIntakeId > 0) {
+    // 기존 기록 수정
+    await putWaterIntake({
+      dailyWaterIntakeId: route.query.dailyWaterIntakeId,
+      amountLiter: amount.value,
+      intakeDate: selectedDay.selectedDay.setDay,
+    });
+  }
+  else {
+    // 새 기록 추가
+    await postWaterIntake({
+      amountLiter: amount.value,
+      intakeDate: selectedDay.selectedDay.setDay,
+
+    });
+  }
+
   router.back();
 };
 </script>
@@ -37,7 +74,7 @@ const submit = () => {
         <div class="counter">
           <button class="circle" aria-label="minus" @click="minus">−</button>
           <div class="value">
-            <span class="num otd-title">{{ amount.toFixed(2) }}</span>
+            <span class="num otd-title">{{ amount }}</span>
             <span class="unit otd-subtitle-2">L</span>
           </div>
           <button class="circle" aria-label="plus" @click="plus">＋</button>
@@ -56,6 +93,7 @@ const submit = () => {
   display: flex;
   justify-content: center;
 }
+
 .panel {
   margin-top: 16px;
   background: #fff;
@@ -63,9 +101,11 @@ const submit = () => {
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
   padding: 20px 16px;
 }
+
 .q {
   color: #4b4b4b;
 }
+
 .target {
   color: #888;
   margin-top: 10px;
@@ -79,6 +119,7 @@ const submit = () => {
   justify-content: center;
   gap: 18px;
 }
+
 .circle {
   width: 44px;
   height: 44px;
@@ -93,11 +134,13 @@ const submit = () => {
   justify-content: center;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
+
 .value {
   display: flex;
   align-items: baseline;
   gap: 6px;
 }
+
 .num {
   font-weight: 800;
 }

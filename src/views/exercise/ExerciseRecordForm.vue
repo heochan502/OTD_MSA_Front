@@ -13,8 +13,9 @@ const state = reactive({
   form: {
     exerciseId: null,
     effortLevel: 1,
-    startAt: '',
-    endAt: '',
+    startAt: "",
+    endAt: "",
+    duration: 0,
     distance: null,
     reps: null,
     activityKcal: 0,
@@ -68,9 +69,10 @@ const calcKcal = computed(() => {
 // 계산된 칼로리 소모량 state.form.activityKcal에 저장
 watch(calcKcal, (val) => {
   state.form.activityKcal = Math.ceil(val);
-  console.log('저장', state.form.activityKcal);
 });
-
+watch(exerciseDuration, (val) => {
+  state.form.duration = Math.ceil(val);
+});
 const saveDialog = ref(false);
 // @click
 // 기록 저장
@@ -83,6 +85,7 @@ const confirmYes = async () => {
     exerciseId: state.form.exerciseId,
     startAt: state.form.startAt,
     endAt: state.form.endAt,
+    duration: state.form.duration,
     activityKcal: state.form.activityKcal,
     effortLevel: state.form.effortLevel,
     distance: state.form.distance,
@@ -235,19 +238,6 @@ const cancelYes = () => {
       </v-card-actions>
     </v-card>
   </v-dialog>
-  <!-- <v-dialog v-model="cancelDialog" max-width="400">
-    <v-card>
-      <v-card-title> 취소 </v-card-title>
-      <v-card-text
-        >기록을 저장하지 않고 메인화면으로 돌아가시겠습니까?</v-card-text
-      >
-      <v-card-actions>
-        <v-spacer />
-        <v-btn color="dark" text @click="cancelDialog = false">취소</v-btn>
-        <v-btn color="primary" text @click="cancelYes">이동</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog> -->
 </template>
 
 <style lang="scss" scoped>

@@ -1,33 +1,28 @@
 import axios from '@/services/httpRequester';
 
 const BASE_URL = 'admin';
+const LIFE_URL = 'admin2';
 
+// 사용자 관리 페이지
 export const getUser = () => {
   return axios.get(`${BASE_URL}/user`).catch((e) => e.response);
-};
-
-export const getChallenge = () => {
-  return axios.get(`${BASE_URL}/challenge`).catch((e) => e.response);
-};
-
-export const getPointHistory = () => {
-  return axios.get(`${BASE_URL}/point`).catch((e) => e.response);
 };
 
 export const getUserDetail = (userId) => {
   return axios.get(`${BASE_URL}/user/${userId}`).catch((e) => e.response);
 };
 
-export const getGender = () => {
-  return axios.get(`${BASE_URL}/gender`).catch((e) => e.response);
+export const putUserProfile = (params) => {
+  return axios.put(`${BASE_URL}/user/modify`, params).catch((e) => e.response);
 };
 
-export const getAgeCount = () => {
-  return axios.get(`${BASE_URL}/agegroup`).catch((e) => e.response);
+export const deleteUser = (userId) => {
+  return axios.delete(`${BASE_URL}/user/${userId}`).catch((e) => e.response);
 };
 
-export const getQnA = () => {
-  return axios.get(`${BASE_URL}/qna`).catch((e) => e.response);
+// 챌린지 관리 페이지
+export const getChallenge = () => {
+  return axios.get(`${BASE_URL}/challenge`).catch((e) => e.response);
 };
 
 export const postChallenge = (params) => {
@@ -44,4 +39,52 @@ export const putChallenge = (params) => {
 
 export const deleteChallenge = (cdId) => {
   return axios.delete(`${BASE_URL}/challenge/${cdId}`).catch((e) => e.response);
+};
+
+// 포인트 관리 페이지
+export const getPointHistory = () => {
+  return axios.get(`${BASE_URL}/point`).catch((e) => e.response);
+};
+
+// 통계페이지
+export const getGender = () => {
+  return axios.get(`${BASE_URL}/gender`).catch((e) => e.response);
+};
+
+export const getAgeCount = () => {
+  return axios.get(`${BASE_URL}/agegroup`).catch((e) => e.response);
+};
+
+export const getTier = () => {
+  return axios.get(`${BASE_URL}/tier`).catch((e) => e.response);
+};
+
+export const getChallengeRate = () => {
+  return axios.get(`${BASE_URL}/challengerate`).catch((e) => e.response);
+};
+
+export const getSignInCount = () => {
+  return axios.get(`${BASE_URL}/signin`).catch((e) => e.response);
+}
+
+// 문의 관리 페이지
+export const getQna = () => {
+  return axios.get(`${BASE_URL}/qna`).catch((e) => e.response);
+};
+
+export const putQna = (params) => {
+  return axios.put(`${BASE_URL}/qna/modify`, params).catch((e) => e.response);
+};
+
+// life 서버
+export const getUserMealRecord = (userId) => {
+  return axios.get(`${LIFE_URL}/meal/${userId}`).catch((e) => e.response);
+};
+
+export const getUserExerciseRecord = (userId) => {
+  return axios.get(`${LIFE_URL}/exercise/${userId}`).catch((e) => e.response);
+};
+
+export const getCommunity = () => {
+  return axios.get(`${LIFE_URL}/community`).catch((e) => e.response);
 };

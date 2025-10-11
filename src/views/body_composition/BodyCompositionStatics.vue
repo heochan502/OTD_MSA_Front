@@ -6,19 +6,6 @@ import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositi
 
 const model = ref(true);
 const bodyCompositionStore = useBodyCompositionStore();
-
-// TODO: 서버에서 내려받을 수 있도록 api 수정하기
-const metrics = [
-  "weight",
-  "bmi",
-  "skeletal_muscle_mass",
-  "body_fat_mass",
-  "protein",
-  "mineral",
-  "total_body_water",
-  "basal_metabolic_rate",
-  "percent_body_fat",
-];
 </script>
 
 <template>

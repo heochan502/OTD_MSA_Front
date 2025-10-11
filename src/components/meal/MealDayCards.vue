@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, watch, reactive } from 'vue';
+import { onMounted, ref, watch, reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { getMealRecord } from '@/services/meal/mealService.js';
@@ -7,12 +7,15 @@ import { getMealRecord } from '@/services/meal/mealService.js';
 import { useMealSelectedStore, useMealRecordStore } from '@/stores/meal/mealStore.js'
 import { storeToRefs } from 'pinia';
 
+import { postMealRecord } from '@/services/meal/mealService.js';
+
+
 const router = useRouter();
 
 
-const selectedDay  = useMealSelectedStore();
+const selectedDay = useMealSelectedStore();
 
-const  eatenFood = useMealRecordStore();
+const eatenFood = useMealRecordStore();
 
 const { eatenFoodList } = storeToRefs(eatenFood);
 
@@ -53,67 +56,111 @@ const mealInfo = ref([
 ]);
 
 
-const addToDefaultList = (res)=>{
-   eatenFoodList.value = [ ];
-  const list = Array.isArray(res) ? res : res.data;
+const addToDefaultList = (res) => {
+  // 0) 초기화
+  eatenFoodList.value = [];
+  // 카드 초기화(원하면)
+  mealInfo.value = mealInfo.value.map(c => ({ ...c, kcal: 0, check: false, recorded: false }));
 
-    
+  // 1) list 확보 (res가 배열/응답/기타 모두 대비)
+  const list =
+    Array.isArray(res) ? res :
+      (Array.isArray(res?.data) ? res.data : []);
 
-  list.forEach((mealRecord,idx ) => {
-    // foodDb가 있으면 그걸, 없으면 userFood를 사용
-    const food = mealRecord?.foodDb ?? mealRecord?.userFood ?? {};
+  if (!Array.isArray(list)) {
+    console.warn('addToDefaultList: list가 배열이 아님', res);
+    return;
+  }
 
-    // 출처별 id를 분리(시스템이면 makeFoodId=null, 사용자면 systemFoodId=null)
-    const mealId = mealRecord?.foodDb?.foodDbId ?? null;
-    const userFoodId = mealRecord?.userFood?.userFoodId ?? null;
 
-    const payload = {
-      foodDbId: mealId,                     // MealFoodDb.foodDbId or null
-      userFoodId,                       // MealFoodMakeDb.userFoodId or null
-      foodName: food?.foodName ?? "",
-      // amount는 음식 엔티티가 아니라 MealRecord의 foodAmount임
-      amount: Number(mealRecord?.foodAmount) || 0,
-      kcal: food?.kcal || 0,
-      flag: food?.flag ?? "",
-      protein: Number(food?.protein) || 0,
-      carbohydrate: Number(food?.carbohydrate) || 0,
-      fat: Number(food?.fat) || 0,
-      sugar: Number(food?.sugar) || 0,
-      natrium: Number(food?.natrium) || 0,
-      // 필요하면 음식 기준량(없으면 1)
-      foodCapacity: Number(food?.foodCapacity ?? 1),
-      mealTime: mealRecord.mealRecordIds.mealTime,
-    };
-    // console.log("먹은 시점 : ", mealRecord.mealRecordIds.mealTime)
+  list.forEach((mealRecord, idx) => {
+    const foodDbId = Number(mealRecord?.foodDb?.foodDbId ?? 0) === -10000;
+    const mealTime = mealRecord?.mealRecordIds?.mealTime ?? mealRecord?.mealTime ?? '';
+    // console.log("여기222", mealRecord?.foodDb.foodDbId )
+    if (foodDbId ) {
+      const target = mealInfo.value.find(idx => idx.mealDay === mealTime);
+      
+      if (target) {
+        // 체크/기록 표시
+        // console.log("추가 칼로리 : ", payload.kcal);
+        target.check = true;
+        target.recorded = true;
 
-    const mealTimming = mealRecord.mealRecordIds.mealTime;
-
-    // 카드 4개중에 먹은 시점 있는거 판별
-    const target = mealInfo.value.find(idx => idx.mealDay === mealTimming);
-    if(target ){
-      // 체크/기록 표시
-      // target.check = true;
-      // console.log("추가 칼로리 : ", payload.kcal);
-      target.kcal += payload.kcal;
-      target.recorded = true;
-      // console.log("체크 : ", mealInfo.check);
+      }
     }
-    // if (mealRecord.mealRecordIds.mealTime === mealInfo.mealDay)
-    //   {
-    //     mealInfo.check  =  true ; 
-    //     console.log("체크 : ", mealInfo.check )
-    //   }
-    
-    eatenFoodList.value = [...eatenFoodList.value, payload];
-    // console.log("페이로드 ", eatenFood.eatenFoodList);
-  });
- 
+
+    else {
+      // foodDb가 있으면 그걸, 없으면 userFood를 사용
+      const food = mealRecord?.foodDb ?? mealRecord?.userFood ?? {};
+
+      // 출처별 id를 분리(시스템이면 makeFoodId=null, 사용자면 systemFoodId=null)
+      const mealId = mealRecord?.foodDb?.foodDbId ?? null;
+      const userFoodId = mealRecord?.userFood?.userFoodId ?? null;
+
+      const payload = {
+        foodDbId: mealId,                     // MealFoodDb.foodDbId or null
+        userFoodId,                       // MealFoodMakeDb.userFoodId or null
+        foodName: food?.foodName ?? "",
+        // amount는 음식 엔티티가 아니라 MealRecord의 foodAmount임
+        amount: Number(mealRecord?.foodAmount) || 0,
+        kcal: food?.kcal || 0,
+        flag: food?.flag ?? "",
+        protein: Number(food?.protein) || 0,
+        carbohydrate: Number(food?.carbohydrate) || 0,
+        fat: Number(food?.fat) || 0,
+        sugar: Number(food?.sugar) || 0,
+        natrium: Number(food?.natrium) || 0,
+        // 필요하면 음식 기준량(없으면 1)
+        foodCapacity: Number(food?.foodCapacity ?? 1),
+        mealTime: mealRecord.mealRecordIds.mealTime,
+      };
+      // console.log("먹은 시점 : ", mealRecord.mealRecordIds.mealTime)
+
+     
+
+      // 카드 4개중에 먹은 시점 있는거 판별
+      const target = mealInfo.value.find(idx => idx.mealDay === mealTime);
+      if (target) {
+        // 체크/기록 표시
+        // console.log("추가 칼로리 : ", payload.kcal);
+        target.kcal += payload.kcal;
+        target.recorded = true;
+        // console.log("체크 : ", mealInfo.check);
+      }
+
+      eatenFoodList.value = [...eatenFoodList.value, payload];
+      // console.log("페이로드 ", eatenFood.eatenFoodList);
+    }
+  }  );
+
 };
 
+// 식단 참았어요 관련 
+const foods = { foodDbId: -10000, amount: 1, kcal: 0 };
 
-const toggleFasting = (i) => {
+const toggleFasting = async (i) => {
   mealInfo.value[i].check = !mealInfo.value[i].check;
-  if (mealInfo.value[i].check) mealInfo.value[i].recorded = false;
+  if (mealInfo.value[i].check) {
+    console.log("참았어요 선택");
+    const res = await postMealRecord({
+      mealTime: mealInfo.value[i].mealDay,   // 끼니
+      mealDay: selectedDay.selectedDay.setDay,    // 날짜
+      foods: [foods]                    // 음식들
+    });
+    mealInfo.value[i].recorded = false;
+  }
+  else
+  {
+    console.log("체크 해제");
+    const defood = { foodDbId: 0, amount: 1, kcal: 0 };
+    const res = await postMealRecord({
+      mealTime: mealInfo.value[i].mealDay,   // 끼니
+      mealDay: selectedDay.selectedDay.setDay,    // 날짜
+      foods: [defood]                    // 음식들
+    });
+    mealInfo.value[i].recorded = false;
+  }
+  
 };
 
 const onTopIconClick = (i) => {
@@ -121,18 +168,17 @@ const onTopIconClick = (i) => {
   // console.log("뭐가 들어가 있을까 : ", item);
   if (item.recorded) {
     selectedDay.selectedFoods = eatenFood.eatenFoodList.filter(i => i.mealTime === item.mealDay);
-
     selectedDay.selectedDay.setTime = item.mealDay;
     // console.log("디테일 넘어갈때 : ", selectedDay.selectedFoods);
     router.push({ name: 'MealRecordView', query: { meal: item.mealDay } });
   } else if (!item.check) {
     item.recorded = true;
-    
+
     router.push({ name: 'MealFoodSearchView', query: { meal: item.mealDay } });
   }
 };
 
-watch( () => selectedDay.selectedDay.setDay, async () => {
+watch(() => selectedDay.selectedDay.setDay, async () => {
   const res = await getMealRecord(selectedDay.selectedDay.setDay);
   mealInfo.value = mealInfo.value.map(item => ({
     ...item,
@@ -145,7 +191,7 @@ watch( () => selectedDay.selectedDay.setDay, async () => {
 });
 
 
-onMounted(async() => {
+onMounted(async () => {
   // 여기서 API 호출하여 mealInfo 초기화 가능
   const res = await getMealRecord(selectedDay.selectedDay.setDay);
   // console.log("mealRecord", res);
@@ -166,7 +212,7 @@ onMounted(async() => {
           <img class="meal-top-img" :src="item.img" :alt="item.mealDay" />
           <span class="d-flex align-self-center otd-subtitle-1">{{
             item.mealDay
-            }}</span>
+          }}</span>
         </div>
         <div class="d-flex align-items-right">
           <img v-if="item.recorded" class="meal-check-img" src="/image/meal/check.png" alt="기록됨"
@@ -201,17 +247,18 @@ onMounted(async() => {
   gap: 15px;
   border-radius: 12px;
 } */
- .meal-cards {
-   display: grid;
-   grid-template-columns: repeat(2, minmax(0, 1fr));
-   /* 부모폭에 맞춰 자동 */
-   gap: 12px;
-   width: 100%;
-   /* 고정폭 제거 */
-   
-   /* height: auto;        기본값이라 생략 가능 */
-   
- }
+.meal-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* 부모폭에 맞춰 자동 */
+  gap: 12px;
+  width: 100%;
+  /* 고정폭 제거 */
+
+  /* height: auto;        기본값이라 생략 가능 */
+
+}
+
 /* .meal-card {
   display: flex;
   flex-direction: column;
@@ -242,12 +289,14 @@ onMounted(async() => {
   color: #303030;
   box-sizing: border-box;
   /* 넘침 방지 */
-  
+
 }
+
 .meal-top-img {
   width: 50px;
   height: 50px;
 }
+
 .meal-check-img {
   width: 27px;
   height: 25px;
@@ -267,14 +316,15 @@ onMounted(async() => {
   border: 0;
   padding-top: 0px;
 
-  
+
 }
-.meal-card-bottom{
+
+.meal-card-bottom {
   justify-items: left;
   align-self: center;
 }
-.bottom-text
-{
+
+.bottom-text {
   font-weight: 500;
   display: flex;
   align-self: end;
@@ -296,6 +346,7 @@ onMounted(async() => {
   display: flex;
   justify-content: space-between;
 }
+
 .meal-card-bottom img.snack {
   width: 80px;
   height: 17px;

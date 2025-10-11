@@ -26,7 +26,9 @@ import Footer from "./Footer.vue";
   // height: 805px;
   height: 100vh;
   user-select: none;
-  padding-bottom: 95px;
+  padding-bottom: 80px;
+
+  overflow: hidden;
 }
 /* 공통 화면 좌우 여백 */
 .main-wrap {
@@ -39,8 +41,13 @@ import Footer from "./Footer.vue";
   &::-webkit-scrollbar {
     display: none;
   }
+  min-height: 0;
 }
 .nav-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
   margin-top: auto;
   padding-bottom: env(safe-area-inset-bottom);
 }

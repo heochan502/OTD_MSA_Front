@@ -1,6 +1,6 @@
 <script setup>
 import { getUser } from '@/services/admin/adminService';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAdminStore } from '@/stores/admin/adminStore';
 
@@ -12,6 +12,8 @@ const search = ref('');
 
 onMounted(async () => {
   const res = await getUser();
+  console.log('res:', res);
+  console.log(typeof res.data);
   users.value = res.data.map((user) => ({
     ...user,
     userRoles: user.userRoles[0]?.userRoleIds.roleCode ?? '없음',
@@ -58,6 +60,10 @@ const toUserDetial = (user) => {
   console.log(adminStore.state.selectedUser);
   router.push({ path: '/admin/user/detail' });
 };
+
+const reversedUser = computed(() => {
+  return [...users.value].reverse();
+});
 </script>
 
 <template>
@@ -77,9 +83,9 @@ const toUserDetial = (user) => {
         />
       </v-card-title>
 
-      <v-data-table
+      <v-data-table 
         :headers="headers"
-        :items="users"
+        :items="reversedUser"
         :search="search"
         :items-per-page="10"
         fixed-header
@@ -97,10 +103,10 @@ const toUserDetial = (user) => {
           <template v-if="item.userRoles != null">
             <v-chip
               :color="
-                item.userRoles === 'USER' || item.userRoles === 'SOCIAL'
+                item.userRoles === 'USER_1' || item.userRoles === 'USER_2'
                   ? '#00D5DF'
                   : item.userRoles === 'ADMIN'
-                  ? '#303030'
+                  ? '#7a7a7a'
                   : '#ff8a80'
               "
               small
@@ -117,7 +123,7 @@ const toUserDetial = (user) => {
               item.challengeRole === '브론즈'
                 ? '#ce7430'
                 : item.challengeRole === '실버'
-                ? '#9e9e9e'
+                ? '#7a7a7a'
                 : item.challengeRole === '골드'
                 ? '#ffba57'
                 : item.challengeRole === '다이아'
@@ -137,7 +143,8 @@ const toUserDetial = (user) => {
 
         <!-- 생년월일 -->
         <template #item.birthDate="{ item }">
-          {{ formatBirthDate(item.birthDate) }}
+          <!-- {{ formatBirthDate(item.birthDate) }} -->
+          {{ item.birthDate }}
         </template>
       </v-data-table>
     </v-card>
