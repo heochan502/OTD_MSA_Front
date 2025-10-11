@@ -1,6 +1,13 @@
+<!-- src/components/community/ComposeForm.vue -->
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useCommunityStore } from '@/stores/community/community';
+import { useAuthenticationStore } from '@/stores/user/authentication';
+import {
+  createPost,
+  updatePost,
+  uploadPostFiles,
+} from '@/services/community/postService';
 
 const props = defineProps({
   category: { type: String, required: true },
@@ -13,12 +20,13 @@ const props = defineProps({
       { key: 'love', label: '연애' },
     ],
   },
-  mode: { type: String, default: 'create' }, // ✅ 추가 ('create' or 'edit')
-  initial: { type: Object, default: null }, // ✅ 추가 (수정 모드에서 기본값)
+  mode: { type: String, default: 'create' },
+  initial: { type: Object, default: null },
 });
 
 const emit = defineEmits(['cancel', 'submitted', 'update:category']);
 const store = useCommunityStore();
+const auth = useAuthenticationStore();
 
 const title = ref('');
 const content = ref('');
@@ -26,23 +34,21 @@ const files = ref([]);
 const previews = ref([]);
 const submitting = ref(false);
 const errorMsg = ref('');
-const hydrated = ref(false); // ✅ 초기값 수화 가드
+const hydrated = ref(false);
 
-// ✅ 초기값 반영
 function applyInitial() {
   if (!props.initial || hydrated.value) return;
   title.value = props.initial.title ?? '';
   content.value = props.initial.content ?? '';
   hydrated.value = true;
 }
-
 onMounted(applyInitial);
 watch(() => props.initial, applyInitial);
 
 const canSubmit = computed(
   () =>
     title.value.trim().length >= 2 &&
-    content.value.trim().length >= 10 &&
+    content.value.trim().length >= 2 &&
     !submitting.value
 );
 
@@ -98,31 +104,52 @@ function removeAt(i) {
   previews.value = pv;
 }
 
+const getMemberId = () => {
+  const me = auth?.state?.signedUser ?? null;
+  return me?.userId ?? me?.memberNoLogin ?? 0;
+};
+
+async function maybeUploadFiles(postId) {
+  if (!postId || files.value.length === 0) return;
+  try {
+    await uploadPostFiles(postId, files.value, getMemberId());
+  } finally {
+    files.value = [];
+    revokeAll();
+  }
+}
+
 async function submit() {
   if (!canSubmit.value) return;
   submitting.value = true;
   errorMsg.value = '';
   try {
-    if (props.mode === 'edit' && props.initial?.id) {
-      // ✅ 수정 모드일 때
-      const payload = {
-        categoryKey: props.category,
-        title: title.value.trim(),
-        content: content.value.trim(),
-        files: files.value,
-      };
-      await store.updatePost(props.initial.id, payload);
+    const payload = {
+      categoryKey: props.category,
+      title: title.value.trim(),
+      content: content.value.trim(),
+    };
+
+    let postId;
+    if (props.mode === 'edit' && (props.initial?.id || props.initial?.postId)) {
+      postId = Number(props.initial.postId ?? props.initial.id);
+      if (store?.updateExistingPost) {
+        await store.updateExistingPost(postId, payload);
+      } else {
+        await updatePost(postId, payload);
+      }
+      await maybeUploadFiles(postId);
     } else {
-      // ✅ 새 글 작성 모드
-      const payload = {
-        categoryKey: props.category,
-        title: title.value.trim(),
-        content: content.value.trim(),
-        files: files.value,
-      };
-      await store.createNewPost(payload);
+      // 스토어가 정규화된 객체를 반환(= postId 보장)
+      const created = store?.createNewPost
+        ? await store.createNewPost(payload)
+        : await createPost(payload); // 서비스 직접 호출 시 data 반환
+      postId = Number(created?.postId ?? created?.id);
+      if (!postId) throw new Error('생성 응답에 postId가 없습니다.');
+      await maybeUploadFiles(postId);
     }
-    emit('submitted', { categoryKey: props.category });
+
+    emit('submitted', { categoryKey: props.category, postId });
   } catch (e) {
     console.error('[ComposeForm] submit failed:', e?.response?.data || e);
     errorMsg.value =
@@ -159,7 +186,6 @@ async function submit() {
         class="picker pa-2 rounded-lg mb-2"
         color="white"
         elevation="2"
-        border
       >
         <div class="chips">
           <v-chip
@@ -219,7 +245,6 @@ async function submit() {
 </template>
 
 <style scoped>
-/* 스타일은 기존과 동일 */
 .err {
   margin-top: 8px;
   color: #c24040;

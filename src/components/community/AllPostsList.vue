@@ -16,9 +16,16 @@ const store = useCommunityStore();
 const items = computed(() => {
   const q = (props.query || '').trim().toLowerCase();
   return store.allNormalized
+    .filter(Boolean)
     .filter((p) => (q ? (p.title ?? '').toLowerCase().includes(q) : true))
-    .slice()
-    .sort((a, b) => (b.createdAtMs ?? 0) - (a.createdAtMs ?? 0));
+    .map((p) => ({
+      ...p,
+      createdAtMs:
+        Number(
+          p?.createdAtMs ?? (p?.createdAt ? Date.parse(p.createdAt) : 0)
+        ) || 0,
+    }))
+    .sort((a, b) => (b.createdAtMs || 0) - (a.createdAtMs || 0));
 });
 
 function open(post) {
@@ -44,7 +51,10 @@ async function onIntersect(entries) {
   if (store.loading) return;
 
   try {
-    await store.loadMorePosts();
+    // 프로젝트에 이미 구현되어 있다 가정
+    if (typeof store.loadMorePosts === 'function') {
+      await store.loadMorePosts();
+    }
   } catch (e) {
     console.error('[AllPostsList] loadMorePosts failed:', e);
   }
@@ -64,7 +74,6 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <!-- ✅ 뱃지 숨김 -->
   <PopularList
     :items="items"
     :navigateOnClick="false"
