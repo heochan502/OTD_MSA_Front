@@ -3,18 +3,34 @@ import { defineStore } from 'pinia';
 import {
   fetchPosts,
   fetchPostById,
-  createPost, // (payload, userId)
-  updatePost,
+  createPost, // createPost(payload) -> data만 반환
+  updatePost, // updatePost(postId, payload) -> data만 반환
   deletePost,
   toggleLike,
 } from '@/services/community/postService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 
-// 정규화: authorId / isMine 반드시 포함
+/** 서버 응답을 화면에서 쓰기 쉬운 형태로 정규화 */
 function normalizePost(p, me) {
   if (!p) return null;
 
-  const id = p.postId ?? p.id;
+  // id 추출 폭 넓힘 (여러 백엔드 응답 형태 대비)
+  const idRaw =
+    p.postId ??
+    p.id ??
+    p.data?.postId ??
+    p.data?.id ??
+    p.result?.postId ??
+    p.result?.id ??
+    p.payload?.postId ??
+    p.payload?.id ??
+    p.post_no ??
+    p.boardId ??
+    p.seq ??
+    p.pk ??
+    null;
+  const id = idRaw != null ? Number(idRaw) : null;
+
   const category = p.categoryKey ?? p.category ?? '';
 
   const currentUserId = me?.userId ?? me?.memberNoLogin ?? me?.id ?? null;
@@ -25,6 +41,7 @@ function normalizePost(p, me) {
     p.memberNoLogin ??
     p.memberNo ??
     p.writerId ??
+    p.writer?.id ??
     null;
   const authorId = authorIdRaw != null ? Number(authorIdRaw) : null;
 
@@ -42,17 +59,24 @@ function normalizePost(p, me) {
     p.writer?.nickName ??
     (isMine && me?.nickName ? me.nickName : '익명');
 
+  const createdAt = p.createdAt ?? p.time ?? p.created_at ?? null;
+  const createdAtMs = createdAt
+    ? Number(createdAt) || Date.parse(createdAt) || 0
+    : 0;
+
   return {
     id,
+    postId: id,
     category,
     title: p.title ?? '',
     content: p.content ?? '',
-    author, // 닉네임/표시명
-    authorId, // 작성자 식별자
-    isMine, // 내 글 여부 (버튼 노출 조건)
-    time: p.createdAt ?? p.time ?? '',
-    likes: p.likeCount ?? p.likes ?? p.like ?? 0,
-    comments: p.commentCount ?? p.comments ?? 0,
+    author,
+    authorId,
+    isMine,
+    createdAt,
+    createdAtMs, // 정렬용 안전 숫자
+    likes: Number(p.likeCount ?? p.likes ?? p.like ?? 0),
+    comments: Number(p.commentCount ?? p.comments ?? 0),
     avatar: p.avatar ?? p.writer?.memberImg ?? '',
     liked: typeof p.liked === 'boolean' ? p.liked : undefined,
     _raw: p,
@@ -61,7 +85,7 @@ function normalizePost(p, me) {
 
 export const useCommunityStore = defineStore('community', {
   state: () => ({
-    posts: [], // 서버 원본 배열(정규화 전)
+    posts: [], // 서버 원본(정규화 전)
     selectedPost: null, // 정규화된 단건
     viewMode: 'list',
     loading: false,
@@ -72,27 +96,27 @@ export const useCommunityStore = defineStore('community', {
     total: 0,
 
     searchText: '',
-    userId: 0, // (옵션) 캐시. 실제 로그인은 auth에서 읽음
+    userId: 0,
   }),
 
   getters: {
-    // 카테고리별 정규화 리스트
     list: (state) => (categoryKey) => {
       const auth = useAuthenticationStore();
       const me = auth?.state?.signedUser ?? null;
       return (state.posts || [])
         .filter((p) => (p?.categoryKey ?? p?.category) === categoryKey)
-        .map((p) => normalizePost(p, me));
+        .map((p) => normalizePost(p, me))
+        .filter(Boolean);
     },
 
-    // 전체 정규화 리스트
     allNormalized: (state) => {
       const auth = useAuthenticationStore();
       const me = auth?.state?.signedUser ?? null;
-      return (state.posts || []).map((p) => normalizePost(p, me));
+      return (state.posts || [])
+        .map((p) => normalizePost(p, me))
+        .filter(Boolean);
     },
 
-    // 상세(정규화)
     getById: (state) => (idLike) => {
       const idStr = String(idLike);
       const auth = useAuthenticationStore();
@@ -103,7 +127,6 @@ export const useCommunityStore = defineStore('community', {
       return normalizePost(found, me);
     },
 
-    // 인기글(카테고리별)
     popularByCategory:
       (state) =>
       (categoryKey, limit = 5) => {
@@ -111,12 +134,12 @@ export const useCommunityStore = defineStore('community', {
         const me = auth?.state?.signedUser ?? null;
         return (state.posts || [])
           .filter((p) => (p?.categoryKey ?? p?.category) === categoryKey)
-          .sort((a, b) => (b.likeCount ?? 0) - (a.likeCount ?? 0))
+          .sort((a, b) => Number(b.likeCount ?? 0) - Number(a.likeCount ?? 0))
           .slice(0, limit)
-          .map((p) => normalizePost(p, me));
+          .map((p) => normalizePost(p, me))
+          .filter(Boolean);
       },
 
-    // 인기글(전체)
     popularAll:
       (state) =>
       (limit = 5) => {
@@ -124,25 +147,26 @@ export const useCommunityStore = defineStore('community', {
         const me = auth?.state?.signedUser ?? null;
         return (state.posts || [])
           .slice()
-          .sort((a, b) => (b.likeCount ?? 0) - (a.likeCount ?? 0))
+          .sort((a, b) => Number(b.likeCount ?? 0) - Number(a.likeCount ?? 0))
           .slice(0, limit)
-          .map((p) => normalizePost(p, me));
+          .map((p) => normalizePost(p, me))
+          .filter(Boolean);
       },
   },
 
   actions: {
-    // 목록
+    /** 목록 */
     async loadPosts(page = 1, size = 10, categoryKey) {
       this.loading = true;
       this.error = null;
       try {
         const page0 = Math.max(0, Number(page) - 1);
         const res = await fetchPosts(page0, size, categoryKey);
-        const raw = res.data?.content ?? res.data ?? [];
+        const raw = res?.data?.content ?? res?.data ?? [];
         this.posts = Array.isArray(raw) ? raw : [];
         this.page = page;
         this.size = size;
-        this.total = Number(res.data?.totalElements ?? this.posts.length);
+        this.total = Number(res?.data?.totalElements ?? this.posts.length);
       } catch (err) {
         this.posts = [];
         this.total = 0;
@@ -152,7 +176,7 @@ export const useCommunityStore = defineStore('community', {
       }
     },
 
-    // 상세
+    /** 상세 */
     async loadPostDetail(idLike) {
       this.loading = true;
       this.error = null;
@@ -165,7 +189,6 @@ export const useCommunityStore = defineStore('community', {
         const raw = res?.data ?? null;
         this.selectedPost = normalizePost(raw, me);
 
-        // 목록에도 반영(상세 조회만 된 글이 목록에 없으면 추가/갱신)
         if (raw) {
           const idx = (this.posts || []).findIndex(
             (p) => String(p.postId ?? p.id) === idStr
@@ -183,31 +206,114 @@ export const useCommunityStore = defineStore('community', {
       }
     },
 
-    // 글 생성(JSON)
+    /**
+     * 글 생성(JSON) — 정규화 객체를 반환(postId 보장).
+     * 백엔드가 id를 응답에 안 넣어주는 경우, 방금 쓴 글을 목록에서 탐색해서 id를 폴백으로 확보.
+     */
     async createNewPost(payload) {
       this.error = null;
       try {
         const auth = useAuthenticationStore();
         const me = auth?.state?.signedUser ?? null;
+        const myId = me?.userId ?? me?.memberNoLogin ?? null;
 
-        const { data: created } = await createPost(payload, me?.userId || 0);
+        // 1) 생성 (data만 반환)
+        const createdRaw = await createPost(payload);
 
-        // 낙관 반영
-        this.posts = [created, ...(this.posts || [])];
+        // 2) 응답에서 id 바로 탐색
+        let postId = Number(
+          createdRaw?.postId ??
+            createdRaw?.id ??
+            createdRaw?.data?.postId ??
+            createdRaw?.data?.id ??
+            createdRaw?.result?.postId ??
+            createdRaw?.result?.id ??
+            createdRaw?.payload?.postId ??
+            createdRaw?.payload?.id ??
+            createdRaw?.post_no ??
+            createdRaw?.boardId ??
+            createdRaw?.seq ??
+            createdRaw?.pk
+        );
 
-        // 재조회로 정합성 확보
+        // 3) 목록 폴백 탐색 조건 (작성자/제목/내용 매칭)
+        const matchesMe = (p) => {
+          const aId = Number(
+            p.userId ??
+              p.authorId ??
+              p.memberNoLogin ??
+              p.memberNo ??
+              p.writerId ??
+              p.writer?.id
+          );
+          return myId != null && aId === Number(myId);
+        };
+        const sameText = (p) =>
+          String(p.title ?? '').trim() === String(payload.title ?? '').trim() &&
+          String(p.content ?? '').trim() ===
+            String(payload.content ?? '').trim();
+
+        // 4) 목록 옵티미스틱 반영(원본 push) — id 없으면 나중 탐색 시 재사용
+        const createdForList = {
+          ...(typeof createdRaw === 'object' ? createdRaw : {}),
+          ...(postId ? { postId } : {}),
+          // 작성자 id 없을 수 있어 폴백 주입
+          ...(myId != null &&
+          createdRaw?.userId == null &&
+          createdRaw?.authorId == null
+            ? { userId: myId }
+            : {}),
+          categoryKey:
+            payload.categoryKey ??
+            createdRaw?.categoryKey ??
+            createdRaw?.category,
+          title: payload.title ?? createdRaw?.title,
+          content: payload.content ?? createdRaw?.content,
+        };
+        this.posts = [createdForList, ...(this.posts || [])];
+
+        // 5) 재조회 (최신 목록 확보)
         const page0 = Math.max(0, (this.page ?? 1) - 1);
         await this.loadPosts(page0 + 1, this.size);
 
+        // 6) 폴백: 목록에서 방금 쓴 글 찾기
+        if (!postId) {
+          const pool = this.posts || [];
+          const candidate =
+            pool.find((p) => matchesMe(p) && sameText(p)) ||
+            pool.find((p) => sameText(p)); // 작성자 매칭이 안될 때 제목/내용만으로라도
+          if (candidate) {
+            postId = Number(
+              candidate.postId ??
+                candidate.id ??
+                candidate._raw?.postId ??
+                candidate._raw?.id ??
+                0
+            );
+          }
+        }
+
         this.viewMode = 'list';
-        return created;
+
+        // 7) 최종 방어
+        if (!postId) {
+          console.warn(
+            '[community] createNewPost: cannot resolve postId',
+            createdRaw
+          );
+          throw new Error('생성 응답에 postId가 없습니다.');
+        }
+
+        // 8) 정규화 후 반환
+        const normalized = normalizePost({ ...createdForList, postId }, me);
+        return normalized;
       } catch (err) {
         this.error = err;
         throw err;
       }
     },
 
-    // 글 수정(JSON/FD → JSON)
+    /** 글 수정(JSON/FD → JSON) */
     async updateExistingPost(postId, formOrPayload) {
       this.error = null;
       try {
@@ -227,14 +333,11 @@ export const useCommunityStore = defineStore('community', {
           };
         }
 
-        const auth = useAuthenticationStore();
-        const me = auth?.state?.signedUser ?? null;
-
-        const { data } = await updatePost(postId, payload, me?.userId || 0);
+        const data = await updatePost(postId, payload);
 
         // 로컬 반영
         this.posts = (this.posts || []).map((p) =>
-          (p.postId ?? p.id) === postId ? { ...p, ...data } : p
+          Number(p.postId ?? p.id) === Number(postId) ? { ...p, ...data } : p
         );
 
         // 재조회
@@ -248,15 +351,11 @@ export const useCommunityStore = defineStore('community', {
       }
     },
 
-    // 삭제
+    /** 삭제 */
     async removePost(postId) {
       this.error = null;
       try {
-        const auth = useAuthenticationStore();
-        const me = auth?.state?.signedUser ?? null;
-
-        await deletePost(postId, me?.userId || 0);
-
+        await deletePost(postId);
         const asNum = (v) => Number(v ?? 0);
         this.posts = (this.posts || []).filter(
           (p) => asNum(p.postId ?? p.id) !== asNum(postId)
@@ -270,16 +369,17 @@ export const useCommunityStore = defineStore('community', {
       }
     },
 
-    // 좋아요 토글
+    /** 좋아요 토글 */
     async toggleLike(postId) {
       this.error = null;
       try {
         const auth = useAuthenticationStore();
         const me = auth?.state?.signedUser ?? null;
-        if (!me?.userId || me.userId <= 0)
+        if (!me?.userId && !me?.memberNoLogin) {
           throw new Error('로그인이 필요합니다.');
+        }
 
-        const res = await toggleLike(postId, me.userId);
+        const res = await toggleLike(postId, me.userId ?? me.memberNoLogin);
         const likeCount = res.data?.likeCount ?? res.data?.likes ?? null;
         const liked = res.data?.liked ?? undefined;
         const asNum = (v) => Number(v ?? 0);

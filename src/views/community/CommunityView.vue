@@ -26,7 +26,6 @@ onMounted(async () => {
   await store.loadPosts(1, 20, '');
 });
 
-// ✅ 생성된 URL을 그대로 넘김
 const categories = [
   { key: 'free', label: '자유수다', icon: iconFreeUrl },
   { key: 'diet', label: '다이어트', icon: iconDietUrl },
@@ -37,10 +36,12 @@ const categories = [
 const searchVal = ref('');
 
 const allPosts = computed(() =>
-  ['free', 'diet', 'work', 'love'].flatMap((k) => store.list(k))
+  ['free', 'diet', 'work', 'love'].flatMap((k) => store.list(k) ?? [])
 );
+
 const query = computed(() => searchVal.value.trim().toLowerCase());
 const TOP_N = 3;
+
 const popularTop = computed(() =>
   allPosts.value
     .filter((p) =>
@@ -49,6 +50,16 @@ const popularTop = computed(() =>
     .slice()
     .sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0))
     .slice(0, TOP_N)
+);
+
+const popularTopView = computed(() =>
+  popularTop.value.map((p) => ({
+    ...p,
+    id: p.id ?? p.postId,
+    author: p.author ?? p.writer ?? '익명',
+    time: p.time ?? p.createdAt ?? p.updatedAt ?? '',
+    comments: p.comments ?? p.commentCount ?? 0,
+  }))
 );
 
 const handleSelectCategory = (key) =>
@@ -85,7 +96,11 @@ function onPickCategory(key) {
 }
 async function onSubmitSuccess() {
   closeOverlay();
-  (await store.reloadFirstPage?.()) ?? store.loadPosts(1, 20, '');
+  if (typeof store.reloadFirstPage === 'function') {
+    await store.reloadFirstPage();
+  } else {
+    await store.loadPosts(1, 20, '');
+  }
 }
 </script>
 
@@ -123,7 +138,7 @@ async function onSubmitSuccess() {
       <h3 class="section-title">인기글</h3>
       <div class="section-card list-card">
         <PopularList
-          :items="popularTop"
+          :items="popularTopView"
           detail-route-name="CommunityPost"
           :navigateOnClick="true"
           id-key="id"
@@ -138,7 +153,6 @@ async function onSubmitSuccess() {
       </div>
     </section>
 
-    <!-- 오버레이(기존 그대로) -->
     <div v-if="showOverlay" class="overlay-full" @click.self="closeOverlay">
       <div v-if="composeStep === 'pick'" class="picker-floating">
         <button class="pill" @click="onPickCategory('free')">자유수다</button>
@@ -158,7 +172,6 @@ async function onSubmitSuccess() {
 </template>
 
 <style scoped>
-/* 기존 스타일 그대로 */
 .cv-wrap {
   margin: 0 !important;
   align-self: stretch;
@@ -240,7 +253,6 @@ async function onSubmitSuccess() {
   padding: 0 2px;
   margin: 0;
 }
-
 .overlay-full {
   position: fixed;
   top: 50%;
@@ -248,7 +260,7 @@ async function onSubmitSuccess() {
   transform: translate(-50%, -50%);
   width: 100%;
   height: 100%;
-  border-radius: 0; /* 둥근 모서리 제거 */
+  border-radius: 0;
   background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(2px);
   z-index: 999;

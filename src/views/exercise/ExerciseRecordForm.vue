@@ -70,6 +70,7 @@ const calcKcal = computed(() => {
 watch(calcKcal, (val) => {
   state.form.activityKcal = Math.ceil(val);
 });
+// 계산된 운동 시간
 watch(exerciseDuration, (val) => {
   state.form.duration = Math.ceil(val);
 });
