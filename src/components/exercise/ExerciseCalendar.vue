@@ -1,16 +1,13 @@
 <script setup>
-import { onMounted, ref, computed, reactive, watch } from "vue";
+import { ref, computed, watch } from "vue";
 import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
 import { formatDateYearMonthKR, formatDateISO } from "@/utils/dateTimeUtils";
 import { getExerciseRecordList } from "@/services/exercise/exerciseService";
-import { color } from "echarts";
 
 const exerciseRecordStore = useExerciseRecordStore();
 const now = ref(new Date()); // 현재 보고 있는 달
 const selectedDate = ref(new Date()); // 실제 선택된 날짜
-
 const emit = defineEmits(["select-date"]);
-console.log("선택날짜", selectedDate.value);
 
 // 캘린더 속성
 const calendarAttributes = computed(() => {
