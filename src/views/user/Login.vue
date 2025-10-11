@@ -126,20 +126,27 @@ const submit = async () => {
       </div>
       <!-- API 로그인 -->
       <div class="API">
-        <span class="naver"
-          ><a
-            :href="`${beBaseUrl}/oauth2/authorization/naver?redirect_uri=${redirectUrl}`"
-            >네이버</a
-          >
-        </span>
-        <span class="kakao"
-          ><a
-            :href="`${beBaseUrl}/oauth2/authorization/kakao?redirect_uri=${redirectUrl}`"
-            >카카오</a
-          ></span
-        >
-      </div>
-    </div>
+  <a
+    :href="`${beBaseUrl}/oauth2/authorization/naver?redirect_uri=${redirectUrl}`"
+    class="oauth-button naver"
+  >
+    <svg class="oauth-icon" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M16.273 12.845L7.376 0H0v24h7.726V11.156L16.624 24H24V0h-7.727v12.845z"/>
+    </svg>
+    <span>네이버로 로그인</span>
+  </a>
+
+  <a
+    :href="`${beBaseUrl}/oauth2/authorization/kakao?redirect_uri=${redirectUrl}`"
+    class="oauth-button kakao"
+  >
+    <svg class="oauth-icon" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 3C6.477 3 2 6.477 2 10.786c0 2.823 1.886 5.298 4.713 6.682l-1.227 4.505c-.095.349.277.634.589.451l5.083-2.948c.341.032.687.048 1.037.048 5.523 0 10-3.477 10-7.786C22 6.477 17.523 3 12 3z"/>
+    </svg>
+    <span>카카오로 로그인</span>
+  </a>
+</div>
+</div>
     <div class="additional-links">
       <div class="link-row">
         <router-link to="/user/findid" class="link">아이디 찾기</router-link>
@@ -257,9 +264,58 @@ const submit = async () => {
 }
 .API {
   padding-bottom: 20px;
-  text-align: center;
-  
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
+
+.oauth-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.oauth-button svg.oauth-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* 네이버 버튼 */
+.oauth-button.naver {
+  background-color: #03c75a;
+  color: white;
+}
+
+.oauth-button.naver:hover {
+  background-color: #02b350;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(3, 199, 90, 0.3);
+}
+
+/* 카카오 버튼 */
+.oauth-button.kakao {
+  background-color: #fee500;
+  color: #000000;
+}
+
+.oauth-button.kakao:hover {
+  background-color: #f5dc00;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(254, 229, 0, 0.3);
+}
+
+/* 추가 링크 */
 .additional-links {
   text-align: center;
   margin-top: 20px;
