@@ -18,9 +18,25 @@ const monthly = computed(() => formatDateYearMonthISO(selectedDate.value));
 
 onMounted(async () => {
   await exerciseRecordStore.fetchExercises();
-
+  fetchMonthlyRecords(monthly.value);
   onDateClick(selectedDate.value);
 });
+const fetchMonthlyRecords = async (date) => {
+  const params = {
+    page: 1,
+    row_per_page: 1000,
+    type: "monthly",
+    date: date, // YYYY-MM-DD
+  };
+
+  const res = await getExerciseRecordList(params);
+  if (res && res.status === 200) {
+    exerciseRecordStore.monthlyRecords = res.data;
+  } else {
+    exerciseRecordStore.monthlyRecords = [];
+    console.warn("월 기록 조회 실패", res);
+  }
+};
 
 // @click
 const onDateClick = async (date) => {

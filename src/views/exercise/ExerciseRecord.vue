@@ -26,7 +26,7 @@ onMounted(async () => {
     return;
   }
   exerciseRecordStore.records = res.data;
-  exerciseRecordStore.monthlyRecords = res.data;
+  // exerciseRecordStore.monthlyRecords = res.data;
 });
 
 onUnmounted(() => {
