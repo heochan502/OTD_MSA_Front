@@ -1,9 +1,19 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, reactive } from 'vue';
 import { getQna, putQna } from '@/services/admin/adminService';
+import { reactify } from '@vueuse/core';
 
 const qna = ref([]);
-const seletedQna = ref({});
+const selectedQna = ref({
+  senderName: '',
+  senderEmail: '',
+  createdAt: '',
+  subject: '',
+  content: '',
+  reply: '',
+  replyAt: '',
+});
+
 const search = ref('');
 const qnaDialog = ref(false);
 const cancelDialog = ref(false);
@@ -33,7 +43,10 @@ const rowProps = ({ item }) => ({
 
 const onpenQnaDialog = (qna) => {
   console.log('qna', qna);
-  seletedQna.value = qna;
+  selectedQna.value.reply = '';
+  selectedQna.value.replyAt = '';
+  selectedQna.value.repliedNickName = '';
+  Object.assign(selectedQna.value, qna);
   qnaDialog.value = true;
 };
 
@@ -53,7 +66,8 @@ const reversedQna = computed(() => {
 });
 
 const submit = async () => {
-  const jsonBody = seletedQna.value;
+  const jsonBody = selectedQna.value;
+  console.log('json', jsonBody);
   const res = await putQna(jsonBody);
   if (res && res.status === 200) {
     // 성공하면 저장 완료 모달 열기
@@ -73,23 +87,30 @@ const submit = async () => {
         <v-card-title class="text-h8">문의 상세</v-card-title>
 
         <v-card-subtitle>작성자 닉네임</v-card-subtitle>
-        <v-card-text>{{ seletedQna.senderName }}</v-card-text>
+        <v-card-text>{{ selectedQna.senderName }}</v-card-text>
 
         <v-card-subtitle>작성자 이메일</v-card-subtitle>
-        <v-card-text>{{ seletedQna.senderEmail }}</v-card-text>
+        <v-card-text>{{ selectedQna.senderEmail }}</v-card-text>
 
         <v-card-subtitle>작성일</v-card-subtitle>
-        <v-card-text>{{ seletedQna.createdAt }}</v-card-text>
+        <v-card-text>{{ selectedQna.createdAt }}</v-card-text>
 
         <v-card-subtitle>제목</v-card-subtitle>
-        <v-card-text>{{ seletedQna.subject }}</v-card-text>
+        <v-card-text>{{ selectedQna.subject }}</v-card-text>
 
         <v-card-subtitle>내용</v-card-subtitle>
-        <v-card-text>{{ seletedQna.content }}</v-card-text>
+        <v-card-text>{{ selectedQna.content }}</v-card-text>
 
-        <!-- <v-card-subtitle>문의 답변</v-card-subtitle>
-        <v-text-field v-model="seletedQna.reply"></v-text-field> -->
+        <v-card-subtitle v-if="selectedQna.reply != ''"
+          >문의 답변</v-card-subtitle
+        >
+        <v-card-subtitle v-else>답변하기</v-card-subtitle>
+        <v-text-field v-model="selectedQna.reply"></v-text-field>
 
+        <template v-if="selectedQna.replyAt != ''">
+          <v-card-subtitle>답변 시각</v-card-subtitle>
+          <v-card-text>{{ selectedQna.replyAt }}</v-card-text>
+        </template>
         <v-card-actions>
           <v-spacer />
           <v-btn color="dark" text @click="cancelDialog = true">취소</v-btn>
@@ -144,6 +165,7 @@ const submit = async () => {
         :items="reversedQna"
         class="styled-table"
         :row-props="rowProps"
+        :search="search"
       >
         <!-- 작성일 -->
         <template #item.createdAt="{ item }">

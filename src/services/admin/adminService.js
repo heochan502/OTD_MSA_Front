@@ -4,17 +4,21 @@ const BASE_URL = 'admin';
 const LIFE_URL = 'admin2';
 
 // 대쉬보드
-export const getUserCount = () => {
+export const getUserData = () => {
   return axios.get(`${BASE_URL}/dash/user`).catch((e) => e.response);
 };
 
-export const getPointCount = () => {
+export const getChallengeData = () => {
+  return axios.get(`${BASE_URL}/dash/challenge`).catch((e) => e.response);
+};
+
+export const getPointData = () => {
   return axios.get(`${BASE_URL}/dash/point`).catch((e) => e.response);
 };
 
-export const getRecentJoin = () => {
-  return axios.get(`${BASE_URL}/dash/join`).catch((e) => e.response);
-};
+export const getInquiryData = () => {
+    return axios.get(`${BASE_URL}/dash/inquiry`).catch((e) => e.response);
+}
 
 // 사용자 관리 페이지
 export const getUser = () => {
@@ -78,7 +82,7 @@ export const getChallengeRate = () => {
 
 export const getSignInCount = () => {
   return axios.get(`${BASE_URL}/signin`).catch((e) => e.response);
-}
+};
 
 // 문의 관리 페이지
 export const getQna = () => {
@@ -100,4 +104,11 @@ export const getUserExerciseRecord = (userId) => {
 
 export const getCommunity = () => {
   return axios.get(`${LIFE_URL}/community`).catch((e) => e.response);
+};
+
+export const getUserMealDetail = (params) => {
+  console.log('params2', params);
+  return axios
+    .get(`${LIFE_URL}/meal/detail`, { params })
+    .catch((e) => e.response);
 };

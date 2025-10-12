@@ -6,6 +6,7 @@ import {
   deleteUser,
   getUserExerciseRecord,
   getUserMealRecord,
+  getUserMealDetail,
 } from '@/services/admin/adminService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { useAdminStore } from '@/stores/admin/adminStore';
@@ -25,6 +26,8 @@ const putProfileDialog = ref(false);
 const successDialog = ref(false);
 const deleteUserDialog = ref(false);
 const mealDetailDialog = ref(false);
+
+const selectedMeal = ref([]);
 
 const state = reactive({
   userInfo: {},
@@ -88,10 +91,11 @@ const mealHeaders = [
   { title: '기록일', key: 'mealDay' },
   { title: '기록시간', key: 'mealTime' },
   { title: '총 탄수화물 섭취량', key: 'totalCarbohydrate' },
+  { title: '총 단백질 섭취량', key: 'totalProtein' },
   { title: '총 지방 섭취량', key: 'totalFat' },
   { title: '총 나트륨 섭취량', key: 'totalNatrium' },
-  { title: '총 단백질 섭취량', key: 'totalProtein' },
   { title: '총 당 섭취량', key: 'totalSugar' },
+  { title: '총 칼로리', key: 'totalKcal' },
 ];
 
 const formatNumber = (n) => String(n).padStart(2, '0');
@@ -102,7 +106,8 @@ const formatDate = (date) => {
   return `${y}-${m}-${d}`;
 };
 
-const tableSet = computed(() => {
+// 챌린지기록 테이블 평탄화
+const challengeTableSet = computed(() => {
   console.log('test', state.challengeHistory);
   const rows = state.challengeHistory.map((item, i) => {
     const name = String(item.challengeDefinition?.cdName ?? '').trim();
@@ -127,6 +132,29 @@ const tableSet = computed(() => {
   return rows;
 });
 
+// 식단기록 테이블 평탄화
+const mealTableSet = computed(() => {
+  const rows = state.mealHistory.map((item, i) => {
+    const mealDay = String(item.mealRecordIds?.mealDay ?? '').trim();
+    const mealTime = String(item.mealRecordIds?.mealTime ?? '').trim();
+
+    return {
+      userId: Number(item.userId ?? 0),
+      mealDay: mealDay.normalize('NFC'),
+      mealTime: mealTime.normalize('NFC'),
+      totalCarbohydrate: Number(item.totalCarbohydrate ?? 0),
+      totalFat: Number(item.totalFat ?? 0),
+      totalKcal: Number(item.totalKcal ?? 0),
+      totalNatrium: Number(item.totalNatrium ?? 0),
+      totalProtein: Number(item.totalProtein ?? 0),
+      totalSugar: Number(item.totalSugar ?? 0),
+    };
+  });
+
+  // 최신순 (createdAt DESC)
+  rows.sort((a, b) => new Date(b.mealDay) - new Date(a.mealDay));
+  return rows;
+});
 const submit = async () => {
   const jsonBody = state.userInfo;
   console.log('json', jsonBody);
@@ -161,9 +189,23 @@ const deletePic = () => {
 };
 
 const rowProps = ({ item }) => ({
-  onClick: () => (mealDetailDialog.value = true),
+  onClick: () => openMealDialog(item),
   style: 'cursor: pointer;',
 });
+
+const openMealDialog = async (meal) => {
+  console.log('meal', meal);
+  const params = {
+    mealDay: meal.mealDay,
+    mealTime: meal.mealTime,
+    userId: meal.userId,
+  };
+  console.log('params', params);
+  const res = await getUserMealDetail(params);
+  selectedMeal.value = res?.data || [];
+  console.log('res.data', res.data);
+  mealDetailDialog.value = true;
+};
 </script>
 
 <template>
@@ -222,6 +264,51 @@ const rowProps = ({ item }) => ({
       </v-card>
     </v-dialog>
 
+    <!-- 운동기록 상세 모달 -->
+    <v-dialog v-model="mealDetailDialog" max-width="300" min-height="100">
+      <v-card>
+        <v-card-title class="text-h8">상세 기록</v-card-title>
+
+        <v-card-subtitle>기록 날짜</v-card-subtitle>
+        <v-card-text>{{ selectedMeal[0]?.mealDay }}</v-card-text>
+
+        <v-card-subtitle>기록 시간</v-card-subtitle>
+        <v-card-text>{{ selectedMeal[0]?.mealTime }}</v-card-text>
+
+        <template v-for="(meal, index) in selectedMeal" :key="index">
+          <v-card-subtitle>음식명</v-card-subtitle>
+          <v-card-text>{{ meal.foodName }}</v-card-text>
+
+          <v-card-subtitle>탄수화물</v-card-subtitle>
+          <v-card-text>{{ meal.carbohydrate }}g</v-card-text>
+
+          <v-card-subtitle>단백질</v-card-subtitle>
+          <v-card-text>{{ meal.protein }}g</v-card-text>
+
+          <v-card-subtitle>지방</v-card-subtitle>
+          <v-card-text>{{ meal.fat }}g</v-card-text>
+
+          <v-card-subtitle>나트륨</v-card-subtitle>
+          <v-card-text>{{ meal.natrium }}mg</v-card-text>
+
+          <v-card-subtitle>당</v-card-subtitle>
+          <v-card-text>{{ meal.sugar }}g</v-card-text>
+
+          <v-card-subtitle>총 섭취량</v-card-subtitle>
+          <v-card-text>{{ `${meal.foodAmount}${meal.flag}` }}</v-card-text>
+
+          <v-card-subtitle>칼로리</v-card-subtitle>
+          <v-card-text>{{ meal.kcal }}kcal</v-card-text>
+        </template>
+
+        <v-card-actions>
+          <v-spacer />
+          <v-btn color="dark" text @click="mealDetailDialog = false"
+            >확인</v-btn
+          >
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-card>
       <span class="title">회원 정보</span>
       <v-btn @click="deleteUserDialog = true">회원 차단</v-btn>
@@ -339,7 +426,7 @@ const rowProps = ({ item }) => ({
       </v-card-title>
       <v-data-table
         :headers="challengeHeaders"
-        :items="tableSet"
+        :items="challengeTableSet"
         :items-per-page="10"
         :search="searchChallenge"
         fixed-header
@@ -393,20 +480,28 @@ const rowProps = ({ item }) => ({
       </v-card-title>
       <v-data-table
         :headers="mealHeaders"
-        :items="state.mealHistory"
+        :items="mealTableSet"
         :items-per-page="10"
         :search="searchMeal"
         fixed-header
         class="styled-table"
         :row-props="rowProps"
       >
-        <template #item.mealDay="{ item }">{{
-          item.mealRecordIds.mealDay
-        }}</template>
-
-        <template #item.mealTime="{ item }">{{
-          item.mealRecordIds.mealTime
-        }}</template>
+        <!-- userId: Number(item.userId ?? 0),
+      mealDay: mealDay.normalize('NFC'),
+      mealTime: mealTime.normalize('NFC'),
+      totalCarbohydrate: Number(item.totalCarbohydrate ?? 0),
+      totalFat: Number(item.totalFat ?? 0),
+      totalKcal: Number(item.totalKcal ?? 0),
+      totalNatrium: Number(item.totalNatrium ?? 0),
+      totalProtein: Number(item.totalProtein ?? 0),
+      totalSugar: Number(item.totalSugar ?? 0), -->
+        <template #item.totalCarbohydrate="{item}">{{ item.totalCarbohydrate.toLocaleString() }}g</template>
+        <template #item.totalProtein="{item}">{{ item.totalProtein.toLocaleString() }}g</template>
+        <template #item.totalFat="{item}">{{ item.totalFat.toLocaleString() }}g</template>
+        <template #item.totalNatrium="{item}">{{ item.totalNatrium.toLocaleString() }}mg</template>
+        <template #item.totalSugar="{item}">{{ item.totalSugar.toLocaleString() }}g</template>
+        <template #item.totalKcal="{item}">{{ item.totalKcal.toLocaleString() }}kcal</template>
       </v-data-table>
     </v-card>
   </div>
