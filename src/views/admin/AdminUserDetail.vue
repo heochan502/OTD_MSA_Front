@@ -6,7 +6,6 @@ import {
   deleteUser,
   getUserExerciseRecord,
   getUserMealRecord,
-  getUser,
 } from '@/services/admin/adminService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { useAdminStore } from '@/stores/admin/adminStore';
@@ -25,6 +24,7 @@ const deletePicDialog = ref(false);
 const putProfileDialog = ref(false);
 const successDialog = ref(false);
 const deleteUserDialog = ref(false);
+const mealDetailDialog = ref(false);
 
 const state = reactive({
   userInfo: {},
@@ -55,8 +55,8 @@ onMounted(async () => {
   console.log('3', resMeal.data);
   state.challengeHistory = resUser.data.challengeProgress;
   state.pointHistory = resUser.data.challengePointHistory;
-  state.exerciseHistory = resExercise.data.exerciseRecord;
-  state.mealHistory = resMeal.data.mealRecord;
+  state.exerciseHistory = resExercise.data;
+  state.mealHistory = resMeal.data;
 
   picUrl.value = authenticationStore.formattedUserPic(state.userInfo);
 });
@@ -77,9 +77,22 @@ const challengeHeaders = [
   { title: '성공여부', key: 'success' },
 ];
 
-const exerciseHeaders = [];
+const exerciseHeaders = [
+  { title: '운동 종목', key: 'exerciseName' },
+  { title: '시작 시간', key: 'startAt' },
+  { title: '종료 시간', key: 'endAt' },
+  { title: '소비 칼로리', key: 'activityKcal' },
+];
 
-const mealHeaders = [];
+const mealHeaders = [
+  { title: '기록일', key: 'mealDay' },
+  { title: '기록시간', key: 'mealTime' },
+  { title: '총 탄수화물 섭취량', key: 'totalCarbohydrate' },
+  { title: '총 지방 섭취량', key: 'totalFat' },
+  { title: '총 나트륨 섭취량', key: 'totalNatrium' },
+  { title: '총 단백질 섭취량', key: 'totalProtein' },
+  { title: '총 당 섭취량', key: 'totalSugar' },
+];
 
 const formatNumber = (n) => String(n).padStart(2, '0');
 const formatDate = (date) => {
@@ -146,6 +159,11 @@ const deletePic = () => {
   picUrl.value = authenticationStore.formattedUserPic('');
   state.userInfo.pic = null;
 };
+
+const rowProps = ({ item }) => ({
+  onClick: () => (mealDetailDialog.value = true),
+  style: 'cursor: pointer;',
+});
 </script>
 
 <template>
@@ -333,7 +351,7 @@ const deletePic = () => {
     </v-card>
 
     <!-- 운동기록 -->
-    <!-- <v-card>
+    <v-card>
       <v-card-title class="d-flex justify-space-between align-center">
         <span class="title">운동 기록</span>
         <v-text-field
@@ -349,17 +367,17 @@ const deletePic = () => {
       </v-card-title>
       <v-data-table
         :headers="exerciseHeaders"
-        :items="exerciseHistory"
+        :items="state.exerciseHistory"
         :items-per-page="10"
         :search="searchExercise"
         fixed-header
         class="styled-table"
       >
       </v-data-table>
-    </v-card> -->
+    </v-card>
 
     <!-- 식단기록 -->
-    <!-- <v-card>
+    <v-card>
       <v-card-title class="d-flex justify-space-between align-center">
         <span class="title">식단 기록</span>
         <v-text-field
@@ -375,14 +393,22 @@ const deletePic = () => {
       </v-card-title>
       <v-data-table
         :headers="mealHeaders"
-        :items="mealHistory"
+        :items="state.mealHistory"
         :items-per-page="10"
         :search="searchMeal"
         fixed-header
         class="styled-table"
+        :row-props="rowProps"
       >
+        <template #item.mealDay="{ item }">{{
+          item.mealRecordIds.mealDay
+        }}</template>
+
+        <template #item.mealTime="{ item }">{{
+          item.mealRecordIds.mealTime
+        }}</template>
       </v-data-table>
-    </v-card> -->
+    </v-card>
   </div>
 </template>
 
