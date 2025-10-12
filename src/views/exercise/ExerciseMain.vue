@@ -101,6 +101,7 @@ const onDateClick = async (date) => {
   align-content: center;
   justify-content: space-between;
   margin-top: 15px;
+  max-width: 350px;
 }
 
 .btn_add {

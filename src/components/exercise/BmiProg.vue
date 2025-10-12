@@ -72,8 +72,9 @@ const bmiStatus = computed(() => {
 
 <style lang="scss" scoped>
 .content_bmi {
-  width: 315px;
-
+  width: 100%;
+  max-width: 315px;
+  min-width: 320px;
   .chip_bmi {
     display: flex;
     align-items: center;

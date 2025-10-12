@@ -64,6 +64,7 @@ const hasRecord = computed(() => {
 <style lang="scss" scoped>
 .content_main {
   min-width: 320px;
+  max-width: 350px;
   width: 100%;
   height: 188px;
   padding: 10px;
