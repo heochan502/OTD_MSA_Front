@@ -1,3 +1,4 @@
+// stores/community/comments.js
 import { defineStore } from 'pinia';
 import {
   fetchMents,
@@ -35,14 +36,19 @@ export const useCommentsStore = defineStore('comments', {
       }
     },
 
-    async add(postId, content) {
+    // ✅ opts 추가 (닉네임/권한 헤더용)
+    async add(postId, content, opts = {}) {
       const k = String(postId);
       const auth = useAuthenticationStore();
       const me = auth?.state?.signedUser ?? { userId: 0, nickName: '익명' };
 
-      const { data } = await createMent(k, content, me.userId);
-      // 낙관적 갱신: 서버 응답 그대로 + 닉네임 임시필드 붙여 사용해도 OK
-      const next = { ...data, authorNickname: me.nickName ?? '익명' };
+      const { data } = await createMent(k, content, me.userId, opts);
+
+      // ✅ 낙관적 갱신: 응답 + 내 닉네임 보강
+      const next = {
+        ...data,
+        authorNickname: me.nickName ?? opts.nickName ?? '익명',
+      };
       this.byPost[k] = [next, ...(this.byPost[k] ?? [])];
     },
 
@@ -50,6 +56,7 @@ export const useCommentsStore = defineStore('comments', {
       const k = String(postId);
       const auth = useAuthenticationStore();
       const me = auth?.state?.signedUser ?? { userId: 0 };
+
       await deleteMent(mentId, me.userId);
       this.byPost[k] = (this.byPost[k] ?? []).filter(
         (m) => m.commentId !== mentId

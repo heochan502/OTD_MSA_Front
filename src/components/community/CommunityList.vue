@@ -1,4 +1,6 @@
 <script setup>
+import { formatYMDHM } from '@/stores/community/date';
+
 const props = defineProps({
   items: {
     type: Array,
@@ -21,10 +23,11 @@ function openPost(item) {
       @click="openPost(item)"
     >
       <header class="post-header">
-        <div class="badge">인기</div>
         <div class="meta">
           <span class="author">{{ item.author }}</span>
-          <span class="time">· {{ item.time }}</span>
+          <span class="time"
+            >· {{ formatYMDHM(item.createdAt || item.time) }}</span
+          >
         </div>
       </header>
 
