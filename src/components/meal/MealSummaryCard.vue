@@ -42,18 +42,17 @@ const { eatenFoodList } = storeToRefs(store)
 
 // 총합
 const totalKcal = computed(() =>
-  
-  (eatenFoodList.value ?? []).reduce((s, f) => s + ((f?.userFoodId ? Number(f.kcal) : (f.amount * f.kcal) / 100) || 0 ), 0)
-)
+  (eatenFoodList.value ?? []).reduce((s, f) => s +  Number(f.kcal) || 0, 0)
+);
 const totalCarb = computed(() =>
-  (eatenFoodList.value ?? []).reduce((s, f) => s + ((f?.userFoodId ? Number(f.carbohydrate) : (f.amount * f.carbohydrate) / 100) || 0), 0)
-)
+  (eatenFoodList.value ?? []).reduce((s, f) => s +  Number(f.carbohydrate) || 0, 0)
+);
 const totalProtein = computed(() =>
-  (eatenFoodList.value ?? []).reduce((s, f) => s + ((f?.protein ? Number(f.protein) : (f.amount * f.protein) / 100) || 0), 0)
-)
+  (eatenFoodList.value ?? []).reduce((s, f) => s +  Number(f.protein) || 0, 0)
+);
 const totalFat = computed(() =>
-  (eatenFoodList.value ?? []).reduce((s, f) => s + ((f?.fat ? Number(f.fat) : (f.amount * f.fat) / 100) || 0), 0)
-)
+  (eatenFoodList.value ?? []).reduce((s, f) => s +  Number(f.fat) || 0, 0)
+);
 
 
 
