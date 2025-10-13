@@ -31,8 +31,8 @@ onMounted (()=>{
   if (selectedDay.selectedDay.setTime !== meal || !selectedDay.selectedDay.setTime) {
     selectedFoods.value = [];        // 끼니 바뀌면 선택 초기화
     selectedDay.selectedDay.setTime = meal;
-    console.log('끼니 변경:', meal);
-    console.log('끼니 변경:', selectedDay.selectedDay.setDay);
+    // console.log('끼니 변경:', meal);
+    // console.log('끼니 변경:', selectedDay.selectedDay.setDay);
   }
 });
 
@@ -108,7 +108,7 @@ const searchFoodName = async (keyword) => {
           ])
         ).values() // foodName 기준으로 중복 제거 공백까지 포함
       );
-      console.log('음식확인 ', items.foodList);
+      // console.log('음식확인 ', items.foodList);
     } else {
       return null;
     }
@@ -252,11 +252,6 @@ const cancelFood = (foodId) => {
 
 
 
-const menuOpen = ref(false);
-//데이터 입력 받고 정리 하는곳
-const itemList = ref([]);
-
-
 
 //  확정 버튼 → 식단 저장 화면으로 이동
 const goRecord = () => {
@@ -323,23 +318,6 @@ const frameEl = ref(null); // 모달을 붙일 프레임
       </template>
     </v-text-field>
 
-
-    <!-- <div class="food-list otd-top-margin">
-      <div v-for="food in items.foodList" :key="food.foodDbId" class="food-item" @click="toggleSelect(food)">
-        <div class="otd-body-2 d-flex flex-column ">
-          <span>{{ food.foodName }}</span>
-          <span> {{ food.amount }}</span>
-        </div>
-        <div>
-          <span>{{ food.kcal }} kcal</span>
-          <img class="check" :src="food.checked ? checkOn : checkOff" :alt="food.checked ? 'Checked' : 'Default'" />
-        </div>
-      </div>
-    </div>
-
-    <button class="otd-button confirm-btn" :disabled="selected.length === 0" @click="goRecord">
-      {{ selected.length }} 개 담았어요
-    </button> -->
     <!-- 리스트 -->
     <div class="food-list otd-top-margin">
       <div v-for="food in items.foodList" :key="food.foodDbId" class="food-item" @click="openSheet(food)">
@@ -353,9 +331,12 @@ const frameEl = ref(null); // 모달을 붙일 프레임
             :alt="isSelected(food.foodDbId) ? 'Checked' : 'Default'" @click.stop="toggleSelect(food)" />
         </div>
       </div>
-    </div>  
+    </div>
     <v-dialog v-model="sheetOpen" transition="dialog-bottom-transition" :scrim="true" :persistent="true"
-      :contained="true" content-class="otd-sheet" scrim-class="otd-scrim" @click:outside="sheetOpen = false">
+      :contained="false" 
+      content-class="otd-sheet" 
+      @click:outside="sheetOpen = false"
+      >
       <div class="sheet-card">
         <!-- 핸들바 -->
         <div class="sheet-handle" @click="sheetOpen = false" />
@@ -377,9 +358,9 @@ const frameEl = ref(null); // 모달을 붙일 프레임
 
         <!-- kcal 카드 -->
         <div class="kcal-card">
-          <span class="kcal-label">kcal</span>
-          <div class="kcal-value"><strong>{{ customFood.kcal }}</strong> kcal</div>
-        </div>      
+          <span class="kcal-label"></span>
+          <div class="kcal-value "><strong>{{ customFood.kcal }}</strong> kcal</div>
+        </div>
 
         <!-- 수량 스텝퍼 -->
         <div class="stepper">
@@ -421,7 +402,12 @@ const frameEl = ref(null); // 모달을 붙일 프레임
 
 <style scoped>
 
-.layout-frame{ position:relative; width:391px; overflow:hidden; }
+.layout-frame {
+  position: static;
+  width: 100%;
+  max-width: none;
+  overflow: visible;
+}
 .layout-frame :deep(.otd-sheet){ position:absolute !important; bottom:-24px !important; }
 .layout-frame :deep(.backdrop){ position:absolute !important; }
 
@@ -433,7 +419,7 @@ height: 22px;}
 
 .wrap-top
 {
-  margin-top: 20px !important;
+  margin-top: 30px !important;
 }
 
 .check {
@@ -517,34 +503,35 @@ height: 22px;}
 
 /* 바텀시트 */
 :deep(.otd-sheet) {
-  position: absolute !important;
-  /* .layout 기준 */
- 
-  display: flex !important;
-  align-items: center !important;
-  /* 아래에서 올라오기 */
-  justify-content: end !important;
-  bottom: -24px !important;  
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  top: auto !important;
+  margin: 0 !important;
+  width: 100vw !important;
+  max-width: none !important;
+  transform: none !important;
+  /* 가운데 정렬 변환 제거 */
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
 }
 
 /* 스크림도 프레임 안에서만 */
 :deep(.otd-scrim) {
+   width: 100% !important;
   backdrop-filter: blur(1px);
   background: rgba(0, 0, 0, .35);
 }
 
 /* 카드 크기는 그대로 */
 .sheet-card {
-  width: 391px;
-  margin: 0 0 0px 0;
-  background: #fff;
-  border-radius: 0 0 60px 60px;
-  padding: 30px 20px;
-  box-shadow: 0 -10px 28px rgba(0, 0, 0, .2);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  background-color: #ffffff;
+  width: 100%;
+  margin: 0;
+  padding: 24px;
   
+  justify-items: center;
 }
 
 /* 핸들바 */
@@ -613,27 +600,30 @@ height: 22px;}
 /* 주황 */
 
 /* kcal 카드 */
+/* 고정폭 지우기 */
 .kcal-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #fff;
-  border-radius: 14px;
-  padding: 14px 20px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, .08);
-  margin: 10px 0 16px;
   width: 100%;
+  min-width: 0;
+  
+  /* 기존 min-width:390px 제거 */
 }
 
 .kcal-label {
+  
   color: #7a7a7a;
   font-size: 14px;
  
 }
 
 .kcal-value {
+   justify-self: center;
   font-size: 22px;
   color: #222;
+}
+/* 리스트 카드도 화면에 맞게 */
+.food-item {
+  width: 100% !important;
+  /* 기존 350px 제거 */
 }
 
 /* 단위/슬라이더 (옵션) */
@@ -705,6 +695,7 @@ height: 22px;}
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+  margin-bottom: 15px;
 }
 
 .btn-outline {
