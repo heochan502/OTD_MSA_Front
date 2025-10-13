@@ -3,18 +3,22 @@ import { defineStore } from 'pinia';
 import {
   fetchPosts,
   fetchPostById,
-  createPost, // createPost(payload) -> data만 반환
-  updatePost, // updatePost(postId, payload) -> data만 반환
+  createPost, // -> data만 반환
+  updatePost, // -> data만 반환
   deletePost,
   toggleLike,
 } from '@/services/community/postService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 
+// Vite public/ 하위 자산은 BASE_URL을 붙이면 라우팅 환경에서도 안전
+const DEFAULT_AVATAR =
+  import.meta.env.BASE_URL + 'image/main/default-profile.png';
+
 /** 서버 응답을 화면에서 쓰기 쉬운 형태로 정규화 */
 function normalizePost(p, me) {
   if (!p) return null;
 
-  // id 추출 폭 넓힘 (여러 백엔드 응답 형태 대비)
+  // id 폭넓게 탐색
   const idRaw =
     p.postId ??
     p.id ??
@@ -31,10 +35,10 @@ function normalizePost(p, me) {
     null;
   const id = idRaw != null ? Number(idRaw) : null;
 
-  const category = p.categoryKey ?? p.category ?? '';
+  const category = (p.categoryKey ?? p.category ?? '').toString().trim();
 
+  // 작성자/내 계정
   const currentUserId = me?.userId ?? me?.memberNoLogin ?? me?.id ?? null;
-
   const authorIdRaw =
     p.userId ??
     p.authorId ??
@@ -52,13 +56,36 @@ function normalizePost(p, me) {
         authorId != null &&
         Number(currentUserId) === Number(authorId);
 
-  const author =
+  // ✅ 닉네임(백엔드 우선, 없으면 내 글일 때 내 닉네임 → 그래도 없으면 '익명')
+  const authorRaw =
+    p.nickname ??
+    p.nickName ??
     p.authorNickname ??
     p.author ??
     p.writerNickName ??
     p.writer?.nickName ??
-    (isMine && me?.nickName ? me.nickName : '익명');
+    null;
 
+  const author =
+    authorRaw && String(authorRaw).trim()
+      ? String(authorRaw)
+      : isMine && me?.nickName
+      ? String(me.nickName)
+      : '익명';
+
+  // ✅ 프로필 이미지(상대/절대 모두 허용, 없으면 기본 이미지)
+  const avatarRaw =
+    p.profileImage ??
+    p.profileImg ??
+    p.memberImg ??
+    p.avatar ??
+    p.writer?.memberImg ??
+    null;
+
+  const avatar =
+    avatarRaw && String(avatarRaw).trim() ? String(avatarRaw) : DEFAULT_AVATAR;
+
+  // 날짜
   const createdAt = p.createdAt ?? p.time ?? p.created_at ?? null;
   const createdAtMs = createdAt
     ? Number(createdAt) || Date.parse(createdAt) || 0
@@ -72,12 +99,12 @@ function normalizePost(p, me) {
     content: p.content ?? '',
     author,
     authorId,
+    avatar,
     isMine,
     createdAt,
-    createdAtMs, // 정렬용 안전 숫자
+    createdAtMs,
     likes: Number(p.likeCount ?? p.likes ?? p.like ?? 0),
     comments: Number(p.commentCount ?? p.comments ?? 0),
-    avatar: p.avatar ?? p.writer?.memberImg ?? '',
     liked: typeof p.liked === 'boolean' ? p.liked : undefined,
     _raw: p,
   };
@@ -86,7 +113,7 @@ function normalizePost(p, me) {
 export const useCommunityStore = defineStore('community', {
   state: () => ({
     posts: [], // 서버 원본(정규화 전)
-    selectedPost: null, // 정규화된 단건
+    selectedPost: null, // 정규화 단건
     viewMode: 'list',
     loading: false,
     error: null,
@@ -100,15 +127,16 @@ export const useCommunityStore = defineStore('community', {
   }),
 
   getters: {
+    // ✅ 정규화 → 카테고리 필터
     list: (state) => (categoryKey) => {
       const auth = useAuthenticationStore();
       const me = auth?.state?.signedUser ?? null;
       return (state.posts || [])
-        .filter((p) => (p?.categoryKey ?? p?.category) === categoryKey)
         .map((p) => normalizePost(p, me))
-        .filter(Boolean);
+        .filter((np) => np && np.category === categoryKey);
     },
 
+    // 전체 정규화 리스트
     allNormalized: (state) => {
       const auth = useAuthenticationStore();
       const me = auth?.state?.signedUser ?? null;
@@ -117,6 +145,7 @@ export const useCommunityStore = defineStore('community', {
         .filter(Boolean);
     },
 
+    // 상세(정규화)
     getById: (state) => (idLike) => {
       const idStr = String(idLike);
       const auth = useAuthenticationStore();
@@ -127,30 +156,30 @@ export const useCommunityStore = defineStore('community', {
       return normalizePost(found, me);
     },
 
+    // ✅ 정규화 → 해당 카테고리 → 좋아요 순
     popularByCategory:
       (state) =>
       (categoryKey, limit = 5) => {
         const auth = useAuthenticationStore();
         const me = auth?.state?.signedUser ?? null;
         return (state.posts || [])
-          .filter((p) => (p?.categoryKey ?? p?.category) === categoryKey)
-          .sort((a, b) => Number(b.likeCount ?? 0) - Number(a.likeCount ?? 0))
-          .slice(0, limit)
           .map((p) => normalizePost(p, me))
-          .filter(Boolean);
+          .filter((np) => np && np.category === categoryKey)
+          .sort((a, b) => Number(b.likes) - Number(a.likes))
+          .slice(0, limit);
       },
 
+    // 전체 인기글
     popularAll:
       (state) =>
       (limit = 5) => {
         const auth = useAuthenticationStore();
         const me = auth?.state?.signedUser ?? null;
         return (state.posts || [])
-          .slice()
-          .sort((a, b) => Number(b.likeCount ?? 0) - Number(a.likeCount ?? 0))
-          .slice(0, limit)
           .map((p) => normalizePost(p, me))
-          .filter(Boolean);
+          .filter(Boolean)
+          .sort((a, b) => Number(b.likes) - Number(a.likes))
+          .slice(0, limit);
       },
   },
 
@@ -189,6 +218,7 @@ export const useCommunityStore = defineStore('community', {
         const raw = res?.data ?? null;
         this.selectedPost = normalizePost(raw, me);
 
+        // 목록에도 반영/갱신
         if (raw) {
           const idx = (this.posts || []).findIndex(
             (p) => String(p.postId ?? p.id) === idStr
@@ -208,7 +238,7 @@ export const useCommunityStore = defineStore('community', {
 
     /**
      * 글 생성(JSON) — 정규화 객체를 반환(postId 보장).
-     * 백엔드가 id를 응답에 안 넣어주는 경우, 방금 쓴 글을 목록에서 탐색해서 id를 폴백으로 확보.
+     * 백엔드가 id를 응답에 안 넣어줄 가능성 대비, 목록 재조회 후 폴백 탐색.
      */
     async createNewPost(payload) {
       this.error = null;
@@ -217,7 +247,7 @@ export const useCommunityStore = defineStore('community', {
         const me = auth?.state?.signedUser ?? null;
         const myId = me?.userId ?? me?.memberNoLogin ?? null;
 
-        // 1) 생성 (data만 반환)
+        // 1) 생성
         const createdRaw = await createPost(payload);
 
         // 2) 응답에서 id 바로 탐색
@@ -236,28 +266,10 @@ export const useCommunityStore = defineStore('community', {
             createdRaw?.pk
         );
 
-        // 3) 목록 폴백 탐색 조건 (작성자/제목/내용 매칭)
-        const matchesMe = (p) => {
-          const aId = Number(
-            p.userId ??
-              p.authorId ??
-              p.memberNoLogin ??
-              p.memberNo ??
-              p.writerId ??
-              p.writer?.id
-          );
-          return myId != null && aId === Number(myId);
-        };
-        const sameText = (p) =>
-          String(p.title ?? '').trim() === String(payload.title ?? '').trim() &&
-          String(p.content ?? '').trim() ===
-            String(payload.content ?? '').trim();
-
-        // 4) 목록 옵티미스틱 반영(원본 push) — id 없으면 나중 탐색 시 재사용
+        // 3) 낙관적 목록 반영
         const createdForList = {
           ...(typeof createdRaw === 'object' ? createdRaw : {}),
           ...(postId ? { postId } : {}),
-          // 작성자 id 없을 수 있어 폴백 주입
           ...(myId != null &&
           createdRaw?.userId == null &&
           createdRaw?.authorId == null
@@ -272,16 +284,33 @@ export const useCommunityStore = defineStore('community', {
         };
         this.posts = [createdForList, ...(this.posts || [])];
 
-        // 5) 재조회 (최신 목록 확보)
+        // 4) 재조회
         const page0 = Math.max(0, (this.page ?? 1) - 1);
         await this.loadPosts(page0 + 1, this.size);
 
-        // 6) 폴백: 목록에서 방금 쓴 글 찾기
+        // 5) 폴백: 목록에서 방금 쓴 글 찾기
         if (!postId) {
+          const matchesMe = (p) => {
+            const aId = Number(
+              p.userId ??
+                p.authorId ??
+                p.memberNoLogin ??
+                p.memberNo ??
+                p.writerId ??
+                p.writer?.id
+            );
+            return myId != null && aId === Number(myId);
+          };
+          const sameText = (p) =>
+            String(p.title ?? '').trim() ===
+              String(payload.title ?? '').trim() &&
+            String(p.content ?? '').trim() ===
+              String(payload.content ?? '').trim();
+
           const pool = this.posts || [];
           const candidate =
             pool.find((p) => matchesMe(p) && sameText(p)) ||
-            pool.find((p) => sameText(p)); // 작성자 매칭이 안될 때 제목/내용만으로라도
+            pool.find((p) => sameText(p));
           if (candidate) {
             postId = Number(
               candidate.postId ??
@@ -295,7 +324,6 @@ export const useCommunityStore = defineStore('community', {
 
         this.viewMode = 'list';
 
-        // 7) 최종 방어
         if (!postId) {
           console.warn(
             '[community] createNewPost: cannot resolve postId',
@@ -304,7 +332,7 @@ export const useCommunityStore = defineStore('community', {
           throw new Error('생성 응답에 postId가 없습니다.');
         }
 
-        // 8) 정규화 후 반환
+        // 6) 정규화 후 반환
         const normalized = normalizePost({ ...createdForList, postId }, me);
         return normalized;
       } catch (err) {
