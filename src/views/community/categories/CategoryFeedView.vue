@@ -10,46 +10,97 @@ const router = useRouter();
 const store = useCommunityStore();
 
 const TABS = [
+  { key: 'all', label: '전체' },
   { key: 'free', label: '자유수다' },
   { key: 'diet', label: '다이어트' },
   { key: 'work', label: '운동' },
   { key: 'love', label: '연애' },
 ];
-const activeKey = ref(
-  typeof route.params.category === 'string' ? route.params.category : 'free'
-);
 
+const validKeys = new Set(TABS.map((t) => t.key));
+const initialKey =
+  typeof route.params.category === 'string' &&
+  validKeys.has(route.params.category)
+    ? route.params.category
+    : 'all';
+
+const activeKey = ref(initialKey);
+
+// ✅ 페이지네이션 관리
 const PAGE_SIZE = 10;
-const loaded = ref(PAGE_SIZE);
+const page = ref(1);
+const items = ref([]);
+const hasMore = ref(true);
+const loading = ref(false);
 
-// 스토어에 쌓인 서버 응답을 카테고리로 필터링
-const baseList = computed(() => store.list(activeKey.value));
-const items = computed(() => baseList.value.slice(0, loaded.value));
-const hasMore = computed(() => loaded.value < baseList.value.length);
-const loadMore = () =>
-  hasMore.value &&
-  (loaded.value = Math.min(loaded.value + PAGE_SIZE, baseList.value.length));
+// ✅ 게시글 불러오기 (페이지 단위)
+async function fetchByActiveKey(reset = false) {
+  if (loading.value) return;
+  loading.value = true;
 
+  try {
+    if (reset) {
+      page.value = 1;
+      items.value = [];
+      hasMore.value = true;
+    }
+
+    const key = activeKey.value === 'all' ? undefined : activeKey.value;
+    const res = await store.loadPosts(page.value, PAGE_SIZE, key);
+
+    // store.posts 갱신 후 실제 데이터 가져오기
+    const newPosts =
+      activeKey.value === 'all'
+        ? store.allNormalized
+        : store.list(activeKey.value);
+
+    if (reset) {
+      items.value = [...newPosts];
+    } else {
+      const seen = new Set(items.value.map((p) => p.id));
+      const append = newPosts.filter((p) => !seen.has(p.id));
+      items.value.push(...append);
+    }
+
+    // 다음 페이지 여부 판정
+    if (newPosts.length < PAGE_SIZE * page.value) {
+      hasMore.value = false;
+    } else {
+      page.value += 1;
+    }
+  } catch (err) {
+    console.error('[fetchByActiveKey]', err);
+  } finally {
+    loading.value = false;
+  }
+}
+
+// ✅ 무한 스크롤 감지
 const sentinel = ref(null);
 let io;
 function observe() {
   if (io) io.disconnect();
   io = new IntersectionObserver(
-    (es) => es.forEach((e) => e.isIntersecting && loadMore()),
+    (entries) => {
+      if (
+        entries.some((e) => e.isIntersecting) &&
+        hasMore.value &&
+        !loading.value
+      ) {
+        fetchByActiveKey(false);
+      }
+    },
     { root: null, rootMargin: '120px', threshold: 0.01 }
   );
   if (sentinel.value) io.observe(sentinel.value);
 }
 
 onMounted(async () => {
-  // ★ 최초 로드 시에도 categoryKey 전달
-  await store.loadPosts(1, PAGE_SIZE, activeKey.value);
+  await fetchByActiveKey(true);
   observe();
 
-  // 작성 성공 플래그 감지 → 토스트
   if (route.query.posted === '1') {
     showPostedToast();
-    // 쿼리 제거(뒤로가기 시 토스트 재표시 방지)
     router.replace({
       name: 'CommunityCategory',
       params: { category: activeKey.value },
@@ -59,35 +110,31 @@ onMounted(async () => {
 
 onBeforeUnmount(() => io && io.disconnect());
 
-// 탭 전환 시: 라우팅 + categoryKey로 재조회
+// ✅ 탭 전환 시 리셋
 function selectTab(k) {
   if (activeKey.value !== k) {
     activeKey.value = k;
-    loaded.value = PAGE_SIZE;
     router.replace({ name: 'CommunityCategory', params: { category: k } });
-    store.loadPosts(1, PAGE_SIZE, k); // ★ 전달
+    fetchByActiveKey(true);
   }
 }
 
-// 라우트 파라미터 변경 시에도 재조회
+// ✅ 라우트 변경 감지
 watch(
   () => route.params.category,
   (v) => {
-    const k = typeof v === 'string' ? v : 'free';
-    if (TABS.some((t) => t.key === k)) {
+    const k = typeof v === 'string' && validKeys.has(v) ? v : 'all';
+    if (activeKey.value !== k) {
       activeKey.value = k;
-      loaded.value = PAGE_SIZE;
-      store.loadPosts(1, PAGE_SIZE, k); // ★ 전달
+      fetchByActiveKey(true);
     }
   }
 );
 
 const openDetail = (p) =>
   router.push({ name: 'CommunityPost', params: { id: String(p.id) } });
-const goWrite = (category) =>
-  router.push({ name: 'CommunityWrite', params: { category } });
 
-// ----- Toast 상태 -----
+// ✅ 토스트
 const toastOpen = ref(false);
 const toastMessage = ref('');
 function showPostedToast() {
@@ -98,10 +145,9 @@ function showPostedToast() {
 </script>
 
 <template>
-  <!-- 전역 중앙정렬 영향을 최소화한 래퍼 -->
   <div class="cf-wrap">
     <section class="category-page">
-      <!-- 탭 패널 -->
+      <!-- 탭 -->
       <div class="section-card tabs-card">
         <div class="tabs">
           <button
@@ -116,7 +162,7 @@ function showPostedToast() {
         </div>
       </div>
 
-      <!-- 리스트 패널 -->
+      <!-- 리스트 -->
       <div class="section-card list-card">
         <div class="list">
           <button
@@ -143,28 +189,38 @@ function showPostedToast() {
 <style scoped>
 /* ===== 페이지 래퍼 ===== */
 .cf-wrap {
+  height: 100vh;
   margin: 0 !important;
   align-self: stretch;
   width: 100%;
-  min-height: 100%;
   background: #f4f6f8;
+  overflow-y: auto;
   overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable both-edges;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.cf-wrap::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
 }
 
-/* 가운데 정렬 + 대칭 패딩 */
+/* ===== 페이지 기본 ===== */
 .category-page {
   width: 100%;
   max-width: 420px;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0 auto;
   padding: 14px 14px 28px;
   display: flex;
   flex-direction: column;
   gap: 14px;
   box-sizing: border-box;
+  overflow-x: hidden;
 }
 
-/* ===== 공통 카드 패널 ===== */
+/* ===== 카드 공통 ===== */
 .section-card {
   background: #fff;
   border-radius: 18px;
@@ -178,12 +234,16 @@ function showPostedToast() {
   padding: 6px 8px 10px;
 }
 
-/* ===== 탭(칩) ===== */
+/* ===== 탭 ===== */
 .tabs {
   display: flex;
   gap: 8px;
   overflow-x: auto;
   padding: 2px;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar {
+  display: none;
 }
 .tab {
   height: 34px;
@@ -195,6 +255,7 @@ function showPostedToast() {
   font-size: 14px;
   white-space: nowrap;
   box-shadow: 0 3px 8px rgba(17, 24, 39, 0.05);
+  cursor: pointer;
 }
 .tab.active {
   background: #393e46;
@@ -208,6 +269,7 @@ function showPostedToast() {
   flex-direction: column;
   gap: 10px;
   padding: 6px;
+  overflow-x: hidden;
 }
 .card-btn {
   padding: 0;
@@ -231,5 +293,14 @@ function showPostedToast() {
   color: #9aa3af;
   margin: 8px 0 2px;
   font-size: 13px;
+}
+
+/* ===== 전역 스크롤 차단 ===== */
+:global(html),
+:global(body) {
+  overflow-x: hidden;
+  overflow-y: hidden;
+  height: 100%;
+  overscroll-behavior-x: none;
 }
 </style>

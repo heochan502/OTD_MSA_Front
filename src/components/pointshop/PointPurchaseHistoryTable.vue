@@ -27,9 +27,10 @@ onMounted(async () => {
       </thead>
       <tbody>
         <tr v-for="item in purchaseHistory" :key="item.purchaseId">
-          <td>{{ item.purchaseDate }}</td>
-          <td>{{ item.itemName }}</td>
-          <td>{{ item.price.toLocaleString() }}P</td>
+          <td>{{ item.purchaseTime }}</td>
+          <td>{{ item.pointItemName }}</td>
+          <td>{{ item.pointScore.toLocaleString() }}P</td>
+
         </tr>
       </tbody>
     </table>

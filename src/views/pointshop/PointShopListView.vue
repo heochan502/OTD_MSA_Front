@@ -1,8 +1,10 @@
 <script setup>
-import { computed, reactive, onMounted } from 'vue';
-import { usePointShop } from '@/components/pointshop/usePointshop';
+import { computed, reactive, onMounted, ref } from 'vue';
+import { usePointShop } from '@/components/pointshop/usePointShop.js';
 import PointItemCard from '@/components/pointshop/PointItemCard.vue';
-import PointUserStatus from '@/components/pointshop/PointUserStatus.vue';
+import PointShopStatus from '@/components/pointshop/PointUserStatus.vue';
+
+const isMountedOnce = ref(false);
 
 const {
   userPoints,
@@ -16,11 +18,19 @@ const {
 } = usePointShop();
 
 onMounted(async () => {
-  await Promise.all([
-    fetchUserPoints(),
-    fetchAllItems(),
-    fetchPurchasedItems()
-  ]);
+  if (isMountedOnce.value) return;
+  isMountedOnce.value = true;
+
+  try {
+    await Promise.all([
+      fetchUserPoints(),
+      fetchAllItems(),
+      fetchPurchasedItems()
+    ]);
+  } catch (err) {
+    console.error('[PointShopListView] 데이터 로딩 중 오류:', err);
+    alert('서버와 연결할 수 없습니다. 잠시 후 다시 시도해주세요.');
+  }
 });
 
 const state = reactive({
@@ -29,6 +39,7 @@ const state = reactive({
 });
 
 const filteredItems = computed(() => {
+  if (!Array.isArray(allItems.value)) return [];
   const query = state.search.trim().toLowerCase();
   return query === ''
     ? allItems.value
@@ -38,6 +49,7 @@ const filteredItems = computed(() => {
 });
 
 const searchList = computed(() => {
+  if (!Array.isArray(filteredItems.value)) return [];
   const names = filteredItems.value.map(item => item.name);
   return [...new Set(names)].slice(0, 5); // 중복 제거
 });
@@ -50,53 +62,62 @@ const onTyping = () => {
   state.showMessage =  state.search.trim() === '';
 };
 
-const purchase = (item) => {
-  purchaseItem(item);
+const purchase = async (item) => {
+  try {
+    await purchaseItem(item);
+  } catch (err) {
+    console.error('[PointShopListView] 구매 중 오류:', err);
+    alert('구매 처리 중 문제가 발생했습니다. 다시 시도해주세요.');
+  }
 };
 
 </script>
 
 <template>
-  <div class="search-bar-wrapper">
-    <div class="input-container">
-      <input class="form-control"
-             autocomplete="off"
-             type="text"
-             list="search-list-id"
-             @input="onTyping"
-             v-model="state.search"
-      />
-      <span v-if="showNoticeMessage" class="input-overlay">검색어를 입력해주세요.</span>
+  <div v-if="isMountedOnce" class="pointshop-wrapper">
+    <div class="search-bar-wrapper">
+      <div class="input-container">
+        <input
+          class="form-control"
+          autocomplete="off"
+          type="text"
+          list="search-list-id"
+          @input="onTyping"
+          v-model="state.search"
+        />
+        <span v-if="showNoticeMessage" class="input-overlay">검색어를 입력해주세요.</span>
+      </div>
+
+      <datalist id="search-list-id" v-if="searchList.length > 0">
+        <option v-for="item in searchList" :key="item">{{ item }}</option>
+      </datalist>
     </div>
 
-    <datalist id="search-list-id" v-if="searchList.length > 0">
-      <option v-for="item in searchList" :key="item">{{ item }}</option>
-    </datalist>
-  </div>
+    <div class="point-display-global">
+      보유 포인트:
+      {{ userPoints.value ? userPoints.value.toLocaleString() : '0' }} P
+    </div>
 
-  <div class="point-display-global">
-    보유 포인트: {{ userPoints.value ? userPoints.value.toLocaleString() : '0' }} P
-  </div>
+    <div class="pointshop-container">
+      <PointItemCard
+        v-for="item in (Array.isArray(filteredItems) ? filteredItems : [])"
+        :key="item.id"
+        :item="item"
+        :userPoints="userPoints.value"
+        :isPurchased="isPurchased"
+        :onPurchase="purchase"
+      />
+    </div>
 
-  <div class="pointshop-container">
-    <PointItemCard
-      v-for="item in filteredItems"
-      :key="item.id"
-      :item="item"
+    <div v-if="filteredItems.length === 0" class="no-result-message">
+      검색 결과가 없습니다.
+    </div>
+
+    <PointShopStatus
       :userPoints="userPoints.value"
-      :isPurchased="isPurchased"
-      :onPurchase="purchase"
+      :purchasedItemIds="purchasedItemIds"
     />
   </div>
-
-  <div v-if="filteredItems.length === 0" class="no-result-message">
-    검색 결과가 없습니다.
-  </div>
-
-  <PointShopStatus
-    :userPoints="userPoints.value"
-    :purchasedItemIds="purchasedItemIds" />
-
 </template>
 
 <style scoped>

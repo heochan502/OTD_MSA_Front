@@ -20,19 +20,36 @@ const images = ref([]);
 const imagesLoading = ref(false);
 const imagesError = ref('');
 
+const DEFAULT_AVATAR =
+  import.meta.env.BASE_URL + 'image/main/default-profile.png';
+
 /** ⬇️ 캐시 버스트를 1회만 생성 */
 const cacheBust = ref(`?v=${Date.now()}`);
 
 /** ⬇️ 상대경로(/static/...)를 게이트웨이 절대경로로 변환 */
-const toAbsUrl = (p) => {
+function toAbsUrl(p) {
   if (!p) return '';
   if (/^https?:\/\//i.test(p)) return p;
   try {
     return new URL(p, axios.defaults.baseURL).toString();
   } catch {
-    return String(p);
+    return p.startsWith('/')
+      ? p
+      : import.meta.env.BASE_URL + p.replace(/^\.?\//, '');
   }
-};
+}
+const avatarUrl = computed(() => {
+  const p = post.value;
+  const raw =
+    p?.avatar ||
+    p?.profileImage ||
+    p?.profileImg ||
+    p?.memberImg ||
+    p?.writer?.memberImg ||
+    '';
+  const url = raw ? toAbsUrl(raw) : DEFAULT_AVATAR;
+  return url || DEFAULT_AVATAR;
+});
 
 async function loadImages(id) {
   imagesLoading.value = true;
@@ -134,7 +151,13 @@ function openFromDetail(i) {
 
       <div class="meta">
         <div class="meta-left">
-          <span class="avatar" aria-hidden="true"></span>
+          <div class="avatar">
+            <img
+              :src="avatarUrl"
+              alt=""
+              @error="(e) => (e.target.src = DEFAULT_AVATAR)"
+            />
+          </div>
           <span class="otd-body-3" style="font-weight: 600">{{
             post.author
           }}</span>
@@ -233,7 +256,14 @@ function openFromDetail(i) {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #eaeaea;
+  overflow: hidden;
+  background: #f1f1f1;
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 /* === 이미지 레이아웃 === */

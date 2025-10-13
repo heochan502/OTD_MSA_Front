@@ -432,6 +432,7 @@ function openLightboxFromNew(i) {
   font-size: 13px;
 }
 .form-card {
+  margin-left: 5px;
   width: 100%;
   max-width: 380px;
   background: #fff;
