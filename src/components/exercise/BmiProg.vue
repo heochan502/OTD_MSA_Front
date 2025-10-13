@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref } from "vue";
 import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
-
+import Modal from "../user/Modal.vue";
 const bodyCompositionStore = useBodyCompositionStore();
 const showDialog = ref(false);
 
@@ -120,7 +120,7 @@ const bmiStatus = computed(() => {
 
   <!-- BMI 계산기 모달 -->
   <v-dialog v-model="showDialog" max-width="400">
-    <v-card>
+    <div class="modal-container">
       <v-card-title class="text-h6">BMI 계산기</v-card-title>
       <v-card-text>
         <v-text-field
@@ -138,10 +138,12 @@ const bmiStatus = computed(() => {
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn variant="text" @click="showDialog = false">취소</v-btn>
-        <v-btn color="primary" @click="showDialog = false">저장</v-btn>
+        <v-btn class="btn btn-cancel" variant="text" @click="showDialog = false"
+          >취소</v-btn
+        >
+        <v-btn class="btn btn-confirm" @click="showDialog = false">저장</v-btn>
       </v-card-actions>
-    </v-card>
+    </div>
   </v-dialog>
 </template>
 
@@ -219,8 +221,41 @@ const bmiStatus = computed(() => {
   pointer-events: none;
   transition: 0.3s;
 }
-
-.btm_update {
+.modal-container {
+  background: white;
+  border-radius: 16px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  animation: modalSlideUp 0.3s ease-out;
+  padding: 16px;
+}
+.btn_update {
   border-radius: 10px;
+}
+.btn {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-full {
+  flex: 1 1 100%;
+}
+
+.btn-cancel {
+  background: #e5e7eb;
+  color: #374151;
+}
+.btn-confirm {
+  background: #393e46;
+  color: white;
 }
 </style>
