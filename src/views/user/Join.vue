@@ -217,7 +217,17 @@ function toggleAll() {
   }
 }
 
-onMounted(async () => { try { const response = await termsService.getActiveTerms(); if (response.success) { termsData.value = response.result; termsData.value.forEach(term => { termsMap.value.set(term.type, term); }); console.log("약관",termsMap ); } } catch (error) { console.error('약관 불러오기 실패:', error); showModal('오류', '약관을 불러오는데 실패했습니다.', 'error'); } });
+onMounted(async () => { try { const response = await termsService.getActiveTerms();
+   if (response.success) { 
+    termsData.value = response.result; 
+    termsData.value.forEach(term => { termsMap.value.set(term.termsId, term);; 
+
+    }); 
+    console.log("약관",termsMap.value ); } } 
+    catch (error) { 
+      console.error('약관 불러오기 실패:', error); 
+      showModal('오류', '약관을 불러오는데 실패했습니다.', 'error'); } 
+    });
 
 // 생년월일 포맷팅 함수
 const formatBirthDate = (event) => {
@@ -829,7 +839,8 @@ const loadTermsContent = (type) => {
       title: term.title,
       content: term.content,
     };
-    showTermsModal.value = type;
+    // showTermsModal.value = type;
+    showTermsModal.value = true; // 불린으로 관리
   }
 };
 </script>
@@ -935,7 +946,7 @@ const loadTermsContent = (type) => {
                 </span>
               </label>
               <button
-                @click="loadTermsContent(term.type)"  
+                @click="loadTermsContent(term.termsId)"  
                 class="view-button" type="button" > 보기
               </button>
             </div>
@@ -1340,11 +1351,8 @@ const loadTermsContent = (type) => {
     </div>
 
     <!-- 약관 모달 -->
-    <div
-      v-if="showTermsModal"
-      class="modal-overlay"
-      @click="showTermsModal = ''"
-    >
+    <div v-if="showTermsModal" class="modal-overlay" @click="showTermsModal = !showTermsModal">
+  
       <div class="modal" @click.stop>
         <h3 class="modal-title">{{ modalContent.title }}</h3>
         <div class="modal-content">
@@ -1352,9 +1360,8 @@ const loadTermsContent = (type) => {
             {{ modalContent.content }}
           </p>
         </div>
-        <button @click="showTermsModal = ''" class="btn btn-primary">
-          확인
-        </button>
+        <button @click="showTermsModal = false" class="btn btn-primary">확인</button>
+
       </div>
     </div>
 
