@@ -47,7 +47,7 @@ export const useAuthenticationStore = defineStore(
       state.signedUser.challengeRole = challengeRole;
     };
 
-       const setNickname = (nickname) => {
+    const setNickname = (nickname) => {
       state.signedUser.nickName = nickname;
     };
 

@@ -24,7 +24,7 @@ function openPost(item) {
     >
       <header class="post-header">
         <div class="meta">
-          <span class="author">{{ item.author }}</span>
+          <span class="author">{{ item.nickName }}</span>
           <span class="time"
             >· {{ formatYMDHM(item.createdAt || item.time) }}</span
           >

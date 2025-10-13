@@ -1,7 +1,11 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { join, checkUidDuplicate, checkNicknameDuplicate } from '@/services/user/userService';
+import {
+  join,
+  checkUidDuplicate,
+  checkNicknameDuplicate,
+} from '@/services/user/userService';
 import { termsService } from '@/services/user/termsService';
 import AlertModal from '@/components/user/Modal.vue';
 
@@ -22,17 +26,23 @@ const modalState = ref({
   message: '',
   type: 'info',
   onConfirm: null,
-  onCancel: null
+  onCancel: null,
 });
 
-const showModal = (title, message, type = 'info', onConfirm = null, onCancel = null) => {
+const showModal = (
+  title,
+  message,
+  type = 'info',
+  onConfirm = null,
+  onCancel = null
+) => {
   modalState.value = {
     show: true,
     title,
     message,
     type,
     onConfirm,
-    onCancel
+    onCancel,
   };
 };
 
@@ -64,7 +74,7 @@ const emailTimer = ref(0);
 // 2단계: 약관 동의
 const agreements = ref({
   all: false,
-  agreedTermsIds: []  
+  agreedTermsIds: [],
 });
 
 // 3단계: 계정 정보
@@ -97,8 +107,8 @@ const validation = ref({
     isValid: true,
     message: '',
     touched: false,
-  }
-})
+  },
+});
 
 const passwordCriteria = ref({
   length: false,
@@ -197,45 +207,47 @@ onUnmounted(() => {
   }
 });
 
-onMounted(async () => {
-  try {
-    const response = await termsService.getActiveTerms();
-    if (response.success) {
-      termsData.value = response.result;
-      
-      termsData.value.forEach(term => {
-        termsMap.value.set(term.type, term);
-      });
-    }
-  } catch (error) {
-    console.error('약관 불러오기 실패:', error);
-    showModal('오류', '약관을 불러오는데 실패했습니다.', 'error');
+function toggleAll() {
+  if (agreements.value.all) {
+    // 전체 선택
+    agreements.value.checkedIds = termsData.value.map(t => t.termsId)
+  } else {
+    // 전체 해제
+    agreements.value.checkedIds = []
   }
-});
+}
+
+onMounted(async () => { try { const response = await termsService.getActiveTerms(); if (response.success) { termsData.value = response.result; termsData.value.forEach(term => { termsMap.value.set(term.type, term); }); console.log("약관",termsMap ); } } catch (error) { console.error('약관 불러오기 실패:', error); showModal('오류', '약관을 불러오는데 실패했습니다.', 'error'); } });
 
 // 생년월일 포맷팅 함수
 const formatBirthDate = (event) => {
   let value = event.target.value.replace(/[^0-9]/g, '');
-  
+
   if (value.length <= 4) {
     additionalInfo.value.birthDate = value;
   } else if (value.length <= 6) {
     additionalInfo.value.birthDate = `${value.slice(0, 4)}-${value.slice(4)}`;
   } else {
-    additionalInfo.value.birthDate = `${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6, 8)}`;
+    additionalInfo.value.birthDate = `${value.slice(0, 4)}-${value.slice(
+      4,
+      6
+    )}-${value.slice(6, 8)}`;
   }
 };
 
 // 전화번호 포맷팅 함수
 const formatPhoneNumber = (event) => {
   let value = event.target.value.replace(/[^0-9]/g, '');
-  
+
   if (value.length <= 3) {
     additionalInfo.value.phone = value;
   } else if (value.length <= 7) {
     additionalInfo.value.phone = `${value.slice(0, 3)}-${value.slice(3)}`;
   } else {
-    additionalInfo.value.phone = `${value.slice(0, 3)}-${value.slice(3, 7)}-${value.slice(7, 11)}`;
+    additionalInfo.value.phone = `${value.slice(0, 3)}-${value.slice(
+      3,
+      7
+    )}-${value.slice(7, 11)}`;
   }
 };
 
@@ -288,21 +300,35 @@ const validatePassword = (password) => {
     return { isValid: false, message: '비밀번호는 10자 이상이어야 합니다.' };
   }
   if (password.length > 20) {
-    return { isValid: false, message: '비밀번호는 최대 20자까지 입력 가능합니다.' };
+    return {
+      isValid: false,
+      message: '비밀번호는 최대 20자까지 입력 가능합니다.',
+    };
   }
 
-  const hasLetter = /[a-z]/i.test(password);            
-  const hasNumber = /[0-9]/.test(password);             
-  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>_\-+=[\]\\\/'`~;]/.test(password);
+  const hasLetter = /[a-z]/i.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>_\-+=[\]\\\/'`~;]/.test(
+    password
+  );
 
   if (!hasLetter) {
-    return { isValid: false, message: '비밀번호에는 최소한 하나의 영문자가 포함되어야 합니다.' };
+    return {
+      isValid: false,
+      message: '비밀번호에는 최소한 하나의 영문자가 포함되어야 합니다.',
+    };
   }
   if (!hasNumber) {
-    return { isValid: false, message: '비밀번호에는 최소한 하나의 숫자가 포함되어야 합니다.' };
+    return {
+      isValid: false,
+      message: '비밀번호에는 최소한 하나의 숫자가 포함되어야 합니다.',
+    };
   }
   if (!hasSpecialChar) {
-    return { isValid: false, message: '비밀번호에는 최소한 하나의 특수문자가 포함되어야 합니다.' };
+    return {
+      isValid: false,
+      message: '비밀번호에는 최소한 하나의 특수문자가 포함되어야 합니다.',
+    };
   }
 
   return { isValid: true, message: '' };
@@ -435,11 +461,11 @@ const checkNicknameDuplicateAction = async () => {
 
   try {
     isLoading.value = true;
-    const response = await checkNicknameDuplicate(nickname); 
-    
+    const response = await checkNicknameDuplicate(nickname);
+
     validation.value.nickname.checked = true;
     validation.value.nickname.available = response.data.result.isAvailable;
-    
+
     if (response.data.result.isAvailable) {
       validation.value.nickname.message = '사용 가능한 닉네임입니다.';
       validation.value.nickname.isValid = true;
@@ -494,10 +520,11 @@ watch(() => accountInfo.upw, (newValue) => {
   passwordCriteria.value.number = /[0-9]/.test(newValue);
   passwordCriteria.value.specialChar = /[!@#$%^&*(),.?":{}|<>_\-+=[\]\\\/'`~;]/.test(newValue);
 
-  if (validation.value.upw.touched) {
-    validateField('upw', newValue);
+    if (validation.value.upw.touched) {
+      validateField('upw', newValue);
+    }
   }
-});
+);
 
 watch(
   () => accountInfo.value.confirmPassword,
@@ -559,27 +586,27 @@ const getFitnessRank = computed(() => {
   return { name: '브론즈', color: '#CD7F32' };
 });
 
-// 약관 동의 처리 
+// 약관 동의 처리
 const handleAgreementChange = (termsId) => {
   if (termsId === 'all') {
     const newValue = !agreements.value.all;
     agreements.value.all = newValue;
-    
+
     if (newValue) {
-      agreements.value.agreedTermsIds = termsData.value.map(t => t.termsId);
+      agreements.value.agreedTermsIds = termsData.value.map((t) => t.termsId);
     } else {
       agreements.value.agreedTermsIds = [];
     }
   } else {
     const index = agreements.value.agreedTermsIds.indexOf(termsId);
-    
+
     if (index > -1) {
       agreements.value.agreedTermsIds.splice(index, 1);
     } else {
       agreements.value.agreedTermsIds.push(termsId);
     }
-    
-    agreements.value.all = 
+
+    agreements.value.all =
       agreements.value.agreedTermsIds.length === termsData.value.length;
   }
 };
@@ -595,8 +622,8 @@ const canProceedToNext = computed(() => {
     case 1:
       return isEmailVerified.value;
     case 2:
-      const requiredTerms = termsData.value.filter(t => t.isRequired);
-      return requiredTerms.every(term => 
+      const requiredTerms = termsData.value.filter((t) => t.isRequired);
+      return requiredTerms.every((term) =>
         agreements.value.agreedTermsIds.includes(term.termsId)
       );
     case 3:
@@ -655,7 +682,11 @@ const sendVerificationEmail = async () => {
       showModal('전송 완료', '인증코드가 발송되었습니다.', 'success');
     } else {
       const error = await response.json();
-      showModal('전송 실패', error.message || '이메일 발송에 실패했습니다.', 'error');
+      showModal(
+        '전송 실패',
+        error.message || '이메일 발송에 실패했습니다.',
+        'error'
+      );
     }
   } catch (error) {
     showModal('네트워크 오류', '네트워크 오류가 발생했습니다.', 'error');
@@ -684,7 +715,11 @@ const verifyEmailCode = async () => {
       isEmailVerified.value = true;
       showModal('인증 완료', '이메일 인증이 완료되었습니다.', 'success');
     } else {
-      showModal('인증 실패', result.message || '인증코드가 일치하지 않습니다.', 'error');
+      showModal(
+        '인증 실패',
+        result.message || '인증코드가 일치하지 않습니다.',
+        'error'
+      );
     }
   } catch (error) {
     showModal('네트워크 오류', '네트워크 오류가 발생했습니다.', 'error');
@@ -750,26 +785,31 @@ const submitJoin = async () => {
       nickname: additionalInfo.value.nickname,
       roles: ['USER_1'],
       surveyAnswers: calculateSurveyScore.value,
-      agreedTermsIds: agreements.value.agreedTermsIds
+      agreedTermsIds: agreements.value.agreedTermsIds,
     };
 
     formData.append(
       'req',
       new Blob([JSON.stringify(joinData)], {
         type: 'application/json',
-      }),'req.json'
+      }),
+      'req.json'
     );
 
-    if (additionalInfo.value.pic instanceof File || additionalInfo.value.pic instanceof Blob) {
-      formData.append('pic', additionalInfo.value.pic, additionalInfo.value.pic.name ?? 'pic');
+    if (
+      additionalInfo.value.pic instanceof File ||
+      additionalInfo.value.pic instanceof Blob
+    ) {
+      formData.append(
+        'pic',
+        additionalInfo.value.pic,
+        additionalInfo.value.pic.name ?? 'pic'
+      );
     }
 
     await join(formData);
-    showModal(
-      '가입 완료',
-      '회원가입이 완료되었습니다!',
-      'success',
-      () => router.push('/user/login')
+    showModal('가입 완료', '회원가입이 완료되었습니다!', 'success', () =>
+      router.push('/user/login')
     );
   } catch (error) {
     console.error('회원가입 오류:', error);
@@ -781,13 +821,13 @@ const submitJoin = async () => {
 
 const loadTermsContent = (type) => {
   const term = termsMap.value.get(type);
-  if (!term) return;
-  
-  modalContent.value = {
-    title: term.title || '',
-    content: term.content || ''
-  };
-  showTermsModal.value = type;
+  if (term) {
+    modalContent.value = {
+      title: term.title,
+      content: term.content,
+    };
+    showTermsModal.value = type;
+  }
 };
 </script>
 
@@ -861,41 +901,39 @@ const loadTermsContent = (type) => {
         <h2 class="step-title">서비스 이용동의</h2>
 
         <div class="form-group">
+          <!-- 전체동의 -->
           <div class="agreement-all">
             <label class="checkbox-container">
               <input
                 type="checkbox"
-                :checked="agreements.all"
-                @change="handleAgreementChange('all')"
+                v-model="agreements.all"
+                @change="toggleAll()"
                 class="checkbox"
               />
               <span class="checkbox-text font-medium">약관 전체동의</span>
             </label>
           </div>
 
+          <!-- 개별 약관 -->
           <div class="agreement-list">
-            <div 
-              v-for="term in termsData" 
+            <div
+              v-for="term in termsData"
               :key="term.termsId"
               class="agreement-item"
             >
               <label class="checkbox-container">
                 <input
                   type="checkbox"
-                  :checked="isTermsChecked(term.termsId)"
-                  @change="handleAgreementChange(term.termsId)"
-                  />
+                  :value="term.termsId"
+                  v-model="agreements.checkedIds"                
+                class="checkbox" />
                 <span>
-                  {{ term.isRequired ? '(필수)' : '(선택)' }} 
-                  {{ term.title }}
+                  {{ term.isRequired ? '(필수)' : '(선택)' }} {{ term.title }}
                 </span>
               </label>
               <button
-                @click="loadTermsContent(term.type)"
-                class="view-button"
-                type="button"
-              >
-                보기
+                @click="loadTermsContent(term.type)"  
+                class="view-button" type="button" > 보기
               </button>
             </div>
           </div>
@@ -1299,13 +1337,21 @@ const loadTermsContent = (type) => {
     </div>
 
     <!-- 약관 모달 -->
-    <div v-if="showTermsModal" class="modal-overlay" @click="showTermsModal = ''">
+    <div
+      v-if="showTermsModal"
+      class="modal-overlay"
+      @click="showTermsModal = ''"
+    >
       <div class="modal" @click.stop>
         <h3 class="modal-title">{{ modalContent.title }}</h3>
         <div class="modal-content">
-          <p class="modal-text" style="white-space: pre-wrap;">{{ modalContent.content }}</p>
+          <p class="modal-text" style="white-space: pre-wrap">
+            {{ modalContent.content }}
+          </p>
         </div>
-        <button @click="showTermsModal = ''" class="btn btn-primary">확인</button>
+        <button @click="showTermsModal = ''" class="btn btn-primary">
+          확인
+        </button>
       </div>
     </div>
 

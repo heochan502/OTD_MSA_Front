@@ -3,9 +3,7 @@ import { onMounted, reactive, computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
-import effortLevels from "@/assets/effortLevels.json";
-import WeeklyCalendar from "@/components/exercise/WeeklyCalendar.vue";
-import WeeklyChart from "@/components/exercise/WeeklyChart.vue";
+
 import {
   deleteExerciseRecord,
   getExerciseRecordDetail,
@@ -14,8 +12,14 @@ import {
 } from "@/services/exercise/exerciseService";
 import { formatTimeKR, formatDateISO } from "@/utils/dateTimeUtils";
 import { calcDuration } from "@/utils/exerciseUtils";
+
 import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
+
+import effortLevels from "@/assets/effortLevels.json";
+import WeeklyCalendar from "@/components/exercise/WeeklyCalendar.vue";
+import WeeklyChart from "@/components/exercise/WeeklyChart.vue";
 import BarChart from "@/components/exercise/BarChart.vue";
+import Modal from "@/components/user/Modal.vue";
 
 dayjs.extend(isoWeek);
 
@@ -45,17 +49,14 @@ const selectedExercise = computed(() => {
     (e) => e.exerciseId === state.record.exerciseId
   );
 });
-
 // 거리기반운동 여부
 const hasDistance = computed(() => {
   return selectedExercise.value ? selectedExercise.value.hasDistance : 0; // 1 또는 0 그대로 반환
 });
-
 // 반복횟수기반운동 여부
 const hasReps = computed(() => {
   return selectedExercise.value ? selectedExercise.value.hasReps : 0; // 1 또는 0 그대로 반환
 });
-
 // 운동 소요시간
 const duration = computed(() =>
   calcDuration(state.record.startAt, state.record.endAt)
@@ -140,7 +141,7 @@ const confirmYes = async () => {
     alert("에러발생");
     return;
   }
-  router.push("/exercise/record");
+  router.back();
 };
 </script>
 
@@ -210,11 +211,6 @@ const confirmYes = async () => {
         <span class="otd-subtitle-1">주간 운동 시간</span>
       </div>
       <div>
-        <!-- <WeeklyChart
-          :selectedDate="state.record.startAt"
-          :records="state.weeklyRecords"
-          label="duration"
-        /> -->
         <BarChart
           :selectedDate="state.record.startAt"
           :records="state.weeklyRecords"
@@ -227,7 +223,7 @@ const confirmYes = async () => {
 
   <!-- 모달창 -->
   <v-dialog v-model="selectionDialog" max-width="350" min-height="100">
-    <v-card>
+    <div class="modal-container">
       <v-card-title class="otd-subtitle-1"> 운동 기록 선택 </v-card-title>
       <v-card-text>
         <v-list>
@@ -253,42 +249,35 @@ const confirmYes = async () => {
           </v-list-item>
         </v-list>
       </v-card-text>
-      <v-card-actions class="d-flex justify-center">
-        <v-btn @click="selectionDialog = false" class="btn_close w-50"
+      <div class="d-flex justify-center">
+        <v-btn color="#393e46" @click="selectionDialog = false" class="btn"
           >닫기</v-btn
         >
-      </v-card-actions>
-    </v-card>
+      </div>
+    </div>
   </v-dialog>
 
-  <v-dialog v-model="noticeDialog" max-width="350" min-height="100">
-    <v-card class="pa-2 d-flex">
-      <v-card-text class="otd-body-1 text-center">
-        <span> 운동을 기록하지 않았어요! </span>
-        <v-btn @click="noticeDialog = false" class="btn_close w-50">닫기</v-btn>
-      </v-card-text>
-    </v-card>
-  </v-dialog>
-  <v-dialog v-model="confirmDialog" max-width="350" min-height="100">
-    <v-card class="pa-2 d-flex">
-      <v-card-text class="otd-body-1 text-center">
-        <span class="otd-subtitle-1"> 정말 기록을 삭제하겠습니까? </span>
-        <div class="d-flex justify-center">
-          <v-btn
-            color="#ffe864"
-            @click="confirmYes"
-            class="btn_close w-50 otd-body-1 ma-1"
-            >삭제</v-btn
-          >
-          <v-btn
-            @click="confirmDialog = false"
-            class="btn_close w-50 otd-body-1 ma-1"
-            >닫기</v-btn
-          >
-        </div>
-      </v-card-text>
-    </v-card>
-  </v-dialog>
+  <!-- 주간 캘린더에서 기록 없는 날 클릭했을 때 -->
+  <Modal
+    :show="noticeDialog"
+    title="알림"
+    message="운동 기록이 없는 날이에요"
+    type="info"
+    confirmText="닫기"
+    @close="noticeDialog = false"
+  />
+
+  <!-- 삭제 모달 -->
+  <Modal
+    :show="confirmDialog"
+    title="삭제 확인"
+    message="정말 기록을 삭제하겠습니까?"
+    type="warning"
+    confirm-text="삭제하기"
+    cancel-text="취소하기"
+    @confirm="confirmYes"
+    @close="confirmDialog = false"
+  />
 </template>
 
 <style lang="scss" scoped>
@@ -346,17 +335,29 @@ const confirmYes = async () => {
   height: 24px;
 }
 .btn_select {
-  background-color: #e6e6e6;
-}
-.btn_select:hover {
   background-color: #ffe864;
-}
-.btn_close {
-  width: 143px;
-  height: 38px;
-  margin-top: 20px;
-  background-color: #e6e6e6;
   border-radius: 10px;
   box-shadow: none;
+}
+
+.modal-container {
+  background: white;
+  border-radius: 16px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  animation: modalSlideUp 0.3s ease-out;
+  padding: 16px;
+}
+.btn {
+  display: flex;
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 </style>
