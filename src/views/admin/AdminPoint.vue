@@ -50,13 +50,11 @@ const tableSet = computed(() => {
   rows.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   return rows;
 });
-
-// ✅ 검색은 Vuetify 기본 search 사용 (이제 전부 원시값이라 잘 됨)
 </script>
 
 <template>
-  <div class="admin-points">
-    <v-card>
+  <div class="admin-point">
+    <v-card class="data-card pa-2">
       <v-card-title class="d-flex justify-space-between align-center">
         <span class="title">포인트 관리</span>
         <v-text-field
@@ -105,11 +103,17 @@ const tableSet = computed(() => {
 </template>
 
 <style lang="scss" scoped>
-.admin-points {
-  padding: 20px;
+.admin-point {
+  padding: 10px;
+
+  .data-card {
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  }
   .title {
     font-weight: 700;
-    font-size: 18px;
+    font-size: 23px;
   }
 }
 .styled-table {

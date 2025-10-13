@@ -12,6 +12,8 @@ const keyword = ref('');
 const formDialog = ref(false);
 const deleteDialog = ref(false);
 const isEdit = ref(false);
+const successDialog = ref(false);
+const cancelDialog = ref(false)
 
 const editExercise = ref({
   exerciseId: null,
@@ -93,6 +95,7 @@ const saveExercise = async () => {
     } else {
       await postExercise(editExercise.value);
     }
+    successDialog.value = true;
     formDialog.value = false;
     loadExercises();
   } catch (e) {
@@ -110,6 +113,7 @@ const openDelete = (exercise) => {
 const removeExercise = async () => {
   try {
     await deleteExercise(deleteTarget.value.exerciseId);
+    successDialog.value = true;
     deleteDialog.value = false;
     loadExercises();
   } catch (e) {
@@ -117,14 +121,19 @@ const removeExercise = async () => {
   }
 };
 
+// 수정, 추가 취소 모달
+const cancel = () => {
+  cancelDialog.value = false;
+  formDialog.value = false;
+}
 onMounted(() => {
   loadExercises();
 });
 </script>
 
 <template>
-  <div class="exercise-admin">
-    <v-card>
+  <div class="admin-exercise">
+    <v-card class="data-card pa-2">
       <!-- 상단 툴바 -->
       <v-card-title class="d-flex justify-space-between align-center">
         <span class="title">운동 관리</span>
@@ -153,14 +162,14 @@ onMounted(() => {
       >
         <!-- 거리 기반 -->
         <template #item.hasDistance="{ item }">
-          <v-icon :color="item.hasDistance ? 'green' : 'red'">
+          <v-icon :color="item.hasDistance ? '#9FD995' : '#F18A86'">
             {{ item.hasDistance ? 'mdi-check-circle' : 'mdi-close-circle' }}
           </v-icon>
         </template>
 
         <!-- 반복 기반 -->
         <template #item.hasReps="{ item }">
-          <v-icon :color="item.hasReps ? 'green' : 'red'">
+          <v-icon :color="item.hasReps ? '#9FD995' : '#F18A86'">
             {{ item.hasReps ? 'mdi-check-circle' : 'mdi-close-circle' }}
           </v-icon>
         </template>
@@ -174,44 +183,110 @@ onMounted(() => {
     </v-card>
 
     <!-- 추가/수정 모달 -->
-    <v-dialog v-model="formDialog" max-width="500">
-      <v-card>
-        <v-card-title>{{ isEdit ? '운동 수정' : '새 운동 추가' }}</v-card-title>
-        <v-card-text>
-          <v-text-field v-model="editExercise.exerciseName" label="운동명" />
-          <v-text-field
-            v-model.number="editExercise.exerciseMet"
-            label="MET"
-            type="number"
-          />
-          <v-switch
-            v-model="editExercise.hasDistance"
-            label="거리 기반 운동 여부"
-          />
-          <v-switch
-            v-model="editExercise.hasReps"
-            label="반복 기반 운동 여부"
-          />
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn text @click="formDialog = false">취소</v-btn>
-          <v-btn color="primary" @click="saveExercise">저장</v-btn>
+    <v-dialog v-model="formDialog" max-width="700">
+      <v-card class="admin-dialog pa-6">
+        <v-card-title class="dialog-title mb-4">
+          {{ isEdit ? '운동 수정' : '운동 추가' }}
+        </v-card-title>
+
+        <v-container fluid>
+          <v-row dense>
+            <!-- 운동명 -->
+            <v-col cols="6">
+              <v-card-subtitle class="field-label">운동명</v-card-subtitle>
+              <v-text-field
+                v-model="editExercise.exerciseName"
+                class="field-input"
+                density="comfortable"
+                hide-details
+                placeholder="운동명을 입력하세요"
+              />
+            </v-col>
+
+            <!-- MET -->
+            <v-col cols="6">
+              <v-card-subtitle class="field-label">MET</v-card-subtitle>
+              <v-text-field
+                v-model.number="editExercise.exerciseMet"
+                class="field-input"
+                type="number"
+                density="comfortable"
+                hide-details
+              />
+            </v-col>
+
+            <!-- 거리 기반 -->
+            <v-col cols="6">
+              <v-switch
+                v-model="editExercise.hasDistance"
+                color="#9FD995"
+                hide-details
+                inset
+                label="거리 기반 운동 여부"
+              />
+            </v-col>
+
+            <!-- 반복 기반 -->
+            <v-col cols="6">
+              <v-switch
+                v-model="editExercise.hasReps"
+                color="#9FD995"
+                hide-details
+                inset
+                label="반복 기반 운동 여부"
+              />
+            </v-col>
+          </v-row>
+        </v-container>
+
+        <v-divider class="my-2" />
+        <v-card-actions class="justify-end btn-area">
+          <v-btn class="btn-no" @click="cancelDialog = true">취소</v-btn>
+          <v-btn class="btn-yes" @click="saveExercise">저장</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <!-- 삭제 모달 -->
     <v-dialog v-model="deleteDialog" max-width="380">
-      <v-card>
+      <v-card class="admin-dialog pa-6">
         <v-card-text>
           정말 <strong>{{ deleteTarget?.exerciseName }}</strong> 운동을
           삭제하시겠습니까?
         </v-card-text>
+        <v-card-actions class="justify-end btn-area">
+          <v-btn class="btn-yes" @click="removeExercise">네</v-btn>
+          <v-btn class="btn-no" @click="deleteDialog = false">아니오</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- 수정 / 저장 완료 모달 -->
+    <v-dialog v-model="successDialog" max-width="380" min-height="100">
+      <v-card class="admin-dialog pa-6">
+        <v-card-text> 성공적으로 완료되었습니다. </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn text color="error" @click="removeExercise">네</v-btn>
-          <v-btn text @click="deleteDialog = false">아니오</v-btn>
+          <v-btn class="btn-yes" text @click="successDialog = false"
+            >확인</v-btn
+          >
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+        <!-- 취소 모달 -->
+    <v-dialog v-model="cancelDialog" max-width="380" min-height="100">
+      <v-card class="admin-dialog pa-6">
+        <v-card-text>
+          취소하고 돌아가시겠습니까? 
+          <br></br>
+          해당 내용은 저장되지 않습니다.
+        </v-card-text>
+        <v-card-actions class="btn-area">
+          <v-btn class="btn-yes" @click="cancel()">네</v-btn>
+          <v-btn class="btn-no" @click="cancelDialog = false"
+            >아니오</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -219,12 +294,17 @@ onMounted(() => {
 </template>
 
 <style lang="scss" scoped>
-.exercise-admin {
-  padding: 20px;
+.admin-exercise {
+  padding: 10px;
 
+  .data-card {
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  }
   .title {
     font-weight: 700;
-    font-size: 18px;
+    font-size: 23px;
   }
   .styled-table {
     :deep(td),
@@ -239,5 +319,109 @@ onMounted(() => {
 }
 .btn {
   min-width: 150px;
+}
+
+.admin-dialog {
+  border-radius: 15px !important;
+  background-color: #fff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.dialog-title {
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: #333;
+  text-align: center;
+}
+
+.field-label {
+  font-weight: 600;
+  color: #555;
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+}
+
+.field-input :deep(.v-field) {
+  border: 1px solid #d7d7d7 !important;
+  border-radius: 14px !important;
+  background-color: #f9f9f9 !important;
+  height: 54px !important;
+  padding-inline: 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  box-shadow: none !important;
+  transition: all 0.25s ease;
+}
+
+// 선 제거
+.field-input :deep(.v-field__outline),
+.field-input :deep(.v-field__overlay) {
+  display: none !important;
+}
+
+// hover시 강조
+.field-input:hover :deep(.v-field),
+.field-input:focus-within :deep(.v-field) {
+  background-color: #f0f0f0 !important;
+  border-color: #b0b0b0 !important;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+}
+
+// 텍스트 중앙 정렬
+.field-input :deep(.v-field__input) {
+  font-size: 0.95rem !important;
+  color: #333;
+  line-height: normal !important;
+  align-items: center !important;
+  display: flex !important;
+}
+
+// 모달 버튼
+.btn-area {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 0 4px 4px 0 !important;
+  margin-top: 4px !important;
+}
+
+// 버튼 공통
+.btn-no,
+.btn-yes {
+  min-width: 72px;
+  height: 38px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: -0.2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+}
+
+// 취소 버튼
+.btn-no {
+  background-color: #e0e0e0 !important;
+  color: #333 !important;
+  border-radius: 10px;
+}
+.btn-no:hover {
+  background-color: #d6d6d6 !important;
+  transform: scale(1.03);
+}
+
+// 저장 버튼
+.btn-yes {
+  background-color: #5ee6eb !important;
+  color: #fff !important;
+  border-radius: 10px;
+}
+.btn-yes:hover {
+  background-color: #3dd4da !important;
+  box-shadow: 0 3px 10px rgba(61, 212, 218, 0.35);
+  transform: scale(1.03);
 }
 </style>
