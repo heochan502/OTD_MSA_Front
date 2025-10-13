@@ -20,6 +20,7 @@ const BASE_URL = import.meta.env.VITE_BASE_URL; // 환경변수
 const loadPosts = async () => {
   const res = await getCommunity();
   posts.value = res.data;
+  console.log(res.data);
 };
 onMounted(loadPosts);
 
