@@ -42,12 +42,16 @@ export const useCommentsStore = defineStore('comments', {
       const auth = useAuthenticationStore();
       const me = auth?.state?.signedUser ?? { userId: 0, nickName: '익명' };
 
-      const { data } = await createMent(k, content, me.userId, opts);
+      const { data } = await createMent(
+        k,
+        content,
+        me.userId,
+        opts.nickName ?? me.nickName
+      );
 
       // ✅ 낙관적 갱신: 응답 + 내 닉네임 보강
       const next = {
         ...data,
-        authorNickname: me.nickName ?? opts.nickName ?? '익명',
       };
       this.byPost[k] = [next, ...(this.byPost[k] ?? [])];
     },

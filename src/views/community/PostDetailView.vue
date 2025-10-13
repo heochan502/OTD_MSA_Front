@@ -7,11 +7,12 @@ import { fetchPostFiles } from '@/services/community/postService';
 import axios from '@/services/httpRequester';
 import CommentSection from '@/components/community/CommentSection.vue';
 import { formatYMDHM } from '@/stores/community/date';
+import { useAuthenticationStore } from '@/stores/user/authentication';
 
 const route = useRoute();
 const router = useRouter();
 const store = useCommunityStore();
-
+const auth = useAuthenticationStore();
 const routeId = computed(() => String(route.params.id));
 const post = computed(() => store.getById(routeId.value));
 
