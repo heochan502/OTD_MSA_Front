@@ -1,13 +1,11 @@
 import axios from '@/services/httpRequester';
 
 export const termsService = {
-  // 활성화된 약관 목록 조회
   async getActiveTerms() {
     const response = await axios.get('/terms/active');
-    return response.data;
+    return response.data;  
   },
 
-  // 특정 타입의 약관 조회
   async getTermsByType(type) {
     const response = await axios.get(`/terms/${type}`);
     return response.data;
