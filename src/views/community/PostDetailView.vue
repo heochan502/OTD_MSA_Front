@@ -7,6 +7,7 @@ import axios from '@/services/httpRequester';
 import CommentSection from '@/components/community/CommentSection.vue';
 import { formatYMDHM } from '@/stores/community/date';
 import ImageLightbox from '@/components/community/ImageLightbox.vue';
+import { useAuthenticationStore } from '@/stores/user/authentication';
 
 const route = useRoute();
 const router = useRouter();
