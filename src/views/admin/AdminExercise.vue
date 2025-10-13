@@ -12,29 +12,54 @@ const formDialog = ref(false);
 const successDialog = ref(false);
 const cancelDialog = ref(false);
 const deleteDialog = ref(false);
+const isEdit = ref(false);
+const deleteTargetId = ref(null);
+const editExercise = ref({})
 
-const exercise = ref({});
+const exercise = ref([]);
 const search = ref('');
 
 const headers = [
   { title: 'ID', key: 'exerciseId' },
   { title: '운동명', key: 'exerciseName' },
   { title: '활동에너지 소모량', key: 'exerciseMet' },
-  { title: '거리 유무', key: 'hasDistance' },
-  { title: '갯수 유무', key: 'hasReps' },
+  { title: '거리 기반', key: 'hasDistance' },
+  { title: '갯수 기반', key: 'hasReps' },
+  { title: '관리', key: 'setting' },
 ];
+
+const toForm = (item) => {
+  if (item) {
+    editExercise.value = item;
+    plainGoal.value = item.cdGoal;
+    isEdit.value = true;
+  } else {
+    isEdit.value = false;
+    editExercise.value = { ...addChallenge };
+    plainGoal.value = null;
+  }
+  formDialog.value = true;
+};
+
+const cancel = () => {
+  cancelDialog.value = false;
+  formDialog.value = false;
+};
 </script>
 
 <template>
-  <div class="challenge-admin">
+  <div class="admin-exercise">
     <!-- 수정 / 추가 모달 -->
     <v-dialog v-model="formDialog" max-width="300" min-height="100">
       <v-card>
         <v-card-title class="text-h8">{{
-          isEdit ? '챌린지 수정' : '챌린지 추가'
+          isEdit ? '운동 종목 수정' : '운동 종목 추가'
         }}</v-card-title>
-        <v-card-subtitle>이름</v-card-subtitle>
-        <v-text-field v-model="editChallenge.cdName" />
+        <v-card-subtitle>운동명</v-card-subtitle>
+        <v-text-field v-model="editExercise.exerciseName" />
+
+        <v-card-subtitle>활동에너지 소모량</v-card-subtitle>
+        <v-text-field v-model="editExercise.exerciseMet" />
 
         <v-card-subtitle>타입</v-card-subtitle>
         <v-select
@@ -138,19 +163,18 @@ const headers = [
           variant="outlined"
           style="max-width: 250px"
         />
-        <v-btn >챌린지 추가하기</v-btn>
+        <v-btn>운동 종목 추가하기</v-btn>
       </v-card-title>
 
       <v-data-table
         :headers="headers"
         :items="exercise"
-        style="max-height: calc(100vh - 200px)"
         :search="search"
         fixed-header
         :items-per-page="10"
         class="styled-table"
       >
-        타입 변환
+        <!-- 타입 변환 -->
         <!-- <template #item.cdType="{ item }">
           <v-chip
             :color="
@@ -195,10 +219,10 @@ const headers = [
         </template> -->
 
         <!-- 관리 -->
-        <!-- <template #item.setting="{ item }">
+        <template #item.setting="{ item }">
           <v-btn @click="toForm(item)">수정</v-btn>
           <v-btn @click="openDelete(item.cdId)">삭제</v-btn>
-        </template> -->
+        </template>
       </v-data-table>
     </v-card>
   </div>
