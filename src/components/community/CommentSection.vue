@@ -24,10 +24,7 @@ async function submit() {
   if (!v) return;
 
   // ✅ 닉네임/권한 옵션을 store로 전달 (헤더에 실리도록)
-  await commentsStore.add(props.postId, v, {
-    nickName: meNickName.value,
-    rolesCsv: 'ROLE_USER',
-  });
+  await commentsStore.add(props.postId, v, meNickName.value);
   input.value = '';
 }
 
@@ -65,9 +62,7 @@ onMounted(() => {
         <div class="meta">
           <span class="avatar" aria-hidden="true"></span>
           <span class="nick">
-            {{
-              c.authorNickname || (c.userId === meUserId ? meNickName : '익명')
-            }}
+            {{ c.nickName || '익명' }}
           </span>
           <span class="time">{{ formatYMDHM(c.createdAt) }}</span>
 
