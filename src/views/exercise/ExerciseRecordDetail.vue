@@ -16,6 +16,7 @@ import { formatTimeKR, formatDateISO } from "@/utils/dateTimeUtils";
 import { calcDuration } from "@/utils/exerciseUtils";
 import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
 import BarChart from "@/components/exercise/BarChart.vue";
+import Modal from "@/components/user/Modal.vue";
 
 dayjs.extend(isoWeek);
 
@@ -140,7 +141,8 @@ const confirmYes = async () => {
     alert("에러발생");
     return;
   }
-  router.push("/exercise/record");
+  // router.push("/exercise/record");
+  router.back();
 };
 </script>
 
@@ -210,11 +212,6 @@ const confirmYes = async () => {
         <span class="otd-subtitle-1">주간 운동 시간</span>
       </div>
       <div>
-        <!-- <WeeklyChart
-          :selectedDate="state.record.startAt"
-          :records="state.weeklyRecords"
-          label="duration"
-        /> -->
         <BarChart
           :selectedDate="state.record.startAt"
           :records="state.weeklyRecords"
@@ -261,14 +258,17 @@ const confirmYes = async () => {
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="noticeDialog" max-width="350" min-height="100">
-    <v-card class="pa-2 d-flex">
-      <v-card-text class="otd-body-1 text-center">
-        <span> 운동을 기록하지 않았어요! </span>
-        <v-btn @click="noticeDialog = false" class="btn_close w-50">닫기</v-btn>
-      </v-card-text>
-    </v-card>
-  </v-dialog>
+  <!-- 주간 캘린더에서 기록 없는 날 클릭했을 때 -->
+  <Modal
+    :show="noticeDialog"
+    title="알림"
+    message="운동 기록이 없는 날이에요"
+    type="info"
+    confirmText="닫기"
+    @close="noticeDialog = false"
+  />
+
+  <!-- 
   <v-dialog v-model="confirmDialog" max-width="350" min-height="100">
     <v-card class="pa-2 d-flex">
       <v-card-text class="otd-body-1 text-center">
@@ -288,7 +288,19 @@ const confirmYes = async () => {
         </div>
       </v-card-text>
     </v-card>
-  </v-dialog>
+  </v-dialog> -->
+
+  <!-- 삭제 모달 -->
+  <Modal
+    :show="confirmDialog"
+    title="삭제 확인"
+    message="정말 기록을 삭제하겠습니까?"
+    type="warning"
+    confirm-text="삭제하기"
+    cancel-text="취소하기"
+    @confirm="confirmYes"
+    @close="confirmDialog = false"
+  />
 </template>
 
 <style lang="scss" scoped>
