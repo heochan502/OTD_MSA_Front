@@ -63,7 +63,7 @@ const markRead = (id) => {
       <h2>내 소식</h2>
     </div>
 
-    <button class="mark-all" @click="markAllRead">모두 읽음</button>
+    <button class="mark-all" @click="markAllRead">모두 읽기</button>
 
     <div class="list">
       <div
