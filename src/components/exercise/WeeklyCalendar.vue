@@ -6,6 +6,7 @@ import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import ExerciseCalendar from "./ExerciseCalendar.vue";
+import Modal from "../user/Modal.vue";
 
 dayjs.extend(isoWeek);
 dayjs.extend(isSameOrAfter);
@@ -50,6 +51,8 @@ const isToday = (day) => day.isSame(today, "day");
 const isSelected = (day) => day.isSame(currentDate.value, "day");
 
 const selectDate = (day) => {
+  if (day.isAfter(today, "day")) return; // 미래 날짜 선택 불가
+
   currentDate.value = day;
   emit("click-date", day.format("YYYY-MM-DD"));
 };
@@ -71,13 +74,6 @@ const goNow = () => {
   weekStart.value = today.startOf("isoWeek"); // 이번 주 시작일 갱신
   emit("click-date", today.format("YYYY-MM-DD"));
 };
-
-// exerciseCalendar에서 emit 한 이벤를 받는 함수
-// const applyDate = (date) => {
-//   // 부모(ExerciseMain.vue)에 선택된 날짜 전달
-//   emit("click-date", date);
-//   openCalendar.value = false; // 모달 닫기
-// };
 
 // 날짜 선택 시 (단순히 날짜만 업데이트)
 const onSelectDate = (date) => {
@@ -114,7 +110,10 @@ const applyDate = (date) => {
         v-for="day in weekDays"
         :key="day.format('YYYY-MM-DD')"
         class="day-cell"
-        :class="{ today: isToday(day), selected: isSelected(day) }"
+        :class="{
+          today: isToday(day),
+          selected: isSelected(day),
+        }"
         @click="selectDate(day)"
       >
         <span class="date">{{ day.format("D") }}</span>
@@ -129,24 +128,24 @@ const applyDate = (date) => {
     </button>
   </div>
   <!-- 캘린더 모달 -->
-  <v-dialog v-model="openCalendar" max-width="350" min-height="100">
-    <v-card class="pb-3 d-flex">
+  <v-dialog v-model="openCalendar" max-width="350">
+    <div class="modal-container">
       <v-card-text class="otd-body-1 text-center">
         <ExerciseCalendar @select-date="onSelectDate" />
         <span>선택한 날의 기록을 보시겠어요?</span>
       </v-card-text>
       <div class="d-flex justify-center">
-        <v-btn @click="openCalendar = false" class="btn_confirm otd-body-1 ma-1"
+        <v-btn @click="openCalendar = false" class="modal-btn otd-body-1 ma-1"
           >닫기</v-btn
         >
         <v-btn
-          color="#ffe864"
+          color="#393e46"
           @click="applyDate(currentDate)"
-          class="btn_confirm otd-body-1 ma-1"
+          class="modal-btn otd-body-1 ma-1"
           >적용하기</v-btn
         >
       </div>
-    </v-card>
+    </div>
   </v-dialog>
 </template>
 
@@ -154,6 +153,7 @@ const applyDate = (date) => {
 .calendar_icon {
   width: 18px;
   height: 18px;
+  cursor: pointer;
 }
 .btn_now {
   cursor: pointer;
@@ -161,7 +161,8 @@ const applyDate = (date) => {
 .weekly-calendar {
   display: flex;
   justify-content: center;
-  max-width: 330px;
+  max-width: 300px;
+  // width: 100%;
   margin: 0 auto;
   padding: 16px;
 
@@ -175,7 +176,7 @@ const applyDate = (date) => {
     .day-cell {
       position: relative;
       text-align: center;
-      padding: 8px 15px;
+      padding: 8px 13px;
 
       cursor: pointer;
 
@@ -183,15 +184,6 @@ const applyDate = (date) => {
         // 기본 날짜 스타일 (선택되지 않은 상태)
         color: #989898;
       }
-
-      //   &.today {
-      //     .date {
-      //       background: #ffe864;
-      //       color: #000;
-      //       border-radius: 10%;
-      //       padding: 32px 20px;
-      //     }
-      //   }
 
       &.selected {
         background: #ffe864;
@@ -217,7 +209,7 @@ const applyDate = (date) => {
   }
 }
 
-.btn_confirm {
+.modal-btn {
   max-width: 135px;
   width: 100%;
   height: 38px;
@@ -231,25 +223,17 @@ const applyDate = (date) => {
   border: none;
 }
 
-.btn_close {
-  width: 143px;
-  height: 38px;
-  margin-top: 20px;
-  background-color: #e6e6e6;
-  border-radius: 10px;
-  box-shadow: none;
-}
-.btn_select {
-  width: 143px;
-  height: 38px;
-  margin-top: 20px;
-
-  border-radius: 10px;
-  box-shadow: none;
-  background-color: #ffe864;
-}
-
 .calendar {
   box-shadow: none;
+}
+
+.modal-container {
+  background: white;
+  border-radius: 16px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  animation: modalSlideUp 0.3s ease-out;
+  padding: 0 0 15px 0;
 }
 </style>

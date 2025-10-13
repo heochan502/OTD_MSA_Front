@@ -10,26 +10,49 @@ export const useBodyCompositionStore = defineStore("bodyComposition", {
     lastest: {},
     series: [],
     metrics: [],
+    selectionMetrics: [],
+    filterList: [],
+    bmiInfo: {
+      height: null,
+      weight: null,
+      bmi: null,
+    },
   }),
+
   actions: {
-    async fetchLastestBodyComposition() {
-       console.log("getLastestBodyComposition : ");
-      const res = await getLastestBodyComposition();
-         console.log("getLastestBodyComposition : ",res.data);
-      this.lastest = res.data;
-    },
-    async fetchSeriesBodyComposition() {
-        console.log("fetchSeriesBodyComposition : ");
-      const res = await getSeries();
-      this.series = res.data;
-    },
+    // 측정 항목들
     async fetchBodyCompositionMetrics() {
-      const res = await getMetrics();
-      this.metrics = res.data;
+      try {
+        const res = await getMetrics();
+        this.metrics = res.data;
+        const targetCodes = [
+          "weight",
+          "percent_body_fat",
+          "skeletal_muscle_mass",
+        ];
+        this.selectionMetrics = this.metrics.filter((m) =>
+          targetCodes.includes(m.metricCode)
+        );
+      } catch (error) {
+        // 에러 발생 시 에러 메시지와 빈 배열
+        console.error("fetchBodyCompositionMetrics error:", error);
+        this.metrics = [];
+        this.selectionMetrics = [];
+      }
+    },
+    addSeries(list) {
+      this.series = [...list];
+    },
+    addLastest(list) {
+      this.lastest = [...list];
     },
     clearSeries() {
       this.series = [];
     },
+    clearMetrics() {
+      this.metrics = [];
+    },
   },
+
   persist: true,
 });

@@ -1,28 +1,31 @@
 <script setup>
-import { ref, onMounted, computed, reactive } from 'vue';
-import Progress from '@/components/challenge/Progress.vue';
-import ProgressJs from '@/components/challenge/ProgressJs.vue';
+import { ref, onMounted, computed, reactive, watch } from "vue";
+import Progress from "@/components/challenge/Progress.vue";
+import ProgressJs from "@/components/challenge/ProgressJs.vue";
 
-import LineChart from '@/components/exercise/lineChart.vue';
-import StaticChart from '@/components/exercise/StaticChart.vue';
+import StaticChart from "@/components/exercise/StaticChart.vue";
 
-import MealCard from '@/components/meal/MealDayCards.vue';
-import { useMealSelectedStore } from '@/stores/meal/mealStore.js';
+import MealCard from "@/components/meal/MealDayCards.vue";
+import { useMealSelectedStore } from "@/stores/meal/mealStore.js";
 
-import BmiProg from '@/components/exercise/BmiProg.vue';
-import { getMyChallenge } from '@/services/challenge/challengeService';
-import { useRouter } from 'vue-router';
+import BmiProg from "@/components/exercise/BmiProg.vue";
+import { getMyChallenge } from "@/services/challenge/challengeService";
+import { useRouter } from "vue-router";
 
-import { getChallengeSettlementLog } from '@/services/challenge/challengeService';
-import ChallengeSettlementCard from '@/components/challenge/ChallengeSettlementCard.vue';
-import { useChallengeStore } from '@/stores/challenge/challengeStore';
+import { getChallengeSettlementLog } from "@/services/challenge/challengeService";
+import ChallengeSettlementCard from "@/components/challenge/ChallengeSettlementCard.vue";
+import { useChallengeStore } from "@/stores/challenge/challengeStore";
 
-import dayjs from 'dayjs';
-import 'dayjs/locale/ko';
+import dayjs from "dayjs";
+import "dayjs/locale/ko";
 
 const selectedDay = useMealSelectedStore();
 
-import { useBodyCompositionStore } from '@/stores/body_composition/bodyCompositionStore';
+import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
+import {
+  getSeries,
+  getLastestBodyComposition,
+} from "@/services/body_composition/bodyCompositionService";
 
 const state = reactive({
   monthlySettlementLog: [],
@@ -33,26 +36,25 @@ const challengeInfo = ref([]);
 const router = useRouter();
 
 const healthInfo = ref([
-  { text: '체중(kg)', value: 70.5, check: true },
-  { text: '체지방률(%)', value: 15.3, check: false },
-  { text: '골격근량(kg)', value: 30.2, check: false },
+  { text: "체중(kg)", value: 70.5, check: true },
+  { text: "체지방률(%)", value: 15.3, check: false },
+  { text: "골격근량(kg)", value: 30.2, check: false },
 ]);
 
 const fields = [
-  { key: 'weight', label: '체중', unit: 'kg' },
-  { key: 'BFP', label: '체지방률', unit: '%' },
-  { key: 'SMM', label: '골격근량', unit: 'kg' },
+  { key: "weight", label: "체중", unit: "kg" },
+  { key: "BFP", label: "체지방률", unit: "%" },
+  { key: "SMM", label: "골격근량", unit: "kg" },
 ];
-const selectedField = ref(fields[0].key);
 
 const inbodyData = ref([
-  { dataTime: '2025-09-22', weight: '62.4', BFP: '20', SMM: '23' },
-  { dataTime: '2025-09-23', weight: '62.1', BFP: '20.2', SMM: '22.9' },
-  { dataTime: '2025-09-24', weight: '60.9', BFP: '20.1', SMM: '23.1' },
-  { dataTime: '2025-09-25', weight: '62.5', BFP: '20.5', SMM: '22.8' },
-  { dataTime: '2025-09-26', weight: '62.2', BFP: '20.3', SMM: '22.9' },
-  { dataTime: '2025-09-27', weight: '61.8', BFP: '19.9', SMM: '23.2' },
-  { dataTime: '2025-09-28', weight: '60', BFP: '20.0', SMM: '23.0' },
+  { dataTime: "2025-09-22", weight: "62.4", BFP: "20", SMM: "23" },
+  { dataTime: "2025-09-23", weight: "62.1", BFP: "20.2", SMM: "22.9" },
+  { dataTime: "2025-09-24", weight: "60.9", BFP: "20.1", SMM: "23.1" },
+  { dataTime: "2025-09-25", weight: "62.5", BFP: "20.5", SMM: "22.8" },
+  { dataTime: "2025-09-26", weight: "62.2", BFP: "20.3", SMM: "22.9" },
+  { dataTime: "2025-09-27", weight: "61.8", BFP: "19.9", SMM: "23.2" },
+  { dataTime: "2025-09-28", weight: "60", BFP: "20.0", SMM: "23.0" },
 ]);
 
 const today = new Date().toISOString().slice(0, 10);
@@ -70,7 +72,7 @@ const healthToggle = (index) => {
   }
 };
 
-const formatNumber = (n) => String(n).padStart(2, '0');
+const formatNumber = (n) => String(n).padStart(2, "0");
 const formatDate = (date) => {
   const y = date.getFullYear();
   const m = formatNumber(date.getMonth() + 1);
@@ -88,14 +90,19 @@ const weeklySettlementDialog = ref(false);
 const challengeStore = useChallengeStore();
 const bodyCompositionStore = useBodyCompositionStore();
 
+const selectedField = ref(
+  bodyCompositionStore.selectionMetrics[0]?.metricCode || null
+);
+
 onMounted(async () => {
-  console.log('여기');
+  console.log("여기");
   await fetchMonthlySettlement(todayDate);
   await fetchWeeklySettlement(todayDate);
-  console.log('state', state.monthlySettlementLog, state.weeklySettlementLog);
+  console.log("state", state.monthlySettlementLog, state.weeklySettlementLog);
   const challenge = await getMyChallenge();
-  challengeInfo.value = challenge.data;
-  console.log('homechallenge', challengeInfo.value);
+  console.log("챌린지 : ", challenge);
+  challengeInfo.value = challenge?.data || null;
+  console.log("homechallenge", challengeInfo.value);
 
   if (state.monthlySettlementLog.length > 0) {
     monthlySettlementDialog.value = true;
@@ -103,33 +110,35 @@ onMounted(async () => {
     weeklySettlementDialog.value = true;
   }
 
-  console.log('homechallenge', challengeInfo.value);
-  selectedDay.selectedDay.setDay = dayjs().format('YYYY-MM-DD');
-  await bodyCompositionStore.fetchSeriesBodyComposition();
+  console.log("homechallenge", challengeInfo.value);
+  selectedDay.selectedDay.setDay = dayjs().format("YYYY-MM-DD");
   await bodyCompositionStore.fetchBodyCompositionMetrics();
+  fetchBodyCompositionSeries();
+  fetchLastestBodyComposition();
 });
 
 const challengeHome = () => {
-  router.push('/challenge');
+  router.push("/challenge");
 };
 
 // 월간 정산 api호출
 const fetchMonthlySettlement = async (date) => {
   const monthlyKey = formatDate(date).slice(0, 7);
-  console.log('monthlykey', monthlyKey);
+  console.log("monthlykey", monthlyKey);
   console.log(
-    'challengeStore.state.lastMonthCheck',
+    "challengeStore.state.lastMonthCheck",
     challengeStore.state.lastMonthCheck
   );
   if (challengeStore.state.lastMonthCheck === monthlyKey) {
     return;
   } else {
     const params = {
-      type: 'monthly',
+      type: "monthly",
       settlementDate: formatDate(new Date(year, month - 1, 1)),
     };
     const res = await getChallengeSettlementLog(params);
-    state.monthlySettlementLog = res.data;
+    console.log("res :", res);
+    state.monthlySettlementLog = res?.data || null;
     challengeStore.state.lastMonthCheck = monthlyKey;
   }
 };
@@ -137,19 +146,20 @@ const fetchMonthlySettlement = async (date) => {
 // 주간 정산 api호출
 const fetchWeeklySettlement = async (date) => {
   const weeklyKey = setWeeklyKey(date);
-  console.log('weeklykey', weeklyKey);
+  console.log("weeklykey", weeklyKey);
   console.log(
-    'challengeStore.state.lastWeekCheck',
+    "challengeStore.state.lastWeekCheck",
     challengeStore.state.lastWeekCheck
   );
   if (challengeStore.state.lastWeekCheck === weeklyKey) {
     return;
   } else {
     const params = {
-      type: 'weekly',
+      type: "weekly",
       settlementDate: formatDate(getMonday(date)),
     };
     const res = await getChallengeSettlementLog(params);
+    // console.log("res :",  res?.data || null);
     state.weeklySettlementLog = res.data;
     challengeStore.state.lastWeekCheck = weeklyKey;
   }
@@ -178,6 +188,25 @@ const setModal = () => {
   if (state.weeklySettlementLog.length > 0) {
     weeklySettlementDialog.value = true;
   }
+};
+
+// 체성분 데이터 받기
+const fetchBodyCompositionSeries = async () => {
+  const res = await getSeries();
+  if (res === undefined || res.status !== 200) {
+    alert(`에러발생? ${res.status}`);
+    return;
+  }
+  bodyCompositionStore.series = res.data;
+};
+
+const fetchLastestBodyComposition = async () => {
+  const res = await getLastestBodyComposition();
+  if (res === undefined || res.status !== 200) {
+    alert(`에러발생? ${res.status}`);
+    return;
+  }
+  bodyCompositionStore.lastest = res.data;
 };
 </script>
 
@@ -233,7 +262,7 @@ const setModal = () => {
           class="challenge-progress-card otd-top-margin"
           @click="challengeHome"
         >
-          <div class=" " v-if="challengeInfo.length > 0">
+          <div class=" " v-if="challengeInfo?.length || 0 > 0">
             <div
               v-for="value in challengeInfo"
               class="d-flex justify-content-around align-items-center challenge-progress-container"
@@ -275,8 +304,15 @@ const setModal = () => {
         <!-- 선형 그래프 선택 부분 -->
         <v-item-group v-model="selectedField">
           <div class="otd-top-margin item-group">
-            <div v-for="(field, idx) in fields" :key="idx" class="card-wrapper">
-              <v-item v-slot="{ selectedClass, toggle }" :value="field.key">
+            <div
+              v-for="field in bodyCompositionStore.selectionMetrics"
+              :key="field.metricId"
+              class="card-wrapper"
+            >
+              <v-item
+                v-slot="{ selectedClass, toggle }"
+                :value="field.metricCode"
+              >
                 <v-card
                   :class="[
                     ` health-button d-flex flex-column justify-center align-center text-center`,
@@ -288,38 +324,22 @@ const setModal = () => {
                 >
                   <div>
                     <span class="otd-body-3">
-                      {{ field.label }}({{ field.unit }})
+                      {{ field.metricName }}({{ field.unit }})
                     </span>
                   </div>
-                  <div class="otd-subtitle-1 text-center">
-                    {{ todayData?.[field.key] }}
-                  </div>
+                  <span class="otd-subtitle-1 text-center">
+                    {{ bodyCompositionStore.lastest[field.metricCode] || "-" }}
+                  </span>
                 </v-card>
               </v-item>
             </div>
           </div>
         </v-item-group>
-
-        <!-- <div class="otd-top-margin d-flex justify-content-between ">
-        <button v-for="(value, index) in healthInfo" :key="index" :class="{ 'health-button': true, 'health-button-active': value.check }" @click="healthToggle(index)">
-
-          <div class="d-flex flex-column align-items-center">
-            <span class="otd-body-3">{{ value.text }}</span>
-            <span class="otd-subtitle-1">{{ value.value }}</span>
-          </div>
-        </button>
-      </div> -->
-
         <div class="otd-top-margin">
-          <!-- <LineChart
-            :selected-date="today"
-            :selectedField="selectedField"
-            :fields="fields"
-            :logs="inbodyData"
-          /> -->
           <StaticChart
-            v-if="(bodyCompositionStore.series?.length ?? 0) > 0"
             :series="bodyCompositionStore.series"
+            :metrics="bodyCompositionStore.metrics"
+            :selectedMetric="selectedField"
           />
         </div>
       </section>
@@ -459,14 +479,16 @@ const setModal = () => {
 }
 
 .health-card {
-  width: 350px;
-  height: 87px;
+  max-width: 350px;
+
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
 }
 
 .bmi-prog {
+  display: flex;
+  justify-content: center;
   padding: 10px;
 }
 
@@ -474,6 +496,7 @@ const setModal = () => {
   display: flex;
   flex-wrap: nowrap;
   gap: 10px;
+  width: 350px;
 }
 .health-button {
   width: 110px;

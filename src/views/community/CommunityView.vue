@@ -4,35 +4,44 @@ import { useRouter } from 'vue-router';
 import CommunitySearch from '@/components/community/CommunitySearch.vue';
 import CommunityCategory from '@/components/community/CommunityCategory.vue';
 import PopularList from '@/components/community/PopularList.vue';
+import AllPostsList from '@/components/community/AllPostsList.vue';
 import ComposeForm from '@/components/community/ComposeForm.vue';
 import { useCommunityStore } from '@/stores/community/community';
 
-import iconFree from '@/assets/img/community/free.png';
-import iconDiet from '@/assets/img/community/diet.png';
-import iconWork from '@/assets/img/community/workout.png';
-import iconLove from '@/assets/img/community/love.png';
+const iconFreeUrl = new URL('@/assets/img/community/free.png', import.meta.url)
+  .href;
+const iconDietUrl = new URL('@/assets/img/community/diet.png', import.meta.url)
+  .href;
+const iconWorkUrl = new URL(
+  '@/assets/img/community/workout.png',
+  import.meta.url
+).href;
+const iconLoveUrl = new URL('@/assets/img/community/love.png', import.meta.url)
+  .href;
 
 const router = useRouter();
 const store = useCommunityStore();
 
-onMounted(() => {
-  store.loadPosts(1, 10, '');
+onMounted(async () => {
+  await store.loadPosts(1, 20, '');
 });
 
 const categories = [
-  { key: 'free', label: '자유수다', icon: '/otd/image/community/free.png' },
-  { key: 'diet', label: '다이어트', icon: '/otd/image/community/diet.png' },
-  { key: 'work', label: '운동', icon: '/otd/image/community/workout.png' },
-  { key: 'love', label: '연애', icon: '/otd/image/community/love.png' },
+  { key: 'free', label: '자유수다', icon: iconFreeUrl },
+  { key: 'diet', label: '다이어트', icon: iconDietUrl },
+  { key: 'work', label: '운동', icon: iconWorkUrl },
+  { key: 'love', label: '연애', icon: iconLoveUrl },
 ];
 
 const searchVal = ref('');
 
 const allPosts = computed(() =>
-  ['free', 'diet', 'work', 'love'].flatMap((k) => store.list(k))
+  ['free', 'diet', 'work', 'love'].flatMap((k) => store.list(k) ?? [])
 );
+
 const query = computed(() => searchVal.value.trim().toLowerCase());
 const TOP_N = 3;
+
 const popularTop = computed(() =>
   allPosts.value
     .filter((p) =>
@@ -43,15 +52,24 @@ const popularTop = computed(() =>
     .slice(0, TOP_N)
 );
 
+const popularTopView = computed(() =>
+  popularTop.value.map((p) => ({
+    ...p,
+    id: p.id ?? p.postId,
+    author: p.author ?? p.writer ?? '익명',
+    time: p.time ?? p.createdAt ?? p.updatedAt ?? '',
+    comments: p.comments ?? p.commentCount ?? 0,
+  }))
+);
+
 const handleSelectCategory = (key) =>
   router.push({ name: 'CommunityCategory', params: { category: key } });
 
-// 🔎 돋보기 클릭/엔터 → 카테고리 화면으로 이동 + 검색어 전달(q)
 function handleSearchSubmit(q) {
   searchVal.value = q;
   router.push({
     name: 'CommunityCategory',
-    params: { category: 'free' }, // 기본 탭 자유수다로 열기(원하면 변경)
+    params: { category: 'free' },
     query: { q },
   });
 }
@@ -76,9 +94,13 @@ function onPickCategory(key) {
   selectedCategory.value = key;
   composeStep.value = 'form';
 }
-function onSubmitSuccess() {
+async function onSubmitSuccess() {
   closeOverlay();
-  store.loadPosts(1, 10, '');
+  if (typeof store.reloadFirstPage === 'function') {
+    await store.reloadFirstPage();
+  } else {
+    await store.loadPosts(1, 20, '');
+  }
 }
 </script>
 
@@ -88,7 +110,6 @@ function onSubmitSuccess() {
       <div class="section-card top-card">
         <div class="head-row">
           <div class="search-line">
-            <!-- ✅ 입력 변화는 v-model로 받아 인기글 필터링, 제출은 라우팅 -->
             <CommunitySearch
               v-model="searchVal"
               class="search-flex"
@@ -115,10 +136,9 @@ function onSubmitSuccess() {
       </div>
 
       <h3 class="section-title">인기글</h3>
-
       <div class="section-card list-card">
         <PopularList
-          :items="popularTop"
+          :items="popularTopView"
           detail-route-name="CommunityPost"
           :navigateOnClick="true"
           id-key="id"
@@ -126,9 +146,13 @@ function onSubmitSuccess() {
           @click-post="handleClickPost"
         />
       </div>
+
+      <h3 class="section-title">전체글</h3>
+      <div class="section-card list-card">
+        <AllPostsList :query="query" />
+      </div>
     </section>
 
-    <!-- 글쓰기 플로팅 오버레이 -->
     <div v-if="showOverlay" class="overlay-full" @click.self="closeOverlay">
       <div v-if="composeStep === 'pick'" class="picker-floating">
         <button class="pill" @click="onPickCategory('free')">자유수다</button>
@@ -139,7 +163,7 @@ function onSubmitSuccess() {
 
       <ComposeForm
         v-if="composeStep === 'form'"
-        :category="selectedCategory"
+        v-model:category="selectedCategory"
         @cancel="closeOverlay"
         @submitted="onSubmitSuccess"
       />
@@ -172,7 +196,6 @@ function onSubmitSuccess() {
   filter: blur(2px);
   opacity: 0.6;
 }
-
 .section-card {
   background: #fff;
   border-radius: 18px;
@@ -187,14 +210,12 @@ function onSubmitSuccess() {
 .list-card {
   padding: 10px;
 }
-
 .section-title {
-  margin: 4px 0 0px !important;
+  margin: 4px 0 0 !important;
   font-size: 16px;
   font-weight: 700;
   color: #1f2937;
 }
-
 .head-row {
   display: flex;
   flex-direction: column;
@@ -209,19 +230,19 @@ function onSubmitSuccess() {
   flex: 1;
 }
 .compose-emoji {
+  padding-bottom: 5px;
   width: 44px;
   height: 44px;
   border: 1px solid #e8ebef;
-  background: #ffffff;
+  background: #fff;
   border-radius: 50%;
-  font-size: 22px;
+  font-size: 30px;
   line-height: 1;
   display: grid;
   place-items: center;
   box-shadow: 0 4px 10px rgba(17, 24, 39, 0.06);
   cursor: pointer;
 }
-
 .cat-wrap {
   margin-top: 8px;
 }
@@ -232,22 +253,21 @@ function onSubmitSuccess() {
   padding: 0 2px;
   margin: 0;
 }
-
-/* 글쓰기 오버레이 */
 .overlay-full {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 390px;
-  height: 805px;
-  border-radius: 60px;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
   background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(2px);
   z-index: 999;
   display: flex;
   align-items: flex-start;
   justify-content: flex-end;
+  padding-left: 12px;
   padding-top: 96px;
   padding-right: 12px;
 }
@@ -272,7 +292,6 @@ function onSubmitSuccess() {
   background: #f7f7f7;
   color: #666;
 }
-
 *,
 *::before,
 *::after {

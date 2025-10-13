@@ -1,36 +1,28 @@
 <script setup>
 import { onMounted, ref } from "vue";
-import lineChart from "@/components/exercise/lineChart.vue";
 import StaticChart from "@/components/exercise/StaticChart.vue";
 import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
 
-const model = ref(true);
 const bodyCompositionStore = useBodyCompositionStore();
-
-// TODO: 서버에서 내려받을 수 있도록 api 수정하기
-const metrics = [
-  "weight",
-  "bmi",
-  "skeletal_muscle_mass",
-  "body_fat_mass",
-  "protein",
-  "mineral",
-  "total_body_water",
-  "basal_metabolic_rate",
-  "percent_body_fat",
-];
+const toggle = ref(true);
+const filterRange = ref({
+  start_date: "",
+  end_date: "",
+});
 </script>
 
 <template>
   <div class="wrap">
     <div class="d-flex align-center justify-space-between">
-      <div class="day_picker otd-border">
-        <div class="otd-body-2">{{ "2024.10.16 ~ 최근" }}</div>
-      </div>
+      <router-link to="/exercise/body_composition/filter">
+        <div class="day_picker otd-border">
+          <div class="otd-body-2">조회 필터링</div>
+        </div>
+      </router-link>
       <div class="d-flex align-center ga-2">
         <span>최근</span>
         <v-switch
-          v-model="model"
+          v-model="toggle"
           hide-details
           inset
           density="compact"
@@ -50,6 +42,9 @@ const metrics = [
 </template>
 
 <style lang="scss" scoped>
+* {
+  text-decoration: none;
+}
 .day_picker {
   display: flex;
   justify-content: center;
@@ -59,5 +54,6 @@ const metrics = [
   background-color: #fff;
 
   border-radius: 10px;
+  cursor: pointer;
 }
 </style>

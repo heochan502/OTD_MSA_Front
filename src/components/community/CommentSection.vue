@@ -1,28 +1,62 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useCommentsStore } from '@/stores/community/comments';
+import { useAuthenticationStore } from '@/stores/user/authentication';
+import { formatYMDHM } from '@/stores/community/date';
+import axios from '@/services/httpRequester';
 
 const props = defineProps({
   postId: { type: [String, Number], required: true },
-  // 작성자 닉네임 보여줄 때 필요하면 부모에서 내려줄 수도 있음
 });
 
 const commentsStore = useCommentsStore();
+const auth = useAuthenticationStore();
+
 const loading = computed(() => commentsStore.isLoading(props.postId));
 const comments = computed(() => commentsStore.list(props.postId));
 const count = computed(() => commentsStore.count(props.postId));
 
 const input = ref('');
+const meUserId = computed(() => auth.state.signedUser?.userId || 0);
+const meNickName = computed(() => auth.state.signedUser?.nickName || '회원');
+
+const DEFAULT_AVATAR =
+  import.meta.env.BASE_URL + 'image/main/default-profile.png';
+
+// ✅ 절대경로 변환 함수 (게이트웨이 환경 포함)
+function toAbsUrl(p) {
+  if (!p) return '';
+  if (/^https?:\/\//i.test(p)) return p;
+  try {
+    return new URL(p, axios.defaults.baseURL).toString();
+  } catch {
+    return p.startsWith('/')
+      ? p
+      : import.meta.env.BASE_URL + p.replace(/^\.?\//, '');
+  }
+}
+
+function getAvatar(c) {
+  const raw =
+    c.memberImg || c.profileImg || c.profileImage || c.writer?.memberImg || '';
+  const url = raw ? toAbsUrl(raw) : DEFAULT_AVATAR;
+  return url || DEFAULT_AVATAR;
+}
 
 async function submit() {
   const v = input.value.trim();
   if (!v) return;
-  await commentsStore.add(props.postId, v);
+
+  await commentsStore.add(props.postId, v, meNickName.value);
   input.value = '';
 }
+
 async function removeOne(c) {
   await commentsStore.remove(c.commentId, props.postId);
 }
+
+// ✅ 내가 쓴 댓글 판별
+const isMine = (c) => Number(c.userId) === Number(meUserId.value);
 
 onMounted(() => {
   commentsStore.load(props.postId);
@@ -49,10 +83,19 @@ onMounted(() => {
     <div class="list" v-if="!loading && comments.length">
       <div v-for="c in comments" :key="c.commentId" class="item">
         <div class="meta">
-          <span class="avatar" aria-hidden="true"></span>
-          <span class="nick">{{ c.authorNickname ?? '익명' }}</span>
-          <span class="time">{{ c.createdAt }}</span>
-          <button class="del" @click="removeOne(c)">삭제</button>
+          <div class="avatar">
+            <img
+              :src="getAvatar(c)"
+              alt=""
+              @error="(e) => (e.target.src = DEFAULT_AVATAR)"
+            />
+          </div>
+          <span class="nick">{{ c.nickName || '익명' }}</span>
+          <span class="time">{{ formatYMDHM(c.createdAt) }}</span>
+
+          <button v-if="isMine(c)" class="del" @click="removeOne(c)">
+            삭제
+          </button>
         </div>
         <p class="content">{{ c.content }}</p>
       </div>
@@ -110,10 +153,17 @@ onMounted(() => {
   color: #777;
 }
 .avatar {
-  width: 20px;
-  height: 20px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
+  overflow: hidden;
   background: #eaeaea;
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 .nick {
   font-weight: 700;

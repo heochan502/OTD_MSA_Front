@@ -1,16 +1,13 @@
 <script setup>
-import { onMounted, ref, computed, reactive, watch } from "vue";
+import { ref, computed, watch } from "vue";
 import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
 import { formatDateYearMonthKR, formatDateISO } from "@/utils/dateTimeUtils";
 import { getExerciseRecordList } from "@/services/exercise/exerciseService";
-import { color } from "echarts";
 
 const exerciseRecordStore = useExerciseRecordStore();
 const now = ref(new Date()); // 현재 보고 있는 달
 const selectedDate = ref(new Date()); // 실제 선택된 날짜
-
 const emit = defineEmits(["select-date"]);
-console.log("선택날짜", selectedDate.value);
 
 // 캘린더 속성
 const calendarAttributes = computed(() => {
@@ -24,12 +21,20 @@ const calendarAttributes = computed(() => {
   });
 
   // 기록 있는 날짜 점 표시
-  const recordDates = exerciseRecordStore.monthlyRecords.map((r) =>
-    formatDateISO(new Date(r.startAt))
-  );
+  // const recordDates = new Set(exerciseRecordStore.monthlyRecords.map((r) =>
+  //   formatDateISO(new Date(r.startAt))
+  // ));
+  const recordDates = computed(() => {
+    return new Set(
+      exerciseRecordStore.monthlyRecords.map((r) =>
+        formatDateISO(new Date(r.startAt))
+      )
+    );
+  });
+  console.log(recordDates.value);
   attrs.push({
     key: "records",
-    dates: recordDates,
+    dates: Array.from(recordDates.value).map((d) => new Date(d)),
     dot: { color: "teal", radius: 3 },
   });
 
@@ -143,11 +148,6 @@ const onDidMove = async (pages) => {
   padding: 4px;
   border-radius: 50%;
   transition: background-color 0.2s ease;
-
-  // &:hover {
-  //   background-color: rgba(0, 0, 0, 0.05); /* hover 효과 */
-  //   cursor: pointer;
-  // }
 }
 
 .v-calendar__day:hover {

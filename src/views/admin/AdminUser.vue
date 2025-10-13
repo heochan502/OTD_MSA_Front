@@ -83,7 +83,7 @@ const reversedUser = computed(() => {
         />
       </v-card-title>
 
-      <v-data-table
+      <v-data-table 
         :headers="headers"
         :items="reversedUser"
         :search="search"
@@ -103,10 +103,10 @@ const reversedUser = computed(() => {
           <template v-if="item.userRoles != null">
             <v-chip
               :color="
-                item.userRoles === 'USER' || item.userRoles === 'SOCIAL'
+                item.userRoles === 'USER_1' || item.userRoles === 'USER_2'
                   ? '#00D5DF'
                   : item.userRoles === 'ADMIN'
-                  ? '#303030'
+                  ? '#7a7a7a'
                   : '#ff8a80'
               "
               small
@@ -123,7 +123,7 @@ const reversedUser = computed(() => {
               item.challengeRole === '브론즈'
                 ? '#ce7430'
                 : item.challengeRole === '실버'
-                ? '#9e9e9e'
+                ? '#7a7a7a'
                 : item.challengeRole === '골드'
                 ? '#ffba57'
                 : item.challengeRole === '다이아'

@@ -38,15 +38,19 @@ ChartJS.register(
 const props = defineProps({
   series: { type: Object, default: () => ({ points: [] }) },
   metrics: { type: Array, default: () => [] },
-  data: { type: Array, default: () => [] },
+  selectedMetric: String,
+});
+
+// 선택된 측정항목이 있으면 그것만 화면에 보여짐. 없으면 전체 항목
+const displayMetrics = computed(() => {
+  if (!props.selectedMetric) return props.metrics;
+  return props.metrics.filter((m) => m.metricCode === props.selectedMetric);
 });
 
 // 날짜 라벨
 const labels = computed(() =>
   props.series.points.map((p) => dayjs(p.date).format("YY/MM/DD"))
 );
-
-console.log("data", props.series);
 
 // 항목별 데이터셋 생성
 const makeChartData = (metric) => {
@@ -58,16 +62,17 @@ const makeChartData = (metric) => {
         data: props.series.points.map((p) => p.values[metric]),
         borderColor: "#FFE864", // 선 색깔 오렌지톤
         backgroundColor: (context) => {
-          const ctx = context.chart.ctx;
+          const chart = context.chart; // chartArea가 계산된 후에 gradient 생성
+          const { ctx, chartArea } = chart; // ctx 객체로 선 긋고 색 칠하고 그라데이션 효과 줌
+          if (!chartArea) return null; // 아직 계산 전이면 null 리턴
           const gradient = ctx.createLinearGradient(
             0,
+            chartArea.top,
             0,
-            0,
-            context.chart.height
+            chartArea.bottom
           );
-          gradient.addColorStop(1, "rgba(255, 232, 100, 0)"); // 위쪽 진한색, 1은 불투명
-          gradient.addColorStop(0, "rgba(255, 232, 100, 0.3)"); // 아래쪽 투명 (알파 0)
-          gradient.addColorStop(0.3, "rgba(255, 232, 100, 0)"); // 중간
+          gradient.addColorStop(0, "rgba(255, 232, 100, 0.6)"); // 위쪽 진한색
+          gradient.addColorStop(1, "rgba(255, 232, 100, 0)"); // 아래쪽 투명
           return gradient;
         },
         fill: true,
@@ -120,36 +125,36 @@ const hasData = computed(() => {
 
 <template>
   <div v-if="!hasData" class="no-data">
-    <v-card class="chart flex-column otd-border otd-shadow otd-box-style">
+    <v-card class="chart otd-border otd-shadow otd-box-style">
       <span class="text-h4">☹️</span>
       <span class="otd-subtitle-2"> 체성분 측정 데이터가 없어요 </span>
     </v-card>
   </div>
+  <!-- selectedMetric 유무에 따라 표시할 metric 다르게 -->
   <div v-else>
-    <v-card
-      v-for="metric in props.metrics"
-      :key="metric"
-      class="chart otd-border otd-shadow otd-box-style"
-    >
-      <div style="margin-bottom: 24px">
-        <h4>{{ metric.metricName }}</h4>
-        <Line
-          :data="makeChartData(metric.metricCode)"
-          :options="makeChartOptions(metric.metricCode)"
-          style="width: 100%"
-        />
+    <div v-for="metric in displayMetrics" :key="metric.metricCode">
+      <div>
+        <span class="otd-subtitle-1 ml-2">{{ metric.metricName }}</span>
+        <v-card class="chart otd-border otd-shadow otd-box-style">
+          <Line
+            :data="makeChartData(metric.metricCode)"
+            :options="makeChartOptions(metric.metricCode)"
+            style="width: 100%"
+          />
+        </v-card>
       </div>
-    </v-card>
+    </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
 .chart {
   display: flex;
+  flex-direction: column;
   justify-content: center;
-
+  text-align: center;
   height: 250px;
-  padding: 15px;
-  margin: 15px;
+  padding: 20px 10px;
+  margin: 0 0 15px 0;
 }
 </style>
