@@ -113,6 +113,7 @@ const confirmDelete = async () => {
               </v-chip>
             </p>
           </v-card-text>
+          <v-card-text>{{ post.createdAt }}</v-card-text>
           <v-card-actions>
             <v-btn color="primary" text @click="openDetail(post.postId)">
               상세보기
