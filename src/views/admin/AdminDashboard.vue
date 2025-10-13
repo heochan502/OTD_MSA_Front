@@ -124,7 +124,7 @@ const formatDate = (dateStr) => {
                 v-for="(ch, i) in state.challengeData.participantTop5Challenge"
                 :key="i"
               >
-                {{ ch.cdName }} ({{ ch.cdType }}) — {{ ch.cdGoal
+                {{ ch.cdName }} ({{ ch.cdType }}) — {{ ch.cdGoal.toLocaleString()
                 }}{{ ch.cdUnit }}
               </li>
             </ul>
@@ -141,7 +141,7 @@ const formatDate = (dateStr) => {
                 v-for="(ch, i) in state.challengeData.failTop3Challenge"
                 :key="i"
               >
-                {{ ch.cdName }} ({{ ch.cdType }}) — {{ ch.cdGoal
+                {{ ch.cdName }} ({{ ch.cdType }}) — {{ ch.cdGoal.toLocaleString()
                 }}{{ ch.cdUnit }}
               </li>
             </ul>

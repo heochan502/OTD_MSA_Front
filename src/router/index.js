@@ -399,6 +399,16 @@ const router = createRouter({
           component: () => import('@/views/admin/AdminCommunity.vue'),
         },
         {
+          path: 'exercise',
+          name: 'AdminExercise',
+          component: () => import('@/views/admin/AdminExercise.vue'),
+        },
+        {
+          path: 'meal',
+          name: 'AdminMeal',
+          component: () => import('@/views/admin/AdminMeal.vue'),
+        },
+        {
           path: 'qna',
           name: 'AdminQnA',
           component: () => import('@/views/admin/AdminQnA.vue'),

@@ -128,29 +128,37 @@ export const getUserExerciseRecord = (userId) => {
   return axios.get(`${LIFE_URL}/exercise/${userId}`).catch((e) => e.response);
 };
 
+// 커뮤니티 목록
 export const getCommunity = () => {
   return axios.get(`${LIFE_URL}/community`).catch((e) => e.response);
 };
 
+// 커뮤니티 디테일
 export const getCommunityDetail = (postId) => {
   return axios.get(`${LIFE_URL}/community/${postId}`).catch((e) => e.response);
 };
 
+// 커뮤니티 글 삭제
 export const deleteCommunity = (postId) => {
   return axios
     .delete(`${LIFE_URL}/community/${postId}`)
     .catch((e) => e.response);
 };
+
+// 커뮤니티 댓글 삭제
 export const deleteComment = (commentId) => {
   return axios
     .delete(`${LIFE_URL}/community/comment/${commentId}`)
     .catch((e) => e.response);
 };
+
+// 커뮤니티 사진 삭제
 export const deleteFile = (fileId) => {
   return axios
     .delete(`${LIFE_URL}/community/file/${fileId}`)
     .catch((e) => e.response);
 };
+
 // 게시글 대시보드
 export const getCommunityData = () => {
   return axios.get(`${LIFE_URL}/dash/community`).catch((e) => e.response);
@@ -179,4 +187,14 @@ export const getExerciseStatistics = () => {
 // 식단기록 통계
 export const getMealStatistics = () => {
   return axios.get(`${LIFE_URL}/statistics/meal`).catch((e) => e.response);
+};
+
+// 운동 종목 목록
+export const getExercise = () => {
+  return axios.get(`${LIFE_URL}/exercise`).catch((e) => e.response);
+};
+
+// 음식 정보 목록
+export const getMeal = () => {
+  return axios.get(`${LIFE_URL}/meal`).catch((e) => e.response);
 };
