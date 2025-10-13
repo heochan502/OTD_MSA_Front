@@ -11,6 +11,11 @@ import {
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { useAdminStore } from '@/stores/admin/adminStore';
 import router from '@/router';
+import {
+  putLifeUserProfile,
+  updateLifeNickname,
+  updateLifeUserInfo,
+} from '@/services/community/postService';
 
 const authenticationStore = useAuthenticationStore();
 const adminStore = useAdminStore();
@@ -48,14 +53,10 @@ const formatBirthDate = (birthDate) => {
 
 onMounted(async () => {
   state.userInfo = adminStore.state.selectedUser;
-  console.log('userInfo', state.userInfo);
   const userId = Number(state.userInfo.userId);
   const resUser = await getUserDetail(userId);
-  console.log('1', resUser.data);
   const resExercise = await getUserExerciseRecord(userId);
-  console.log('2', resExercise.data);
   const resMeal = await getUserMealRecord(userId);
-  console.log('3', resMeal.data);
   state.challengeHistory = resUser.data.challengeProgress;
   state.pointHistory = resUser.data.challengePointHistory;
   state.exerciseHistory = resExercise.data;
@@ -108,7 +109,6 @@ const formatDate = (date) => {
 
 // 챌린지기록 테이블 평탄화
 const challengeTableSet = computed(() => {
-  console.log('test', state.challengeHistory);
   const rows = state.challengeHistory.map((item, i) => {
     const name = String(item.challengeDefinition?.cdName ?? '').trim();
     const point = Number(item.challengeDefinition?.cdReward ?? 0);
@@ -128,7 +128,6 @@ const challengeTableSet = computed(() => {
 
   // 최신순 (endDate DESC)
   rows.sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
-  console.log('row', rows);
   return rows;
 });
 
@@ -157,11 +156,17 @@ const mealTableSet = computed(() => {
 });
 const submit = async () => {
   const jsonBody = state.userInfo;
-  console.log('json', jsonBody);
 
   const res = await putUserProfile(jsonBody);
 
   if (res && res.status === 200) {
+    const jsonBody = {
+      userId: state.userInfo.userId,
+      nickname: state.userInfo.nickName,
+      imgPath: state.userInfo.pic,
+    };
+    const life = await updateLifeUserInfo(jsonBody);
+    console.log('life:', life.data);
     // 성공하면 저장 완료 모달 열기
     putProfileDialog.value = false;
     successDialog.value = true;
@@ -194,16 +199,13 @@ const rowProps = ({ item }) => ({
 });
 
 const openMealDialog = async (meal) => {
-  console.log('meal', meal);
   const params = {
     mealDay: meal.mealDay,
     mealTime: meal.mealTime,
     userId: meal.userId,
   };
-  console.log('params', params);
   const res = await getUserMealDetail(params);
   selectedMeal.value = res?.data || [];
-  console.log('res.data', res.data);
   mealDetailDialog.value = true;
 };
 </script>
@@ -496,12 +498,24 @@ const openMealDialog = async (meal) => {
       totalNatrium: Number(item.totalNatrium ?? 0),
       totalProtein: Number(item.totalProtein ?? 0),
       totalSugar: Number(item.totalSugar ?? 0), -->
-        <template #item.totalCarbohydrate="{item}">{{ item.totalCarbohydrate.toLocaleString() }}g</template>
-        <template #item.totalProtein="{item}">{{ item.totalProtein.toLocaleString() }}g</template>
-        <template #item.totalFat="{item}">{{ item.totalFat.toLocaleString() }}g</template>
-        <template #item.totalNatrium="{item}">{{ item.totalNatrium.toLocaleString() }}mg</template>
-        <template #item.totalSugar="{item}">{{ item.totalSugar.toLocaleString() }}g</template>
-        <template #item.totalKcal="{item}">{{ item.totalKcal.toLocaleString() }}kcal</template>
+        <template #item.totalCarbohydrate="{ item }"
+          >{{ item.totalCarbohydrate.toLocaleString() }}g</template
+        >
+        <template #item.totalProtein="{ item }"
+          >{{ item.totalProtein.toLocaleString() }}g</template
+        >
+        <template #item.totalFat="{ item }"
+          >{{ item.totalFat.toLocaleString() }}g</template
+        >
+        <template #item.totalNatrium="{ item }"
+          >{{ item.totalNatrium.toLocaleString() }}mg</template
+        >
+        <template #item.totalSugar="{ item }"
+          >{{ item.totalSugar.toLocaleString() }}g</template
+        >
+        <template #item.totalKcal="{ item }"
+          >{{ item.totalKcal.toLocaleString() }}kcal</template
+        >
       </v-data-table>
     </v-card>
   </div>
