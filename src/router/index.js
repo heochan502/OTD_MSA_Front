@@ -40,10 +40,18 @@ import MyLike from '@/views/user/MyLike.vue';
 import MyComment from '@/views/user/MyComment.vue';
 
 // 포인트샵
+<<<<<<< HEAD
+import PointShopListView from '@/views/pointshop/PointShopListView.vue';
+import PointUserPurchaseHistoryView from '@/views/pointshop/PointUserPurchaseHistoryView.vue';
+import PointUserView from '@/views/pointshop/PointUserView.vue';
+import PointPurchaseHistoryTable from '@/components/pointshop/PointPurchaseHistoryTable.vue';
+import PointRechargeView from '@/views/pointshop/PointRechargeView.vue';
+=======
 import PointShopListView from "@/views/point/PointShopListView.vue";
 import PointUserPurchaseHistoryView from "@/views/point/PointUserPurchaseHistoryView.vue";
 import PointUserView from "@/views/point/PointUserView.vue";
 import PointPurchaseHistoryTable from "@/components/pointshop/PointPurchaseHistoryTable.vue";
+>>>>>>> 0172eee5dd3b7054040a23c51cbefdd21e39e04e
 
 //식단
 import MealMainView from "@/views/meal/MealMainView.vue";
@@ -304,8 +312,19 @@ const router = createRouter({
       component: PointUserView,
     },
     {
+<<<<<<< HEAD
+      path: '/pointshop/recharge',
+      name: 'PointRechargeView',
+      component: PointRechargeView.vue,
+      meta: { headerType: 'title', title: '포인트 충전', showUserPanel: false },
+    },
+    {
+      path: '/meal',
+      name: 'MealMainView',
+=======
       path: "/meal",
       name: "MealMainView",
+>>>>>>> 0172eee5dd3b7054040a23c51cbefdd21e39e04e
       component: MealMainView,
       meta: { headerType: "title", title: "식단", showUserPanel: false },
     },
