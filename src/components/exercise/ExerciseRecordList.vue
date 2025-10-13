@@ -1,19 +1,17 @@
 <script setup>
-import { onMounted, reactive } from "vue";
-import { useRouter, useRoute } from "vue-router";
-import { getExerciseRecordList } from "@/services/exercise/exerciseService";
+import { computed } from "vue";
+import { useRouter } from "vue-router";
 import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
-import { calcDuration } from "@/utils/exerciseUtils";
+import { calcDuration, calcEffortAvg, calcKcal } from "@/utils/exerciseUtils";
 import {
   getDateString,
   formatTimeKR,
   formatDateKR,
 } from "@/utils/dateTimeUtils";
+import { getFeedbackMessage } from "@/utils/getFeedbackMessage";
 
 const router = useRouter();
-const route = useRoute();
 const exerciseRecordStore = useExerciseRecordStore();
-const todayStr = getDateString();
 
 const props = defineProps({
   records: {
@@ -21,6 +19,35 @@ const props = defineProps({
     default: () => [],
   },
 });
+
+// const todayRecords = computed(() => exerciseRecordStore.today);
+// const yesterdayRecords = computed(() => exerciseRecordStore.yesterday);
+
+// const todayKcal = computed(() => calcKcal(todayRecords.value));
+// const yesterdayKcal = computed(() => calcKcal(yesterdayRecords.value));
+
+// const todayDuration = computed(() => calcDuration(todayRecords.value));
+// const yesterdayDuration = computed(() => calcDuration(yesterdayRecords.value));
+
+// const todayEffortAvg = computed(() => calcEffortAvg(todayRecords.value));
+// const yesterdayEffortAvg = computed(() =>
+//   calcEffortAvg(yesterdayRecords.value)
+// );
+// console.log("여기여기", yesterdayRecords.value);
+
+// const feedbackMessage = computed(() =>
+//   getFeedbackMessage({
+//     todayDuration: todayDuration.value,
+//     yesterdayDuration: yesterdayDuration.value,
+//     todayEffort: todayEffortAvg.value,
+//     yesterdayEffort: yesterdayEffortAvg.value,
+//     todayKcal: todayKcal.value,
+//     yesterdayKcal: yesterdayKcal.value,
+//     isFirst: todayRecords.length === 1 && yesterdayRecords.length === 0,
+//     isComeback: yesterdayRecords.length === 0 && todayRecords.length === 1,
+//     hasRecord: todayRecords.length > 0,
+//   })
+// );
 
 // @click
 const goDetail = (exerciseRecordId) => {
@@ -40,7 +67,10 @@ const goDetail = (exerciseRecordId) => {
         v-if="exerciseRecordStore.records.length < 1"
         class="list_item otd-box-style"
       >
-        오늘도 운동에 도전하세요!
+        <span>운동 기록이 없어요. 잊지말고 기록하세요!</span>
+      </li>
+      <li>
+        <!-- <div>{{ feedbackMessage }}</div> -->
       </li>
       <li
         v-for="item in exerciseRecordStore.records"
@@ -87,7 +117,8 @@ const goDetail = (exerciseRecordId) => {
   align-items: center;
   justify-content: space-between;
 
-  min-width: 300px;
+  min-width: 320px;
+  max-width: 350px;
   width: 100%;
   height: 75px;
   padding: 17px;

@@ -3,6 +3,23 @@ import axios from '@/services/httpRequester';
 const BASE_URL = 'admin';
 const LIFE_URL = 'admin2';
 
+// 대쉬보드
+export const getUserData = () => {
+  return axios.get(`${BASE_URL}/dash/user`).catch((e) => e.response);
+};
+
+export const getChallengeData = () => {
+  return axios.get(`${BASE_URL}/dash/challenge`).catch((e) => e.response);
+};
+
+export const getPointData = () => {
+  return axios.get(`${BASE_URL}/dash/point`).catch((e) => e.response);
+};
+
+export const getInquiryData = () => {
+  return axios.get(`${BASE_URL}/dash/inquiry`).catch((e) => e.response);
+};
+
 // 사용자 관리 페이지
 export const getUser = () => {
   return axios.get(`${BASE_URL}/user`).catch((e) => e.response);
@@ -51,6 +68,18 @@ export const getPointHistory = () => {
 };
 
 // 통계페이지
+export const getUserStatistics = () => {
+  return axios.get(`${BASE_URL}/statistics/user`).catch((e) => e.response);
+};
+
+export const getChallengeStatistics = () => {
+  return axios.get(`${BASE_URL}/statistics/challenge`).catch((e) => e.response);
+};
+
+export const getInquiryStatistics = () => {
+  return axios.get(`${BASE_URL}/statistics/inquiry`).catch((e) => e.response);
+};
+
 export const getGender = () => {
   return axios.get(`${BASE_URL}/gender`).catch((e) => e.response);
 };
@@ -81,15 +110,25 @@ export const putQna = (params) => {
 };
 
 // life 서버
+// 유저 디테일 식단 기록
 export const getUserMealRecord = (userId) => {
   return axios.get(`${LIFE_URL}/meal/${userId}`).catch((e) => e.response);
 };
 
+// 유저 디테일 식단 기록 디테일
+export const getUserMealDetail = (params) => {
+  console.log('params2', params);
+  return axios
+    .get(`${LIFE_URL}/meal/detail`, { params })
+    .catch((e) => e.response);
+};
+
+// 유저 디테일 운동 기록
 export const getUserExerciseRecord = (userId) => {
   return axios.get(`${LIFE_URL}/exercise/${userId}`).catch((e) => e.response);
 };
 
-// 커뮤니티 페이지
+
 export const getCommunity = () => {
   return axios.get(`${LIFE_URL}/community`).catch((e) => e.response);
 };
@@ -117,3 +156,32 @@ export const deleteFile = (fileId) => {
 export const getTodayLogin = () => {
   return axios.get(`${BASE_URL}/dashboard/login`).catch((e) => e.response);
 };
+// 게시글 대시보드
+export const getCommunityData = () => {
+  return axios.get(`${LIFE_URL}/dash/community`).catch((e) => e.response);
+};
+
+// 운동기록 대시보드
+export const getExerciseData = () => {
+  return axios.get(`${LIFE_URL}/dash/exercise`).catch((e) => e.response);
+};
+
+// 식단기록 대시보드
+export const getMealData = () => {
+  return axios.get(`${LIFE_URL}/dash/meal`).catch((e) => e.response);
+};
+
+// 게시글 통계
+export const getCommunityStatistics = () => {
+  return axios.get(`${LIFE_URL}/statistics/community`).catch((e) => e.response);
+};
+
+// 운동기록 통계
+export const getExerciseStatistics = () => {
+    return axios.get(`${LIFE_URL}/statistics/exercise`).catch((e) => e.response);
+}
+
+// 식단기록 통계
+export const getMealStatistics = () => {
+      return axios.get(`${LIFE_URL}/statistics/meal`).catch((e) => e.response);
+}

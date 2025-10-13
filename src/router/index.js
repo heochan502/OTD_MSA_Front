@@ -407,7 +407,7 @@ const router = createRouter({
         {
           path: "statistics",
           name: "AdminStatistics",
-          component: () => import("@/views/admin/AdminStatistic.vue"),
+          component: () => import("@/views/admin/AdminStatistics.vue"),
         },
         {
           path: "user/detail",
