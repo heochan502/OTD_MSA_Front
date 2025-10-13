@@ -1,4 +1,3 @@
-<!-- src/views/community/PostDetailView.vue -->
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -7,6 +6,7 @@ import { fetchPostFiles } from '@/services/community/postService';
 import axios from '@/services/httpRequester';
 import CommentSection from '@/components/community/CommentSection.vue';
 import { formatYMDHM } from '@/stores/community/date';
+import ImageLightbox from '@/components/community/ImageLightbox.vue';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 
 const route = useRoute();
@@ -20,7 +20,7 @@ const images = ref([]);
 const imagesLoading = ref(false);
 const imagesError = ref('');
 
-/** ⬇️ 캐시 버스트를 1회만 생성 (리렌더시 매번 바뀌어 재다운로드 되는 문제 방지) */
+/** ⬇️ 캐시 버스트를 1회만 생성 */
 const cacheBust = ref(`?v=${Date.now()}`);
 
 /** ⬇️ 상대경로(/static/...)를 게이트웨이 절대경로로 변환 */
@@ -114,6 +114,17 @@ const gridClass = computed(() => {
   if (n === 2) return 'two';
   return 'three';
 });
+
+/** ⬇️ 라이트박스 */
+const lbOpen = ref(false);
+const lbStart = ref(0);
+const lbImages = computed(() =>
+  images.value.map((img) => ({ url: img.url, name: img.name || '' }))
+);
+function openFromDetail(i) {
+  lbStart.value = i;
+  lbOpen.value = true;
+}
 </script>
 
 <template>
@@ -150,7 +161,12 @@ const gridClass = computed(() => {
       <div class="images err" v-else-if="imagesError">{{ imagesError }}</div>
 
       <div class="images grid" :class="gridClass" v-else-if="images.length">
-        <div class="img" v-for="img in images" :key="img.id || img.url">
+        <div
+          class="img"
+          v-for="(img, i) in images"
+          :key="img.id || img.url"
+          @click="openFromDetail(i)"
+        >
           <img
             :src="img.url"
             :alt="img.name || '첨부 이미지'"
@@ -159,12 +175,8 @@ const gridClass = computed(() => {
             @error="
               (e) => {
                 console.error('[PostDetail] img load error:', img);
-                e.target.replaceWith(
-                  Object.assign(document.createElement('div'), {
-                    className: 'img-fallback',
-                    innerText: '이미지를 불러오지 못했어요',
-                  })
-                );
+                // fallback: 이미지 감춤
+                e.target.style.display = 'none';
               }
             "
           />
@@ -180,6 +192,13 @@ const gridClass = computed(() => {
       </div>
 
       <CommentSection :post-id="routeId" class="otd-top-margin" />
+
+      <!-- 라이트박스 -->
+      <ImageLightbox
+        v-model:open="lbOpen"
+        :images="lbImages"
+        :start="lbStart"
+      />
     </section>
 
     <section v-else class="detail">
@@ -229,7 +248,7 @@ const gridClass = computed(() => {
   grid-template-columns: 1fr;
 }
 .images.grid.one .img {
-  padding-top: 62.5%; /* 16:10 비율 박스 */
+  padding-top: 62.5%; /* 16:10 */
 }
 
 /* 2장: 2열 */
@@ -237,7 +256,7 @@ const gridClass = computed(() => {
   grid-template-columns: repeat(2, 1fr);
 }
 .images.grid.two .img {
-  padding-top: 100%; /* 정사각형 */
+  padding-top: 100%;
 }
 
 /* 3장 이상: 3열 그리드 */
@@ -255,6 +274,7 @@ const gridClass = computed(() => {
   border-radius: 12px;
   border: 1px solid #eee;
   background: #f7f7f7;
+  cursor: zoom-in;
 }
 .images .img img {
   position: absolute;
@@ -289,17 +309,6 @@ const gridClass = computed(() => {
 .images.err {
   color: #c24040;
   font-size: 13px;
-}
-
-/* 이미지 에러 대체 박스 */
-.img-fallback {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  font-size: 12px;
-  color: #9a9a9a;
-  background: #f3f3f3;
 }
 
 .content {
