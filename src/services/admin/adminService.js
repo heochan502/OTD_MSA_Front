@@ -25,15 +25,19 @@ export const getChallenge = () => {
   return axios.get(`${BASE_URL}/challenge`).catch((e) => e.response);
 };
 
-export const postChallenge = (params) => {
+export const postChallenge = (formData) => {
   return axios
-    .post(`${BASE_URL}/challenge/add`, params)
+    .post(`${BASE_URL}/challenge/add`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
     .catch((e) => e.response);
 };
 
-export const putChallenge = (params) => {
+export const putChallenge = (formData) => {
   return axios
-    .put(`${BASE_URL}/challenge/modify`, params)
+    .put(`${BASE_URL}/challenge/modify`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
     .catch((e) => e.response);
 };
 
@@ -85,6 +89,31 @@ export const getUserExerciseRecord = (userId) => {
   return axios.get(`${LIFE_URL}/exercise/${userId}`).catch((e) => e.response);
 };
 
+// 커뮤니티 페이지
 export const getCommunity = () => {
   return axios.get(`${LIFE_URL}/community`).catch((e) => e.response);
+};
+
+export const getCommunityDetail = (postId) => {
+  return axios.get(`${LIFE_URL}/community/${postId}`).catch((e) => e.response);
+};
+
+export const deleteCommunity = (postId) => {
+  return axios
+    .delete(`${LIFE_URL}/community/${postId}`)
+    .catch((e) => e.response);
+};
+export const deleteComment = (commentId) => {
+  return axios
+    .delete(`${LIFE_URL}/community/comment/${commentId}`)
+    .catch((e) => e.response);
+};
+export const deleteFile = (fileId) => {
+  return axios
+    .delete(`${LIFE_URL}/community/file/${fileId}`)
+    .catch((e) => e.response);
+};
+// 대시보드
+export const getTodayLogin = () => {
+  return axios.get(`${BASE_URL}/dashboard/login`).catch((e) => e.response);
 };
