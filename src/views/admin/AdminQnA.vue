@@ -71,6 +71,8 @@ const submit = async () => {
   const res = await putQna(jsonBody);
   if (res && res.status === 200) {
     // 성공하면 저장 완료 모달 열기
+    const refresh = await getQna();
+    qna.value = refresh.data;
     qnaDialog.value = false;
     successDialog.value = true;
   } else {
