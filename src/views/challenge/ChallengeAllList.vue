@@ -128,6 +128,11 @@ onMounted(async () => {
     margin-top: 15px;
   }
 }
+.weekly-challenge,
+.monthly-challenge {
+  margin: 0 15px;
+  box-sizing: border-box;
+}
 :deep(.swiper) {
   overflow: hidden;
 }
