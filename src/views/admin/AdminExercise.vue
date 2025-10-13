@@ -14,7 +14,6 @@ const deleteDialog = ref(false);
 const isEdit = ref(false);
 const successDialog = ref(false);
 const cancelDialog = ref(false);
-const deleteDialog = ref(false);
 
 const exercise = ref({});
 const search = ref('');
@@ -23,28 +22,144 @@ const search = ref('');
 const headers = [
   { title: 'ID', key: 'exerciseId' },
   { title: '운동명', key: 'exerciseName' },
-  { title: '활동에너지 소모량', key: 'exerciseMet' },
-  { title: '거리 유무', key: 'hasDistance' },
-  { title: '갯수 유무', key: 'hasReps' },
+  { title: 'MET', key: 'exerciseMet' },
+  { title: '거리 기반', key: 'hasDistance' },
+  { title: '반복 기반', key: 'hasReps' },
+  { title: '관리', key: 'setting', sortable: false },
 ];
+
+// 운동 목록 불러오기
+const loadExercises = async () => {
+  try {
+    const res = await getExercise();
+    // exerciseId → Number 변환 후 내림차순 정렬
+    exercises.value = res.data.map((e) => ({
+      ...e,
+      exerciseId: Number(e.exerciseId),
+    }));
+  } catch (e) {
+    console.error('운동 데이터 불러오기 실패:', e);
+  }
+};
+
+// 검색 필터링
+const filteredExercises = computed(() => {
+  if (!keyword.value) return exercises.value;
+  return exercises.value.filter((e) =>
+    e.exerciseName.toLowerCase().includes(keyword.value.toLowerCase())
+  );
+});
+
+// 추가/수정 폼 열기
+const openForm = (exercise = null) => {
+  if (exercise) {
+    isEdit.value = true;
+    editExercise.value = { ...exercise };
+  } else {
+    isEdit.value = false;
+    editExercise.value = {
+      exerciseId: null,
+      exerciseName: '',
+      exerciseMet: 0,
+      hasDistance: false,
+      hasReps: false,
+    };
+  }
+  formDialog.value = true;
+};
+
+// 저장 (추가 or 수정)
+const saveExercise = async () => {
+  if (
+    !editExercise.value.exerciseName ||
+    editExercise.value.exerciseName.trim() === ''
+  ) {
+    alert('운동명을 입력해주세요.');
+    return;
+  }
+  if (editExercise.value.exerciseMet <= 0) {
+    alert('MET 값을 입력해주세요.');
+    return;
+  }
+
+  try {
+    if (isEdit.value) {
+      await putExercise(editExercise.value.exerciseId, editExercise.value);
+    } else {
+      await postExercise(editExercise.value);
+    }
+    successDialog.value = true;
+    formDialog.value = false;
+    loadExercises();
+  } catch (e) {
+    console.error('저장 실패:', e);
+  }
+};
+
+// 삭제 다이얼로그 열기
+const openDelete = (exercise) => {
+  deleteTarget.value = exercise;
+  deleteDialog.value = true;
+};
+
+// 삭제 실행
+const removeExercise = async () => {
+  try {
+    await deleteExercise(deleteTarget.value.exerciseId);
+    successDialog.value = true;
+    deleteDialog.value = false;
+    loadExercises();
+  } catch (e) {
+    console.error('삭제 실패:', e);
+  }
+};
+
+// 수정, 추가 취소 모달
+const cancel = () => {
+  cancelDialog.value = false;
+  formDialog.value = false;
+}
+onMounted(() => {
+  loadExercises();
+});
+
 </script>
 
 <template>
-  <div class="challenge-admin">
-    <!-- 수정 / 추가 모달 -->
-    <v-dialog v-model="formDialog" max-width="300" min-height="100">
-      <v-card>
-        <v-card-title class="text-h8">{{
-          isEdit ? '챌린지 수정' : '챌린지 추가'
-        }}</v-card-title>
-        <v-card-subtitle>이름</v-card-subtitle>
-        <v-text-field v-model="editChallenge.cdName" />
+    <div class="admin-exercise">
+    <v-card class="data-card pa-2">
+      <!-- 상단 툴바 -->
+      <v-card-title class="d-flex justify-space-between align-center">
+        <span class="title">운동 관리</span>
+        <div class="d-flex align-center search" style="gap: 12px">
+          <v-text-field
+            v-model="keyword"
+            label="검색 (운동명)"
+            prepend-inner-icon="mdi-magnify"
+            density="compact"
+            hide-details
+            single-line
+            variant="outlined"
+            style="max-width: 450px"
+          />
+          <v-btn class="btn" @click="openForm()">➕ 운동 추가</v-btn>
+        </div>
+      </v-card-title>
 
-        <v-card-subtitle>타입</v-card-subtitle>
-        <v-select
-          :items="['competition', 'personal', 'weekly', 'daily']"
-          v-model="editChallenge.cdType"
-        />
+      <!-- 데이터 테이블 -->
+      <v-data-table
+        :headers="headers"
+        :items="filteredExercises"
+        :items-per-page="10"
+        class="styled-table"
+        fixed-header
+      >
+        <!-- 거리 기반 -->
+        <template #item.hasDistance="{ item }">
+          <v-icon :color="item.hasDistance ? '#9FD995' : '#F18A86'">
+            {{ item.hasDistance ? 'mdi-check-circle' : 'mdi-close-circle' }}
+          </v-icon>
+        </template>
 
         <!-- 반복 기반 -->
         <template #item.hasReps="{ item }">
