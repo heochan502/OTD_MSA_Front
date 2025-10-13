@@ -228,6 +228,7 @@ const bmiStatus = computed(() => {
   width: 100%;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
   animation: modalSlideUp 0.3s ease-out;
+  padding: 16px;
 }
 .btn_update {
   border-radius: 10px;
