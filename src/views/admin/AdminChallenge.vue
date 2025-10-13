@@ -1,10 +1,10 @@
 <script setup>
-import { getChallenge } from '@/services/admin/adminService';
 import { onMounted, ref, computed, nextTick } from 'vue';
 import {
   postChallenge,
   putChallenge,
   deleteChallenge,
+  getChallenge,
 } from '@/services/admin/adminService';
 
 const challenges = ref([]);
@@ -25,10 +25,10 @@ const addChallenge = {
   cdName: '',
   cdType: '',
   cdGoal: null,
-  cdUnit: '',
+  cdUnit: '-',
   cdReward: null,
   xp: null,
-  tier: '',
+  tier: '없음',
   cdImage: '',
 };
 
@@ -130,6 +130,12 @@ const cancel = () => {
   cancelDialog.value = false;
   formDialog.value = false;
 };
+const onFileChange = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  editChallenge.value.cdImageFile = file; // 실제 File 객체
+  editChallenge.value.cdImage = file.name; // 파일명
+};
 
 // 수정 / 추가 api
 const submit = async () => {
@@ -144,27 +150,60 @@ const submit = async () => {
     'cdImage',
   ];
 
-  const isEmpty = fields.some((key) => !editChallenge.value[key]);
+  // 0은 허용, null/''만 막기
+  const isEmpty = fields.some(
+    (key) =>
+      editChallenge.value[key] === null || editChallenge.value[key] === ''
+  );
   if (isEmpty) {
     alert('모든 항목을 입력해주세요.');
     return;
   }
 
   console.log('json', editChallenge.value);
+
+  const formData = new FormData();
+
+  const challengeData = {
+    cdId: editChallenge.value.cdId,
+    cdName: editChallenge.value.cdName,
+    cdType: editChallenge.value.cdType,
+    cdGoal: editChallenge.value.cdGoal,
+    cdUnit: editChallenge.value.cdUnit,
+    cdReward: editChallenge.value.cdReward,
+    xp: editChallenge.value.xp,
+    tier: editChallenge.value.tier,
+    cdImage: editChallenge.value.cdImage,
+  };
+  formData.append(
+    'challenge',
+    new Blob([JSON.stringify(challengeData)], { type: 'application/json' })
+  );
+  if (editChallenge.value.cdImageFile) {
+    formData.append('file', editChallenge.value.cdImageFile);
+  }
+  console.log('file check', editChallenge.value.cdImageFile);
+  console.log('json', editChallenge.value);
+
+  console.log([...formData]);
   let res = null;
   if (editChallenge.value.cdId) {
-    res = await putChallenge(editChallenge.value);
+    res = await putChallenge(formData);
     console.log('수정');
   } else {
-    res = await postChallenge(editChallenge.value);
+    res = await postChallenge(formData);
   }
   if (res && res.status === 200) {
     // 성공하면 저장 완료 모달 열기
     successDialog.value = true;
     formDialog.value = false;
+    const refresh = await getChallenge();
+    setIdType(refresh.data);
+    setChallengeUnit(refresh.data);
   } else {
     alert('저장에 실패했습니다. 다시 시도해주세요.');
   }
+  deleteDialog.value = false;
 };
 
 // 삭제 api
@@ -223,12 +262,25 @@ const remove = async () => {
         />
 
         <v-card-subtitle>이미지</v-card-subtitle>
-        <v-text-field v-model="editChallenge.cdImage" />
-        <!-- <v-card-subtitle>이미지</v-card-subtitle>
         <v-file-input
-          v-model="editChallenge.cdImage"
-          clearable
-        /> -->
+          accept="image/*"
+          label="이미지 선택"
+          @change="onFileChange"
+        />
+
+        <v-card-subtitle>포인트 보상</v-card-subtitle>
+        <v-text-field
+          type="number"
+          v-model.number="editChallenge.cdReward"
+          placeholder="포인트 보상 입력"
+        />
+
+        <v-card-subtitle>경험치</v-card-subtitle>
+        <v-text-field
+          type="number"
+          v-model.number="editChallenge.xp"
+          placeholder="획득 경험치 입력"
+        />
 
         <v-card-actions>
           <v-spacer />
