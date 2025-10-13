@@ -290,6 +290,17 @@ const goToMain = () => {
     padding: 0 !important; /* 내부 padding 제거 */
   }
 }
+.btn_submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 350px;
+  height: 50px;
+  margin-top: 15px;
+
+  background-color: #ffe864;
+  border-radius: 10px;
+}
 .content_result {
   display: flex;
   gap: 75px;
