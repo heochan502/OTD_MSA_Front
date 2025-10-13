@@ -23,6 +23,22 @@ export const updatePost = async (postId, payload) => {
 
 export const deletePost = (postId) => axios.delete(`${BASE}/${postId}`);
 
+export const putLifeUserProfile = (imgPath) => {
+  return axios
+    .put(`${BASE}/modify/profile`, { imgPath })
+    .catch((e) => e.response);
+};
+
+export const updateLifeNickname = (nickname) => {
+  return axios
+    .put(`${BASE}/modify/nickname`, { nickname })
+    .catch((e) => e.response);
+};
+
+export const updateLifeUserInfo = (jsonBody) => {
+  return axios.put(`${BASE}/modify/info`, jsonBody).catch((e) => e.response);
+};
+
 export const toggleLike = (postId, userId) =>
   axios.post(`${BASE}/${postId}/likes/toggle`, null, {
     headers: {

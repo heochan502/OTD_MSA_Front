@@ -1,14 +1,18 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { checkNicknameDuplicate, updateNickname } from '@/services/user/userService'; 
-import { useAuthenticationStore } from '@/stores/user/authentication'; 
+import {
+  checkNicknameDuplicate,
+  updateNickname,
+} from '@/services/user/userService';
+import { useAuthenticationStore } from '@/stores/user/authentication';
 import AlertModal from '@/components/user/Modal.vue';
+import { updateLifeNickname } from '@/services/community/postService';
 
 const router = useRouter();
-const authStore = useAuthenticationStore(); 
+const authStore = useAuthenticationStore();
 const additionalInfo = ref({
-  nickname: ''
+  nickname: '',
 });
 
 const validation = ref({
@@ -17,8 +21,8 @@ const validation = ref({
     isValid: false,
     message: '',
     checked: false,
-    available: false
-  }
+    available: false,
+  },
 });
 
 const isLoading = ref(false);
@@ -30,7 +34,7 @@ const modalState = ref({
   title: '',
   message: '',
   type: 'info',
-  onConfirm: null
+  onConfirm: null,
 });
 
 const showModal = (title, message, type = 'info', onConfirm = null) => {
@@ -39,7 +43,7 @@ const showModal = (title, message, type = 'info', onConfirm = null) => {
     title,
     message,
     type,
-    onConfirm
+    onConfirm,
   };
 };
 
@@ -90,11 +94,11 @@ const checkNicknameDuplicateAction = async () => {
   try {
     isLoading.value = true;
     const response = await checkNicknameDuplicate(nickname);
-    
+
     validation.value.nickname.checked = true;
     const isAvailable = response.data.result?.isAvailable;
     validation.value.nickname.available = isAvailable;
-    
+
     if (isAvailable) {
       validation.value.nickname.message = '사용 가능한 닉네임입니다.';
       validation.value.nickname.isValid = true;
@@ -126,17 +130,23 @@ const resetNicknameValidation = () => {
 
 // 닉네임 변경 제출
 const handleSubmit = async () => {
-  if (!validation.value.nickname.isValid || !validation.value.nickname.available) {
+  if (
+    !validation.value.nickname.isValid ||
+    !validation.value.nickname.available
+  ) {
     return;
   }
 
   try {
     isLoading.value = true;
     const response = await updateNickname(additionalInfo.value.nickname);
-    
+
     if (response.data?.success) {
       authStore.state.signedUser.nickName = additionalInfo.value.nickname;
-      
+      const lifeNickName = await updateLifeNickname(
+        additionalInfo.value.nickname
+      );
+      console.log('lifenick', lifeNickName);
       showModal(
         '변경 완료',
         '닉네임이 성공적으로 변경되었습니다.',
@@ -148,22 +158,19 @@ const handleSubmit = async () => {
     }
   } catch (error) {
     console.error('닉네임 변경 오류:', error);
-    
+
     let errorMessage = '닉네임 변경에 실패했습니다.';
-    
+
     if (error.response) {
       const status = error.response.status;
       const message = error.response.data?.message;
-      
+
       if (status === 400) {
         errorMessage = message || '잘못된 요청입니다.';
       } else if (status === 401) {
         errorMessage = '로그인이 필요합니다.';
-        showModal(
-          '인증 오류',
-          errorMessage,
-          'warning',
-          () => router.push('/user/login')
+        showModal('인증 오류', errorMessage, 'warning', () =>
+          router.push('/user/login')
         );
         return;
       } else if (status === 409) {
@@ -174,7 +181,7 @@ const handleSubmit = async () => {
     } else if (error.request) {
       errorMessage = '서버와 통신할 수 없습니다.';
     }
-    
+
     showModal('변경 실패', errorMessage, 'error');
   } finally {
     isLoading.value = false;
@@ -191,8 +198,18 @@ const handleBack = () => {
   <div class="nickname-edit-container">
     <div class="header">
       <button @click="handleBack" class="back-button" aria-label="뒤로가기">
-        <svg class="icon-md" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        <svg
+          class="icon-md"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 19l-7-7 7-7"
+          />
         </svg>
       </button>
       <h2 class="page-title">닉네임 수정</h2>
@@ -203,7 +220,7 @@ const handleBack = () => {
       <span class="error-icon">⚠</span>
       {{ generalError }}
     </div>
-    
+
     <div class="form-container">
       <div class="form-group">
         <label for="nickname">닉네임</label>
@@ -215,8 +232,12 @@ const handleBack = () => {
             v-model="additionalInfo.nickname"
             :class="{
               'input-field-with-button': true,
-              error: validation.nickname.touched && !validation.nickname.isValid,
-              success: validation.nickname.touched && validation.nickname.isValid && validation.nickname.available,
+              error:
+                validation.nickname.touched && !validation.nickname.isValid,
+              success:
+                validation.nickname.touched &&
+                validation.nickname.isValid &&
+                validation.nickname.available,
             }"
             @blur="validation.nickname.touched = true"
             @input="resetNicknameValidation"
@@ -236,20 +257,24 @@ const handleBack = () => {
           v-if="validation.nickname.touched && validation.nickname.message"
           :class="[
             'field-message',
-            validation.nickname.isValid && validation.nickname.available ? 'field-success' : 'field-error',
+            validation.nickname.isValid && validation.nickname.available
+              ? 'field-success'
+              : 'field-error',
           ]"
         >
           {{ validation.nickname.message }}
         </div>
-        <p class="field-hint">
-          닉네임은 2자 이상 10자 이하로 입력해주세요.
-        </p>
+        <p class="field-hint">닉네임은 2자 이상 10자 이하로 입력해주세요.</p>
       </div>
 
-      <button 
-        type="button" 
+      <button
+        type="button"
         class="btn-submit"
-        :disabled="!validation.nickname.isValid || !validation.nickname.available || isLoading"
+        :disabled="
+          !validation.nickname.isValid ||
+          !validation.nickname.available ||
+          isLoading
+        "
         @click="handleSubmit"
       >
         <span v-if="isLoading">변경중...</span>
@@ -384,7 +409,7 @@ label {
 
 .input-field-with-button:focus {
   outline: none;
-  border-color: #4CAF50;
+  border-color: #4caf50;
   box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
 }
 
@@ -394,7 +419,7 @@ label {
 }
 
 .input-field-with-button.success {
-  border-color: #4CAF50;
+  border-color: #4caf50;
   background-color: #f0fdf4;
 }
 
@@ -437,7 +462,7 @@ label {
 }
 
 .field-success {
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .field-hint {
