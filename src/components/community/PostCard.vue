@@ -17,12 +17,13 @@ const router = useRouter();
 
 const getId = (p) => p?.[props.idKey] ?? p?.id ?? p?.postId;
 const getAuthor = (p) =>
-  p?.author ?? p?.writer?.nickName ?? p?.nickName ?? '익명';
+  p?.nickName ?? p?.author ?? p?.writer?.nickName ?? '익명';
 const getTime = (p) => p?.time ?? p?.createdAt ?? '';
 const getLikes = (p) => p?.likes ?? p?.like ?? p?.likeCount ?? 0;
 const getComments = (p) => p?.comments ?? p?.commentCount ?? 0;
 const getThumb = (p) =>
   props.thumbnailUrl || p?.[props.thumbnailKey] || p?.thumb || p?.image;
+console.log('📌 PostCard post prop:', props.post);
 
 function open() {
   if (!props.clickable) return emit('click', props.post);
