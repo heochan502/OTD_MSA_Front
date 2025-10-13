@@ -370,6 +370,7 @@ onMounted(() => {
   color: #fff;
   font-weight: 800;
   font-size: 15px;
+  margin-bottom: 15px;
 }
 .cta:disabled {
   opacity: 0.5;
