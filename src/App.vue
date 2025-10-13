@@ -1,7 +1,7 @@
 <script setup>
-import AdminLayout from "./views/admin/AdminLayout.vue";
-import Layout from "./views/layout/layout.vue";
-import { useRoute, useRouter } from "vue-router";
+import AdminLayout from './views/admin/AdminLayout.vue';
+import Layout from './views/layout/layout.vue';
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
 </script>

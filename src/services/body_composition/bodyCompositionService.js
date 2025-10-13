@@ -14,7 +14,7 @@ export const getSeries = (jsonBody) => {
 
 // 체성분 기록 목록 조회(조회 범위 설정 시 사용)
 export const getList = (params) => {
-  return axios.get(`${BASE_URL}/list `, { params }).catch((e) => e.response);
+  return axios.get(`${BASE_URL}/list`, { params }).catch((e) => e.response);
 };
 
 // metirics 조회

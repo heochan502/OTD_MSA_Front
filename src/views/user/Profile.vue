@@ -1,6 +1,11 @@
 <script setup>
 import { useRouter } from 'vue-router';
-import { logout, getPointHistory, patchUserProfilePic, deleteUserProfilePic } from '@/services/user/userService';
+import {
+  logout,
+  getPointHistory,
+  patchUserProfilePic,
+  deleteUserProfilePic,
+} from '@/services/user/userService';
 import { getSelectedAll } from '@/services/user/userService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { ref, computed, onMounted } from 'vue';
@@ -14,7 +19,7 @@ const showPhotoModal = ref(false);
 const selectedFile = ref(null);
 const previewUrl = ref(null);
 
-
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 const defaultProfile = '/otd/image/main/default-profile.png';
 
 const profileImage = computed(() => {
@@ -33,7 +38,6 @@ const userInfo = computed(() => {
     userId: authStore.state.signedUser?.userId,
   };
 });
-
 
 // 프로필 사진 클릭 시 모달 열기
 const openPhotoModal = (e) => {
@@ -74,20 +78,19 @@ const saveProfilePhoto = async () => {
   try {
     const formData = new FormData();
     formData.append('pic', selectedFile.value);
-    
+
     console.log('프로필 사진 업로드 시작...');
-    
+
     const response = await patchUserProfilePic(formData);
-    
+
     console.log('업로드 응답:', response);
-    
+
     if (response.data && response.data.result) {
       const fileName = response.data.result;
-      const imagePath = `http://localhost:8082/profile/${userInfo.value.userId}/${fileName}`;
-       
+      const imagePath = `${BASE_URL}/profile/${userInfo.value.userId}/${fileName}`;
+
       authStore.state.signedUser.pic = imagePath;
-      
-      
+
       alert('프로필 사진이 변경되었습니다.');
       closePhotoModal();
     }
@@ -104,17 +107,16 @@ const deleteProfilePhoto = async () => {
 
   try {
     console.log('프로필 사진 삭제 시작...');
-    
-    const response = await deleteUserProfilePic();
-    
-    console.log('삭제 응답:', response);
-    
-    if (response.status === 200) {
 
+    const response = await deleteUserProfilePic();
+
+    console.log('삭제 응답:', response);
+
+    if (response.status === 200) {
       authStore.state.signedUser.pic = null;
-      
+
       console.log('프로필 사진이 삭제되었습니다.');
-      
+
       alert('프로필 사진이 삭제되었습니다.');
       closePhotoModal();
     }
@@ -130,64 +132,61 @@ const fetchRecentHistory = async () => {
   try {
     loadingHistory.value = true;
     const userId = authStore.state.signedUser?.userId;
-    
+
     if (!userId || userId === 0) {
       return;
     }
 
     const response = await getPointHistory(userId);
     const pointHistory = response.data.result?.pointHistory || [];
-    
+
     const missionResponse = await getSelectedAll();
-    
+
     const result = missionResponse.data.result;
     let missionComplete = [];
     let dailyMission = [];
-    
+
     if (result) {
       missionComplete = result.missionComplete || [];
       dailyMission = result.dailyMission || [];
-    
     } else if (missionResponse.data.missionComplete) {
       missionComplete = missionResponse.data.missionComplete || [];
       dailyMission = missionResponse.data.dailyMission || [];
-
     }
-    
+
     const combined = [];
-    
+
     // 포인트 히스토리 추가
-    pointHistory.forEach(item => {
+    pointHistory.forEach((item) => {
       combined.push({
         type: 'point',
         reason: formatPointReason(item.reason),
         point: item.point,
         createdAt: item.createdAt,
-        id: `point-${item.chId}`
+        id: `point-${item.chId}`,
       });
     });
-    
+
     // 미션 완료 내역 추가
-    missionComplete.forEach(mission => {
-      const missionDetail = dailyMission.find(m => String(m.cdId) === String(mission.cdId));
+    missionComplete.forEach((mission) => {
+      const missionDetail = dailyMission.find(
+        (m) => String(m.cdId) === String(mission.cdId)
+      );
       if (missionDetail) {
         combined.push({
           type: 'mission',
           reason: '✅ 일일 미션: ' + missionDetail.cdName,
           point: missionDetail.cdReward,
           createdAt: mission.successDate,
-          id: `mission-${mission.cdId}-${mission.successDate}`
+          id: `mission-${mission.cdId}-${mission.successDate}`,
         });
       }
     });
-    
-    
+
     // 최신순 정렬 후 최근 2개만
     recentHistory.value = combined
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, 2);
-      
-      
   } catch (err) {
     console.error('포인트 히스토리 조회 실패 백켰나?쿠키있나?:', err);
     console.error('에러 응답:', err.response?.data);
@@ -199,7 +198,7 @@ const fetchRecentHistory = async () => {
 
 const formatPointReason = (reason) => {
   if (!reason) return '';
-  
+
   if (reason.includes('1위_reward_')) {
     return '🥇 1위 보상: ' + reason.split('1위_reward_')[1];
   }
@@ -227,17 +226,20 @@ const formatPointReason = (reason) => {
   if (reason.includes('personal_')) {
     return '💪 개인 챌린지: ' + reason.split('personal_')[1];
   }
-  
+
   return reason;
 };
 
 const formatDate = (dateString) => {
   const date = new Date(dateString);
-  return date.toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).replace(/\. /g, '.').replace(/\.$/, '');
+  return date
+    .toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    })
+    .replace(/\. /g, '.')
+    .replace(/\.$/, '');
 };
 
 const logoutAccount = async () => {
@@ -275,20 +277,20 @@ onMounted(() => {
         </div>
       </router-link>
     </div>
-    
+
     <!-- 활동 섹션 -->
     <div class="activity-section">
       <h3 class="section-title">나의 활동</h3>
       <div class="activity-grid">
-        <router-link to="/user/posts" class="activity-item">
+        <router-link to="/user/post" class="activity-item">
           <div class="activity-icon">📝</div>
           <span>내가 쓴 게시글</span>
         </router-link>
-        <router-link to="/user/likes" class="activity-item">
+        <router-link to="/user/like" class="activity-item">
           <div class="activity-icon">❤️</div>
           <span>나의 좋아요</span>
         </router-link>
-        <router-link to="/user/comments" class="activity-item">
+        <router-link to="/user/comment" class="activity-item">
           <div class="activity-icon">💬</div>
           <span>내가 쓴 댓글</span>
         </router-link>
@@ -305,23 +307,21 @@ onMounted(() => {
       <!-- 포인트 기록 -->
       <div class="point-history">
         <h4 class="history-title">최근 포인트 기록</h4>
-        
+
         <!-- 로딩 중 -->
-        <div v-if="loadingHistory" class="loading-message">
-          로딩 중...
-        </div>
-        
+        <div v-if="loadingHistory" class="loading-message">로딩 중...</div>
+
         <!-- 포인트 기록이 있을 때 -->
         <div v-else-if="recentHistory.length > 0">
-          <div 
-            v-for="item in recentHistory" 
-            :key="item.id" 
+          <div
+            v-for="item in recentHistory"
+            :key="item.id"
             class="history-item"
           >
             <div class="history-description">{{ item.reason }}</div>
             <div class="history-right">
-              <div 
-                class="history-points" 
+              <div
+                class="history-points"
                 :class="item.point > 0 ? 'positive' : 'negative'"
               >
                 {{ item.point > 0 ? '+' : '' }}{{ item.point }}P
@@ -330,11 +330,9 @@ onMounted(() => {
             </div>
           </div>
         </div>
-        
+
         <!-- 포인트 기록이 없을 때 -->
-        <div v-else class="no-history">
-          아직 포인트 기록이 없습니다
-        </div>
+        <div v-else class="no-history">아직 포인트 기록이 없습니다</div>
 
         <router-link to="/user/pointhistory" class="view-all-link">
           모든 포인트 기록 보기 →
@@ -373,7 +371,9 @@ onMounted(() => {
 
     <!-- 약관 및 로그아웃 섹션 -->
     <div class="footer-section">
-      <router-link to="/user/term" class="footer-link">약관 및 보안</router-link>
+      <router-link to="/user/term" class="footer-link"
+        >약관 및 보안</router-link
+      >
       <button
         class="logout-btn"
         @click="logoutAccount"
@@ -390,15 +390,12 @@ onMounted(() => {
           <h3>프로필 사진 변경</h3>
           <button class="close-btn" @click="closePhotoModal">✕</button>
         </div>
-        
+
         <div class="modal-body">
           <div class="photo-preview">
-            <img 
-              :src="previewUrl || profileImage" 
-              :alt="userInfo.nickName"
-            />
+            <img :src="previewUrl || profileImage" :alt="userInfo.nickName" />
           </div>
-          
+
           <input
             id="photoInput"
             type="file"
@@ -406,26 +403,22 @@ onMounted(() => {
             style="display: none"
             @change="handleFileSelect"
           />
-          
+
           <button class="select-photo-btn" @click="triggerFileInput">
             📁 사진 선택
           </button>
 
-          <button 
-            v-if="userInfo.pic" 
-            class="delete-photo-btn" 
+          <button
+            v-if="userInfo.pic"
+            class="delete-photo-btn"
             @click="deleteProfilePhoto"
           >
             🗑️ 사진 삭제
           </button>
-          
+
           <div class="modal-actions">
-            <button class="cancel-btn" @click="closePhotoModal">
-              취소
-            </button>
-            <button class="save-btn" @click="saveProfilePhoto">
-              저장
-            </button>
+            <button class="cancel-btn" @click="closePhotoModal">취소</button>
+            <button class="save-btn" @click="saveProfilePhoto">저장</button>
           </div>
         </div>
       </div>
@@ -470,7 +463,7 @@ onMounted(() => {
 
       &:hover {
         transform: scale(1.05);
-        
+
         .photo-overlay {
           opacity: 1;
         }
@@ -516,11 +509,11 @@ onMounted(() => {
       }
       .arrow {
         position: absolute;
-      right: 20px;
-      top: 50%; 
-      font-size: 24px;
-      color: #ccc; 
-    }
+        right: 20px;
+        top: 50%;
+        font-size: 24px;
+        color: #ccc;
+      }
     }
   }
 }
@@ -617,7 +610,6 @@ onMounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-
 
     img {
       width: 100%;
@@ -960,11 +952,11 @@ onMounted(() => {
   }
 }
 .arrowpic {
-      position: absolute; 
-      right: 20px; 
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 24px; 
-      color: #ccc; 
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 24px;
+  color: #ccc;
 }
 </style>

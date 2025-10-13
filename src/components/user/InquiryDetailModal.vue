@@ -45,10 +45,16 @@ const getStatusText = (status) => {
     'PENDING': '대기중',
     'COMPLETED': '완료'
   };
+
+  if (status === '대기 중' || status === '완료') {
+    return status;
+  }
+
   return statusTextMap[status] || '알 수 없음';
 };
 
 const formatDate = (dateString) => {
+  if (!dateString) return '';
   const date = new Date(dateString);
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -114,6 +120,29 @@ onMounted(() => {
           <div class="content-box">
             {{ inquiry.content }}
           </div>
+        </div>
+
+        <!-- 답변 섹션 추가 -->
+        <div v-if="inquiry.reply" class="reply-section">
+          <div class="reply-header">
+            <h4>관리자 답변</h4>
+            <div class="reply-info">
+              <span v-if="inquiry.adminName" class="admin-name">
+                {{ inquiry.adminName }}
+              </span>
+              <span v-if="inquiry.replyAt" class="reply-date">
+                {{ formatDate(inquiry.replyAt) }}
+              </span>
+            </div>
+          </div>
+          <div class="reply-content">
+            {{ inquiry.reply }}
+          </div>
+        </div>
+
+        <!-- 답변 대기 메시지 -->
+        <div v-else class="no-reply">
+          <p>아직 답변이 등록되지 않았습니다.</p>
         </div>
       </div>
 
@@ -266,7 +295,74 @@ onMounted(() => {
   word-break: break-word;
   line-height: 1.6;
   color: #374151;
-  min-height: 150px;
+  min-height: 100px;
+}
+
+/* 답변 섹션 스타일 */
+.reply-section {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #eff6ff;
+  border-radius: 8px;
+  border: 2px solid #3b82f6;
+}
+
+.reply-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #bfdbfe;
+}
+
+.reply-header h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e40af;
+  margin: 0;
+}
+
+.reply-info {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.admin-name {
+  color: #3b82f6;
+  font-weight: 500;
+}
+
+.reply-date {
+  color: #6b7280;
+}
+
+.reply-content {
+  background-color: white;
+  padding: 15px;
+  border-radius: 6px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.6;
+  color: #1f2937;
+  min-height: 80px;
+}
+
+/* 답변 대기 메시지 */
+.no-reply {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #f3f4f6;
+  border-radius: 8px;
+  text-align: center;
+  border: 1px dashed #d1d5db;
+}
+
+.no-reply p {
+  color: #6b7280;
+  margin: 0;
+  font-size: 14px;
 }
 
 .modal-footer {
@@ -305,6 +401,17 @@ onMounted(() => {
   
   .detail-row label {
     min-width: auto;
+  }
+
+  .reply-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .reply-info {
+    flex-direction: column;
+    gap: 4px;
   }
 }
 </style>

@@ -49,9 +49,13 @@ const getStatusText = (status) => {
     'PENDING': '대기중',
     'COMPLETED': '완료'
   };
+
+  if (status === '대기 중' || status === '완료') {
+    return status;
+  }
+
   return statusTextMap[status] || '알 수 없음';
 };
-
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   const year = date.getFullYear();

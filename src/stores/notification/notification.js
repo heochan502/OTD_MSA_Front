@@ -1,57 +1,65 @@
+// src/stores/notification/notification.js
 import { defineStore } from 'pinia';
-import { LocalNotificationProvider } from '@/services/notification/provider.local';
-// import { HttpNotificationProvider } from '@/services/notifications/provider.http'
-
-const provider = LocalNotificationProvider;
-// const provider = HttpNotificationProvider
-
-function timeAgo(iso) {
-  const s = (Date.now() - new Date(iso).getTime()) / 1000;
-  if (s < 60) return `${Math.floor(s)}초 전`;
-  const m = s / 60;
-  if (m < 60) return `${Math.floor(m)}분 전`;
-  const h = m / 60;
-  if (h < 24) return `${Math.floor(h)}시간 전`;
-  return `${Math.floor(h / 24)}일 전`;
-}
+import {
+  fetchNotifications,
+  markRead,
+  markAllRead,
+} from '@/services/notification/notificationService';
+import { useAuthenticationStore } from '@/stores/user/authentication';
 
 export const useNotificationStore = defineStore('notification', {
   state: () => ({
     items: [],
     loading: false,
+    error: null,
   }),
   getters: {
-    unreadCount: (s) => s.items.filter((i) => !i.read).length,
-    timeAgo: () => timeAgo,
+    unreadCount: (s) => s.items.filter((it) => !it.read).length,
   },
   actions: {
     async load() {
       this.loading = true;
+      this.error = null;
       try {
-        this.items = await provider.list();
+        const auth = useAuthenticationStore();
+        const userId = auth.state.signedUser?.userId;
+        const { data } = await fetchNotifications(userId);
+        // createdAt/created_at 대응
+        this.items = (data || []).map((it) => ({
+          ...it,
+          createdAt: it.createdAt || it.created_at,
+          read:
+            typeof it.read === 'boolean'
+              ? it.read
+              : it.is_read === 1 || it.is_read === true || it.is_read === '1',
+        }));
+      } catch (e) {
+        this.error = e;
+        this.items = [];
       } finally {
         this.loading = false;
       }
     },
     async markRead(id) {
-      await provider.markRead(id);
-      const i = this.items.find((x) => x.id === id);
-      if (i) i.read = true;
+      try {
+        const auth = useAuthenticationStore();
+        const userId = auth.state.signedUser?.userId;
+        await markRead(id, userId);
+        const idx = this.items.findIndex((it) => it.id === id);
+        if (idx !== -1) this.items[idx] = { ...this.items[idx], read: true };
+      } catch (e) {
+        console.error(e);
+      }
     },
     async markAllRead() {
-      await provider.markAllRead();
-      this.items.forEach((i) => (i.read = true));
-    },
-    async pushDemo(body = '운동 잘했다!') {
-      await provider.pushMock?.({
-        title: '커뮤니티',
-        body,
-        category: 'comment',
-        createdAt: new Date().toISOString(),
-        read: false,
-      });
-      await this.load();
+      try {
+        const auth = useAuthenticationStore();
+        const userId = auth.state.signedUser?.userId;
+        await markAllRead(userId);
+        this.items = this.items.map((it) => ({ ...it, read: true }));
+      } catch (e) {
+        console.error(e);
+      }
     },
   },
-  persist: true,
 });

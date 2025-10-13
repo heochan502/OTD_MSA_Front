@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch } from "vue";
 
 const props = defineProps({
   show: Boolean,
@@ -7,33 +7,33 @@ const props = defineProps({
   message: String,
   type: {
     type: String,
-    default: 'info' // 'info', 'success', 'error', 'warning', 'confirm'
+    default: "info", // 'info', 'success', 'error', 'warning', 'confirm'
   },
   confirmText: {
     type: String,
-    default: '확인'
+    default: "확인",
   },
   cancelText: {
     type: String,
-    default: '취소'
-  }
+    default: "취소",
+  },
 });
 
-const emit = defineEmits(['close', 'confirm', 'cancel']);
+const emit = defineEmits(["close", "confirm", "cancel"]);
 
 const handleConfirm = () => {
-  emit('confirm');
-  emit('close');
+  emit("confirm");
+  emit("close");
 };
 
 const handleCancel = () => {
-  emit('cancel');
-  emit('close');
+  emit("cancel");
+  emit("close");
 };
 
 const handleOverlayClick = () => {
-  if (props.type !== 'confirm') {
-    emit('close');
+  if (props.type !== "confirm") {
+    emit("close");
   }
 };
 </script>
@@ -44,23 +44,23 @@ const handleOverlayClick = () => {
       <div class="modal-container" @click.stop>
         <div class="modal-header">
           <h3 class="modal-title">{{ title }}</h3>
-          <button 
-            v-if="type !== 'confirm'" 
-            class="close-btn" 
+          <button
+            v-if="type !== 'confirm'"
+            class="close-btn"
             @click="emit('close')"
           >
             ✕
           </button>
         </div>
-        
+
         <div class="modal-body">
-          <div 
-            class="icon-container" 
+          <div
+            class="icon-container"
             :class="{
               'icon-success': type === 'success',
               'icon-error': type === 'error',
               'icon-warning': type === 'warning',
-              'icon-confirm': type === 'confirm'
+              'icon-confirm': type === 'confirm',
             }"
           >
             <span v-if="type === 'success'" class="icon">✓</span>
@@ -69,20 +69,20 @@ const handleOverlayClick = () => {
             <span v-else-if="type === 'confirm'" class="icon">?</span>
             <span v-else class="icon">ℹ</span>
           </div>
-          
+
           <p class="modal-message">{{ message }}</p>
         </div>
-        
+
         <div class="modal-footer">
-          <button 
-            v-if="type === 'confirm'" 
-            class="btn btn-cancel" 
+          <button
+            v-if="type === 'confirm'"
+            class="btn btn-cancel"
             @click="handleCancel"
           >
             {{ cancelText }}
           </button>
-          <button 
-            class="btn btn-confirm" 
+          <button
+            class="btn btn-confirm"
             :class="{ 'btn-full': type !== 'confirm' }"
             @click="handleConfirm"
           >

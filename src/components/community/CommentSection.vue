@@ -1,14 +1,15 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useCommentsStore } from '@/stores/community/comments';
-import { useAuthenticationStore } from '@/stores/user/authentication'; // ✅ 내 로그인 정보 가져오기
+import { useAuthenticationStore } from '@/stores/user/authentication';
+import { formatYMDHM } from '@/stores/community/date';
 
 const props = defineProps({
   postId: { type: [String, Number], required: true },
 });
 
 const commentsStore = useCommentsStore();
-const auth = useAuthenticationStore(); // ✅ 로그인 정보
+const auth = useAuthenticationStore();
 
 const loading = computed(() => commentsStore.isLoading(props.postId));
 const comments = computed(() => commentsStore.list(props.postId));
@@ -21,16 +22,18 @@ const meNickName = computed(() => auth.state.signedUser?.nickName || '회원');
 async function submit() {
   const v = input.value.trim();
   if (!v) return;
-  // ✅ 닉네임 포함해서 댓글 생성 요청
-  await commentsStore.add(props.postId, v, {
-    nickName: meNickName.value,
-    rolesCsv: 'ROLE_USER',
-  });
+
+  // ✅ 닉네임/권한 옵션을 store로 전달 (헤더에 실리도록)
+  await commentsStore.add(props.postId, v, meNickName.value);
   input.value = '';
 }
+
 async function removeOne(c) {
   await commentsStore.remove(c.commentId, props.postId);
 }
+
+// ✅ 내가 쓴 댓글 판별 (userId 기준)
+const isMine = (c) => Number(c.userId) === Number(meUserId.value);
 
 onMounted(() => {
   commentsStore.load(props.postId);
@@ -58,14 +61,15 @@ onMounted(() => {
       <div v-for="c in comments" :key="c.commentId" class="item">
         <div class="meta">
           <span class="avatar" aria-hidden="true"></span>
-          <!-- ✅ 닉네임 표시 로직 -->
           <span class="nick">
-            {{
-              c.authorNickname || (c.userId === meUserId ? meNickName : '익명')
-            }}
+            {{ c.nickName || '익명' }}
           </span>
-          <span class="time">{{ c.createdAt }}</span>
-          <button class="del" @click="removeOne(c)">삭제</button>
+          <span class="time">{{ formatYMDHM(c.createdAt) }}</span>
+
+          <!-- ✅ 내 댓글일 때만 보이도록 -->
+          <button v-if="isMine(c)" class="del" @click="removeOne(c)">
+            삭제
+          </button>
         </div>
         <p class="content">{{ c.content }}</p>
       </div>

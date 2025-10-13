@@ -1,13 +1,16 @@
 <script setup>
-import { reactive, computed, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
-import { useExerciseRecordStore } from '@/stores/exercise/exerciseRecordStore';
-import effortLevels from '@/assets/effortLevels.json';
-import { calcDuration } from '@/utils/exerciseUtils';
-import { saveExerciseRecord } from '@/services/exercise/exerciseService';
+import { reactive, computed, ref, watch } from "vue";
+import { useRouter } from "vue-router";
+import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
+import effortLevels from "@/assets/effortLevels.json";
+import { calcDuration } from "@/utils/exerciseUtils";
+import { saveExerciseRecord } from "@/services/exercise/exerciseService";
+import Modal from "@/components/user/Modal.vue";
 
 const router = useRouter();
 const exerciseRecordStore = useExerciseRecordStore();
+const saveDialog = ref(false);
+const successDialog = ref(false);
 
 const state = reactive({
   form: {
@@ -24,9 +27,9 @@ const state = reactive({
 
 // 운동강도 색상
 const color = computed(() => {
-  if (state.form.effortLevel < 4) return '#00D5DF';
-  if (state.form.effortLevel < 7) return '#FFB996';
-  return '#FF8282';
+  if (state.form.effortLevel < 4) return "#00D5DF";
+  if (state.form.effortLevel < 7) return "#FFB996";
+  return "#FF8282";
 });
 
 // 선택된 운동
@@ -58,7 +61,6 @@ const exerciseDuration = computed(() => {
 // 칼로리 소모량
 const calcKcal = computed(() => {
   // MET × 체중(kg) × 운동시간(분) × 0.0175 = 소모 칼로리(kcal).
-
   const met = selectedExercise.value ? selectedExercise.value.exerciseMet : 0;
   const bodyWeight = 68;
   const duration = exerciseDuration.value;
@@ -70,17 +72,14 @@ const calcKcal = computed(() => {
 watch(calcKcal, (val) => {
   state.form.activityKcal = Math.ceil(val);
 });
+// 계산된 운동 시간
 watch(exerciseDuration, (val) => {
   state.form.duration = Math.ceil(val);
 });
-const saveDialog = ref(false);
+
 // @click
 // 기록 저장
 const confirmYes = async () => {
-  const convertDatetimeFormat = (datetimeStr) => {
-    return datetimeStr.replace('T', ' ');
-  };
-
   const jsonBody = {
     exerciseId: state.form.exerciseId,
     startAt: state.form.startAt,
@@ -94,14 +93,16 @@ const confirmYes = async () => {
 
   const res = await saveExerciseRecord(jsonBody);
   if (res === undefined || res.status !== 200) {
-    alert('에러발생');
+    alert("에러발생");
     return;
   }
-  router.push('/exercise/main');
-};
 
-const cancelYes = () => {
-  router.push('/exercise/main');
+  saveDialog.value = false;
+  successDialog.value = true;
+};
+const goToMain = () => {
+  successDialog.value = false;
+  router.push("/exercise/main");
 };
 </script>
 
@@ -226,18 +227,26 @@ const cancelYes = () => {
     </div>
   </div>
 
-  <!-- 모달창 -->
-  <v-dialog v-model="saveDialog" max-width="380" min-height="100">
-    <v-card>
-      <v-card-title> 저장 </v-card-title>
-      <v-card-text>운동 기록을 저장하시겠습니까?</v-card-text>
-      <v-card-actions>
-        <v-spacer />
-        <v-btn color="dark" text @click="saveDialog = false">취소</v-btn>
-        <v-btn color="primary" text @click="confirmYes">저장</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+  <!-- 저장 확인용 모달 -->
+  <Modal
+    :show="saveDialog"
+    type="confirm"
+    title="운동 기록 저장"
+    message="운동 기록을 저장하시겠습니까?"
+    confirmText="저장"
+    cancelText="취소"
+    @close="saveDialog = false"
+    @confirm="confirmYes"
+  />
+  <!-- 저장 성공 모달 -->
+  <Modal
+    :show="successDialog"
+    type="success"
+    title="저장 완료"
+    message="운동 기록이 성공적으로 저장되었습니다!"
+    confirmText="확인"
+    @confirm="goToMain"
+  />
 </template>
 
 <style lang="scss" scoped>
@@ -266,11 +275,11 @@ const cancelYes = () => {
   padding: 20px 20px;
 
   // <input> datetime-local 아이콘 변경
-  input[type='datetime-local']::-webkit-calendar-picker-indicator {
+  input[type="datetime-local"]::-webkit-calendar-picker-indicator {
     color: rgba(0, 0, 0, 0);
     opacity: 1;
     display: block;
-    background: url('/image/exercise/calender.png') center/80% no-repeat;
+    background: url("/image/exercise/calender.png") center/80% no-repeat;
     width: 15px;
     height: 15px;
 
@@ -285,16 +294,5 @@ const cancelYes = () => {
   display: flex;
   gap: 75px;
   width: 310px;
-}
-.btn_submit {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  max-width: 350px;
-  height: 50px;
-  margin-top: 15px;
-
-  background-color: #ffe864;
-  border-radius: 10px;
 }
 </style>
