@@ -1,6 +1,6 @@
 <script setup>
 import { computed, reactive, onMounted, ref } from 'vue';
-import { usePointShop } from '@/components/pointshop/usePointsShop.js';
+import { usePointShop } from '@/components/pointshop/usePointshop.js';
 import PointItemCard from '@/components/pointshop/PointItemCard.vue';
 import PointShopStatus from '@/components/pointshop/PointUserStatus.vue';
 
