@@ -3,7 +3,7 @@ import axios from '@/services/httpRequester';
 const BASE_URL = 'admin';
 const LIFE_URL = 'admin2';
 
-// 대쉬보드
+// 대시보드
 export const getUserData = () => {
   return axios.get(`${BASE_URL}/dash/user`).catch((e) => e.response);
 };
@@ -128,7 +128,6 @@ export const getUserExerciseRecord = (userId) => {
   return axios.get(`${LIFE_URL}/exercise/${userId}`).catch((e) => e.response);
 };
 
-
 export const getCommunity = () => {
   return axios.get(`${LIFE_URL}/community`).catch((e) => e.response);
 };
@@ -152,10 +151,6 @@ export const deleteFile = (fileId) => {
     .delete(`${LIFE_URL}/community/file/${fileId}`)
     .catch((e) => e.response);
 };
-// 대시보드
-export const getTodayLogin = () => {
-  return axios.get(`${BASE_URL}/dashboard/login`).catch((e) => e.response);
-};
 // 게시글 대시보드
 export const getCommunityData = () => {
   return axios.get(`${LIFE_URL}/dash/community`).catch((e) => e.response);
@@ -178,10 +173,10 @@ export const getCommunityStatistics = () => {
 
 // 운동기록 통계
 export const getExerciseStatistics = () => {
-    return axios.get(`${LIFE_URL}/statistics/exercise`).catch((e) => e.response);
-}
+  return axios.get(`${LIFE_URL}/statistics/exercise`).catch((e) => e.response);
+};
 
 // 식단기록 통계
 export const getMealStatistics = () => {
-      return axios.get(`${LIFE_URL}/statistics/meal`).catch((e) => e.response);
-}
+  return axios.get(`${LIFE_URL}/statistics/meal`).catch((e) => e.response);
+};

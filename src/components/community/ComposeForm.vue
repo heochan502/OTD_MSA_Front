@@ -228,10 +228,13 @@ async function submit() {
   submitting.value = true;
   errorMsg.value = '';
   try {
+    const myProfile = auth.state.signedUser;
     const payload = {
       categoryKey: props.category,
       title: title.value.trim(),
       content: content.value.trim(),
+      nickName: myProfile.nickName,
+      profile: myProfile.pic,
     };
 
     let postId;

@@ -11,7 +11,7 @@ import ImageLightbox from '@/components/community/ImageLightbox.vue';
 const route = useRoute();
 const router = useRouter();
 const store = useCommunityStore();
-
+const auth = useAuthenticationStore();
 const routeId = computed(() => String(route.params.id));
 const post = computed(() => store.getById(routeId.value));
 
