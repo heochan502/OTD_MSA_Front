@@ -38,7 +38,6 @@ const formatDate = (date) => {
   return `${y}-${m}-${d}`;
 };
 
-// ✅ Vuetify v-data-table headers
 const headers = [
   { title: 'ID', key: 'userId' },
   { title: '닉네임 (이름)', key: 'nickName' },

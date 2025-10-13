@@ -89,6 +89,39 @@ const logoutAccount = async () => {
           />
           <span>포인트 관리</span>
         </router-link>
+
+        <router-link
+          to="/admin/exercise"
+          class="menu-item otd-subtitle-1 d-flex"
+          active-class="active"
+          :class="{ active: route.path.startsWith('/admin/exercise') }"
+        >
+          <img
+            class="icon"
+            :src="
+              route.path.startsWith('/admin/exercise')
+                ? '/otd/image/admin_page/exercise-s.png'
+                : '/otd/image/admin_page/exercise.png'
+            "
+          />
+          <span>운동 종목 관리</span>
+        </router-link>
+        <router-link
+          to="/admin/meal"
+          class="menu-item otd-subtitle-1 d-flex"
+          active-class="active"
+          :class="{ active: route.path.startsWith('/admin/meal') }"
+        >
+          <img
+            class="icon"
+            :src="
+              route.path.startsWith('/admin/meal')
+                ? '/otd/image/admin_page/food-s.png'
+                : '/otd/image/admin_page/food.png'
+            "
+          />
+          <span>음식 정보 관리</span>
+        </router-link>
         <router-link
           to="/admin/community"
           class="menu-item otd-subtitle-1 d-flex"

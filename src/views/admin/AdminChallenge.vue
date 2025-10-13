@@ -330,28 +330,36 @@ const remove = async () => {
 
     <v-card>
       <v-card-title class="d-flex justify-space-between align-center">
-        <span class="title">챌린지 관리</span>
-        <v-select
-          v-model="selectedType"
-          :items="typeOptions"
-          item-title="title"
-          item-value="value"
-          label="타입 선택"
-          density="compact"
-          variant="outlined"
-          style="max-width: 200px"
-        />
-        <v-text-field
-          v-model="search"
-          label="검색"
-          prepend-inner-icon="mdi-magnify"
-          density="compact"
-          hide-details
-          single-line
-          variant="outlined"
-          style="max-width: 250px"
-        />
-        <v-btn @Click="toForm()">챌린지 추가하기</v-btn>
+        <!-- 왼쪽 -->
+        <div class="d-flex align-center" style="gap: 12px">
+          <span class="title">챌린지 관리</span>
+          <v-select
+            v-model="selectedType"
+            :items="typeOptions"
+            item-title="title"
+            item-value="value"
+            label="타입 선택"
+            density="compact"
+            hide-details
+            variant="outlined"
+            style="max-width: 200px"
+          />
+        </div>
+
+        <!-- 오른쪽 -->
+        <div class="d-flex align-center search" style="gap: 12px">
+          <v-text-field
+            v-model="search"
+            label="검색 (챌린지명)"
+            prepend-inner-icon="mdi-magnify"
+            density="compact"
+            hide-details
+            single-line
+            variant="outlined"
+            style="max-width: 450px"
+          />
+          <v-btn class="btn" @click="toForm()">➕ 챌린지 추가</v-btn>
+        </div>
       </v-card-title>
 
       <v-data-table
@@ -427,13 +435,18 @@ const remove = async () => {
   border-radius: 12px;
   overflow: hidden;
 }
+.search {
+  width: 50%;
+}
+.btn {
+  min-width: 150px;
+}
 .styled-table {
   :deep(td),
   :deep(th) {
     // text-align: center !important;
     vertical-align: middle;
   }
-
   thead {
     background-color: #393e46;
     color: #fff;
