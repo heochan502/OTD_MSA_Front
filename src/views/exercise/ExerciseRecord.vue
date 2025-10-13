@@ -26,7 +26,7 @@ onMounted(async () => {
     return;
   }
   exerciseRecordStore.records = res.data;
-  exerciseRecordStore.monthlyRecords = res.data;
+  // exerciseRecordStore.monthlyRecords = res.data;
 });
 
 onUnmounted(() => {
@@ -55,7 +55,7 @@ const calcMonthlyAvgDuration = computed(() => {
   if (countRecord.value === 0) {
     return 0;
   }
-  return totalDuration / countRecord.value;
+  return Math.ceil(totalDuration / countRecord.value);
 });
 
 // 전체 킬로칼로리
@@ -75,7 +75,7 @@ const calcMonthlyAvgKcal = computed(() => {
     return 0;
   }
   const totalKcal = calcMonthlyTotalKcal?.value ?? 0;
-  return totalKcal / countRecord.value;
+  return Math.ceil(totalKcal / countRecord.value);
 });
 </script>
 
@@ -102,13 +102,13 @@ const calcMonthlyAvgKcal = computed(() => {
           </tr>
           <tr>
             <td>시간</td>
-            <td>{{ calcMonthlyTotalDuration }}</td>
-            <td>{{ calcMonthlyAvgDuration }}</td>
+            <td>{{ calcMonthlyTotalDuration.toLocaleString() }}</td>
+            <td>{{ calcMonthlyAvgDuration.toLocaleString() }}</td>
           </tr>
           <tr>
             <td>킬로칼로리</td>
-            <td>{{ calcMonthlyTotalKcal }}</td>
-            <td>{{ calcMonthlyAvgKcal }}</td>
+            <td>{{ calcMonthlyTotalKcal.toLocaleString() }}</td>
+            <td>{{ calcMonthlyAvgKcal.toLocaleString() }}</td>
           </tr>
         </tbody>
       </table>

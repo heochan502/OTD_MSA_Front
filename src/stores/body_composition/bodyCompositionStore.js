@@ -12,6 +12,11 @@ export const useBodyCompositionStore = defineStore("bodyComposition", {
     metrics: [],
     selectionMetrics: [],
     filterList: [],
+    bmiInfo: {
+      height: null,
+      weight: null,
+      bmi: null,
+    },
   }),
 
   actions: {

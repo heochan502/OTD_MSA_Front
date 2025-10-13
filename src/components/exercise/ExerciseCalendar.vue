@@ -21,12 +21,20 @@ const calendarAttributes = computed(() => {
   });
 
   // 기록 있는 날짜 점 표시
-  const recordDates = exerciseRecordStore.monthlyRecords.map((r) =>
-    formatDateISO(new Date(r.startAt))
-  );
+  // const recordDates = new Set(exerciseRecordStore.monthlyRecords.map((r) =>
+  //   formatDateISO(new Date(r.startAt))
+  // ));
+  const recordDates = computed(() => {
+    return new Set(
+      exerciseRecordStore.monthlyRecords.map((r) =>
+        formatDateISO(new Date(r.startAt))
+      )
+    );
+  });
+  console.log(recordDates.value);
   attrs.push({
     key: "records",
-    dates: recordDates,
+    dates: Array.from(recordDates.value).map((d) => new Date(d)),
     dot: { color: "teal", radius: 3 },
   });
 
@@ -140,11 +148,6 @@ const onDidMove = async (pages) => {
   padding: 4px;
   border-radius: 50%;
   transition: background-color 0.2s ease;
-
-  // &:hover {
-  //   background-color: rgba(0, 0, 0, 0.05); /* hover 효과 */
-  //   cursor: pointer;
-  // }
 }
 
 .v-calendar__day:hover {

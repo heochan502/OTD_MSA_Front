@@ -152,6 +152,7 @@ const applyDate = (date) => {
 .calendar_icon {
   width: 18px;
   height: 18px;
+  cursor: pointer;
 }
 .btn_now {
   cursor: pointer;
