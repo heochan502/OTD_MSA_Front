@@ -206,25 +206,26 @@ onMounted(() => {
   /* position: fixed; */
   position: absolute ;
   inset: 0;
-  /* display: flex;
   align-self: center;
+  /* display: flex;
+  
   justify-self: center; */
-  width: 391px;
-  height: 809px;
+  width: 100%;
+  height: 100%;
   background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(1px);
   z-index: 999;
-  border-radius: 60px;
+  border-radius: 0 0 0px 0px;
 }
 
 /* 핸들바 */
 .sheet-handle {
-  width: 134px;
+  width: 100%;
   height: 7px;
   padding-top: 0px;
   border-radius: 999px;
   background: #000000;
-  margin: 6px auto 12px;
+  margin: 10px auto 12px;
 }
 
 /* 가운데 카드(시트) */
@@ -233,10 +234,11 @@ onMounted(() => {
   /* direction : column-reverse; */
   /* justify-self: end; */
   position: absolute ;
-  width: 391px;
+  bottom: 0;
+  width: 100%;
     margin-top: 239px;
   background: #fff;
-  border-radius: 0px 0px 60px 60px;
+  border-radius: 0px 0px 0px 0px;
   box-shadow: 0 0px 10px rgba(0, 0, 0, 0.1);
   padding: 5px 18px 16px;
   z-index: 1000;
