@@ -34,7 +34,7 @@ export const getMyDay = async (mealDay) => {
 
 export const getSummaryDay = async (mealDay) => {
   const res = await axios.get(`${path}/summary/day`, { params: { mealDay } });
-  // console.log("식단 하루 요약 데이터", res.data);
+  console.log("식단 하루 요약 데이터", res.data);
   return res.data;
 };
 
