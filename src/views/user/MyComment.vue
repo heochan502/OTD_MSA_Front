@@ -225,7 +225,7 @@ onMounted(() => {
     .stat-value {
       font-size: 20px;
       font-weight: bold;
-      color: #4caf50;
+      color: #393E46;
     }
   }
 }
@@ -354,7 +354,7 @@ onMounted(() => {
   }
 
   .explore-btn {
-    background: #4caf50;
+    background: #393E46;
     color: white;
     border: none;
     padding: 12px 24px;
@@ -365,7 +365,7 @@ onMounted(() => {
     transition: all 0.2s ease;
 
     &:hover {
-      background: #45a049;
+      background: #303030;
       transform: translateY(-1px);
     }
   }
