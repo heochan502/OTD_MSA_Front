@@ -134,7 +134,11 @@ function openFromDetail(i) {
 
       <div class="meta">
         <div class="meta-left">
-          <span class="avatar" aria-hidden="true"></span>
+          <span
+            class="avatar"
+            :style="{ backgroundImage: `url(${post.avatar})` }"
+            aria-hidden="true"
+          ></span>
           <span class="otd-body-3" style="font-weight: 600">{{
             post.author
           }}</span>
@@ -233,9 +237,8 @@ function openFromDetail(i) {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #eaeaea;
+  background: #eaeaea center/cover no-repeat; /* 이미지 표시 */
 }
-
 /* === 이미지 레이아웃 === */
 .images.grid {
   display: grid;

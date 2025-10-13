@@ -17,7 +17,7 @@ const router = useRouter();
 
 const getId = (p) => p?.[props.idKey] ?? p?.id ?? p?.postId;
 const getAuthor = (p) =>
-  p?.nickName ?? p?.author ?? p?.writer?.nickName ?? '익명';
+  p?.author ?? p?.writer?.nickName ?? p?.nickName ?? '익명';
 const getTime = (p) => p?.time ?? p?.createdAt ?? '';
 const getLikes = (p) => p?.likes ?? p?.like ?? p?.likeCount ?? 0;
 const getComments = (p) => p?.comments ?? p?.commentCount ?? 0;
@@ -47,14 +47,17 @@ function open() {
   >
     <!-- 왼쪽 상단: 작성자/시간 -->
     <header class="meta">
-      <span class="avatar" aria-hidden="true"></span>
+      <span
+        class="avatar"
+        :style="{ backgroundImage: `url(${post.avatar})` }"
+        aria-hidden="true"
+      ></span>
       <div class="meta-text">
         <div class="author">{{ getAuthor(post) }}</div>
         <div class="time" v-if="getTime(post)">{{ getTime(post) }}</div>
         <div class="badge" v-if="badge">{{ badge }}</div>
       </div>
     </header>
-
     <!-- 왼쪽 중단: 제목 -->
     <h3 class="title">{{ post.title }}</h3>
 
@@ -141,7 +144,7 @@ function open() {
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: #eaeaea;
+  background: #eaeaea center/cover no-repeat; /* 이미지 표시 */
   box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.06);
 }
 .meta-text {
