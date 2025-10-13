@@ -160,8 +160,7 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
 }
-.otd-logo {
-  width: 40%;  
+.otd-logo {  
   max-width: 500px;
 }
 .hearder-text {

@@ -8,6 +8,8 @@ defineProps({
   navigateOnClick: { type: Boolean, default: true },
   idKey: { type: String, default: 'postId' },
   routeParamKey: { type: String, default: 'id' },
+  showBadge: { type: Boolean, default: true }, // ✅ 추가: 뱃지 표시 여부
+  badgeText: { type: String, default: '인기' }, // ✅ 추가: 문구 변경 가능
 });
 defineEmits(['click-post']);
 </script>
@@ -21,7 +23,7 @@ defineEmits(['click-post']);
     >
       <PostCard
         :post="item"
-        badge="인기"
+        :badge="showBadge ? badgeText : ''"
         :clickable="navigateOnClick"
         :route-name="detailRouteName"
         :route-param-key="routeParamKey"
@@ -41,8 +43,6 @@ defineEmits(['click-post']);
   gap: 12px;
   padding: 2px;
 }
-
-/* 각 게시글 카드 컨테이너 */
 .item-card {
   background: #fff;
   border-radius: 14px;
@@ -51,8 +51,6 @@ defineEmits(['click-post']);
   overflow: hidden;
   padding: 10px;
 }
-
-/* PostCard 자체 그림자 제거(패널 안에서 과하지 않도록) */
 :deep(.post-card),
 :deep(.card),
 :deep(.v-card) {
@@ -62,43 +60,31 @@ defineEmits(['click-post']);
   margin: 0 !important;
   padding: 0 !important;
 }
-
-/* ▼▼ 닉네임 영역 확장 & 세로 쪼개짐 방지 ▼▼
-   - PostCard 내부에 author 영역이 있다면 클래스를 아래처럼 붙이는 걸 권장:
-     .post-header .author-area .author-name
-   - 그래도 안 먹으면 범용 selector([class*="author"], [class*="name"])가 커버 */
 :deep(.post-header) {
   display: grid;
-  grid-template-columns: 44px 1fr 72px; /* avatar | author block | 우측버튼 */
+  grid-template-columns: 44px 1fr 72px;
   align-items: center;
   column-gap: 10px;
 }
-
-:deep(.author-area),          /* 권장 클래스 */
-:deep([class*="author"]) {
-  /* 범용: 'author' 포함 클래스 */
+:deep(.author-area),
+:deep([class*='author']) {
   display: flex;
   align-items: center;
   gap: 8px;
-  min-width: 160px; /* 닉네임 영역 넉넉히 */
+  min-width: 160px;
 }
-
-:deep(.author-name),          /* 권장 클래스 */
-:deep([class*="name"]) {
-  /* 범용: 'name' 포함 클래스 */
+:deep(.author-name),
+:deep([class*='name']) {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 180px; /* 필요 시 조정 */
+  max-width: 180px;
   font-weight: 700;
 }
-
-/* 타임스탬프가 이름 아래로 밀리지 않도록 줄바꿈 억제 */
 :deep(.post-meta),
 :deep([class*='date']) {
   white-space: nowrap;
 }
-
 .empty {
   text-align: center;
   color: #9a9a9a;
