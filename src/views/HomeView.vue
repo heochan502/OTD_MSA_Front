@@ -90,7 +90,9 @@ const weeklySettlementDialog = ref(false);
 const challengeStore = useChallengeStore();
 const bodyCompositionStore = useBodyCompositionStore();
 
-const selectedField = ref(bodyCompositionStore.selectionMetrics[0]?.metricCode || null);
+const selectedField = ref(
+  bodyCompositionStore.selectionMetrics[0]?.metricCode || null
+);
 
 onMounted(async () => {
   console.log("여기");
@@ -99,7 +101,7 @@ onMounted(async () => {
   console.log("state", state.monthlySettlementLog, state.weeklySettlementLog);
   const challenge = await getMyChallenge();
   console.log("챌린지 : ", challenge);
-  challengeInfo.value = challenge?.data || null ;
+  challengeInfo.value = challenge?.data || null;
   console.log("homechallenge", challengeInfo.value);
 
   if (state.monthlySettlementLog.length > 0) {
@@ -135,7 +137,7 @@ const fetchMonthlySettlement = async (date) => {
       settlementDate: formatDate(new Date(year, month - 1, 1)),
     };
     const res = await getChallengeSettlementLog(params);
-    console.log("res :",  res);
+    console.log("res :", res);
     state.monthlySettlementLog = res?.data || null;
     challengeStore.state.lastMonthCheck = monthlyKey;
   }
@@ -477,8 +479,8 @@ const fetchLastestBodyComposition = async () => {
 }
 
 .health-card {
-  width: 350px;
-  height: 87px;
+  max-width: 350px;
+
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);

@@ -58,7 +58,6 @@ const exerciseDuration = computed(() => {
 // 칼로리 소모량
 const calcKcal = computed(() => {
   // MET × 체중(kg) × 운동시간(분) × 0.0175 = 소모 칼로리(kcal).
-
   const met = selectedExercise.value ? selectedExercise.value.exerciseMet : 0;
   const bodyWeight = 68;
   const duration = exerciseDuration.value;
@@ -74,6 +73,7 @@ watch(calcKcal, (val) => {
 watch(exerciseDuration, (val) => {
   state.form.duration = Math.ceil(val);
 });
+
 const saveDialog = ref(false);
 // @click
 // 기록 저장
