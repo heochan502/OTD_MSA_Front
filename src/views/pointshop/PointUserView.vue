@@ -2,7 +2,7 @@
 import PointUserStatus from '@/components/pointshop/PointUserStatus.vue';
 import PointUserPurchaseHistoryView from '@/components/pointshop/PointPurchaseHistoryTable.vue';
 import { onMounted } from 'vue';
-import { usePointShop } from '@/components/pointshop/usePointShop.js';
+import { usePointShop } from '@/components/pointshop/usePointsShop.js';
 
 const {
   userPoints,
