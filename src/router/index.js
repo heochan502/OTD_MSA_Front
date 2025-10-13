@@ -40,9 +40,8 @@ import MyLike from '@/views/user/MyLike.vue';
 import MyComment from '@/views/user/MyComment.vue';
 
 // 포인트샵
-import PointShopListView from '@/views/point/PointShopListView.vue';
-import PointUserPurchaseHistoryView from '@/views/point/PointUserPurchaseHistoryView.vue';
-import PointUserView from '@/views/point/PointUserView.vue';
+import PointShopListView from '@/views/pointshop/PointShopListView.vue';
+import PointUserView from '@/views/pointshop/PointUserView.vue';
 import PointPurchaseHistoryTable from '@/components/pointshop/PointPurchaseHistoryTable.vue';
 
 //식단

@@ -14,13 +14,16 @@ const selectedPost = ref(null);
 const detailDialog = ref(false);
 const deleteDialog = ref(false);
 
-const BASE_URL = import.meta.env.VITE_BASE_URL; // 환경변수
+const BASE_URL = import.meta.env.VITE_BASE_URL;
+
+// 📌 페이지네이션 상태
+const page = ref(1);
+const itemsPerPage = 6; // 한 페이지당 게시글 개수 (2열 × 3행 = 6개)
 
 // 목록 로드
 const loadPosts = async () => {
   const res = await getCommunity();
   posts.value = res.data;
-  console.log(res.data);
 };
 onMounted(loadPosts);
 
@@ -35,6 +38,15 @@ const filteredPosts = computed(() => {
   if (selectedCategory.value === '전체') return posts.value;
   return posts.value.filter((p) => p.category === selectedCategory.value);
 });
+
+// ✅ 페이지네이션 적용
+const paginatedPosts = computed(() => {
+  const start = (page.value - 1) * itemsPerPage;
+  return filteredPosts.value.slice(start, start + itemsPerPage);
+});
+const pageCount = computed(() =>
+  Math.ceil(filteredPosts.value.length / itemsPerPage)
+);
 
 // 상세보기
 const openDetail = async (postId) => {
@@ -80,7 +92,12 @@ const confirmDelete = async () => {
         :key="cat"
         class="mx-1"
         :color="selectedCategory === cat ? 'primary' : 'grey-lighten-2'"
-        @click="selectedCategory = cat"
+        @click="
+          () => {
+            selectedCategory = cat;
+            page = 1;
+          }
+        "
       >
         {{ cat }}
       </v-btn>
@@ -89,18 +106,20 @@ const confirmDelete = async () => {
     <!-- 게시글 카드 리스트 -->
     <v-row>
       <v-col
-        v-for="post in filteredPosts"
+        v-for="post in paginatedPosts"
         :key="post.postId"
         cols="12"
         sm="6"
-        md="4"
+        md="6"
       >
         <v-card class="post-card" elevation="3">
           <v-card-title>
             <span class="category">[{{ post.category }}]</span>
             <span class="title">{{ post.title }}</span>
           </v-card-title>
-          <v-card-subtitle>작성자: {{ post.userId }}</v-card-subtitle>
+          <v-card-subtitle>
+            작성자: {{ post.nickName ?? post.userId }}
+          </v-card-subtitle>
           <v-card-text>
             <p>
               <strong>상태:</strong>
@@ -126,6 +145,11 @@ const confirmDelete = async () => {
       </v-col>
     </v-row>
 
+    <!-- ✅ 페이지네이션 -->
+    <div class="d-flex justify-center mt-4">
+      <v-pagination v-model="page" :length="pageCount" :total-visible="5" />
+    </div>
+
     <!-- 상세보기 다이얼로그 -->
     <v-dialog v-model="detailDialog" max-width="700">
       <v-card v-if="selectedPost">
@@ -133,8 +157,10 @@ const confirmDelete = async () => {
         <v-card-subtitle>[{{ selectedPost.category }}]</v-card-subtitle>
 
         <v-card-text>
-          <!-- 기본 정보 -->
-          <p><strong>작성자:</strong> {{ selectedPost.userId }}</p>
+          <p>
+            <strong>작성자:</strong>
+            {{ selectedPost.nickName ?? selectedPost.userId }}
+          </p>
           <p><strong>내용:</strong> {{ selectedPost.content }}</p>
           <p>
             <strong>상태:</strong>

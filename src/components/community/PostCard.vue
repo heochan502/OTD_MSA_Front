@@ -1,5 +1,6 @@
 <script setup>
 import { useRouter } from 'vue-router';
+import axios from '@/services/httpRequester';
 
 const props = defineProps({
   post: { type: Object, required: true },
@@ -12,8 +13,9 @@ const props = defineProps({
   thumbnailUrl: { type: String, default: '' },
 });
 
-const emit = defineEmits(['click']);
 const router = useRouter();
+const DEFAULT_AVATAR =
+  import.meta.env.BASE_URL + 'image/main/default-profile.png';
 
 const getId = (p) => p?.[props.idKey] ?? p?.id ?? p?.postId;
 const getAuthor = (p) =>
@@ -21,11 +23,37 @@ const getAuthor = (p) =>
 const getTime = (p) => p?.time ?? p?.createdAt ?? '';
 const getLikes = (p) => p?.likes ?? p?.like ?? p?.likeCount ?? 0;
 const getComments = (p) => p?.comments ?? p?.commentCount ?? 0;
+
+function toAbsUrl(p) {
+  if (!p) return '';
+  if (/^https?:\/\//i.test(p)) return p;
+  try {
+    return new URL(p, axios.defaults.baseURL).toString();
+  } catch {
+    // 상대경로가 public 자산인 경우
+    return p.startsWith('/')
+      ? p
+      : import.meta.env.BASE_URL + p.replace(/^\.?\//, '');
+  }
+}
+
+function getAvatar(p) {
+  const raw =
+    p?.avatar ||
+    p?.profileImage ||
+    p?.profileImg ||
+    p?.memberImg ||
+    p?.writer?.memberImg ||
+    '';
+  const url = raw ? toAbsUrl(raw) : DEFAULT_AVATAR;
+  return url || DEFAULT_AVATAR;
+}
+
 const getThumb = (p) =>
   props.thumbnailUrl || p?.[props.thumbnailKey] || p?.thumb || p?.image;
 
 function open() {
-  if (!props.clickable) return emit('click', props.post);
+  if (!props.clickable) return;
   const id = getId(props.post);
   if (!id) return;
   router.push({
@@ -44,9 +72,14 @@ function open() {
     @keydown.enter.prevent="open"
     @keydown.space.prevent="open"
   >
-    <!-- 왼쪽 상단: 작성자/시간 -->
     <header class="meta">
-      <span class="avatar" aria-hidden="true"></span>
+      <div class="avatar">
+        <img
+          :src="getAvatar(post)"
+          alt=""
+          @error="(e) => (e.target.src = DEFAULT_AVATAR)"
+        />
+      </div>
       <div class="meta-text">
         <div class="author">{{ getAuthor(post) }}</div>
         <div class="time" v-if="getTime(post)">{{ getTime(post) }}</div>
@@ -54,43 +87,38 @@ function open() {
       </div>
     </header>
 
-    <!-- 왼쪽 중단: 제목 -->
     <h3 class="title">{{ post.title }}</h3>
 
-    <!-- 왼쪽 하단: 통계 -->
     <footer class="stats">
       <span class="like">❤️ {{ getLikes(post) }}</span>
       <span class="comment">💬 {{ getComments(post) }}</span>
     </footer>
 
-    <!-- 오른쪽: 썸네일(없으면 아예 안보임) -->
     <figure class="thumb" v-if="getThumb(post)">
       <img :src="getThumb(post)" alt="" loading="lazy" decoding="async" />
     </figure>
-    <!-- 🔽 skeleton 제거 -->
   </article>
 </template>
 
 <style scoped>
-/* 카드 컨테이너: 폭/오버플로우 방지 */
 .card {
   box-sizing: border-box;
   width: 100%;
   max-width: 100%;
-  overflow: hidden; /* 🔹 튀어나오는 것 방지 */
+  overflow: hidden;
   background: #fff;
   border-radius: 14px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
-  padding: 10px 12px; /* 🔹 패딩 축소 */
-  margin: 8px 10px; /* 🔹 카드 간격 축소 */
+  padding: 10px 12px;
+  margin: 8px 10px;
   display: grid;
-  grid-template-columns: 1fr 92px; /* 🔹 썸네일 너비 축소 (기존 112px) */
+  grid-template-columns: 1fr 92px;
   grid-template-rows: auto auto auto;
   grid-template-areas:
     'meta   thumb'
     'title  thumb'
     'stats  thumb';
-  column-gap: 10px; /* 🔹 간격 축소 */
+  column-gap: 10px;
   row-gap: 6px;
   cursor: pointer;
   outline: none;
@@ -99,37 +127,6 @@ function open() {
   box-shadow: 0 0 0 2px var(--color-primary, #26c6da);
 }
 
-/* 오른쪽 썸네일: 높이 축소 + 알약형 유지 */
-.thumb {
-  grid-area: thumb;
-  align-self: center;
-  width: 100%;
-  height: 78px; /* 🔹 세로 확 줄임 (필요시 72~84px로 조절) */
-  border-radius: 14px; /* 알약 */
-  overflow: hidden;
-  background: #f1f1f1;
-}
-.thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-.thumb--skeleton {
-  background: linear-gradient(90deg, #f1f1f1 0%, #ececec 50%, #f1f1f1 100%);
-  background-size: 200% 100%;
-  animation: shine 1.2s infinite linear;
-}
-@keyframes shine {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
-}
-
-/* 메타: 닉네임 아래 시간 줄바꿈 유지, 폰트/간격 축소 */
 .meta {
   grid-area: meta;
   display: flex;
@@ -140,9 +137,16 @@ function open() {
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: #eaeaea;
-  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  background: #f1f1f1;
 }
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .meta-text {
   flex: 1;
   min-width: 0;
@@ -154,11 +158,9 @@ function open() {
   line-height: 1.2;
 }
 .time {
-  display: block;
   margin-top: 1px;
   font-size: 10.5px;
   color: #8b8b8b;
-  line-height: 1.1;
 }
 .badge {
   display: inline-block;
@@ -171,22 +173,19 @@ function open() {
   font-weight: 700;
 }
 
-/* 제목: 두 줄까지만 표시 (높이 제어) */
 .title {
   grid-area: title;
-  font-size: 14px; /* 🔹 살짝 축소 */
+  font-size: 14px;
   font-weight: 700;
   color: #2b2b2b;
   line-height: 1.28;
   margin-right: 2px;
-
-  display: -webkit-box; /* 🔹 라인 클램프 */
+  display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* 통계: 폰트/간격 축소 */
 .stats {
   grid-area: stats;
   display: flex;
@@ -195,7 +194,22 @@ function open() {
   font-size: 11.5px;
 }
 
-/* 살짝 넓은 화면에서만 약간 키우기 */
+.thumb {
+  grid-area: thumb;
+  align-self: center;
+  width: 100%;
+  height: 78px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #f1f1f1;
+}
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 @media (min-width: 420px) {
   .card {
     grid-template-columns: 1fr 104px;
