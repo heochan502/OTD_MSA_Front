@@ -489,7 +489,7 @@ watch(
 );
 
 watch(() => accountInfo.upw, (newValue) => {
-  passwordCriteria.value.length = newValue.length >= 8;
+  passwordCriteria.value.length = newValue.length >= 10;
   passwordCriteria.value.letter = /[a-z]/i.test(newValue);
   passwordCriteria.value.number = /[0-9]/.test(newValue);
   passwordCriteria.value.specialChar = /[!@#$%^&*(),.?":{}|<>_\-+=[\]\\\/'`~;]/.test(newValue);
@@ -781,13 +781,13 @@ const submitJoin = async () => {
 
 const loadTermsContent = (type) => {
   const term = termsMap.value.get(type);
-  if (term) {
-    modalContent.value = {
-      title: term.title,
-      content: term.content
-    };
-    showTermsModal.value = type;
-  }
+  if (!term) return;
+  
+  modalContent.value = {
+    title: term.title || '',
+    content: term.content || ''
+  };
+  showTermsModal.value = type;
 };
 </script>
 
@@ -884,8 +884,7 @@ const loadTermsContent = (type) => {
                   type="checkbox"
                   :checked="isTermsChecked(term.termsId)"
                   @change="handleAgreementChange(term.termsId)"
-                  class="checkbox"
-                />
+                  />
                 <span>
                   {{ term.isRequired ? '(필수)' : '(선택)' }} 
                   {{ term.title }}
