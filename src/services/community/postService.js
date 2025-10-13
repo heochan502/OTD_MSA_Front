@@ -48,3 +48,9 @@ export const uploadPostFiles = async (postId, files, memberId) => {
 };
 
 export const fetchPostFiles = (postId) => axios.get(`${BASE}/${postId}/files`);
+
+export const putLifeUserProfile = (imgPath) => {
+  return axios
+    .put(`${BASE}/modify/profile`, { imgPath })
+    .catch((e) => e.response);
+};
