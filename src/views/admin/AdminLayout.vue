@@ -99,8 +99,8 @@ const logoutAccount = async () => {
             class="icon"
             :src="
               route.path.startsWith('/admin/community')
-                ? '/otd/image/admin_page/point-s.png'
-                : '/otd/image/admin_page/point.png'
+                ? '/otd/image/admin_page/community-s.png'
+                : '/otd/image/admin_page/community.png'
             "
           />
           <span>게시글 관리</span>
