@@ -23,31 +23,46 @@ const meNickName = computed(() => auth.state.signedUser?.nickName || '회원');
 const DEFAULT_AVATAR =
   import.meta.env.BASE_URL + 'image/main/default-profile.png';
 
-// ✅ 절대경로 변환 함수 (게이트웨이 환경 포함)
 function toAbsUrl(p) {
   if (!p) return '';
+  // 1) data URI/절대 URL은 그대로
+  if (/^data:image\//i.test(p)) return p;
   if (/^https?:\/\//i.test(p)) return p;
+  if (p.startsWith('//')) return window.location.protocol + p;
+  // 2) 프론트 정적 경로는 프론트 BASE_URL과 합치기 (백엔드 baseURL로 바꾸지 말기)
+  if (p.startsWith('/otd/')) return p;
+  // 3) 그 외 상대경로는 백엔드 baseURL 기준으로 절대화
   try {
     return new URL(p, axios.defaults.baseURL).toString();
   } catch {
-    return p.startsWith('/')
-      ? p
-      : import.meta.env.BASE_URL + p.replace(/^\.?\//, '');
+    const clean = p.replace(/^\.?\//, '');
+    return '/' + clean;
   }
 }
 
+/** ✅ 댓글 프로필도 profile 우선 */
 function getAvatar(c) {
   const raw =
-    c.memberImg || c.profileImg || c.profileImage || c.writer?.memberImg || '';
-  const url = raw ? toAbsUrl(raw) : DEFAULT_AVATAR;
+    c.profile || // 백엔드에서 내려주는 댓글 작성자 프로필(있다면)
+    c.profilePath ||
+    c.profileUrl ||
+    c.memberImg ||
+    c.profileImg ||
+    c.profileImage ||
+    c.writer?.memberImg ||
+    '';
+  // 기본 이미지 경로는 프론트 자산으로 고정
+  if (!raw) return DEFAULT_AVATAR;
+  if (raw.startsWith('/otd/')) return raw;
+  const url = toAbsUrl(raw);
+
   return url || DEFAULT_AVATAR;
 }
 
 async function submit() {
   const v = input.value.trim();
   if (!v) return;
-
-  await commentsStore.add(props.postId, v, meNickName.value);
+  await commentsStore.add(props.postId, v, { nickName: meNickName.value });
   input.value = '';
 }
 
@@ -55,7 +70,6 @@ async function removeOne(c) {
   await commentsStore.remove(c.commentId, props.postId);
 }
 
-// ✅ 내가 쓴 댓글 판별
 const isMine = (c) => Number(c.userId) === Number(meUserId.value);
 
 onMounted(() => {
@@ -86,7 +100,7 @@ onMounted(() => {
           <div class="avatar">
             <img
               :src="getAvatar(c)"
-              alt=""
+              alt="프로필"
               @error="(e) => (e.target.src = DEFAULT_AVATAR)"
             />
           </div>

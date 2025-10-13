@@ -12,7 +12,8 @@ import { useAuthenticationStore } from '@/stores/user/authentication';
 const route = useRoute();
 const router = useRouter();
 const store = useCommunityStore();
-const auth = useAuthenticationStore();
+useAuthenticationStore();
+
 const routeId = computed(() => String(route.params.id));
 const post = computed(() => store.getById(routeId.value));
 
@@ -23,12 +24,13 @@ const imagesError = ref('');
 const DEFAULT_AVATAR =
   import.meta.env.BASE_URL + 'image/main/default-profile.png';
 
-/** ⬇️ 캐시 버스트를 1회만 생성 */
 const cacheBust = ref(`?v=${Date.now()}`);
 
-/** ⬇️ 상대경로(/static/...)를 게이트웨이 절대경로로 변환 */
 function toAbsUrl(p) {
   if (!p) return '';
+  if (p.startsWith('/otd/image/main/')) {
+    return import.meta.env.BASE_URL + p.replace(/^\//, '');
+  }
   if (/^https?:\/\//i.test(p)) return p;
   try {
     return new URL(p, axios.defaults.baseURL).toString();
@@ -38,14 +40,23 @@ function toAbsUrl(p) {
       : import.meta.env.BASE_URL + p.replace(/^\.?\//, '');
   }
 }
+
 const avatarUrl = computed(() => {
   const p = post.value;
   const raw =
     p?.avatar ||
+    p?.profile ||
+    p?.profilePath ||
+    p?.profileUrl ||
+    p?.profile_url ||
     p?.profileImage ||
     p?.profileImg ||
+    p?.profile_img ||
+    p?.profile_img_path ||
     p?.memberImg ||
+    p?.member_img ||
     p?.writer?.memberImg ||
+    p?.writer?.member_img ||
     '';
   const url = raw ? toAbsUrl(raw) : DEFAULT_AVATAR;
   return url || DEFAULT_AVATAR;
@@ -64,7 +75,6 @@ async function loadImages(id) {
       name: f.fileName ?? '',
     }));
   } catch (e) {
-    console.error('[PostDetail] loadImages error:', e?.response?.data || e);
     imagesError.value =
       e?.response?.data?.message || e?.message || '이미지 로딩 실패';
   } finally {
@@ -81,12 +91,41 @@ watch(routeId, async (id) => {
   await loadImages(id);
 });
 
-/** 좋아요 */
+const modalOpen = ref(false);
+const modalTitle = ref('');
+const modalMessage = ref('');
+const modalMode = ref('info');
+let onConfirm = null;
+
+function showInfo(msg, title = '안내') {
+  modalTitle.value = title;
+  modalMessage.value = msg;
+  modalMode.value = 'info';
+  modalOpen.value = true;
+  onConfirm = null;
+}
+function showConfirm(msg, onYes, title = '확인') {
+  modalTitle.value = title;
+  modalMessage.value = msg;
+  modalMode.value = 'confirm';
+  modalOpen.value = true;
+  onConfirm = onYes;
+}
+function handleConfirm() {
+  const fn = onConfirm;
+  modalOpen.value = false;
+  if (fn) fn();
+}
+function handleCancel() {
+  modalOpen.value = false;
+  onConfirm = null;
+}
+
 const like = async () => {
   try {
     await store.toggleLike(routeId.value);
   } catch {
-    alert('좋아요 처리에 실패했습니다.');
+    showInfo('좋아요 처리에 실패했습니다.', '오류');
   }
 };
 
@@ -103,16 +142,18 @@ const canEdit = computed(
 const removePost = async () => {
   if (!post.value) return;
   const prevCategory = post.value.category || 'free';
-  if (!confirm('이 게시글을 삭제할까요?')) return;
-  try {
-    await store.removePost(routeId.value);
-    router.replace({
-      name: 'CommunityCategory',
-      params: { category: prevCategory },
-    });
-  } catch {
-    alert('삭제에 실패했습니다.');
-  }
+
+  showConfirm('이 게시글을 삭제할까요?', async () => {
+    try {
+      await store.removePost(routeId.value);
+      router.replace({
+        name: 'CommunityCategory',
+        params: { category: prevCategory },
+      });
+    } catch {
+      showInfo('삭제에 실패했습니다.', '오류');
+    }
+  });
 };
 
 const editPost = () => {
@@ -124,7 +165,6 @@ const editPost = () => {
   }
 };
 
-/** ⬇️ 이미지 개수에 따른 그리드 클래스 (1장=풀, 2장=2열, 3장 이상=3열) */
 const gridClass = computed(() => {
   const n = images.value.length;
   if (n === 1) return 'one';
@@ -132,7 +172,6 @@ const gridClass = computed(() => {
   return 'three';
 });
 
-/** ⬇️ 라이트박스 */
 const lbOpen = ref(false);
 const lbStart = ref(0);
 const lbImages = computed(() =>
@@ -153,17 +192,17 @@ function openFromDetail(i) {
         <div class="meta-left">
           <div class="avatar">
             <img
-              :src="avatarUrl"
+              :src="avatarUrl + cacheBust"
               alt=""
               @error="(e) => (e.target.src = DEFAULT_AVATAR)"
             />
           </div>
-          <span class="otd-body-3" style="font-weight: 600">{{
-            post.author
-          }}</span>
-          <span class="otd-body-3"
-            >· {{ formatYMDHM(post.createdAt || post.time) }}</span
-          >
+          <span class="otd-body-3" style="font-weight: 600">
+            {{ post.author }}
+          </span>
+          <span class="otd-body-3">
+            · {{ formatYMDHM(post.createdAt || post.time) }}
+          </span>
         </div>
 
         <div class="meta-right" v-if="canEdit">
@@ -175,7 +214,6 @@ function openFromDetail(i) {
         </div>
       </div>
 
-      <!-- ⬇️ 첨부 이미지 섹션 -->
       <div class="images loading" v-if="imagesLoading">
         <div class="skeleton" />
         <div class="skeleton" />
@@ -195,13 +233,7 @@ function openFromDetail(i) {
             :alt="img.name || '첨부 이미지'"
             decoding="async"
             loading="lazy"
-            @error="
-              (e) => {
-                console.error('[PostDetail] img load error:', img);
-                // fallback: 이미지 감춤
-                e.target.style.display = 'none';
-              }
-            "
+            @error="(e) => (e.target.style.display = 'none')"
           />
         </div>
       </div>
@@ -216,7 +248,6 @@ function openFromDetail(i) {
 
       <CommentSection :post-id="routeId" class="otd-top-margin" />
 
-      <!-- 라이트박스 -->
       <ImageLightbox
         v-model:open="lbOpen"
         :images="lbImages"
@@ -227,6 +258,25 @@ function openFromDetail(i) {
     <section v-else class="detail">
       <p class="otd-body-1">글을 찾을 수 없습니다.</p>
     </section>
+
+    <teleport to="body">
+      <div v-if="modalOpen" class="m-backdrop" @click="handleCancel">
+        <div class="m-panel" @click.stop>
+          <div class="m-title">{{ modalTitle }}</div>
+          <div class="m-body">{{ modalMessage }}</div>
+          <div class="m-actions">
+            <button
+              v-if="modalMode === 'confirm'"
+              class="m-btn ghost"
+              @click="handleCancel"
+            >
+              취소
+            </button>
+            <button class="m-btn primary" @click="handleConfirm">확인</button>
+          </div>
+        </div>
+      </div>
+    </teleport>
   </div>
 </template>
 
@@ -265,38 +315,29 @@ function openFromDetail(i) {
   object-fit: cover;
   display: block;
 }
-
-/* === 이미지 레이아웃 === */
 .images.grid {
   display: grid;
   gap: 8px;
   margin: 6px 0 2px;
 }
-
-/* 1장: 세로 비율 유지, 가로 꽉 */
 .images.grid.one {
   grid-template-columns: 1fr;
 }
 .images.grid.one .img {
-  padding-top: 62.5%; /* 16:10 */
+  padding-top: 62.5%;
 }
-
-/* 2장: 2열 */
 .images.grid.two {
   grid-template-columns: repeat(2, 1fr);
 }
 .images.grid.two .img {
   padding-top: 100%;
 }
-
-/* 3장 이상: 3열 그리드 */
 .images.grid.three {
   grid-template-columns: repeat(3, 1fr);
 }
 .images.grid.three .img {
   padding-top: 100%;
 }
-
 .images .img {
   position: relative;
   width: 100%;
@@ -313,8 +354,6 @@ function openFromDetail(i) {
   height: 100%;
   object-fit: cover;
 }
-
-/* 로딩 스켈레톤 */
 .images.loading {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -335,12 +374,10 @@ function openFromDetail(i) {
     background-position: -200% 0;
   }
 }
-
 .images.err {
   color: #c24040;
   font-size: 13px;
 }
-
 .content {
   white-space: pre-wrap;
   line-height: 1.6;
@@ -372,5 +409,56 @@ function openFromDetail(i) {
 }
 .dot {
   color: #cfcfcf;
+}
+.m-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.45);
+  display: grid;
+  place-items: center;
+  z-index: 9999;
+}
+.m-panel {
+  width: min(92vw, 360px);
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+}
+.m-title {
+  font-weight: 800;
+  color: #0f172a;
+  font-size: 16px;
+}
+.m-body {
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+.m-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+.m-btn {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 700;
+}
+.m-btn.primary {
+  background: #06b6d4;
+  color: #fff;
+  border-color: #06b6d4;
+}
+.m-btn.ghost {
+  background: #f8fafc;
 }
 </style>
