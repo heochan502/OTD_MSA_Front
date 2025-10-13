@@ -13,159 +13,38 @@ const formDialog = ref(false);
 const deleteDialog = ref(false);
 const isEdit = ref(false);
 const successDialog = ref(false);
-const cancelDialog = ref(false)
+const cancelDialog = ref(false);
+const deleteDialog = ref(false);
 
-const editExercise = ref({
-  exerciseId: null,
-  exerciseName: '',
-  exerciseMet: 0,
-  hasDistance: false,
-  hasReps: false,
-});
-
-const deleteTarget = ref(null);
+const exercise = ref({});
+const search = ref('');
 
 // 테이블 헤더
 const headers = [
   { title: 'ID', key: 'exerciseId' },
   { title: '운동명', key: 'exerciseName' },
-  { title: 'MET', key: 'exerciseMet' },
-  { title: '거리 기반', key: 'hasDistance' },
-  { title: '반복 기반', key: 'hasReps' },
-  { title: '관리', key: 'setting', sortable: false },
+  { title: '활동에너지 소모량', key: 'exerciseMet' },
+  { title: '거리 유무', key: 'hasDistance' },
+  { title: '갯수 유무', key: 'hasReps' },
 ];
-
-// 운동 목록 불러오기
-const loadExercises = async () => {
-  try {
-    const res = await getExercise();
-    // exerciseId → Number 변환 후 내림차순 정렬
-    exercises.value = res.data.map((e) => ({
-      ...e,
-      exerciseId: Number(e.exerciseId),
-    }));
-  } catch (e) {
-    console.error('운동 데이터 불러오기 실패:', e);
-  }
-};
-
-// 검색 필터링
-const filteredExercises = computed(() => {
-  if (!keyword.value) return exercises.value;
-  return exercises.value.filter((e) =>
-    e.exerciseName.toLowerCase().includes(keyword.value.toLowerCase())
-  );
-});
-
-// 추가/수정 폼 열기
-const openForm = (exercise = null) => {
-  if (exercise) {
-    isEdit.value = true;
-    editExercise.value = { ...exercise };
-  } else {
-    isEdit.value = false;
-    editExercise.value = {
-      exerciseId: null,
-      exerciseName: '',
-      exerciseMet: 0,
-      hasDistance: false,
-      hasReps: false,
-    };
-  }
-  formDialog.value = true;
-};
-
-// 저장 (추가 or 수정)
-const saveExercise = async () => {
-  if (
-    !editExercise.value.exerciseName ||
-    editExercise.value.exerciseName.trim() === ''
-  ) {
-    alert('운동명을 입력해주세요.');
-    return;
-  }
-  if (editExercise.value.exerciseMet <= 0) {
-    alert('MET 값을 입력해주세요.');
-    return;
-  }
-
-  try {
-    if (isEdit.value) {
-      await putExercise(editExercise.value.exerciseId, editExercise.value);
-    } else {
-      await postExercise(editExercise.value);
-    }
-    successDialog.value = true;
-    formDialog.value = false;
-    loadExercises();
-  } catch (e) {
-    console.error('저장 실패:', e);
-  }
-};
-
-// 삭제 다이얼로그 열기
-const openDelete = (exercise) => {
-  deleteTarget.value = exercise;
-  deleteDialog.value = true;
-};
-
-// 삭제 실행
-const removeExercise = async () => {
-  try {
-    await deleteExercise(deleteTarget.value.exerciseId);
-    successDialog.value = true;
-    deleteDialog.value = false;
-    loadExercises();
-  } catch (e) {
-    console.error('삭제 실패:', e);
-  }
-};
-
-// 수정, 추가 취소 모달
-const cancel = () => {
-  cancelDialog.value = false;
-  formDialog.value = false;
-}
-onMounted(() => {
-  loadExercises();
-});
 </script>
 
 <template>
-  <div class="admin-exercise">
-    <v-card class="data-card pa-2">
-      <!-- 상단 툴바 -->
-      <v-card-title class="d-flex justify-space-between align-center">
-        <span class="title">운동 관리</span>
-        <div class="d-flex align-center search" style="gap: 12px">
-          <v-text-field
-            v-model="keyword"
-            label="검색 (운동명)"
-            prepend-inner-icon="mdi-magnify"
-            density="compact"
-            hide-details
-            single-line
-            variant="outlined"
-            style="max-width: 450px"
-          />
-          <v-btn class="btn" @click="openForm()">➕ 운동 추가</v-btn>
-        </div>
-      </v-card-title>
+  <div class="challenge-admin">
+    <!-- 수정 / 추가 모달 -->
+    <v-dialog v-model="formDialog" max-width="300" min-height="100">
+      <v-card>
+        <v-card-title class="text-h8">{{
+          isEdit ? '챌린지 수정' : '챌린지 추가'
+        }}</v-card-title>
+        <v-card-subtitle>이름</v-card-subtitle>
+        <v-text-field v-model="editChallenge.cdName" />
 
-      <!-- 데이터 테이블 -->
-      <v-data-table
-        :headers="headers"
-        :items="filteredExercises"
-        :items-per-page="10"
-        class="styled-table"
-        fixed-header
-      >
-        <!-- 거리 기반 -->
-        <template #item.hasDistance="{ item }">
-          <v-icon :color="item.hasDistance ? '#9FD995' : '#F18A86'">
-            {{ item.hasDistance ? 'mdi-check-circle' : 'mdi-close-circle' }}
-          </v-icon>
-        </template>
+        <v-card-subtitle>타입</v-card-subtitle>
+        <v-select
+          :items="['competition', 'personal', 'weekly', 'daily']"
+          v-model="editChallenge.cdType"
+        />
 
         <!-- 반복 기반 -->
         <template #item.hasReps="{ item }">
@@ -290,6 +169,83 @@ onMounted(() => {
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <v-card>
+      <v-card-title class="d-flex justify-space-between align-center">
+        <span class="title">운동 종목 관리</span>
+        <v-text-field
+          v-model="search"
+          label="검색"
+          prepend-inner-icon="mdi-magnify"
+          density="compact"
+          hide-details
+          single-line
+          variant="outlined"
+          style="max-width: 250px"
+        />
+        <v-btn >챌린지 추가하기</v-btn>
+      </v-card-title>
+
+      <v-data-table
+        :headers="headers"
+        :items="exercise"
+        style="max-height: calc(100vh - 200px)"
+        :search="search"
+        fixed-header
+        :items-per-page="10"
+        class="styled-table"
+      >
+        타입 변환
+        <!-- <template #item.cdType="{ item }">
+          <v-chip
+            :color="
+              item.cdType === 'daily'
+                ? 'blue'
+                : item.cdType === 'weekly'
+                ? 'green'
+                : item.cdType === 'competition'
+                ? 'red'
+                : 'purple'
+            "
+            text-color="white"
+            small
+          >
+            {{ formatType(item.cdType) }}
+          </v-chip>
+        </template> -->
+
+        <!-- 목표 -->
+        <!-- <template #item.cdGoal="{ item }">
+          {{ Number(item.cdGoal).toLocaleString() }}
+        </template> -->
+
+        <!-- 챌린지 등급 -->
+        <!-- <template #item.tier="{ item }">
+          <v-chip
+            :color="
+              item.tier === '브론즈'
+                ? '#ce7430'
+                : item.tier === '실버'
+                ? '#7a7a7a'
+                : item.tier === '골드'
+                ? '#ffba57'
+                : item.tier === '다이아'
+                ? '#00c6ff'
+                : '#ff8a80' // 그 외
+            "
+            small
+          >
+            {{ item.tier }}
+          </v-chip>
+        </template> -->
+
+        <!-- 관리 -->
+        <!-- <template #item.setting="{ item }">
+          <v-btn @click="toForm(item)">수정</v-btn>
+          <v-btn @click="openDelete(item.cdId)">삭제</v-btn>
+        </template> -->
+      </v-data-table>
+    </v-card>
   </div>
 </template>
 
