@@ -107,6 +107,8 @@ const validation = ref({
     isValid: true,
     message: '',
     touched: false,
+    checked: false,
+    available: false,
   },
 });
 
@@ -140,8 +142,11 @@ const surveyAnswers = ref({
 });
 
 // 모달
-const showTermsModal = ref('');
-const modalContent = ref({});
+const showTermsModal = ref(false);
+const modalContent = ref({
+  title: '',
+  content: ''
+});
 
 // 설문 문항 데이터
 const surveyQuestions = [
@@ -207,17 +212,35 @@ onUnmounted(() => {
   }
 });
 
+// 전체 동의 토글 함수
 function toggleAll() {
+  // 현재 상태 반전
+  agreements.value.all = !agreements.value.all;
+  
   if (agreements.value.all) {
     // 전체 선택
-    agreements.value.checkedIds = termsData.value.map(t => t.termsId)
+    agreements.value.agreedTermsIds = termsData.value.map(t => t.termsId);
   } else {
     // 전체 해제
-    agreements.value.checkedIds = []
+    agreements.value.agreedTermsIds = [];
   }
 }
 
-onMounted(async () => { try { const response = await termsService.getActiveTerms(); if (response.success) { termsData.value = response.result; termsData.value.forEach(term => { termsMap.value.set(term.type, term); }); console.log("약관",termsMap ); } } catch (error) { console.error('약관 불러오기 실패:', error); showModal('오류', '약관을 불러오는데 실패했습니다.', 'error'); } });
+onMounted(async () => { 
+  try { 
+    const response = await termsService.getActiveTerms(); 
+    if (response.success) { 
+      termsData.value = response.result; 
+      termsData.value.forEach(term => { 
+        termsMap.value.set(term.type, term); 
+      }); 
+      console.log("약관", termsMap); 
+    } 
+  } catch (error) { 
+    console.error('약관 불러오기 실패:', error); 
+    showModal('오류', '약관을 불러오는데 실패했습니다.', 'error'); 
+  } 
+});
 
 // 생년월일 포맷팅 함수
 const formatBirthDate = (event) => {
@@ -514,14 +537,11 @@ watch(
   }
 );
 
-watch(
-  () => accountInfo.upw,
-  (newValue) => {
-    passwordCriteria.value.length = newValue.length >= 8;
-    passwordCriteria.value.letter = /[a-z]/i.test(newValue);
-    passwordCriteria.value.number = /[0-9]/.test(newValue);
-    passwordCriteria.value.specialChar =
-      /[!@#$%^&*(),.?":{}|<>_\-+=[\]\\\/'`~;]/.test(newValue);
+watch(() => accountInfo.upw, (newValue) => {
+  passwordCriteria.value.length = newValue.length >= 10;
+  passwordCriteria.value.letter = /[a-z]/i.test(newValue);
+  passwordCriteria.value.number = /[0-9]/.test(newValue);
+  passwordCriteria.value.specialChar = /[!@#$%^&*(),.?":{}|<>_\-+=[\]\\\/'`~;]/.test(newValue);
 
     if (validation.value.upw.touched) {
       validateField('upw', newValue);
@@ -552,6 +572,24 @@ watch(
     resetNicknameValidation();
   }
 );
+
+// 개별 약관 체크 시 전체 동의 상태 업데이트
+watch(
+  () => agreements.value.agreedTermsIds.length,
+  (newLength) => {
+    agreements.value.all = newLength === termsData.value.length && termsData.value.length > 0;
+  }
+);
+
+// 약관 정렬: 필수 약관을 먼저, 선택 약관을 나중에 표시
+const sortedTermsData = computed(() => {
+  return [...termsData.value].sort((a, b) => {
+    // isRequired가 true인 것을 먼저 (내림차순)
+    if (a.isRequired && !b.isRequired) return -1;
+    if (!a.isRequired && b.isRequired) return 1;
+    return 0;
+  });
+});
 
 // 설문 완료 여부
 const isSurveyCompleted = computed(() => {
@@ -823,14 +861,29 @@ const submitJoin = async () => {
 };
 
 const loadTermsContent = (type) => {
-  const term = termsMap.value.get(type);
+  console.log('=== loadTermsContent 시작 ===');
+  console.log('전달받은 type:', type);
+  
+  // termsData에서 직접 찾기
+  const term = termsData.value.find(t => t.type === type);
+  console.log('찾은 term:', term ? JSON.parse(JSON.stringify(term)) : null);
+  
   if (term) {
-    modalContent.value = {
-      title: term.title,
-      content: term.content,
-    };
-    showTermsModal.value = type;
+    // 직접 속성 할당 방식으로 변경
+    modalContent.value.title = term.title;
+    modalContent.value.content = term.content;
+    
+    console.log('modalContent 설정:', JSON.parse(JSON.stringify(modalContent.value)));
+    console.log('title:', modalContent.value.title);
+    console.log('content 길이:', modalContent.value.content?.length);
+    
+    showTermsModal.value = true;
+    console.log('showTermsModal 설정:', showTermsModal.value);
+  } else {
+    console.error('약관을 찾을 수 없습니다. type:', type);
+    console.log('termsData의 모든 type 값:', termsData.value.map(t => t.type));
   }
+  console.log('=== loadTermsContent 종료 ===');
 };
 </script>
 
@@ -909,8 +962,8 @@ const loadTermsContent = (type) => {
             <label class="checkbox-container">
               <input
                 type="checkbox"
-                v-model="agreements.all"
-                @change="toggleAll()"
+                :checked="agreements.all"
+                @change="toggleAll"
                 class="checkbox"
               />
               <span class="checkbox-text font-medium">약관 전체동의</span>
@@ -920,7 +973,7 @@ const loadTermsContent = (type) => {
           <!-- 개별 약관 -->
           <div class="agreement-list">
             <div
-              v-for="term in termsData"
+              v-for="term in sortedTermsData"
               :key="term.termsId"
               class="agreement-item"
             >
@@ -928,7 +981,7 @@ const loadTermsContent = (type) => {
                 <input
                   type="checkbox"
                   :value="term.termsId"
-                  v-model="agreements.checkedIds"                
+                  v-model="agreements.agreedTermsIds"             
                 class="checkbox" />
                 <span>
                   {{ term.isRequired ? '(필수)' : '(선택)' }} {{ term.title }}
@@ -1343,16 +1396,16 @@ const loadTermsContent = (type) => {
     <div
       v-if="showTermsModal"
       class="modal-overlay"
-      @click="showTermsModal = ''"
+      @click="showTermsModal = false"
     >
       <div class="modal" @click.stop>
-        <h3 class="modal-title">{{ modalContent.title }}</h3>
+        <h3 class="modal-title">{{ modalContent.title || '약관 제목' }}</h3>
         <div class="modal-content">
           <p class="modal-text" style="white-space: pre-wrap">
-            {{ modalContent.content }}
+            {{ modalContent.content || '내용을 불러오는 중입니다...' }}
           </p>
         </div>
-        <button @click="showTermsModal = ''" class="btn btn-primary">
+        <button @click="showTermsModal = false" class="btn btn-primary">
           확인
         </button>
       </div>
@@ -1867,7 +1920,7 @@ const loadTermsContent = (type) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 50;
+  z-index: 1000;
 }
 
 .modal {
@@ -1875,9 +1928,12 @@ const loadTermsContent = (type) => {
   border-radius: 0.5rem;
   padding: 1.5rem;
   max-width: 28rem;
-  width: 100%;
+  width: 90%;
   margin: 0 1rem;
-  max-height: 24rem;
+  max-height: 80vh;
+  z-index: 1001;
+  position: relative;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 .modal-title {
@@ -1888,13 +1944,15 @@ const loadTermsContent = (type) => {
 
 .modal-content {
   overflow-y: auto;
-  max-height: 16rem;
+  max-height: 50vh;
   margin-bottom: 1rem;
+  padding: 0.5rem;
 }
 
 .modal-text {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: #374151;
+  line-height: 1.6;
 }
 
 @media (max-width: 600px) {

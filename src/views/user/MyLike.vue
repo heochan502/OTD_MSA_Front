@@ -229,7 +229,7 @@ onMounted(() => {
     .stat-value {
       font-size: 20px;
       font-weight: bold;
-      color: #e91e63;
+      color: #393E46;
     }
   }
 }
@@ -332,7 +332,7 @@ onMounted(() => {
           font-size: 14px;
 
           &.liked {
-            color: #e91e63;
+            color: #393E46;
             font-weight: 600;
           }
         }
@@ -360,7 +360,7 @@ onMounted(() => {
   }
 
   .explore-btn {
-    background: #e91e63;
+    background: #393E46;
     color: white;
     border: none;
     padding: 12px 24px;
@@ -371,7 +371,7 @@ onMounted(() => {
     transition: all 0.2s ease;
 
     &:hover {
-      background: #c2185b;
+      background: #303030;
       transform: translateY(-1px);
     }
   }

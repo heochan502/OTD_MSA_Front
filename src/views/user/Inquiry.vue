@@ -1,211 +1,278 @@
 <script setup>
-import { reactive, ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthenticationStore } from '@/stores/user/authentication';
-import { sendInquiry } from '@/services/user/inquiryService';
-import AlertModal from '@/components/user/Modal.vue';
+import { getMyInquiries } from '@/services/user/inquiryService';
+import InquiryDetailModal from '@/components/user/InquiryDetailModal.vue';
 
 const router = useRouter();
-const authStore = useAuthenticationStore();
 
-const state = reactive({
-  memo: {
-    id: 0,
-    title: '',
-    content: '',
-    createdAt: ''
-  },
-  isLoading: false
-});
+const inquiries = ref([]);
+const loading = ref(false);
+const showDetailModal = ref(false);
+const selectedInquiryId = ref(null);
 
-// 모달 상태
-const modalState = ref({
-  show: false,
-  title: '',
-  message: '',
-  type: 'info',
-  onConfirm: null
-});
-
-const showModal = (title, message, type = 'info', onConfirm = null) => {
-  modalState.value = {
-    show: true,
-    title,
-    message,
-    type,
-    onConfirm
-  };
-};
-
-const closeModal = () => {
-  modalState.value.show = false;
-};
-
-const handleModalConfirm = () => {
-  if (modalState.value.onConfirm) {
-    modalState.value.onConfirm();
-  }
-  closeModal();
-};
-
-// 입력 검증 함수
-const validateInput = () => {
-  if (!state.memo.title.trim()) {
-    showModal('입력 오류', '제목을 입력해주세요.', 'warning');
-    return false;
-  }
-  if (!state.memo.content.trim()) {
-    showModal('입력 오류', '내용을 입력해주세요.', 'warning');
-    return false;
-  }
-  return true;
-};
-
-// 이메일 전송 함수 (개선됨)
-const sendEmailInquiry = async () => {
-  if (!validateInput()) return;
-
-  // 로그인 확인
-  if (!authStore.state.isSigned || !authStore.state.signedUser.userId) {
-    showModal(
-      '로그인 필요', 
-      '로그인이 필요한 서비스입니다.', 
-      'warning',
-      () => router.push('/login')
-    );
-    return;
-  }
-
-  state.isLoading = true;
-
+const loadInquiries = async () => {
+  loading.value = true;
   try {
-    const emailData = {
-      subject: state.memo.title,
-      message: state.memo.content,
-      senderName: authStore.state.signedUser.nickName || '웹사이트 방문자',
-      senderEmail: authStore.state.signedUser.email, 
-      timestamp: new Date().toISOString()
-    };
-
-    const result = await sendInquiry(emailData);
-
-    if (result.result?.success) {
-      showModal(
-        '전송 완료',
-        result.message || '문의가 성공적으로 전송되었습니다!',
-        'success',
-        () => {
-          state.memo.title = '';
-          state.memo.content = '';
-        }
-      );
-    } else {
-      showModal('전송 실패', result.message || '문의 전송에 실패했습니다.', 'error');
-    }
+    const data = await getMyInquiries();
+    inquiries.value = data;
   } catch (error) {
-    console.error('이메일 전송 오류:', error);
-    
-    // 인증 오류 처리
-    if (error.message.includes('401')) {
-      showModal(
-        '세션 만료',
-        '로그인 세션이 만료되었습니다.\n다시 로그인해주세요.',
-        'warning',
-        async () => {
-          await authStore.logout();
-          router.push('/login');
-        }
-      );
-      return;
-    }
-    
-    showModal(
-      '전송 오류',
-      '문의 전송 중 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.',
-      'error'
-    );
-  } finally {
-    state.isLoading = false;
+    } finally {
+    loading.value = false; 
   }
 };
+
+const viewDetail = (inquiryId) => {
+  selectedInquiryId.value = Number(inquiryId); 
+  showDetailModal.value = true;
+};
+
+const closeDetailModal = () => {
+  showDetailModal.value = false;
+  selectedInquiryId.value = null;
+};
+
+const goToInquiry = () => {
+  router.push('/user/email/inquiry');
+};
+
+const getStatusText = (status) => {
+
+  if (status === '대기 중' || status === '답변 완료') {
+    return status;
+  }
+
+  const statusTextMap = {
+    'PENDING': '대기 중',
+    'RESOLVED': '답변 완료',
+    '00': '대기 중',
+    '01': '답변 완료'
+  };
+
+  return statusTextMap[status] || '알 수 없음';
+};
+
+const getStatusClass = (status) => {
+  const statusMap = {
+    'PENDING': 'pending',
+    'RESOLVED': 'completed',
+    '00': 'pending',
+    '01': 'completed',
+    '대기 중': 'pending',
+    '답변 완료': 'completed'
+  };
+  return statusMap[status] || 'pending';
+};
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  
+  return `${year}-${month}-${day} ${hours}:${minutes}`;
+};
+
+onMounted(() => {
+  loadInquiries();
+});
 </script>
 
 <template>
-  <div class="detail">
-    <div class="mb-3" v-if="state.memo.createdAt">
-      등록일시: {{ state.memo.createdAt }}
+  <div class="inquiry-list-container">
+    <div class="header">
+      <h2>문의 내역</h2>
+      <button @click="loadInquiries" class="refresh-btn">
+        <span>새로고침</span>
+      </button>
     </div>
-    <div class="mb-3">
-      <label for="title" class="form-label">제목</label>
-      <input 
-        type="text" 
-        id="title" 
-        class="form-control p-3" 
-        v-model="state.memo.title" 
-        placeholder="문의 제목을 입력해주세요"
-        :disabled="state.isLoading"
-      />
-    </div>
-    <div class="mb-3">
-      <label for="content" class="form-label">내용</label>
-      <textarea 
-        id="content" 
-        class="form-control p-3" 
-        v-model="state.memo.content"
-        rows="8"
-        placeholder="문의 내용을 자세히 입력해주세요"
-        :disabled="state.isLoading"
-      ></textarea>
-    </div>
-    
-    <button 
-      type="button" 
-      class="btn btn-primary w-100 py-3" 
-      @click="sendEmailInquiry"
-      :disabled="state.isLoading"
-    >
-      <span v-if="state.isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-      {{ state.isLoading ? '전송 중...' : '문의하기' }}
-    </button>
 
-    <!-- 모달 컴포넌트 -->
-    <AlertModal
-      :show="modalState.show"
-      :title="modalState.title"
-      :message="modalState.message"
-      :type="modalState.type"
-      @close="closeModal"
-      @confirm="handleModalConfirm"
+    <!-- 로딩 상태 -->
+    <div v-if="loading" class="loading">
+      <p>문의 내역을 불러오는 중...</p>
+    </div>
+
+    <!-- 문의 내역이 없을 때 -->
+    <div v-else-if="inquiries.length === 0" class="empty-state">
+      <p>아직 문의 내역이 없습니다.</p>
+      <button @click="goToInquiry" class="create-btn">문의하기</button>
+    </div>
+
+    <!-- 문의 목록 -->
+    <div v-else class="inquiry-list">
+      <div 
+        v-for="inquiry in inquiries" 
+        :key="inquiry.id"
+        class="inquiry-item"
+        @click="viewDetail(inquiry.id)"
+      >
+        <div class="inquiry-header">
+          <h3>{{ inquiry.subject }}</h3>
+          <span :class="['status', getStatusClass(inquiry.status)]">
+            {{ getStatusText(inquiry.status) }}
+          </span>
+        </div>
+        <div class="inquiry-date">
+          {{ formatDate(inquiry.createdAt) }}
+        </div>
+      </div>
+    </div>
+
+    <!-- 상세보기 모달 -->
+    <InquiryDetailModal
+      v-if="showDetailModal"
+      :inquiry-id="selectedInquiryId"
+      @close="closeDetailModal"
     />
   </div>
 </template>
 
 <style scoped>
-.detail {
-  max-width: 600px;
+.inquiry-list-container {
+  max-width: 800px;
   margin: 0 auto;
   padding: 20px;
-  background: #fff;
-  min-height: 100vh;
 }
 
-.form-control:focus {
-  border-color: #80bdff;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
 }
 
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.header h2 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
 }
 
-.spinner-border-sm {
-  width: 1rem;
-  height: 1rem;
+.refresh-btn {
+  padding: 10px 20px;
+  background-color: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
 }
 
-.form-control:disabled {
-  background-color: #f8f9fa;
-  opacity: 0.8;
+.refresh-btn:hover {
+  background-color: #059669;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #6b7280;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.empty-state p {
+  font-size: 16px;
+  color: #6b7280;
+  margin-bottom: 20px;
+}
+
+.create-btn {
+  padding: 12px 30px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.create-btn:hover {
+  background-color: #2563eb;
+}
+
+.inquiry-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.inquiry-item {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.inquiry-item:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-color: #3b82f6;
+}
+
+.inquiry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.inquiry-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: 10px;
+}
+
+.status.pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status.completed {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.inquiry-date {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+@media (max-width: 768px) {
+  .inquiry-list-container {
+    padding: 15px;
+  }
+  
+  .header h2 {
+    font-size: 20px;
+  }
+  
+  .inquiry-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .status {
+    margin-left: 0;
+  }
 }
 </style>

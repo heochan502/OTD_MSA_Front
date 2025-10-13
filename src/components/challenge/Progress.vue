@@ -24,6 +24,7 @@ onMounted(() => {
     targetValue.value = props.indataProgress;
     animateProgress(targetValue.value);
   }, 50); // DOM 렌더링 직후 약간의 지연을 줘야 transition이 발동
+  console.log(targetValue.value);
 });
 
 const animateProgress = (target) => {
@@ -56,11 +57,9 @@ defineExpose({
 watch(
   () => props.indataProgress,
   (data) => {
-    if (data !== undefined && data !== null) {
       targetValue.value = data;
       animateProgress(data);
-    }
-  },
+    },
   { immediate: true }
 );
 </script>
