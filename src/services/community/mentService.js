@@ -8,7 +8,7 @@ export const fetchMents = (postId) =>
   axios.get(`${BASE}/posts/${postId}/ments`);
 
 /** 댓글 생성 */
-export const createMent = (postId, content, userId) => {
+export const createMent = (postId, content, userId, nickName) => {
   const headers =
     userId != null
       ? { 'Content-Type': 'application/json', 'X-MEMBER-ID': String(userId) }
@@ -16,7 +16,7 @@ export const createMent = (postId, content, userId) => {
 
   return axios.post(
     `${BASE}/posts/${postId}/ments`,
-    { content }, // ← 닉네임 등 한글은 헤더 말고 바디로!
+    { content, nickName }, // ← 닉네임 등 한글은 헤더 말고 바디로!
     { headers }
   );
 };
