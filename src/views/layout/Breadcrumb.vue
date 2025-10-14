@@ -85,27 +85,17 @@ onMounted(() => {});
 <template>
   <div class="top-header">
     <!-- 로고 출력 -->
-    <div class="title" v-if="route.meta.headerType === 'logo'">
+    <div class="title" v-if="headerType === 'logo'">
       <img class="otd-logo" src="/image/main/ontoday_logo.png" alt="로고" />
-      <img
-        class="alram"
-        src="/image/main/alarm.png"
-        alt="알람"
-        @click="handleClick"
-      />
+      <img class="alram" src="/image/main/alarm.png" alt="알람" @click="handleClick" />
     </div>
     <!-- 타이틀 출력 -->
     <div class="title" v-else>
       <button class="black-btn" @click="$router.back()" aria-label="뒤로가기">
         <img class="back-btn" src="/image/main/back_icon.png" alt="뒤로가기" />
       </button>
-      <div class="hearder-text">{{ headerStore.detailName }}</div>
-      <img
-        class="alram"
-        src="/image/main/alarm.png"
-        alt="알람"
-        @click="handleClick"
-      />
+      <div class="hearder-text">{{ headerTitle }}</div>
+      <img class="alram" src="/image/main/alarm.png" alt="알람" @click="handleClick" />
     </div>
   </div>
 
@@ -120,11 +110,7 @@ onMounted(() => {});
         </div>
       </div>
       <div class="point otd-body-1">
-        <router-link
-          to="/pointshop"
-          class="pointShop"
-          :class="{ active: route.path.startsWith('/pointshop') }"
-        >
+        <router-link to="/pointshop" class="pointShop" :class="{ active: route.path.startsWith('/pointshop') }">
           <div class="point-wrap">
             <img class="point-img" src="/image/main/point.png" alt="포인트" />
             <span>{{ formatPoint(userInfo.userPoint) }}</span>
