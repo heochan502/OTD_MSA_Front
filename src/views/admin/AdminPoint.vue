@@ -6,12 +6,12 @@ const pointHistory = ref([]);
 const search = ref('');
 
 const headers = [
-  { title: 'ID', key: 'chId' },
-  { title: '닉네임(이름)', key: 'userText' },
-  { title: '챌린지', key: 'challengeText' },
-  { title: '포인트', key: 'point' },
-  { title: '사유', key: 'reason' },
-  { title: '획득일', key: 'createdAt' },
+  { title: 'ID', key: 'chId', align: 'center' },
+  { title: '닉네임(이름)', key: 'userText', align: 'center' },
+  { title: '챌린지', key: 'challengeText', align: 'center' },
+  { title: '포인트', key: 'point', align: 'center' },
+  { title: '사유', key: 'reason', align: 'center' },
+  { title: '획득일', key: 'createdAt', align: 'center' },
 ];
 
 onMounted(async () => {
@@ -136,5 +136,16 @@ const tableSet = computed(() => {
     color: #888;
     font-size: 0.85rem;
   }
+}
+/* 정렬 아이콘 항상 보이게 */
+.styled-table :deep(.v-data-table__th .v-icon) {
+  opacity: 1 !important; /* 항상 표시 */
+  color: #bbb !important; /* 기본은 연한 회색으로 */
+  transition: color 0.2s ease;
+}
+
+/* 활성 정렬 컬럼 아이콘 강조 */
+.styled-table :deep(.v-data-table__th--sorted .v-icon) {
+  color: #5ee6eb !important; /* 활성 정렬 컬럼만 민트 */
 }
 </style>

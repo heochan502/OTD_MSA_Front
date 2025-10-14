@@ -41,32 +41,32 @@ const deleteType = ref('db'); // "db" (공식) / "make" (사용자)
 
 // 공식 DB 헤더
 const headersDb = [
-  { title: 'ID', key: 'foodDbId' },
-  { title: '이름', key: 'foodName' },
-  { title: '칼로리', key: 'kcal' },
-  { title: '탄수화물', key: 'carbohydrate' },
-  { title: '단백질', key: 'protein' },
-  { title: '지방', key: 'fat' },
-  { title: '당', key: 'sugar' },
-  { title: '나트륨', key: 'natrium' },
-  { title: '용량', key: 'foodCapacity' },
-  { title: '단위', key: 'flag' },
-  { title: '관리', key: 'setting', sortable: false },
+  { title: 'ID', key: 'foodDbId', align: 'center' },
+  { title: '이름', key: 'foodName', align: 'center' },
+  { title: '칼로리', key: 'kcal', align: 'center' },
+  { title: '탄수화물', key: 'carbohydrate', align: 'center' },
+  { title: '단백질', key: 'protein', align: 'center' },
+  { title: '지방', key: 'fat', align: 'center' },
+  { title: '당', key: 'sugar', align: 'center' },
+  { title: '나트륨', key: 'natrium', align: 'center' },
+  { title: '용량', key: 'foodCapacity', align: 'center' },
+  { title: '단위', key: 'flag', align: 'center' },
+  { title: '관리', key: 'setting', sortable: false, align: 'center' },
 ];
 
 // 사용자 커스텀 DB 헤더
 const headersMake = [
-  { title: 'ID', key: 'userFoodId' },
-  { title: '유저ID', key: 'userId' },
-  { title: '이름', key: 'foodName' },
-  { title: '칼로리', key: 'kcal' },
-  { title: '탄수화물', key: 'carbohydrate' },
-  { title: '단백질', key: 'protein' },
-  { title: '지방', key: 'fat' },
-  { title: '당', key: 'sugar' },
-  { title: '나트륨', key: 'natrium' },
-  { title: '단위', key: 'flag' },
-  { title: '관리', key: 'setting', sortable: false },
+  { title: 'ID', key: 'userFoodId', align: 'center' },
+  { title: '유저ID', key: 'userId', align: 'center' },
+  { title: '이름', key: 'foodName', align: 'center' },
+  { title: '칼로리', key: 'kcal', align: 'center' },
+  { title: '탄수화물', key: 'carbohydrate', align: 'center' },
+  { title: '단백질', key: 'protein', align: 'center' },
+  { title: '지방', key: 'fat', align: 'center' },
+  { title: '당', key: 'sugar', align: 'center' },
+  { title: '나트륨', key: 'natrium', align: 'center' },
+  { title: '단위', key: 'flag', align: 'center' },
+  { title: '관리', key: 'setting', sortable: false, align: 'center' },
 ];
 
 // 데이터 불러오기
@@ -168,7 +168,9 @@ onMounted(() => {
   <div class="admin-meal">
     <!-- 공식 DB -->
     <v-card class="data-card pa-2">
-      <v-card-title class="d-flex justify-space-between align-center">
+      <v-card-title
+        class="d-flex justify-space-between align-center data-title"
+      >
         <span class="title">공식 식품 관리</span>
         <div class="d-flex align-center search" style="gap: 12px">
           <v-text-field
@@ -182,8 +184,10 @@ onMounted(() => {
             style="max-width: 450px"
             @keyup.enter="searchMeals"
           />
-          <v-btn @click="searchMeals">검색</v-btn>
-          <v-btn @click="openForm()">➕ 식품 추가</v-btn>
+          <div class="btn-area justify-end">
+            <v-btn class="btn-gray" @click="searchMeals">검색</v-btn>
+            <v-btn class="btn-blue" @click="openForm()">식품 추가하기</v-btn>
+          </div>
         </div>
       </v-card-title>
 
@@ -228,9 +232,11 @@ onMounted(() => {
             {{ item.flag }}
           </v-chip>
         </template>
-        <template #item.setting="{ item }">
-          <v-btn @click="openForm(item)">수정</v-btn>
-          <v-btn @click="openDelete(item, 'db')">삭제</v-btn>
+        <template class="btn-area" #item.setting="{ item }">
+          <div class="btn-area">
+            <v-btn class="btn-gray" @click="openForm(item)">수정</v-btn>
+            <v-btn class="btn-red" @click="openDelete(item, 'db')">삭제</v-btn>
+          </div>
         </template>
       </v-data-table>
 
@@ -239,7 +245,6 @@ onMounted(() => {
         <v-btn
           class="page-btn"
           :disabled="currentPage === 0"
-          variant="tonal"
           prepend-icon="mdi-page-first"
           @click="loadMeals(0)"
         >
@@ -247,7 +252,6 @@ onMounted(() => {
         <v-btn
           class="page-btn"
           :disabled="currentPage === 0"
-          variant="tonal"
           prepend-icon="mdi-chevron-left"
           @click="loadMeals(currentPage - 1)"
         >
@@ -262,7 +266,6 @@ onMounted(() => {
         <v-btn
           class="page-btn"
           :disabled="currentPage + 1 >= totalPages"
-          variant="tonal"
           append-icon="mdi-chevron-right"
           @click="loadMeals(currentPage + 1)"
         >
@@ -270,7 +273,6 @@ onMounted(() => {
         <v-btn
           class="page-btn"
           :disabled="currentPage + 1 >= totalPages"
-          variant="tonal"
           append-icon="mdi-page-last"
           @click="loadMeals(totalPages - 1)"
         >
@@ -324,7 +326,11 @@ onMounted(() => {
           </v-chip>
         </template>
         <template #item.setting="{ item }">
-          <v-btn @click="openDelete(item, 'make')">삭제</v-btn>
+          <div class="single-btn">
+            <v-btn class="btn-red" @click="openDelete(item, 'make')"
+              >삭제</v-btn
+            >
+          </div>
         </template>
       </v-data-table>
     </v-card>
@@ -432,10 +438,10 @@ onMounted(() => {
         </v-container>
 
         <v-divider class="my-2" />
-        <v-card-actions class="justify-end btn-area">
-          <v-btn class="btn-no" @click="cancelDialog = true">취소</v-btn>
-          <v-btn class="btn-yes" @click="saveMeal">저장</v-btn>
-        </v-card-actions>
+        <div class="justify-end btn-area">
+          <v-btn class="btn-gray" @click="cancelDialog = true">취소</v-btn>
+          <v-btn class="btn-blue" @click="saveMeal">저장</v-btn>
+        </div>
       </v-card>
     </v-dialog>
 
@@ -446,10 +452,10 @@ onMounted(() => {
           정말 <strong>{{ deleteTarget?.foodName }}</strong> 을(를)
           삭제하시겠습니까?
         </v-card-text>
-        <v-card-actions class="justify-end btn-area">
-          <v-btn class="btn-yes" @click="removeMeal">네</v-btn>
-          <v-btn class="btn-no" @click="deleteDialog = false">아니오</v-btn>
-        </v-card-actions>
+        <div class="justify-end btn-area">
+          <v-btn class="btn-blue" @click="removeMeal">네</v-btn>
+          <v-btn class="btn-gray" @click="deleteDialog = false">아니오</v-btn>
+        </div>
       </v-card>
     </v-dialog>
 
@@ -457,12 +463,12 @@ onMounted(() => {
     <v-dialog v-model="successDialog" max-width="380" min-height="100">
       <v-card class="admin-dialog pa-6">
         <v-card-text> 성공적으로 완료되었습니다. </v-card-text>
-        <v-card-actions>
+        <div>
           <v-spacer />
-          <v-btn class="btn-yes" text @click="successDialog = false"
+          <v-btn class="btn-blue" text @click="successDialog = false"
             >확인</v-btn
           >
-        </v-card-actions>
+        </div>
       </v-card>
     </v-dialog>
 
@@ -474,10 +480,10 @@ onMounted(() => {
           <br />
           해당 내용은 저장되지 않습니다.
         </v-card-text>
-        <v-card-actions class="btn-area">
-          <v-btn class="btn-yes" @click="cancel()">네</v-btn>
-          <v-btn class="btn-no" @click="cancelDialog = false">아니오</v-btn>
-        </v-card-actions>
+        <div class="btn-area">
+          <v-btn class="btn-blue" @click="cancel()">네</v-btn>
+          <v-btn class="btn-gray" @click="cancelDialog = false">아니오</v-btn>
+        </div>
       </v-card>
     </v-dialog>
   </div>
@@ -493,6 +499,9 @@ onMounted(() => {
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
   }
 
+  .data-title {
+    height: 56px;
+  }
   .title {
     font-weight: 700;
     font-size: 23px;
@@ -509,6 +518,17 @@ onMounted(() => {
   .search {
     width: 50%;
   }
+  /* 정렬 아이콘 항상 보이게 */
+  .styled-table :deep(.v-data-table__th .v-icon) {
+    opacity: 1 !important; /* 항상 표시 */
+    color: #bbb !important; /* 기본은 연한 회색으로 */
+    transition: color 0.2s ease;
+  }
+
+  /* 활성 정렬 컬럼 아이콘 강조 */
+  .styled-table :deep(.v-data-table__th--sorted .v-icon) {
+    color: #5ee6eb !important; /* 활성 정렬 컬럼만 민트 */
+  }
 
   .pagination {
     display: flex;
@@ -518,6 +538,10 @@ onMounted(() => {
     margin-top: 5px;
     padding: 12px 0;
 
+    .btn,
+    .page-btn {
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
     .page-btn :deep(.v-btn__content) {
       padding: 0 !important;
     }
@@ -538,17 +562,31 @@ onMounted(() => {
       color: #555 !important;
       transition: all 0.25s ease;
 
-      &:hover {
-        background-color: #dcdcdc !important;
-        transform: scale(1.03);
+      &:disabled {
+        background-color: #fcfcfc !important; // 평상시보다 더 연한 회색으로
+        color: #aaa !important;
+        opacity: 1 !important; // Vuetify의 disabled opacity 무시
+        box-shadow: none !important;
+        transform: none !important;
+        transition: none !important;
+      }
+      // 🧩 Vuetify overlay 완전 제거
+      :deep(.v-btn__overlay),
+      :deep(.v-btn__underlay) {
+        transition: none !important; // overlay에 있는 opacity 전환 제거
+        background: transparent !important;
+        opacity: 0 !important;
       }
 
-      &:disabled {
-        background-color: #f0f0f0 !important;
-        color: #999 !important;
-        box-shadow: none;
-        transform: none;
+      // 🧩 disabled일 때 overlay가 다시 생기지 않도록 완전 차단
+      &:disabled :deep(.v-btn__overlay),
+      &:disabled :deep(.v-btn__underlay) {
+        display: none !important;
       }
+    }
+    .btn:disabled :deep(.v-btn__overlay),
+    .page-btn:disabled :deep(.v-btn__overlay) {
+      background: transparent !important; // 반투명 오버레이 제거
     }
 
     .page-info {
@@ -633,7 +671,10 @@ onMounted(() => {
   display: flex !important;
 }
 
-// 모달 버튼
+.single-btn {
+  display: flex;
+  justify-content: center;
+}
 .btn-area {
   display: flex;
   justify-content: flex-end;
@@ -642,9 +683,11 @@ onMounted(() => {
   margin-top: 4px !important;
 }
 
+// 모달 버튼
 // 버튼 공통
-.btn-no,
-.btn-yes {
+.btn-gray,
+.btn-blue,
+.btn-red {
   min-width: 72px;
   height: 38px;
   border-radius: 10px;
@@ -660,25 +703,28 @@ onMounted(() => {
 }
 
 // 취소 버튼
-.btn-no {
+.btn-gray {
   background-color: #e0e0e0 !important;
   color: #333 !important;
   border-radius: 10px;
 }
-.btn-no:hover {
-  background-color: #d6d6d6 !important;
-  transform: scale(1.03);
-}
 
 // 저장 버튼
-.btn-yes {
+.btn-blue {
   background-color: #5ee6eb !important;
   color: #fff !important;
   border-radius: 10px;
 }
-.btn-yes:hover {
+.btn-blue:hover {
   background-color: #3dd4da !important;
   box-shadow: 0 3px 10px rgba(61, 212, 218, 0.35);
   transform: scale(1.03);
+}
+
+// 삭제 버튼
+.btn-red {
+  background-color: #f28b82 !important;
+  color: #fff !important;
+  border-radius: 10px;
 }
 </style>

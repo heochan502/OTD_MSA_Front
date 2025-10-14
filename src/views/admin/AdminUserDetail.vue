@@ -66,37 +66,37 @@ onMounted(async () => {
 });
 
 const pointHeaders = [
-  { title: 'ID', key: 'chId' },
-  { title: '사유', key: 'reason' },
-  { title: '지급 포인트', key: 'point' },
-  { title: '지급일', key: 'createdAt' },
+  { title: 'ID', key: 'chId', align: 'center'  },
+  { title: '사유', key: 'reason', align: 'center'  },
+  { title: '지급 포인트', key: 'point' , align: 'center' },
+  { title: '지급일', key: 'createdAt' , align: 'center' },
 ];
 
 const challengeHeaders = [
-  { title: 'ID', key: 'cpId' },
-  { title: '챌린지', key: 'name' },
-  { title: '포인트', key: 'point' },
-  { title: '시작일', key: 'startDate' },
-  { title: '종료일', key: 'endDate' },
-  { title: '성공여부', key: 'success' },
+  { title: 'ID', key: 'cpId', align: 'center'  },
+  { title: '챌린지', key: 'name' , align: 'center' },
+  { title: '포인트', key: 'point' , align: 'center' },
+  { title: '시작일', key: 'startDate' , align: 'center' },
+  { title: '종료일', key: 'endDate' , align: 'center' },
+  { title: '성공여부', key: 'success' , align: 'center' },
 ];
 
 const exerciseHeaders = [
-  { title: '운동 종목', key: 'exerciseName' },
-  { title: '시작 시간', key: 'startAt' },
-  { title: '종료 시간', key: 'endAt' },
-  { title: '소비 칼로리', key: 'activityKcal' },
+  { title: '운동 종목', key: 'exerciseName', align: 'center'  },
+  { title: '시작 시간', key: 'startAt' , align: 'center' },
+  { title: '종료 시간', key: 'endAt' , align: 'center' },
+  { title: '소비 칼로리', key: 'activityKcal' , align: 'center' },
 ];
 
 const mealHeaders = [
-  { title: '기록일', key: 'mealDay' },
-  { title: '기록시간', key: 'mealTime' },
-  { title: '총 탄수화물 섭취량', key: 'totalCarbohydrate' },
-  { title: '총 단백질 섭취량', key: 'totalProtein' },
-  { title: '총 지방 섭취량', key: 'totalFat' },
-  { title: '총 나트륨 섭취량', key: 'totalNatrium' },
-  { title: '총 당 섭취량', key: 'totalSugar' },
-  { title: '총 칼로리', key: 'totalKcal' },
+  { title: '기록일', key: 'mealDay' , align: 'center' },
+  { title: '기록시간', key: 'mealTime' , align: 'center' },
+  { title: '총 탄수화물 섭취량', key: 'totalCarbohydrate', align: 'center'  },
+  { title: '총 단백질 섭취량', key: 'totalProtein' , align: 'center' },
+  { title: '총 지방 섭취량', key: 'totalFat' , align: 'center' },
+  { title: '총 나트륨 섭취량', key: 'totalNatrium', align: 'center'  },
+  { title: '총 당 섭취량', key: 'totalSugar' , align: 'center' },
+  { title: '총 칼로리', key: 'totalKcal' , align: 'center' },
 ];
 
 const formatNumber = (n) => String(n).padStart(2, '0');
@@ -216,12 +216,12 @@ const openMealDialog = async (meal) => {
     <v-dialog v-model="deletePicDialog" max-width="380" min-height="100">
       <v-card class="admin-dialog pa-6">
         <v-card-text> 프로필 이미지를 삭제하시겠습니까? </v-card-text>
-        <v-card-actions class="modal-btn-area">
+        <div class="modal-btn-area">
           <v-btn class="btn-yes" text @click="deletePic()">네</v-btn>
           <v-btn class="btn-no" text @click="deletePicDialog = false"
             >아니오</v-btn
           >
-        </v-card-actions>
+        </div>
       </v-card>
     </v-dialog>
 
@@ -229,12 +229,12 @@ const openMealDialog = async (meal) => {
     <v-dialog v-model="deleteUserDialog" max-width="380" min-height="100">
       <v-card class="admin-dialog pa-6">
         <v-card-text> 해당 사용자를 차단하시겠습니까? </v-card-text>
-        <v-card-actions class="modal-btn-area">
+        <div class="modal-btn-area">
           <v-btn class="btn-yes" text @click="deleteUserProfile()">네</v-btn>
           <v-btn class="btn-no" text @click="deleteUserDialog = false"
             >아니오</v-btn
           >
-        </v-card-actions>
+        </div>
       </v-card>
     </v-dialog>
 
@@ -242,12 +242,12 @@ const openMealDialog = async (meal) => {
     <v-dialog v-model="putProfileDialog" max-width="380" min-height="100">
       <v-card class="admin-dialog pa-6">
         <v-card-text> 내용을 저장하시겠습니까? </v-card-text>
-        <v-card-actions class="modal-btn-area">
+        <div class="modal-btn-area">
           <v-btn class="btn-yes" text @click="submit()">네</v-btn>
           <v-btn class="btn-no" text @click="putProfileDialog = false"
             >아니오</v-btn
           >
-        </v-card-actions>
+        </div>
       </v-card>
     </v-dialog>
 
@@ -255,12 +255,12 @@ const openMealDialog = async (meal) => {
     <v-dialog v-model="successDialog" max-width="380" min-height="100">
       <v-card class="admin-dialog pa-6">
         <v-card-text> 성공적으로 완료되었습니다. </v-card-text>
-        <v-card-actions>
+        <div>
           <v-spacer />
           <v-btn class="btn-yes" text @click="successDialog = false"
             >확인</v-btn
           >
-        </v-card-actions>
+        </div>
       </v-card>
     </v-dialog>
 
@@ -345,9 +345,9 @@ const openMealDialog = async (meal) => {
         </v-container>
 
         <v-divider class="my-2" />
-        <v-card-actions>
+        <div>
           <v-btn class="btn-save" @click="mealDetailDialog = false">확인</v-btn>
-        </v-card-actions>
+        </div>
       </v-card>
     </v-dialog>
 
@@ -810,10 +810,7 @@ const openMealDialog = async (meal) => {
   color: #555 !important;
   border-radius: 10px;
 }
-.btn-no:hover {
-  background-color: #dcdcdc !important;
-  transform: scale(1.03);
-}
+
 
 // 저장 버튼
 .btn-yes {
@@ -821,9 +818,16 @@ const openMealDialog = async (meal) => {
   color: #fff !important;
   border-radius: 10px;
 }
-.btn-yes:hover {
-  background-color: #3dd4da !important;
-  box-shadow: 0 3px 10px rgba(61, 212, 218, 0.35);
-  transform: scale(1.03);
+
+/* 정렬 아이콘 항상 보이게 */
+.styled-table :deep(.v-data-table__th .v-icon) {
+  opacity: 1 !important; /* 항상 표시 */
+  color: #bbb !important; /* 기본은 연한 회색으로 */
+  transition: color 0.2s ease;
+}
+
+/* 활성 정렬 컬럼 아이콘 강조 */
+.styled-table :deep(.v-data-table__th--sorted .v-icon) {
+  color: #5ee6eb !important; /* 활성 정렬 컬럼만 민트 */
 }
 </style>

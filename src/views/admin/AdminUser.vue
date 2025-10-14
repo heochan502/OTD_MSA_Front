@@ -39,13 +39,13 @@ const formatDate = (date) => {
 };
 
 const headers = [
-  { title: 'ID', key: 'userId' },
-  { title: '닉네임 (이름)', key: 'nickName' },
-  { title: '이메일', key: 'email' },
-  { title: '권한', key: 'userRoles' },
-  { title: '챌린지 등급', key: 'challengeRole' },
-  { title: '가입일', key: 'createdAt' },
-  { title: '생년월일', key: 'birthDate' },
+  { title: 'ID', key: 'userId', align: 'center' },
+  { title: '닉네임 (이름)', key: 'nickName', align: 'center' },
+  { title: '이메일', key: 'email', align: 'center' },
+  { title: '권한', key: 'userRoles', align: 'center' },
+  { title: '챌린지 등급', key: 'challengeRole', align: 'center' },
+  { title: '가입일', key: 'createdAt', align: 'center' },
+  { title: '생년월일', key: 'birthDate', align: 'center' },
 ];
 
 const rowProps = ({ item } = {}) => ({
@@ -191,5 +191,16 @@ const reversedUser = computed(() => {
     color: #888;
     font-size: 0.85rem;
   }
+}
+/* 정렬 아이콘 항상 보이게 */
+.styled-table :deep(.v-data-table__th .v-icon) {
+  opacity: 1 !important; /* 항상 표시 */
+  color: #bbb !important; /* 기본은 연한 회색으로 */
+  transition: color 0.2s ease;
+}
+
+/* 활성 정렬 컬럼 아이콘 강조 */
+.styled-table :deep(.v-data-table__th--sorted .v-icon) {
+  color: #5ee6eb !important; /* 활성 정렬 컬럼만 민트 */
 }
 </style>
