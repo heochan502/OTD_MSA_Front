@@ -224,7 +224,7 @@ const settlementButton = async () => {
           :class="{ 'mission-done': mission.done }"
         >
           <img
-            :src="`${FILE_URL}${mission.cdImage}`"
+            :src="`${FILE_URL}/${mission.cdImage}`"
             :alt="`${mission.cdName}`"
             class="mission-image"
           />
