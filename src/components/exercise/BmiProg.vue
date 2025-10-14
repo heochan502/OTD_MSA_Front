@@ -1,9 +1,12 @@
 <script setup>
-import { computed, reactive, ref } from "vue";
+import { computed, reactive, ref, onMounted } from "vue";
 import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
+import { useAuthenticationStore } from "@/stores/user/authentication";
 import { saveUserBasicBodyInfo } from "@/services/body_composition/bodyCompositionService";
 import Modal from "../user/Modal.vue";
+
 const bodyCompositionStore = useBodyCompositionStore();
+const authenticationStore = useAuthenticationStore();
 const showDialog = ref(false);
 
 // bmi 데이터 유무
@@ -17,9 +20,12 @@ const hasBmiData = computed(() => {
 
 // 수정 가능 여부: bmiInfo 기반일 때만 true
 const isBmiInfo = computed(() => {
-  const { lastest, bmiInfo } = bodyCompositionStore;
+  const { lastest, basicInfo } = bodyCompositionStore;
   return (
-    !lastest?.height && !lastest?.weight && bmiInfo?.height && bmiInfo?.weight
+    !lastest?.height &&
+    !lastest?.weight &&
+    basicInfo?.height &&
+    basicInfo?.weight
   );
 });
 
@@ -38,6 +44,10 @@ function calculateBmi(height, weight) {
 const bmi = computed(() => {
   const { lastest, basicInfo } = bodyCompositionStore;
 
+  if (basicInfo?.bmi) {
+    return basicInfo.bmi;
+  }
+
   const height = lastest?.height || basicInfo?.height;
   const weight = lastest?.weight || basicInfo?.weight;
 
@@ -54,6 +64,31 @@ const bmiStatus = computed(() => {
   else return "고도비만";
 });
 
+// 기초대사량 bmr
+const userGender = computed(() => authenticationStore.state.signedUser.gender);
+const userAge = computed(() => authenticationStore.state.signedUser.age);
+
+function calculateBmr(height, weight, age, gender) {
+  if (!height || !weight || !age || !gender) return 0;
+
+  let bmr;
+
+  // 남성 BMR 공식: 66.47 + (13.75 * W) + (5 * H) - (6.76 * A)
+  if (gender === "M") {
+    bmr = 66.47 + 13.75 * weight + 5 * height - 6.76 * age;
+  }
+  // 여성 BMR 공식: 655.1 + (9.56 * W) + (1.85 * H) - (4.68 * A)
+  else if (gender === "F") {
+    bmr = 655.1 + 9.56 * weight + 1.85 * height - 4.68 * age;
+  } else {
+    // 성별 정보가 없는 경우 0 반환
+    return 0;
+  }
+
+  // 소수점 첫째 자리에서 반올림하여 정수로 반환
+  return Math.round(bmr);
+}
+
 const state = reactive({
   form: {
     weight: null,
@@ -64,17 +99,26 @@ const state = reactive({
 });
 
 const saveFormData = async () => {
-  state.form.bmi = bmi.value;
-  state.form.bmr = null;
-  
+  const height = state.form.height;
+  const weight = state.form.weight;
+
+  const calcBmi = calculateBmi(height, weight);
+  const calcBmr = calculateBmr(height, weight, userAge.value, userGender.value);
+
+  state.form.bmi = calcBmi;
+  state.form.bmr = calcBmr;
+
   const res = await saveUserBasicBodyInfo(state.form);
   if (res === undefined || res.status !== 200) {
     alert("에러발생");
     return;
   }
+
+  bodyCompositionStore.setBasicInfo(state.form);
+
   // 모달창 닫기 전에 입력된 내용 지우기
-  state.form.height = null;
-  state.form.weight = null;
+  // state.form.height = null;
+  // state.form.weight = null;
 
   // 모달창 닫기
   showDialog.value = false;

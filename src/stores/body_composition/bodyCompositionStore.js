@@ -13,7 +13,7 @@ export const useBodyCompositionStore = defineStore("bodyComposition", {
     metrics: [],
     selectionMetrics: [],
     filterList: [],
-    basicInfo: {},
+    basicInfo: { height: null, weight: null, bmi: null, bmr: null },
   }),
 
   actions: {
@@ -56,6 +56,12 @@ export const useBodyCompositionStore = defineStore("bodyComposition", {
     },
     clearMetrics() {
       this.metrics = [];
+    },
+    setBasicInfo(data) {
+      this.basicInfo = data;
+    },
+    resetStore() {
+      this.basicInfo = { height: null, weight: null, bmi: null, bmr: null };
     },
   },
 
