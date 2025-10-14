@@ -214,8 +214,8 @@ const settlementButton = async () => {
         </div>
       </div>
     </div>
+    <div class="title">일일 미션</div>
     <div class="daily">
-      <div class="title">일일 미션</div>
       <div class="mission-box">
         <div
           v-for="mission in missionDone"
@@ -224,7 +224,7 @@ const settlementButton = async () => {
           :class="{ 'mission-done': mission.done }"
         >
           <img
-            :src="`${FILE_URL}/${mission.cdImage}`"
+            :src="`${FILE_URL}${mission.cdImage}`"
             :alt="`${mission.cdName}`"
             class="mission-image"
           />
@@ -339,13 +339,33 @@ const settlementButton = async () => {
 </template>
 
 <style lang="scss" scoped>
+.wrap {
+  margin-top: 30px;
+}
+// 화면이 391px 이상일 때만 max-width + 중앙정렬 적용
+@media (min-width: 391px) {
+  .wrap {
+    max-width: 391px;
+    margin: 0 auto;
+    margin-top: 30px;
+  }
+}
 .daily {
+  display: flex;
+  justify-content: center;
+  justify-items: center;
   .mission-box {
-    width: 351px;
+    display: flex;
+    flex-direction: column;
+    max-width: 351px;
+    min-width: 280px;
+    width: 100%;
     height: 170px;
     .mission-card {
       margin-bottom: 10px;
-      width: 311px;
+      max-width: 351px;
+      min-width: 280px;
+      width: 100%;
       height: 40px;
       display: flex;
       align-items: center;
@@ -394,6 +414,8 @@ const settlementButton = async () => {
   display: grid;
   grid-template-columns: repeat(2, 168px); // 가로 2칸
   gap: 15px;
+  justify-content: center;
+  justify-items: center;
 }
 .empty-card {
   display: flex;
@@ -411,7 +433,9 @@ const settlementButton = async () => {
 }
 .sub-wrap {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
+  justify-items: center;
+  gap: 15px;
 }
 .point-wrap,
 .success-challenge {
@@ -433,6 +457,10 @@ const settlementButton = async () => {
 }
 .info {
   display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+  max-width: 351px;
   gap: 15px;
   .tier-img {
     width: 100px;
@@ -445,6 +473,28 @@ const settlementButton = async () => {
     .progress {
       // width: 70%;
     }
+  }
+}
+/* 360px 이하에서는 카드 조금 줄여주기 */
+@media (max-width: 360px) {
+  .challenge-card {
+    grid-template-columns: repeat(2, 150px); // 카드 폭 줄임
+  }
+  .empty-card {
+    width: 150px;
+    height: 110px;
+  }
+}
+
+/* 320px 이하에서는 1열로 변경 */
+@media (max-width: 320px) {
+  .challenge-card {
+    grid-template-columns: 1fr; // 한 줄만
+  }
+  .empty-card {
+    width: 80%; // 부모 폭 기준
+    max-width: 168px;
+    margin: 0 auto; // 가운데 정렬
   }
 }
 </style>
