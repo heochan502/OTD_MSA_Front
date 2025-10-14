@@ -30,11 +30,10 @@ onMounted(async () => {
     authenticationStore.userRole === "MANAGER"
   ) {
     return;
-  } else if (hasRecord) {
+  } else if (hasRecord.value) {
     return;
   } else {
     const res = await getUserBasicBodyInfo();
-
     if (res === undefined || res.status !== 200) {
       if (hasRecord.value) {
         //인바디 기록이 있으면 X
