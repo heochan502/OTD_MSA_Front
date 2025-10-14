@@ -22,7 +22,7 @@ import {
   LinearScale,
 } from 'chart.js';
 import { Pie, Bar, Line } from 'vue-chartjs';
-import ChartDataLabels from 'chartjs-plugin-datalabels';
+import Progress from '@/components/challenge/Progress.vue';
 ChartJS.register(
   Title,
   Tooltip,
@@ -34,62 +34,18 @@ ChartJS.register(
   PointElement,
   CategoryScale,
   LinearScale
-  // ChartDataLabels
 );
 
 const state = reactive({
   // 유저
-  genderChartData: {
-    labels: [],
-    datasets: [
-      {
-        data: [],
-        backgroundColor: [],
-        borderWidth: 0,
-      },
-    ],
-  },
-  ageChartData: {
-    labels: [],
-    datasets: [
-      {
-        data: [],
-        backgroundColor: [],
-        borderWidth: 0,
-      },
-    ],
-  },
-  signInChartData: {
-    labels: [],
-    datasets: [
-      {
-        data: [],
-        pointRadius: 0,
-      },
-    ],
-  },
+  genderChartData: { labels: [], datasets: [{ data: [] }] },
+  ageChartData: { labels: [], datasets: [{ data: [] }] },
+  signInChartData: { labels: [], datasets: [{ data: [] }] },
 
   // 챌린지
-  tierChartData: {
-    labels: [],
-    datasets: [
-      {
-        data: [],
-        backgroundColor: [],
-        borderWidth: 0,
-      },
-    ],
-  },
-  challengeRateChartData: {
-    labels: [],
-    datasets: [
-      {
-        data: [],
-        backgroundColor: [],
-        borderRadius: 0,
-      },
-    ],
-  },
+  tierChartData: { labels: [], datasets: [{ data: [] }] },
+  challengeTypeChartData: { labels: [], datasets: [{ data: [] }] },
+  challengeRateChartData: { labels: [], datasets: [{ data: [] }] },
 
   // 커뮤니티
   postChartData: { labels: [], datasets: [{ data: [] }] },
@@ -103,6 +59,10 @@ const state = reactive({
   // 식단
   mealRecordChartData: { labels: [], datasets: [{ data: [] }] },
   mealMacroAverageChartData: { labels: [], datasets: [{ data: [] }] },
+
+  // 문의
+  inquiryCountData: { labels: [], datasets: [{ data: [] }] },
+  responseRate: '',
 });
 
 // 퍼센트 계산용 원형차트 툴팁 콜백 함수 (마지막 조각 보정)
@@ -338,6 +298,34 @@ const getChallenge = async () => {
     ],
   };
 
+  // 챌린지 타입별 갯수 비율
+  const challengeTypeData = (
+    Array.isArray(res.data.challengeTypeCount)
+      ? res.data.challengeTypeCount
+      : []
+  ).map((d) => ({
+    type: d.type ?? '기타',
+    count: Number(d.count ?? 0),
+  }));
+
+  state.challengeTypeChartData = {
+    labels: challengeTypeData.map((d) => d.type),
+    datasets: [
+      {
+        data: challengeTypeData.map((d) => d.count),
+        backgroundColor: [
+          '#4fc3f7',
+          '#81c784',
+          '#ffb74d',
+          '#e57373',
+          '#9575cd',
+          '#b0bec5',
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
+
   // 챌린지 타입별 성공률
   const challengeRateData = (
     Array.isArray(res.data.challengeSuccessRateCount)
@@ -374,10 +362,10 @@ const getCommunity = async () => {
   // 게시글 추이
   const postData = Array.isArray(res.data.postCount) ? res.data.postCount : [];
   state.postChartData = {
-    labels: postData.map((p) => p.month),
+    labels: postData.map((d) => d.month),
     datasets: [
       {
-        data: postData.map((p) => Number(p.postCount)),
+        data: postData.map((d) => Number(d.postCount)),
         borderColor: '#42a5f5',
         backgroundColor: '#bbdefb',
         borderWidth: 2,
@@ -391,10 +379,10 @@ const getCommunity = async () => {
     ? res.data.categoryPostCount
     : [];
   state.CategoryPostChartData = {
-    labels: catData.map((c) => c.categoryName),
+    labels: catData.map((d) => d.categoryName),
     datasets: [
       {
-        data: catData.map((c) => Number(c.count)),
+        data: catData.map((d) => Number(d.count)),
         backgroundColor: ['#4db6e2', '#81c784', '#ffb74d', '#f06292'],
       },
     ],
@@ -462,10 +450,10 @@ const getMeal = async () => {
     ? res.data.mealRecordCount
     : [];
   state.mealRecordChartData = {
-    labels: mealTrend.map((m) => m.month),
+    labels: mealTrend.map((d) => d.month),
     datasets: [
       {
-        data: mealTrend.map((m) => Number(m.recordCount)),
+        data: mealTrend.map((d) => Number(d.recordCount)),
         borderColor: '#42a5f5',
         backgroundColor: '#bbdefb',
         fill: true,
@@ -495,6 +483,26 @@ const getMeal = async () => {
 const getInquiry = async () => {
   const res = await getInquiryStatistics();
   console.log('inquiry', res.data);
+
+  // 문의 건 수 추이
+  const inquiryCount = Array.isArray(res.data.inquiryCount)
+    ? res.data.inquiryCount
+    : [];
+  state.inquiryCountData = {
+    labels: inquiryCount.map((d) => d.month),
+    datasets: [
+      {
+        data: inquiryCount.map((d) => Number(d.inquiryCount)),
+        borderColor: '#42a5f5',
+        backgroundColor: '#bbdefb',
+        fill: true,
+        borderWidth: 2,
+      },
+    ],
+  };
+
+  // 문의 답변율
+  state.responseRate = res.data.responseRate;
 };
 </script>
 
@@ -517,6 +525,15 @@ const getInquiry = async () => {
     <div class="chart-group">
       <h3 class="title">사용자 챌린지 티어</h3>
       <Pie :data="state.tierChartData" :options="pieCommonOption" class="pie" />
+    </div>
+
+    <div class="chart-group">
+      <h3 class="title">챌린지 타입 비율</h3>
+      <Pie
+        :data="state.challengeTypeChartData"
+        :options="pieCommonOption"
+        class="pie"
+      />
     </div>
 
     <div class="chart-group">
@@ -599,6 +616,20 @@ const getInquiry = async () => {
         class="bar"
       />
     </div>
+
+    <div class="chart-group">
+      <h3 class="title">문의건수 추이</h3>
+      <Line
+        :data="state.inquiryCountData"
+        :options="lineCommonOption"
+        class="line"
+      />
+    </div>
+  </div>
+
+  <div class="chart-group" v-if="state.responseRate != ''">
+    <h3 class="title">문의 답변율</h3>
+    <Progress :indata-progress="state.responseRate"></Progress>
   </div>
 </template>
 

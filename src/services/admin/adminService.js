@@ -128,29 +128,37 @@ export const getUserExerciseRecord = (userId) => {
   return axios.get(`${LIFE_URL}/exercise/${userId}`).catch((e) => e.response);
 };
 
+// 커뮤니티 목록
 export const getCommunity = () => {
   return axios.get(`${LIFE_URL}/community`).catch((e) => e.response);
 };
 
+// 커뮤니티 디테일
 export const getCommunityDetail = (postId) => {
   return axios.get(`${LIFE_URL}/community/${postId}`).catch((e) => e.response);
 };
 
+// 커뮤니티 글 삭제
 export const deleteCommunity = (postId) => {
   return axios
     .delete(`${LIFE_URL}/community/${postId}`)
     .catch((e) => e.response);
 };
+
+// 커뮤니티 댓글 삭제
 export const deleteComment = (commentId) => {
   return axios
     .delete(`${LIFE_URL}/community/comment/${commentId}`)
     .catch((e) => e.response);
 };
+
+// 커뮤니티 사진 삭제
 export const deleteFile = (fileId) => {
   return axios
     .delete(`${LIFE_URL}/community/file/${fileId}`)
     .catch((e) => e.response);
 };
+
 // 게시글 대시보드
 export const getCommunityData = () => {
   return axios.get(`${LIFE_URL}/dash/community`).catch((e) => e.response);
@@ -179,4 +187,50 @@ export const getExerciseStatistics = () => {
 // 식단기록 통계
 export const getMealStatistics = () => {
   return axios.get(`${LIFE_URL}/statistics/meal`).catch((e) => e.response);
+};
+
+// 운동 종목 목록
+export const getExercise = () => {
+  return axios.get(`${LIFE_URL}/exercise`).catch((e) => e.response);
+};
+
+export const postExercise = (exercise) => {
+  return axios.post(`${LIFE_URL}/exercise`, exercise).catch((e) => e.response);
+};
+
+export const putExercise = (exerciseId, exercise) => {
+  return axios
+    .put(`${LIFE_URL}/exercise/${exerciseId}`, exercise)
+    .catch((e) => e.response);
+};
+
+export const deleteExercise = (exerciseId) => {
+  return axios
+    .delete(`${LIFE_URL}/exercise/${exerciseId}`)
+    .catch((e) => e.response);
+};
+
+// 음식 정보 목록
+export const getMeals = (page = 0, size = 50, keyword = '') => {
+  return axios
+    .get(`${LIFE_URL}/meal`, { params: { page, size, keyword } })
+    .catch((e) => e.response);
+};
+
+export const postMeal = (food) => {
+  return axios.post(`${LIFE_URL}/meal`, food).catch((e) => e.response);
+};
+
+export const putMeal = (mealId, food) => {
+  return axios.put(`${LIFE_URL}/meal/${mealId}`, food).catch((e) => e.response);
+};
+
+export const deleteMeal = (mealId) => {
+  return axios.delete(`${LIFE_URL}/meal/${mealId}`).catch((e) => e.response);
+};
+
+export const deleteMealMake = (mealId) => {
+  return axios
+    .delete(`${LIFE_URL}/mealmake/${mealId}`)
+    .catch((e) => e.response);
 };

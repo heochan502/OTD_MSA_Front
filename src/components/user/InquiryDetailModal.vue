@@ -32,27 +32,33 @@ const closeModal = () => {
   emit('close');
 };
 
-const getStatusClass = (status) => {
-  const statusMap = {
-    'PENDING': 'pending',
-    'COMPLETED': 'completed'
-  };
-  return statusMap[status] || 'pending';
-};
-
 const getStatusText = (status) => {
-  const statusTextMap = {
-    'PENDING': '대기중',
-    'COMPLETED': '완료'
-  };
 
-  if (status === '대기 중' || status === '완료') {
+  if (status === '대기 중' || status === '답변 완료') {
     return status;
   }
+
+  const statusTextMap = {
+    'PENDING': '대기 중',
+    'RESOLVED': '답변 완료',
+    '00': '대기 중',
+    '01': '답변 완료'
+  };
 
   return statusTextMap[status] || '알 수 없음';
 };
 
+const getStatusClass = (status) => {
+  const statusMap = {
+    'PENDING': 'pending',
+    'RESOLVED': 'completed',
+    '00': 'pending',
+    '01': 'completed',
+    '대기 중': 'pending',
+    '답변 완료': 'completed'
+  };
+  return statusMap[status] || 'pending';
+};
 const formatDate = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
@@ -84,22 +90,11 @@ onMounted(() => {
 
       <div v-else-if="inquiry" class="modal-body">
         <div class="detail-row">
-          <label>문의 번호</label>
-          <span>{{ inquiry.id }}</span>
-        </div>
-
-        <div class="detail-row">
           <label>상태</label>
           <span :class="['status-badge', getStatusClass(inquiry.status)]">
             {{ getStatusText(inquiry.status) }}
           </span>
         </div>
-
-        <div class="detail-row">
-          <label>제목</label>
-          <span class="subject">{{ inquiry.subject }}</span>
-        </div>
-
         <div class="detail-row">
           <label>작성자</label>
           <span>{{ inquiry.senderName }}</span>
@@ -113,6 +108,11 @@ onMounted(() => {
         <div class="detail-row">
           <label>작성일시</label>
           <span>{{ formatDate(inquiry.createdAt) }}</span>
+        </div>
+
+        <div class="detail-row">
+          <label>제목</label>
+          <span class="subject">{{ inquiry.subject }}</span>
         </div>
 
         <div class="detail-content">

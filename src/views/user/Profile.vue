@@ -9,6 +9,7 @@ import {
 import { getSelectedAll } from '@/services/user/userService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { ref, computed, onMounted } from 'vue';
+import { putLifeUserProfile } from '@/services/community/postService';
 
 const router = useRouter();
 const authStore = useAuthenticationStore();
@@ -91,6 +92,8 @@ const saveProfilePhoto = async () => {
 
       authStore.state.signedUser.pic = imagePath;
 
+      const lifePic = await putLifeUserProfile(imagePath);
+      console.log('lifePic', lifePic);
       alert('프로필 사진이 변경되었습니다.');
       closePhotoModal();
     }
