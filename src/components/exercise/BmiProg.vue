@@ -30,9 +30,10 @@ onMounted(async () => {
     authenticationStore.userRole === "MANAGER"
   ) {
     return;
+  } else if (hasRecord.value) {
+    return;
   } else {
     const res = await getUserBasicBodyInfo();
-
     if (res === undefined || res.status !== 200) {
       if (hasRecord.value) {
         //인바디 기록이 있으면 X
@@ -146,24 +147,23 @@ const saveFormData = async () => {
     return;
   }
   bodyCompositionStore.setBasicInfo(state.form);
-  bodyCompositionStore.setRecentBodyInfo();
+  bodyCompositionStore.recentBodyInfo = { ...state.form };
 
   // 모달창 닫기
   showDialog.value = false;
 };
 
-// watch(showDialog, (isModalOpen) => {
-//   if (isModalOpen) {
-//     state.form.height = bodyCompositionStore.recentBodyInfo.height;
-//     state.form.weight = bodyCompositionStore.recentBodyInfo.weight;
-//   } else {
-//     // 모달이 닫힐 때는 임시 폼 데이터를 초기화
-//     state.form.height = null;
-//     state.form.weight = null;
-//     state.form.bmi = null;
-//     state.form.bmr = null;
-//   }
-// });
+watch(showDialog, (isModalOpen) => {
+  if (isModalOpen) {
+    state.form.height = bodyCompositionStore.recentBodyInfo?.height || null;
+    state.form.weight = bodyCompositionStore.recentBodyInfo?.weight || null;
+    // 모달이 닫힐 때는 임시 폼 데이터를 초기화
+    state.form.height = null;
+    state.form.weight = null;
+    state.form.bmi = null;
+    state.form.bmr = null;
+  }
+});
 </script>
 
 <template>
