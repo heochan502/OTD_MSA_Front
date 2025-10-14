@@ -16,12 +16,20 @@ onMounted(async () => {
 
   const res = await getUserBasicBodyInfo();
   if (res === undefined || res.status !== 200) {
+    if (bodyCompositionStore.lastest) {
+      return;
+    }
+    if (
+      authenticationStore.userRole === "ADMIN" ||
+      authenticationStore.userRole === "MANAGER"
+    ) {
+      return;
+    }
     noticeDialog.value = true;
 
-    return;
+    bodyCompositionStore.basicInfo = res.data;
+    bodyCompositionStore.setRecentBodyInfo();
   }
-  bodyCompositionStore.basicInfo = res.data;
-  bodyCompositionStore.setRecentBodyInfo();
 });
 
 // bmi 데이터 유무
@@ -245,9 +253,9 @@ watch(showDialog, (isModalOpen) => {
 
   <Modal
     :show="noticeDialog"
-    title="회원가입 축하합니다 🎉"
-    message="키랑 몸무게를 알려주세요"
-    type="success"
+    title="키와 체중을 알려주세요!"
+    message="기본 신체 정보로 bmi를 계산해드릴게요."
+    type="info"
     confirmText="입력하기"
     @close="(noticeDialog = false), (showDialog = true)"
   />
