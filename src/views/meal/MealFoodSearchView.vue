@@ -175,7 +175,8 @@ const customFood = ref ({
 // }
 
 const openSheet = (food) => {
-  const kcalPer100 = food.amount ? Math.round(food.kcal / (food.amount / 100)) : 0;
+  const kcalPer100 = food.amount
+    ? Math.round((food.kcal * 100) / food.amount) : 0;
 
   clickFood.value = { ...food, _kcalPer100: kcalPer100 };
 

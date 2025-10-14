@@ -95,6 +95,10 @@ const addToDefaultList = (res) => {
 
       // 출처별 id를 분리(시스템이면 makeFoodId=null, 사용자면 systemFoodId=null)
       const mealId = mealRecord?.foodDb?.foodDbId ?? null;
+
+
+      const modiKcal = mealId ? Math.round(food.kcal * (mealRecord.foodAmount / 100)) : food.kcal;
+
       const userFoodId = mealRecord?.userFood?.userFoodId ?? null;
 
       const payload = {
@@ -103,7 +107,7 @@ const addToDefaultList = (res) => {
         foodName: food?.foodName ?? "",
         // amount는 음식 엔티티가 아니라 MealRecord의 foodAmount임
         amount: Number(mealRecord?.foodAmount) || 0,
-        kcal: food?.kcal || 0,
+        kcal: modiKcal,
         flag: food?.flag ?? "",
         protein: Number(food?.protein) || 0,
         carbohydrate: Number(food?.carbohydrate) || 0,
@@ -129,7 +133,7 @@ const addToDefaultList = (res) => {
       }
 
       eatenFoodList.value = [...eatenFoodList.value, payload];
-      // console.log("페이로드 ", eatenFood.eatenFoodList);
+      console.log("페이로드 ", eatenFood.eatenFoodList);
     }
   }  );
 
@@ -194,7 +198,7 @@ watch(() => selectedDay.selectedDay.setDay, async () => {
 onMounted(async () => {
   // 여기서 API 호출하여 mealInfo 초기화 가능
   const res = await getMealRecord(selectedDay.selectedDay.setDay);
-  // console.log("mealRecord", res);
+  console.log("mealRecord", res);
   // console.log("mealRecordIds", res[0]?.mealRecordIds);
   // console.log("userFood", res[0]?.userFood);
   // console.log("foodDb", res[0]?.foodDb);
