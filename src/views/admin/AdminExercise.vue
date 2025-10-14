@@ -15,8 +15,8 @@ const isEdit = ref(false);
 const successDialog = ref(false);
 const cancelDialog = ref(false);
 
-const exercise = ref({});
-const search = ref('');
+// const exercise = ref([]);
+// const search = ref('');
 
 // 테이블 헤더
 const headers = [
@@ -130,7 +130,7 @@ onMounted(() => {
     <v-card class="data-card pa-2">
       <!-- 상단 툴바 -->
       <v-card-title class="d-flex justify-space-between align-center">
-        <span class="title">운동 관리</span>
+        <span class="title">운동 종목 관리</span>
         <div class="d-flex align-center search" style="gap: 12px">
           <v-text-field
             v-model="keyword"
@@ -285,7 +285,7 @@ onMounted(() => {
       </v-card>
     </v-dialog>
 
-    <v-card>
+    <!-- <v-card>
       <v-card-title class="d-flex justify-space-between align-center">
         <span class="title">운동 종목 관리</span>
         <v-text-field
@@ -310,7 +310,7 @@ onMounted(() => {
         :items-per-page="10"
         class="styled-table"
       >
-        타입 변환
+        <!-- 타입 변환 -->
         <!-- <template #item.cdType="{ item }">
           <v-chip
             :color="
@@ -359,8 +359,8 @@ onMounted(() => {
           <v-btn @click="toForm(item)">수정</v-btn>
           <v-btn @click="openDelete(item.cdId)">삭제</v-btn>
         </template> -->
-      </v-data-table>
-    </v-card>
+      <!-- </v-data-table>
+    </v-card> -->
   </div>
 </template>
 

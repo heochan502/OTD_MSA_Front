@@ -25,7 +25,7 @@ const modalState = ref({
   title: '',
   message: '',
   type: 'info',
-  onConfirm: null
+  onConfirm: null,
 });
 
 const showModal = (title, message, type = 'info', onConfirm = null) => {
@@ -34,7 +34,7 @@ const showModal = (title, message, type = 'info', onConfirm = null) => {
     title,
     message,
     type,
-    onConfirm
+    onConfirm,
   };
 };
 
@@ -57,7 +57,6 @@ const submit = async () => {
   try {
     const res = await login(state.form);
 
-
     if (res.status === 200) {
       const result = res.data.result;
 
@@ -66,8 +65,8 @@ const submit = async () => {
 
       // store 상태 확인
       console.log('업데이트 후 store 상태:', authentication.state.signedUser);
-      
-      if (result.userRole === 'ADMIN') {
+
+      if (result.userRole === 'ADMIN' || result.userRole === 'MANAGER') {
         await router.push('/admin');
       } else {
         await router.push('/');
@@ -126,32 +125,38 @@ const submit = async () => {
       </div>
       <!-- API 로그인 -->
       <div class="API">
-  <a
-    :href="`${beBaseUrl}/oauth2/authorization/naver?redirect_uri=${redirectUrl}`"
-    class="oauth-button naver"
-  >
-    <svg class="oauth-icon" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M16.273 12.845L7.376 0H0v24h7.726V11.156L16.624 24H24V0h-7.727v12.845z"/>
-    </svg>
-    <span>네이버로 로그인</span>
-  </a>
+        <a
+          :href="`${beBaseUrl}/oauth2/authorization/naver?redirect_uri=${redirectUrl}`"
+          class="oauth-button naver"
+        >
+          <svg class="oauth-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M16.273 12.845L7.376 0H0v24h7.726V11.156L16.624 24H24V0h-7.727v12.845z"
+            />
+          </svg>
+          <span>네이버로 로그인</span>
+        </a>
 
-  <a
-    :href="`${beBaseUrl}/oauth2/authorization/kakao?redirect_uri=${redirectUrl}`"
-    class="oauth-button kakao"
-  >
-    <svg class="oauth-icon" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 3C6.477 3 2 6.477 2 10.786c0 2.823 1.886 5.298 4.713 6.682l-1.227 4.505c-.095.349.277.634.589.451l5.083-2.948c.341.032.687.048 1.037.048 5.523 0 10-3.477 10-7.786C22 6.477 17.523 3 12 3z"/>
-    </svg>
-    <span>카카오로 로그인</span>
-  </a>
-</div>
-</div>
+        <a
+          :href="`${beBaseUrl}/oauth2/authorization/kakao?redirect_uri=${redirectUrl}`"
+          class="oauth-button kakao"
+        >
+          <svg class="oauth-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M12 3C6.477 3 2 6.477 2 10.786c0 2.823 1.886 5.298 4.713 6.682l-1.227 4.505c-.095.349.277.634.589.451l5.083-2.948c.341.032.687.048 1.037.048 5.523 0 10-3.477 10-7.786C22 6.477 17.523 3 12 3z"
+            />
+          </svg>
+          <span>카카오로 로그인</span>
+        </a>
+      </div>
+    </div>
     <div class="additional-links">
       <div class="link-row">
         <router-link to="/user/findid" class="link">아이디 찾기</router-link>
         <span class="link-separator">|</span>
-        <router-link to="/user/password" class="link">비밀번호 찾기</router-link>
+        <router-link to="/user/password" class="link"
+          >비밀번호 찾기</router-link
+        >
       </div>
     </div>
 

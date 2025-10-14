@@ -41,9 +41,9 @@ import MyLike from '@/views/user/MyLike.vue';
 import MyComment from '@/views/user/MyComment.vue';
 
 // 포인트샵
-import PointShopListView from "@/views/pointshop/PointShopListView.vue";
-import PointUserView from "@/views/pointshop/PointUserView.vue";
-import PointPurchaseHistoryTable from "@/components/pointshop/PointPurchaseHistoryTable.vue";
+import PointShopListView from '@/views/pointshop/PointShopListView.vue';
+import PointUserView from '@/views/pointshop/PointUserView.vue';
+import PointPurchaseHistoryTable from '@/components/pointshop/PointPurchaseHistoryTable.vue';
 //식단
 import MealMainView from '@/views/meal/MealMainView.vue';
 import MealDetailView from '@/views/meal/MealDetailView.vue';
@@ -291,10 +291,10 @@ const router = createRouter({
       path: '/user/onboarding',
       name: 'Onboarding',
       component: Onboarding,
-      meta: { 
-        headerType: 'title', 
-        title: '온보딩', 
-        showUserPanel: false 
+      meta: {
+        headerType: 'title',
+        title: '온보딩',
+        showUserPanel: false,
       },
     },
     {
@@ -461,7 +461,7 @@ const onboardingExcludedPaths = [
 
 //navigation guard
 router.beforeEach((to, from) => {
-  const authenticationStore = useAuthenticationStore(); 
+  const authenticationStore = useAuthenticationStore();
   const isUnsignedPath = unSignedPathList.some((path) =>
     to.path.startsWith(path)
   );
@@ -473,26 +473,34 @@ router.beforeEach((to, from) => {
     document.body.classList.remove('is-admin');
   }
   if (to.path.startsWith('/admin')) {
-     const user = authenticationStore.state.signedUser;
-    if (!user || user.userRole !== 'ADMIN') {
+    const user = authenticationStore.state.signedUser;
+    if (!user || (user.userRole !== 'ADMIN' && user.userRole !== 'MANAGER')) {
       alert('관리자만 접근 가능합니다.');
       return { path: '/' }; // 일반 유저는 홈으로 돌려보내기
     }
   }
-  if (unSignedPathList.includes(to.path) && authenticationStore.state.isSigned) {
+  if (
+    unSignedPathList.includes(to.path) &&
+    authenticationStore.state.isSigned
+  ) {
     //로그인 상태에서 /user/login, /user/join 경로로 이동하려고 하면
     return { path: '/' };
   } else if (
-     !authenticationStore.state.isSigned &&
+    !authenticationStore.state.isSigned &&
     !unSignedPathList.includes(to.path)
   ) {
     console.log('로그아웃 상태에서 접근 불가 경로');
     //로그아웃 상태에서 /user/login, /user/join 경로가 아닌 경우
     return { path: '/user/login' };
   }
-   if (authenticationStore.state.isSigned && authenticationStore.needsOnboarding()) {
-    const isExcluded = onboardingExcludedPaths.some(path => to.path.startsWith(path));
-    
+  if (
+    authenticationStore.state.isSigned &&
+    authenticationStore.needsOnboarding()
+  ) {
+    const isExcluded = onboardingExcludedPaths.some((path) =>
+      to.path.startsWith(path)
+    );
+
     if (!isExcluded) {
       console.log('온보딩 미완료 - 온보딩 페이지로 리다이렉트');
       return { path: '/user/onboarding' };

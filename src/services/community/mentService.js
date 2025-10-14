@@ -22,9 +22,16 @@ export const createMent = (postId, content, userId, nickName) => {
 };
 
 /** 댓글 삭제 */
-export const deleteMent = (mentId, userId) => {
-  const headers =
-    userId != null ? { 'X-MEMBER-ID': String(userId) } : undefined;
+export const deleteMent = (mentId, userId, role) => {
+  const headers = {};
+  if (userId != null) {
+    headers['X-MEMBER-ID'] = String(userId);
+  } else {
+    undefined;
+  }
+  if (role) {
+    headers['X-ROLE'] = role;
+  }
 
   return axios.delete(`${BASE}/ments/${mentId}`, { headers });
 };

@@ -12,7 +12,8 @@ import { useAuthenticationStore } from '@/stores/user/authentication';
 const route = useRoute();
 const router = useRouter();
 const store = useCommunityStore();
-useAuthenticationStore();
+const auth = useAuthenticationStore();
+const myRole = computed(() => auth?.state?.signedUser?.userRole ?? '');
 
 const routeId = computed(() => String(route.params.id));
 const post = computed(() => store.getById(routeId.value));
@@ -26,12 +27,13 @@ const DEFAULT_AVATAR =
 
 const cacheBust = ref(`?v=${Date.now()}`);
 
-const API_BASE =
-  (import.meta.env.VITE_BASE_URL ).replace(/\/$/, '');
+const API_BASE = import.meta.env.VITE_BASE_URL.replace(/\/$/, '');
 
-function toAbsUrl(path) {
-  const base = import.meta.env.VITE_BASE_URL.replace(/\/$/, ''); // https://greenart.n-e.kr/otd-api
-  if (!path) return base;
+function toAbsUrl(p) {
+  if (!p) return '';
+  if (/^https?:\/\//i.test(p)) return p;
+  if (p.startsWith('/static/')) return `${API_BASE}${p}`;
+  if (p.startsWith('static/')) return `${API_BASE}/${p}`;
 
   // 슬래시 중복 방지해서 안전하게 합침
   return `${base}/${path.replace(/^\/+/, '')}`;
@@ -127,20 +129,25 @@ const like = async () => {
 
 const myId = computed(() => store.currentUserId);
 const postOwnerId = computed(() => post.value?.authorId);
-const canEdit = computed(
-  () =>
+const canEdit = computed(() => {
+  // 관리자면 무조건 true
+  if (myRole.value === 'ADMIN') return true;
+
+  // 아니면 본인 글만
+  return (
     post.value?.isMine === true ||
     (myId.value != null &&
       postOwnerId.value != null &&
       Number(myId.value) === Number(postOwnerId.value))
-);
+  );
+});
 
 const removePost = async () => {
   if (!post.value) return;
 
   showConfirm('이 게시글을 삭제할까요?', async () => {
     try {
-      await store.removePost(routeId.value);
+      await store.removePost(routeId.value, myRole.value);
 
       // 삭제 성공 후 커뮤니티 메인으로 이동
       if (router.hasRoute('CommunityView')) {
