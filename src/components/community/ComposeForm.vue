@@ -665,18 +665,20 @@ function openLightboxFromNew(i) {
 }
 .m-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between; /* 좌/우 끝으로 벌리기 */
+  align-items: center;
   gap: 8px;
   margin-top: 6px;
 }
 .m-btn {
   height: 36px;
-  padding: 0 14px;
+  padding: 0 16px; /* 살짝 더 넉넉하게 */
   border-radius: 10px;
   border: 1px solid #e5e7eb;
   background: #fff;
   cursor: pointer;
   font-weight: 700;
+  min-width: 96px; /* 최소 버튼 폭 확보 */
 }
 .m-btn.primary {
   background: #06b6d4;
