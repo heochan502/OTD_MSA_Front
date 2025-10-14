@@ -35,13 +35,8 @@ function toAbsUrl(p) {
   if (p.startsWith('/static/')) return `${API_BASE}${p}`;
   if (p.startsWith('static/')) return `${API_BASE}/${p}`;
 
-  try {
-    return new URL(p, `${API_BASE}/`).toString();
-  } catch {
-    return p.startsWith('/')
-      ? p
-      : import.meta.env.BASE_URL + p.replace(/^\.?\//, '');
-  }
+  // 슬래시 중복 방지해서 안전하게 합침
+  return `${base}/${path.replace(/^\/+/, '')}`;
 }
 
 const avatarUrl = computed(() => {
