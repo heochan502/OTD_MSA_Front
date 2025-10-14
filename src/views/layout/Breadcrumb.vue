@@ -87,7 +87,12 @@ onMounted(() => {});
     <!-- 로고 출력 -->
     <div class="title" v-if="headerType === 'logo'">
       <img class="otd-logo" src="/image/main/ontoday_logo.png" alt="로고" />
-      <img class="alram" src="/image/main/alarm.png" alt="알람" @click="handleClick" />
+      <img
+        class="alram"
+        src="/image/main/alarm.png"
+        alt="알람"
+        @click="handleClick"
+      />
     </div>
     <!-- 타이틀 출력 -->
     <div class="title" v-else>
@@ -95,13 +100,18 @@ onMounted(() => {});
         <img class="back-btn" src="/image/main/back_icon.png" alt="뒤로가기" />
       </button>
       <div class="hearder-text">{{ headerTitle }}</div>
-      <img class="alram" src="/image/main/alarm.png" alt="알람" @click="handleClick" />
+      <img
+        class="alram"
+        src="/image/main/alarm.png"
+        alt="알람"
+        @click="handleClick"
+      />
     </div>
   </div>
 
   <div class="user" v-if="route.name === 'Home'">
     <!-- 일반 유저 -->
-    <template v-if="myRole !== 'ADMIN'">
+    <template v-if="['USER_1', 'USER_2'].includes(myRole)">
       <div class="user-profile">
         <img class="avatar otd-shadow" :src="profileImage" alt="프로필" />
         <div class="info">
@@ -110,7 +120,11 @@ onMounted(() => {});
         </div>
       </div>
       <div class="point otd-body-1">
-        <router-link to="/pointshop" class="pointShop" :class="{ active: route.path.startsWith('/pointshop') }">
+        <router-link
+          to="/pointshop"
+          class="pointShop"
+          :class="{ active: route.path.startsWith('/pointshop') }"
+        >
           <div class="point-wrap">
             <img class="point-img" src="/image/main/point.png" alt="포인트" />
             <span>{{ formatPoint(userInfo.userPoint) }}</span>
@@ -119,22 +133,25 @@ onMounted(() => {});
       </div>
     </template>
 
-    <!-- 관리자 -->
+    <!-- ADMIN & MANAGER -->
     <template v-else>
-      <div class="admin-panel">
-        <router-link to="/admin" class="admin-btn">
-          관리자 페이지로 이동
-        </router-link>
+      <div class="admin-profile">
+        <span class="otd-title">관리자 님</span>
+        <div class="admin-panel">
+          <router-link to="/admin" class="admin-btn">
+            관리자 페이지로 이동
+          </router-link>
+        </div>
       </div>
     </template>
   </div>
 </template>
-<style scoped>
+<style lang="scss" scoped>
 .admin-btn {
   display: inline-block;
   padding: 10px 16px;
-  background: #ff595e;
-  color: #fff;
+  background: #ffe864;
+  color: #000;
   font-weight: 700;
   border-radius: 10px;
   text-decoration: none;
@@ -220,13 +237,19 @@ onMounted(() => {});
   display: flex;
   flex-direction: row;
 }
-
-.user {
-  margin: 20px;
+.admin-profile {
   display: flex;
   align-items: center;
-
+  // gap: 40px;
   justify-content: space-between;
+}
+.user {
+  margin: 20px auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 350px;
+  width: 100%;
 }
 .point {
   display: flex;
