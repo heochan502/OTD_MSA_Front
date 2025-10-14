@@ -13,7 +13,7 @@ export const useBodyCompositionStore = defineStore("bodyComposition", {
     metrics: [],
     selectionMetrics: [],
     filterList: [],
-    basicInfo: [],
+    basicInfo: {},
   }),
 
   actions: {

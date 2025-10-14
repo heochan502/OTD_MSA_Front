@@ -115,7 +115,6 @@ onMounted(async () => {
   await bodyCompositionStore.fetchBodyCompositionMetrics();
   fetchBodyCompositionSeries();
   fetchLastestBodyComposition();
-  await bodyCompositionStore.fetchBasicBodyInfo();
 });
 
 const challengeHome = () => {
