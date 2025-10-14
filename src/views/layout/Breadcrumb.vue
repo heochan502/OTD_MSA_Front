@@ -145,7 +145,7 @@ onMounted(() => {
   margin: 0 20px 0;
 
   height: 43px;
-  max-width: 100%;
+  max-width: 350px;
   min-width: 320px;
 
 
