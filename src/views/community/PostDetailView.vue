@@ -27,11 +27,10 @@ const DEFAULT_AVATAR =
 
 const cacheBust = ref(`?v=${Date.now()}`);
 
-const API_BASE =
-  (import.meta.env.VITE_BASE_URL ).replace(/\/$/, '');
+const API_BASE = import.meta.env.VITE_BASE_URL.replace(/\/$/, '');
 
 function toAbsUrl(p) {
-  if (!p) return ''; 
+  if (!p) return '';
   if (/^https?:\/\//i.test(p)) return p;
   if (p.startsWith('/static/')) return `${API_BASE}${p}`;
   if (p.startsWith('static/')) return `${API_BASE}/${p}`;
@@ -153,7 +152,7 @@ const removePost = async () => {
 
   showConfirm('이 게시글을 삭제할까요?', async () => {
     try {
-      await store.removePost(routeId.value);
+      await store.removePost(routeId.value, myRole.value);
 
       // 삭제 성공 후 커뮤니티 메인으로 이동
       if (router.hasRoute('CommunityView')) {
