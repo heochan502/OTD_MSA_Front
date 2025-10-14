@@ -34,6 +34,8 @@ onMounted(async () => {
     return;
   } else {
     const res = await getUserBasicBodyInfo();
+    // console.log("getUserBasicBodyInfo res : ", res.data);
+    // console.log(" authenticationStore.state : ", authenticationStore.state);
     if (res === undefined || res.status !== 200) {
       if (hasRecord.value) {
         //인바디 기록이 있으면 X
@@ -98,29 +100,27 @@ const bmiStatus = computed(() => {
 });
 
 // 기초대사량 bmr
-const userGender = computed(() => authenticationStore.state.signedUser.gender);
-const userAge = computed(() => authenticationStore.state.signedUser.age);
+const userGender = computed(() => authenticationStore.state.signedUser?.gender || null);
+const userAge = computed(() => authenticationStore.state.signedUser?.age || null);
 
 function calculateBmr(height, weight, age, gender) {
-  if (!height || !weight || !age || !gender) return 0;
+  const h = Number(height);
+  const w = Number(weight);
+  const a = Number(age);
+  const g = (gender ?? '').toUpperCase();
+
+  // 숫자 검증
+  if (!Number.isFinite(h) || h <= 0) return 0;
+  if (!Number.isFinite(w) || w <= 0) return 0;
+  if (!Number.isFinite(a) || a <= 0) return 0;
+  if (g !== 'M' && g !== 'F') return 0;
 
   let bmr;
+  if (g === 'M') bmr = 66.47 + 13.75 * w + 5 * h - 6.76 * a;
+  else bmr = 655.1 + 9.56 * w + 1.85 * h - 4.68 * a;
 
-  // 남성 BMR 공식: 66.47 + (13.75 * W) + (5 * H) - (6.76 * A)
-  if (gender === "M") {
-    bmr = 66.47 + 13.75 * weight + 5 * height - 6.76 * age;
-  }
-  // 여성 BMR 공식: 655.1 + (9.56 * W) + (1.85 * H) - (4.68 * A)
-  else if (gender === "F") {
-    bmr = 655.1 + 9.56 * weight + 1.85 * height - 4.68 * age;
-  } else {
-    // 성별 정보가 없는 경우 0 반환
-    return 0;
-  }
-
-  // 소수점 첫째 자리에서 반올림하여 정수로 반환
   return Math.round(bmr);
-}
+};
 
 const state = reactive({
   form: {
@@ -152,16 +152,19 @@ const saveFormData = async () => {
   // 모달창 닫기
   showDialog.value = false;
 };
-
-watch(showDialog, (isModalOpen) => {
-  if (isModalOpen) {
-    state.form.height = bodyCompositionStore.recentBodyInfo?.height || null;
-    state.form.weight = bodyCompositionStore.recentBodyInfo?.weight || null;
-    // 모달이 닫힐 때는 임시 폼 데이터를 초기화
-    state.form.height = null;
-    state.form.weight = null;
+watch(showDialog, (isOpen) => {
+  if (isOpen) {
+    // 열릴 때 최근 값으로 프리필
+    state.form.height = bodyCompositionStore.recentBodyInfo?.height ?? null;
+    state.form.weight = bodyCompositionStore.recentBodyInfo?.weight ?? null;
     state.form.bmi = null;
     state.form.bmr = null;
+  } else {
+    // 닫힐 때만 초기화하고 싶다면 여기에서
+    // state.form.height = null;
+    // state.form.weight = null;
+    // state.form.bmi = null;
+    // state.form.bmr = null;
   }
 });
 </script>
@@ -180,19 +183,8 @@ watch(showDialog, (isModalOpen) => {
 
       <div class="bmi-slider-wrapper">
         <div class="gradient-bar w-100"></div>
-        <v-slider
-          :model-value="bmi"
-          :min="minBmi"
-          :max="maxBmi"
-          step="0.1"
-          track-size="12"
-          thumb-size="6"
-          thumb-color="white"
-          color="transparent"
-          readonly
-          thumb-label
-          hide-details
-        />
+        <v-slider :model-value="bmi" :min="minBmi" :max="maxBmi" step="0.1" track-size="12" thumb-size="6"
+          thumb-color="white" color="transparent" readonly thumb-label hide-details />
       </div>
 
       <div class="bmi-legend">
@@ -206,30 +198,16 @@ watch(showDialog, (isModalOpen) => {
 
       <!-- bmiInfo 기반일 때만 수정 가능 -->
       <div v-if="isBmiInfo" class="overlay">
-        <v-btn
-          class="btn_update otd-shadow otd-box-style"
-          color="#ffe864"
-          @click="showDialog = true"
-          >수정하기</v-btn
-        >
+        <v-btn class="btn_update otd-shadow otd-box-style" color="#ffe864" @click="showDialog = true">수정하기</v-btn>
       </div>
     </div>
 
     <!-- BMI 미입력 상태 -->
-    <div
-      v-else
-      class="calc_bmi d-flex flex-column justify-center align-center ga-1"
-    >
-      <v-btn
-        class="btn_bmi otd-shadow"
-        color="#ffe864"
-        @click="showDialog = true"
-      >
+    <div v-else class="calc_bmi d-flex flex-column justify-center align-center ga-1">
+      <v-btn class="btn_bmi otd-shadow" color="#ffe864" @click="showDialog = true">
         BMI 계산기
       </v-btn>
-      <span class="otd-body-3"
-        >체중, 키를 입력하고 BMI와 기초대사량을 계산해보세요!</span
-      >
+      <span class="otd-body-3">체중, 키를 입력하고 BMI와 기초대사량을 계산해보세요!</span>
     </div>
   </div>
 
@@ -238,37 +216,19 @@ watch(showDialog, (isModalOpen) => {
     <div class="modal-container">
       <v-card-title class="text-h6">BMI 계산기</v-card-title>
       <v-card-text>
-        <v-text-field
-          v-model="state.form.height"
-          label="신장 (cm)"
-          type="number"
-          variant="outlined"
-        />
-        <v-text-field
-          v-model="state.form.weight"
-          label="체중 (kg)"
-          type="number"
-          variant="outlined"
-        />
+        <v-text-field v-model.number="state.form.height" label="신장 (cm)" type="number" variant="outlined" />
+        <v-text-field v-model.number="state.form.weight" label="체중 (kg)" type="number" variant="outlined" />
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn class="btn btn-cancel" variant="text" @click="showDialog = false"
-          >취소</v-btn
-        >
+        <v-btn class="btn btn-cancel" variant="text" @click="showDialog = false">취소</v-btn>
         <v-btn class="btn btn-confirm" @click="saveFormData">저장</v-btn>
       </v-card-actions>
     </div>
   </v-dialog>
 
-  <Modal
-    :show="noticeDialog"
-    title="키와 체중을 알려주세요!"
-    message="기본 신체 정보로 bmi를 계산해드릴게요."
-    type="info"
-    confirmText="입력하기"
-    @close="(noticeDialog = false), (showDialog = true)"
-  />
+  <Modal :show="noticeDialog" title="키와 체중을 알려주세요!" message="기본 신체 정보로 bmi를 계산해드릴게요." type="info" confirmText="입력하기"
+    @close="(noticeDialog = false), (showDialog = true)" />
 </template>
 
 <style lang="scss" scoped>
