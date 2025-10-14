@@ -13,7 +13,7 @@ export const fetchPostById = (postId) => axios.get(`${BASE}/${postId}`);
 
 export const createPost = async (payload) => {
   const { data } = await axios.post(`${BASE}`, payload);
-  return data; // ✅ data만 반환
+  return data; // data만 반환
 };
 
 export const updatePost = async (postId, payload) => {

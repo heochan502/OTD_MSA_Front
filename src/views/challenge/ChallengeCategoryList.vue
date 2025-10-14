@@ -234,7 +234,18 @@ onMounted(async () => {
   </v-dialog>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
+.wrap {
+  margin-top: 15px;
+}
+// 화면이 391px 이상일 때만 max-width + 중앙정렬 적용
+@media (min-width: 391px) {
+  .wrap {
+    max-width: 391px;
+    margin: 0 auto;
+    margin-top: 15px;
+  }
+}
 :deep(.swiper) {
   overflow: hidden;
 }

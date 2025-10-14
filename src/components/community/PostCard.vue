@@ -1,6 +1,8 @@
 <script setup>
+import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from '@/services/httpRequester';
+import { fetchPostFiles } from '@/services/community/postService';
 
 const props = defineProps({
   post: { type: Object, required: true },
@@ -17,6 +19,9 @@ const router = useRouter();
 const DEFAULT_AVATAR =
   import.meta.env.BASE_URL + 'image/main/default-profile.png';
 
+//  썸네일 캐시(카드 여러개일 때 중복 API 방지)
+const thumbCache = (globalThis.__postThumbCache ||= new Map());
+
 const getId = (p) => p?.[props.idKey] ?? p?.id ?? p?.postId;
 const getAuthor = (p) =>
   p?.author ?? p?.writer?.nickName ?? p?.nickName ?? '익명';
@@ -30,15 +35,18 @@ function toAbsUrl(p) {
   try {
     return new URL(p, axios.defaults.baseURL).toString();
   } catch {
-    // 상대경로가 public 자산인 경우
     return p.startsWith('/')
       ? p
       : import.meta.env.BASE_URL + p.replace(/^\.?\//, '');
   }
 }
 
+/** 프로필: DB profile 컬럼 우선 */
 function getAvatar(p) {
   const raw =
+    p?.profile || // ← 새로 들어온 컬럼
+    p?.profilePath ||
+    p?.profileUrl ||
     p?.avatar ||
     p?.profileImage ||
     p?.profileImg ||
@@ -49,8 +57,63 @@ function getAvatar(p) {
   return url || DEFAULT_AVATAR;
 }
 
-const getThumb = (p) =>
-  props.thumbnailUrl || p?.[props.thumbnailKey] || p?.thumb || p?.image;
+/** 1차: post 자체에서 썸네일 후보 찾기 */
+function findInlineThumb(p) {
+  const explicit =
+    props.thumbnailUrl ||
+    p?.[props.thumbnailKey] ||
+    p?.thumb ||
+    p?.image ||
+    null;
+
+  if (explicit) return toAbsUrl(explicit);
+
+  const files =
+    p?.images ||
+    p?.files ||
+    p?.fileList ||
+    p?.attachments ||
+    p?.postFiles ||
+    [];
+
+  if (Array.isArray(files) && files.length > 0) {
+    const f = files[0];
+    const path = f?.url || f?.filePath || f?.path || f?.src || null;
+    if (path) return toAbsUrl(path);
+  }
+  return '';
+}
+
+/** 2차: 서버에서 첫 이미지 지연 로딩 */
+const thumbUrlRef = ref('');
+async function lazyLoadThumb(p) {
+  const id = getId(p);
+  if (!id) return;
+  if (thumbCache.has(id)) {
+    thumbUrlRef.value = thumbCache.get(id);
+    return;
+  }
+  try {
+    const { data } = await fetchPostFiles(id);
+    const list = Array.isArray(data) ? data : [];
+    if (list.length > 0) {
+      const first = list[0];
+      const path = first.filePath || first.url || first.src || '';
+      if (path) {
+        const url = toAbsUrl(path);
+        thumbCache.set(id, url);
+        thumbUrlRef.value = url;
+      }
+    }
+  } catch (e) {
+    // 조용히 실패
+  }
+}
+
+/** 실제로 쓸 썸네일 src */
+function getThumbSrc() {
+  return findInlineThumb(props.post) || thumbUrlRef.value || '';
+}
 
 function open() {
   if (!props.clickable) return;
@@ -61,6 +124,23 @@ function open() {
     params: { [props.routeParamKey]: String(id) },
   });
 }
+
+onMounted(() => {
+  if (!findInlineThumb(props.post)) {
+    lazyLoadThumb(props.post);
+  }
+});
+
+watch(
+  () => props.post,
+  (p) => {
+    thumbUrlRef.value = '';
+    if (!findInlineThumb(p)) {
+      lazyLoadThumb(p);
+    }
+  },
+  { deep: false }
+);
 </script>
 
 <template>
@@ -76,7 +156,7 @@ function open() {
       <div class="avatar">
         <img
           :src="getAvatar(post)"
-          alt=""
+          alt="프로필 이미지"
           @error="(e) => (e.target.src = DEFAULT_AVATAR)"
         />
       </div>
@@ -94,8 +174,14 @@ function open() {
       <span class="comment">💬 {{ getComments(post) }}</span>
     </footer>
 
-    <figure class="thumb" v-if="getThumb(post)">
-      <img :src="getThumb(post)" alt="" loading="lazy" decoding="async" />
+    <figure class="thumb" v-if="getThumbSrc()">
+      <img
+        :src="getThumbSrc()"
+        alt="게시글 썸네일"
+        loading="lazy"
+        decoding="async"
+        @error="(e) => (e.target.style.display = 'none')"
+      />
     </figure>
   </article>
 </template>
@@ -146,7 +232,6 @@ function open() {
   object-fit: cover;
   display: block;
 }
-
 .meta-text {
   flex: 1;
   min-width: 0;

@@ -14,7 +14,7 @@ const post = computed(() => store.getById(id.value));
 
 onMounted(async () => {
   if (!post.value) {
-    await store.loadPostDetail(id.value); // ✅ 상세 먼저 로드
+    await store.loadPostDetail(id.value);
   }
 });
 
