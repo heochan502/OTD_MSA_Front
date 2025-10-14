@@ -26,14 +26,14 @@ const initialKey =
 
 const activeKey = ref(initialKey);
 
-// ✅ 페이지네이션 관리
+// 페이지네이션 관리
 const PAGE_SIZE = 10;
 const page = ref(1);
 const items = ref([]);
 const hasMore = ref(true);
 const loading = ref(false);
 
-// ✅ 게시글 불러오기 (페이지 단위)
+// 게시글 불러오기 (페이지 단위)
 async function fetchByActiveKey(reset = false) {
   if (loading.value) return;
   loading.value = true;
@@ -75,7 +75,7 @@ async function fetchByActiveKey(reset = false) {
   }
 }
 
-// ✅ 무한 스크롤 감지
+// 무한 스크롤 감지
 const sentinel = ref(null);
 let io;
 function observe() {
@@ -110,7 +110,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => io && io.disconnect());
 
-// ✅ 탭 전환 시 리셋
+// 탭 전환 시 리셋
 function selectTab(k) {
   if (activeKey.value !== k) {
     activeKey.value = k;
@@ -119,7 +119,7 @@ function selectTab(k) {
   }
 }
 
-// ✅ 라우트 변경 감지
+// 라우트 변경 감지
 watch(
   () => route.params.category,
   (v) => {
@@ -134,7 +134,7 @@ watch(
 const openDetail = (p) =>
   router.push({ name: 'CommunityPost', params: { id: String(p.id) } });
 
-// ✅ 토스트
+// 토스트
 const toastOpen = ref(false);
 const toastMessage = ref('');
 function showPostedToast() {

@@ -120,7 +120,7 @@ const logoutAccount = async () => {
                 : '/otd/image/admin_page/food.png'
             "
           />
-          <span>음식 정보 관리</span>
+          <span>식품 정보 관리</span>
         </router-link>
         <router-link
           to="/admin/community"
