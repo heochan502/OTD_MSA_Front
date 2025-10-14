@@ -16,12 +16,20 @@ onMounted(async () => {
 
   const res = await getUserBasicBodyInfo();
   if (res === undefined || res.status !== 200) {
+    if (bodyCompositionStore.lastest) {
+      return;
+    }
+    if (
+      authenticationStore.userRole === "ADMIN" ||
+      authenticationStore.userRole === "MANAGER"
+    ) {
+      return;
+    }
     noticeDialog.value = true;
 
-    return;
+    bodyCompositionStore.basicInfo = res.data;
+    bodyCompositionStore.setRecentBodyInfo();
   }
-  bodyCompositionStore.basicInfo = res.data;
-  bodyCompositionStore.setRecentBodyInfo();
 });
 
 // bmi 데이터 유무
