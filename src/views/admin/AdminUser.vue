@@ -48,8 +48,8 @@ const headers = [
   { title: '생년월일', key: 'birthDate' },
 ];
 
-const rowProps = ({ item }) => ({
-  onClick: () => toUserDetial(item),
+const rowProps = ({ item } = {}) => ({
+  onClick: () => item && toUserDetial(item),
   style: 'cursor: pointer;',
 });
 
@@ -66,8 +66,8 @@ const reversedUser = computed(() => {
 </script>
 
 <template>
-  <div class="admin-users">
-    <v-card>
+  <div class="admin-user">
+    <v-card class="data-card pa-2">
       <v-card-title class="d-flex justify-space-between align-center">
         <span class="title">사용자 목록</span>
         <v-text-field
@@ -82,7 +82,7 @@ const reversedUser = computed(() => {
         />
       </v-card-title>
 
-      <v-data-table 
+      <v-data-table
         :headers="headers"
         :items="reversedUser"
         :search="search"
@@ -151,12 +151,18 @@ const reversedUser = computed(() => {
 </template>
 
 <style lang="scss" scoped>
-.admin-users {
-  padding: 20px;
+.admin-user {
+  padding: 10px;
 
+  .data-card {
+    border-radius: 15px;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  }
   .title {
     font-weight: 700;
-    font-size: 18px;
+    font-size: 23px;
   }
 }
 .styled-table {
