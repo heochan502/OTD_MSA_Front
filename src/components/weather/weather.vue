@@ -81,7 +81,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <span class="otd-body-3">오늘 날씨는 🌡️ {{ temp }}℃ 💧 {{ humidity }}%</span>
+  <!-- <span class="otd-body-3">오늘 날씨는 🌡️ {{ temp }}℃ 💧 {{ humidity }}%</span> -->
+  <span class="otd-body-3">오늘 날씨는 🌡️ 24.5℃ 💧 43.6%</span>
 </template>
 
 <style lang="scss" scoped></style>
