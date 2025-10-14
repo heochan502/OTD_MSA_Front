@@ -10,7 +10,6 @@ import {
 
 const mealFoodDbs = ref([]);
 const mealFoodMakeDbs = ref([]);
-
 const totalPages = ref(0);
 const currentPage = ref(0);
 const keyword = ref('');
@@ -74,10 +73,12 @@ const headersMake = [
 const loadMeals = async (page = 0) => {
   try {
     const res = await getMeals(page, size, keyword.value);
+    console.log('search', res.data);
     mealFoodDbs.value = res.data.mealFoodDbs.content;
     totalPages.value = res.data.mealFoodDbs.totalPages;
     currentPage.value = res.data.mealFoodDbs.number;
     mealFoodMakeDbs.value = res.data.mealFoodMakeDbs;
+    // keyword.value = '';
   } catch (e) {
     console.error('식단 데이터 불러오기 실패:', e);
   }
@@ -239,10 +240,17 @@ onMounted(() => {
           class="page-btn"
           :disabled="currentPage === 0"
           variant="tonal"
+          prepend-icon="mdi-page-first"
+          @click="loadMeals(0)"
+        >
+        </v-btn>
+        <v-btn
+          class="page-btn"
+          :disabled="currentPage === 0"
+          variant="tonal"
           prepend-icon="mdi-chevron-left"
           @click="loadMeals(currentPage - 1)"
         >
-          이전
         </v-btn>
 
         <div class="page-info">
@@ -258,7 +266,14 @@ onMounted(() => {
           append-icon="mdi-chevron-right"
           @click="loadMeals(currentPage + 1)"
         >
-          다음
+        </v-btn>
+        <v-btn
+          class="page-btn"
+          :disabled="currentPage + 1 >= totalPages"
+          variant="tonal"
+          append-icon="mdi-page-last"
+          @click="loadMeals(totalPages - 1)"
+        >
         </v-btn>
       </div>
     </v-card>
@@ -503,8 +518,19 @@ onMounted(() => {
     margin-top: 5px;
     padding: 12px 0;
 
+    .page-btn :deep(.v-btn__content) {
+      padding: 0 !important;
+    }
+    .page-btn :deep(.v-icon) {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      line-height: 1 !important;
+      vertical-align: middle !important;
+      font-size: 20px !important; // 아이콘 크기도 조정 가능
+    }
     .page-btn {
-      min-width: 90px;
+      min-width: 10px !important;
       font-weight: 600;
       font-size: 0.9rem;
       border-radius: 10px;
