@@ -2,6 +2,7 @@
 import { reactive, computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
+import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
 import effortLevels from "@/assets/effortLevels.json";
 import { calcDuration } from "@/utils/exerciseUtils";
 import { formatDateDayTimeKR } from "@/utils/dateTimeUtils";
@@ -10,18 +11,19 @@ import Modal from "@/components/user/Modal.vue";
 
 const router = useRouter();
 const exerciseRecordStore = useExerciseRecordStore();
+const bodyCompositionStore = useBodyCompositionStore();
 const saveDialog = ref(false);
 const successDialog = ref(false);
 const menuStart = ref(false);
 const menuEnd = ref(false);
 
 const onStartPick = (val) => {
-  startDateTime.value = val;
+  state.form.startAt = val;
   menuStart.value = false; // 선택 후 자동 닫기
 };
 
 const onEndPick = (val) => {
-  endDateTime.value = val;
+  state.form.endAt = val;
   menuEnd.value = false; // 선택 후 자동 닫기
 };
 
@@ -78,9 +80,12 @@ const exerciseDuration = computed(() => {
 const calcKcal = computed(() => {
   // MET × 체중(kg) × 운동시간(분) × 0.0175 = 소모 칼로리(kcal).
   const met = selectedExercise.value ? selectedExercise.value.exerciseMet : 0;
-  const bodyWeight = 68;
+  const bodyWeight =
+    bodyCompositionStore.lastest?.weight ??
+    bodyCompositionStore.recentBodyInfo?.weight ??
+    0;
   const duration = exerciseDuration.value;
-
+  console.log("계산", bodyWeight);
   return met * bodyWeight * duration * 0.0175;
 });
 

@@ -11,22 +11,35 @@ const authenticationStore = useAuthenticationStore();
 const showDialog = ref(false);
 const noticeDialog = ref(false);
 
+const hasRecord = computed(() => {
+  const r = bodyCompositionStore.lastest;
+  if (!r) return false;
+  return (
+    r.height > 0 &&
+    r.weight > 0 &&
+    r.skeletal_muscle_mass > 0 &&
+    r.bmi > 0 &&
+    r.percent_body_fat > 0
+  );
+});
+
 onMounted(async () => {
-  bodyCompositionStore.resetStore();
+  if (
+    //관리자 계정이면 신체정보입력 X
+    authenticationStore.userRole === "ADMIN" ||
+    authenticationStore.userRole === "MANAGER"
+  ) {
+    return;
+  } else {
+    const res = await getUserBasicBodyInfo();
 
-  const res = await getUserBasicBodyInfo();
-  if (res === undefined || res.status !== 200) {
-    if (bodyCompositionStore.lastest) {
-      return;
+    if (res === undefined || res.status !== 200) {
+      if (hasRecord.value) {
+        //인바디 기록이 있으면 X
+        return;
+      }
+      noticeDialog.value = true; // 기본 신체정보입력 모달
     }
-    if (
-      authenticationStore.userRole === "ADMIN" ||
-      authenticationStore.userRole === "MANAGER"
-    ) {
-      return;
-    }
-    noticeDialog.value = true;
-
     bodyCompositionStore.basicInfo = res.data;
     bodyCompositionStore.setRecentBodyInfo();
   }
@@ -39,9 +52,6 @@ const hasBmiData = computed(() => {
     (lastest?.height && lastest?.weight) ||
     (recentBodyInfo?.height && recentBodyInfo?.weight)
   );
-});
-watch(hasBmiData, (newValue) => {
-  console.log("hasBmiData 값 변경됨:", newValue);
 });
 
 // 수정 가능 여부: bmiInfo 기반일 때만 true
@@ -135,25 +145,25 @@ const saveFormData = async () => {
     alert("에러발생");
     return;
   }
-
   bodyCompositionStore.setBasicInfo(state.form);
+  bodyCompositionStore.setRecentBodyInfo();
 
   // 모달창 닫기
   showDialog.value = false;
 };
 
-watch(showDialog, (isModalOpen) => {
-  if (isModalOpen) {
-    state.form.height = bodyCompositionStore.recentBodyInfo.height;
-    state.form.weight = bodyCompositionStore.recentBodyInfo.weight;
-  } else {
-    // 모달이 닫힐 때는 임시 폼 데이터를 초기화
-    state.form.height = null;
-    state.form.weight = null;
-    state.form.bmi = null;
-    state.form.bmr = null;
-  }
-});
+// watch(showDialog, (isModalOpen) => {
+//   if (isModalOpen) {
+//     state.form.height = bodyCompositionStore.recentBodyInfo.height;
+//     state.form.weight = bodyCompositionStore.recentBodyInfo.weight;
+//   } else {
+//     // 모달이 닫힐 때는 임시 폼 데이터를 초기화
+//     state.form.height = null;
+//     state.form.weight = null;
+//     state.form.bmi = null;
+//     state.form.bmr = null;
+//   }
+// });
 </script>
 
 <template>
