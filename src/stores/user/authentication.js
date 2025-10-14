@@ -1,23 +1,24 @@
-import { reactive, computed } from 'vue';
-import { defineStore } from 'pinia';
-import router from '@/router';
+import { reactive, computed } from "vue";
+import { defineStore } from "pinia";
+import router from "@/router";
 
-const DEFAULT_PROFILE = '/otd/image/main/default-profile.png';
+const DEFAULT_PROFILE = "/otd/image/main/default-profile.png";
 const FILE_URL = import.meta.env.VITE_BASE_URL;
 export const useAuthenticationStore = defineStore(
-  'authentication',
+  "authentication",
   () => {
     const state = reactive({
       signedUser: {
         userId: 0,
-        nickName: '',
-        email: '',
+        nickName: "",
+        email: "",
         pic: DEFAULT_PROFILE,
-        gender: '',
+        gender: "",
+        age: "",
         point: 0,
         xp: 0,
-        challengeRole: '',
-        userRole: '',
+        challengeRole: "",
+        userRole: "",
       },
       isSigned: false,
     });
@@ -31,7 +32,7 @@ export const useAuthenticationStore = defineStore(
     };
 
     const formattedUserPic = (user) => {
-      return user.pic && user.pic.trim() !== ''
+      return user.pic && user.pic.trim() !== ""
         ? `${FILE_URL}/profile/${user.userId}/${user.pic}`
         : DEFAULT_PROFILE;
     };
@@ -53,8 +54,8 @@ export const useAuthenticationStore = defineStore(
     };
 
     const logout = async () => {
-      console.log('logout 처리');
-      state.signedUser = { userId: 0, nickName: '', pic: DEFAULT_PROFILE };
+      console.log("logout 처리");
+      state.signedUser = { userId: 0, nickName: "", pic: DEFAULT_PROFILE };
       state.isSigned = false;
     };
 
