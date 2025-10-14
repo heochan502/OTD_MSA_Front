@@ -17,6 +17,8 @@ export const useAuthenticationStore = defineStore(
         xp: 0,
         challengeRole: '',
         userRole: '',
+        providerType: null,         
+        onboardingCompleted: false,
       },
       isSigned: false,
     });
@@ -50,6 +52,37 @@ export const useAuthenticationStore = defineStore(
     const setNickname = (nickname) => {
       state.signedUser.nickName = nickname;
     };
+        // ⭐ 추가: 온보딩 완료 처리
+    const completeOnboarding = async (surveyScore, agreedTermsIds) => {
+      try {
+        const response = await axios.post(
+          '/OTD/onboarding/complete',
+          {
+            surveyScore: surveyScore,
+            agreedTermsIds: agreedTermsIds
+          },
+          {
+            params: { userId: state.signedUser.userId }
+          }
+        );
+
+        if (response.data.success) {
+          // 온보딩 완료 상태 업데이트
+          state.signedUser.onboardingCompleted = true;
+        }
+
+        return response.data;
+      } catch (error) {
+        console.error('온보딩 완료 실패:', error);
+        throw error;
+      }
+    };
+
+    // ⭐ 추가: 온보딩 필요 여부 확인
+    const needsOnboarding = () => {
+      return state.signedUser.providerType && 
+             !state.signedUser.onboardingCompleted;
+    };
 
     const logout = async () => {
       console.log('logout 처리');
@@ -66,6 +99,8 @@ export const useAuthenticationStore = defineStore(
       setChallengeRole,
       formattedUserPic,
       setNickname,
+      completeOnboarding,   
+      needsOnboarding, 
     };
   },
   { persist: true }

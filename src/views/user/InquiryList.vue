@@ -16,8 +16,13 @@ const loadInquiries = async () => {
   try {
     const data = await getMyInquiries();
     inquiries.value = data;
+    console.log('문의 내역:', data);
+    if (data.length > 0) {
+      console.log('첫 번째 문의의 상태:', data[0].status);
+    }
   } catch (error) {
-    } finally {
+    console.error('문의 내역 로딩 오류:', error);
+  } finally {
     loading.value = false; 
   }
 };
@@ -32,30 +37,53 @@ const closeDetailModal = () => {
   selectedInquiryId.value = null;
 };
 
+const goBack = () => {
+  router.back();
+};
+
 const goToInquiry = () => {
   router.push('/user/email/inquiry');
 };
 
 const getStatusClass = (status) => {
+  if (!status) return 'pending';
+  
+  const upperStatus = status.toString().toUpperCase();
   const statusMap = {
     'PENDING': 'pending',
-    'COMPLETED': 'completed'
+    'RESOLVED': 'resolved',
+    '00': 'pending',
+    '01': 'resolved',
+    '대기중': 'pending',
+    '대기 중': 'pending',
+    '완료': 'resolved'
   };
-  return statusMap[status] || 'pending';
+  return statusMap[upperStatus] || statusMap[status] || 'pending';
 };
 
 const getStatusText = (status) => {
+  if (!status) return '대기중';
+  
+
+  if (status === '대기 중' || status === '대기중') {
+    return '대기중';
+  }
+  if (status === '완료') {
+    return '완료';
+  }
+  
+
+  const upperStatus = status.toString().toUpperCase();
   const statusTextMap = {
     'PENDING': '대기중',
-    'COMPLETED': '완료'
+    'RESOLVED': '완료',
+    '00': '대기중',
+    '01': '완료'
   };
 
-  if (status === '대기 중' || status === '완료') {
-    return status;
-  }
-
-  return statusTextMap[status] || '알 수 없음';
+  return statusTextMap[upperStatus] || statusTextMap[status] || '대기중';
 };
+
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   const year = date.getFullYear();
@@ -74,11 +102,18 @@ onMounted(() => {
 
 <template>
   <div class="inquiry-list-container">
-    <div class="header">
-      <h2>문의 내역</h2>
+    <!-- 상단 버튼 그룹 -->
+    <div class="top-buttons">
+      <button @click="goBack" class="back-btn">
+        ← 뒤로가기
+      </button>
       <button @click="loadInquiries" class="refresh-btn">
         <span>새로고침</span>
       </button>
+    </div>
+
+    <div class="header">
+      <h2>문의 내역</h2>
     </div>
 
     <!-- 로딩 상태 -->
@@ -128,17 +163,25 @@ onMounted(() => {
   padding: 20px;
 }
 
-.header {
+.top-buttons {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
-.header h2 {
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
+.back-btn {
+  padding: 10px 20px;
+  background-color: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.back-btn:hover {
+  background-color: #4b5563;
 }
 
 .refresh-btn {
@@ -154,6 +197,19 @@ onMounted(() => {
 
 .refresh-btn:hover {
   background-color: #059669;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.header h2 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
 }
 
 .loading {
@@ -239,7 +295,7 @@ onMounted(() => {
   color: #92400e;
 }
 
-.status.completed {
+.status.resolved {
   background-color: #d1fae5;
   color: #065f46;
 }
