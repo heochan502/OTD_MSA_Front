@@ -141,10 +141,17 @@ const toCommunityDetail = (postId) => {
           class="page-btn"
           :disabled="page === 1"
           variant="tonal"
+          prepend-icon="mdi-page-first"
+          @click="page = 1"
+        >
+        </v-btn>
+        <v-btn
+          class="page-btn"
+          :disabled="page === 1"
+          variant="tonal"
           prepend-icon="mdi-chevron-left"
           @click="page--"
         >
-          이전
         </v-btn>
 
         <div class="page-info">
@@ -160,7 +167,14 @@ const toCommunityDetail = (postId) => {
           append-icon="mdi-chevron-right"
           @click="page++"
         >
-          다음
+        </v-btn>
+        <v-btn
+          class="page-btn"
+          :disabled="page >= pageCount"
+          variant="tonal"
+          append-icon="mdi-page-last"
+          @click="page = pageCount"
+        >
         </v-btn>
       </div>
     </v-card>
@@ -402,10 +416,22 @@ const toCommunityDetail = (postId) => {
   justify-content: center;
   align-items: center;
   gap: 16px;
-  padding: 12px 0 13px 0 ;
+  margin-top: 5px;
+  padding: 12px 0;
 
+  .page-btn :deep(.v-btn__content) {
+    padding: 0 !important;
+  }
+  .page-btn :deep(.v-icon) {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    vertical-align: middle !important;
+    font-size: 20px !important; // 아이콘 크기도 조정 가능
+  }
   .page-btn {
-    min-width: 90px;
+    min-width: 10px !important;
     font-weight: 600;
     font-size: 0.9rem;
     border-radius: 10px;
