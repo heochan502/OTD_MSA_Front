@@ -15,8 +15,8 @@ const isEdit = ref(false);
 const successDialog = ref(false);
 const cancelDialog = ref(false);
 
-// const exercise = ref([]);
-// const search = ref('');
+const exercise = ref({});
+const search = ref('');
 
 // 테이블 헤더
 const headers = [
@@ -44,6 +44,7 @@ const loadExercises = async () => {
 
 // 검색 필터링
 const filteredExercises = computed(() => {
+  if (!Array.isArray(exercises.value)) return [];
   if (!keyword.value) return exercises.value;
   return exercises.value.filter((e) =>
     e.exerciseName.toLowerCase().includes(keyword.value.toLowerCase())
@@ -118,15 +119,14 @@ const removeExercise = async () => {
 const cancel = () => {
   cancelDialog.value = false;
   formDialog.value = false;
-}
+};
 onMounted(() => {
   loadExercises();
 });
-
 </script>
 
 <template>
-    <div class="admin-exercise">
+  <div class="admin-exercise">
     <v-card class="data-card pa-2">
       <!-- 상단 툴바 -->
       <v-card-title class="d-flex justify-space-between align-center">
@@ -150,7 +150,8 @@ onMounted(() => {
       <v-data-table
         :headers="headers"
         :items="filteredExercises"
-        :items-per-page="10"
+        :items-per-page="12"
+        height="700"
         class="styled-table"
         fixed-header
       >
@@ -268,24 +269,22 @@ onMounted(() => {
       </v-card>
     </v-dialog>
 
-        <!-- 취소 모달 -->
+    <!-- 취소 모달 -->
     <v-dialog v-model="cancelDialog" max-width="380" min-height="100">
       <v-card class="admin-dialog pa-6">
         <v-card-text>
-          취소하고 돌아가시겠습니까? 
-          <br></br>
+          취소하고 돌아가시겠습니까?
+          <br />
           해당 내용은 저장되지 않습니다.
         </v-card-text>
         <v-card-actions class="btn-area">
           <v-btn class="btn-yes" @click="cancel()">네</v-btn>
-          <v-btn class="btn-no" @click="cancelDialog = false"
-            >아니오</v-btn
-          >
+          <v-btn class="btn-no" @click="cancelDialog = false">아니오</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <!-- <v-card>
+    <v-card>
       <v-card-title class="d-flex justify-space-between align-center">
         <span class="title">운동 종목 관리</span>
         <v-text-field
@@ -310,7 +309,7 @@ onMounted(() => {
         :items-per-page="10"
         class="styled-table"
       >
-        <!-- 타입 변환 -->
+        타입 변환
         <!-- <template #item.cdType="{ item }">
           <v-chip
             :color="
@@ -359,8 +358,8 @@ onMounted(() => {
           <v-btn @click="toForm(item)">수정</v-btn>
           <v-btn @click="openDelete(item.cdId)">삭제</v-btn>
         </template> -->
-      <!-- </v-data-table>
-    </v-card> -->
+      </v-data-table>
+    </v-card>
   </div>
 </template>
 
