@@ -194,7 +194,43 @@ export const getExercise = () => {
   return axios.get(`${LIFE_URL}/exercise`).catch((e) => e.response);
 };
 
+export const postExercise = (exercise) => {
+  return axios.post(`${LIFE_URL}/exercise`, exercise).catch((e) => e.response);
+};
+
+export const putExercise = (exerciseId, exercise) => {
+  return axios
+    .put(`${LIFE_URL}/exercise/${exerciseId}`, exercise)
+    .catch((e) => e.response);
+};
+
+export const deleteExercise = (exerciseId) => {
+  return axios
+    .delete(`${LIFE_URL}/exercise/${exerciseId}`)
+    .catch((e) => e.response);
+};
+
 // 음식 정보 목록
-export const getMeal = () => {
-  return axios.get(`${LIFE_URL}/meal`).catch((e) => e.response);
+export const getMeals = (page = 0, size = 50, keyword = '') => {
+  return axios
+    .get(`${LIFE_URL}/meal`, { params: { page, size, keyword } })
+    .catch((e) => e.response);
+};
+
+export const postMeal = (food) => {
+  return axios.post(`${LIFE_URL}/meal`, food).catch((e) => e.response);
+};
+
+export const putMeal = (mealId, food) => {
+  return axios.put(`${LIFE_URL}/meal/${mealId}`, food).catch((e) => e.response);
+};
+
+export const deleteMeal = (mealId) => {
+  return axios.delete(`${LIFE_URL}/meal/${mealId}`).catch((e) => e.response);
+};
+
+export const deleteMealMake = (mealId) => {
+  return axios
+    .delete(`${LIFE_URL}/mealmake/${mealId}`)
+    .catch((e) => e.response);
 };

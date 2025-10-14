@@ -37,7 +37,7 @@ const goLog = () => router.push({ name: 'WaterLog', query: { amount: Number(prop
 
 <style scoped>
 .water-card {
-  width: 350px;
+  width: 100%;
   background: #79a7ff; /* 스샷에 맞춘 파랑 */
   color: #fff;
   border-radius: 12px;
@@ -51,6 +51,7 @@ const goLog = () => router.push({ name: 'WaterLog', query: { amount: Number(prop
 .content {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 14px;
 }
 .icon {

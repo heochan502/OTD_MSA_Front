@@ -378,7 +378,7 @@ const openMealDialog = async (meal) => {
 
       <v-btn @click="putProfileDialog = true">저장</v-btn>
     </v-card>
-
+    <br />
     <!-- 포인트 -->
     <v-card>
       <v-card-title class="d-flex justify-space-between align-center">
@@ -410,7 +410,7 @@ const openMealDialog = async (meal) => {
         </template>
       </v-data-table>
     </v-card>
-
+    <br />
     <!-- 챌린지 -->
     <v-card>
       <v-card-title class="d-flex justify-space-between align-center">
@@ -438,7 +438,7 @@ const openMealDialog = async (meal) => {
         <template #item.point="{ item }"> {{ item.point }}P </template>
       </v-data-table>
     </v-card>
-
+    <br />
     <!-- 운동기록 -->
     <v-card>
       <v-card-title class="d-flex justify-space-between align-center">
@@ -464,7 +464,7 @@ const openMealDialog = async (meal) => {
       >
       </v-data-table>
     </v-card>
-
+    <br />
     <!-- 식단기록 -->
     <v-card>
       <v-card-title class="d-flex justify-space-between align-center">

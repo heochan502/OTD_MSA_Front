@@ -25,7 +25,8 @@ const props = defineProps({
     <ul class="table">
       <li class="row" v-for="r in rows" :key="r.label">
         <span class="label">{{ r.label }}</span>
-        <span class="value">{{ r.value }} g/ml</span>
+        <span v-if="r.label==='나트륨'" class="value">{{ r.value }} mg</span>
+        <span v-else class="value">{{ r.value }} g/ml</span>
       </li>
     </ul>
   </div>
