@@ -414,6 +414,11 @@ const router = createRouter({
           component: () => import('@/views/admin/AdminCommunity.vue'),
         },
         {
+          path: 'community/detail',
+          name: 'AdminCommunityDetail',
+          component: () => import('@/views/admin/AdminCommunityDetail.vue'),
+        },
+        {
           path: 'exercise',
           name: 'AdminExercise',
           component: () => import('@/views/admin/AdminExercise.vue'),
@@ -427,6 +432,11 @@ const router = createRouter({
           path: 'qna',
           name: 'AdminQnA',
           component: () => import('@/views/admin/AdminQnA.vue'),
+        },
+        {
+          path: 'qna/detail',
+          name: 'AdminQnADetail',
+          component: () => import('@/views/admin/AdminQnADetail.vue'),
         },
         {
           path: 'statistics',

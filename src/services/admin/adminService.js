@@ -1,4 +1,5 @@
 import axios from '@/services/httpRequester';
+import Inquiry from '@/views/user/Inquiry.vue';
 
 const BASE_URL = 'admin';
 const LIFE_URL = 'admin2';
@@ -105,9 +106,14 @@ export const getQna = () => {
   return axios.get(`${BASE_URL}/qna`).catch((e) => e.response);
 };
 
+export const getQnaDetail = (inquiryId) => {
+  return axios.get(`${BASE_URL}/qna/${inquiryId}`).catch((e) => e.response);
+};
+
 export const putQna = (params) => {
   return axios.put(`${BASE_URL}/qna/modify`, params).catch((e) => e.response);
 };
+
 
 // life 서버
 // 유저 디테일 식단 기록

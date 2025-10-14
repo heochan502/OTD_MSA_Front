@@ -133,7 +133,7 @@ const addToDefaultList = (res) => {
       }
 
       eatenFoodList.value = [...eatenFoodList.value, payload];
-      console.log("페이로드 ", eatenFood.eatenFoodList);
+      // console.log("페이로드 ", eatenFood.eatenFoodList);
     }
   }  );
 

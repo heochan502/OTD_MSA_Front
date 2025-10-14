@@ -10,7 +10,6 @@ import {
 
 const mealFoodDbs = ref([]);
 const mealFoodMakeDbs = ref([]);
-
 const totalPages = ref(0);
 const currentPage = ref(0);
 const keyword = ref('');
@@ -74,10 +73,12 @@ const headersMake = [
 const loadMeals = async (page = 0) => {
   try {
     const res = await getMeals(page, size, keyword.value);
+    console.log('search', res.data);
     mealFoodDbs.value = res.data.mealFoodDbs.content;
     totalPages.value = res.data.mealFoodDbs.totalPages;
     currentPage.value = res.data.mealFoodDbs.number;
     mealFoodMakeDbs.value = res.data.mealFoodMakeDbs;
+    // keyword.value = '';
   } catch (e) {
     console.error('식단 데이터 불러오기 실패:', e);
   }
@@ -156,7 +157,7 @@ const removeMeal = async () => {
 const cancel = () => {
   cancelDialog.value = false;
   editDialog.value = false;
-}
+};
 
 onMounted(() => {
   loadMeals();
@@ -233,19 +234,46 @@ onMounted(() => {
         </template>
       </v-data-table>
 
+      <!-- Pagination -->
       <div class="pagination">
         <v-btn
+          class="page-btn"
           :disabled="currentPage === 0"
+          variant="tonal"
+          prepend-icon="mdi-page-first"
+          @click="loadMeals(0)"
+        >
+        </v-btn>
+        <v-btn
+          class="page-btn"
+          :disabled="currentPage === 0"
+          variant="tonal"
+          prepend-icon="mdi-chevron-left"
           @click="loadMeals(currentPage - 1)"
         >
-          이전
         </v-btn>
-        <span>{{ currentPage + 1 }} / {{ totalPages }}</span>
+
+        <div class="page-info">
+          <span class="current">{{ currentPage + 1 }}</span>
+          <span class="divider">/</span>
+          <span class="total">{{ totalPages }}</span>
+        </div>
+
         <v-btn
+          class="page-btn"
           :disabled="currentPage + 1 >= totalPages"
+          variant="tonal"
+          append-icon="mdi-chevron-right"
           @click="loadMeals(currentPage + 1)"
         >
-          다음
+        </v-btn>
+        <v-btn
+          class="page-btn"
+          :disabled="currentPage + 1 >= totalPages"
+          variant="tonal"
+          append-icon="mdi-page-last"
+          @click="loadMeals(totalPages - 1)"
+        >
         </v-btn>
       </div>
     </v-card>
@@ -438,19 +466,17 @@ onMounted(() => {
       </v-card>
     </v-dialog>
 
-        <!-- 취소 모달 -->
+    <!-- 취소 모달 -->
     <v-dialog v-model="cancelDialog" max-width="380" min-height="100">
       <v-card class="admin-dialog pa-6">
         <v-card-text>
-          취소하고 돌아가시겠습니까? 
-          <br></br>
+          취소하고 돌아가시겠습니까?
+          <br />
           해당 내용은 저장되지 않습니다.
         </v-card-text>
         <v-card-actions class="btn-area">
           <v-btn class="btn-yes" @click="cancel()">네</v-btn>
-          <v-btn class="btn-no" @click="cancelDialog = false"
-            >아니오</v-btn
-          >
+          <v-btn class="btn-no" @click="cancelDialog = false">아니오</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -487,8 +513,68 @@ onMounted(() => {
   .pagination {
     display: flex;
     justify-content: center;
-    gap: 12px;
-    margin: 16px 0;
+    align-items: center;
+    gap: 16px;
+    margin-top: 5px;
+    padding: 12px 0;
+
+    .page-btn :deep(.v-btn__content) {
+      padding: 0 !important;
+    }
+    .page-btn :deep(.v-icon) {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      line-height: 1 !important;
+      vertical-align: middle !important;
+      font-size: 20px !important; // 아이콘 크기도 조정 가능
+    }
+    .page-btn {
+      min-width: 10px !important;
+      font-weight: 600;
+      font-size: 0.9rem;
+      border-radius: 10px;
+      background-color: #eee !important;
+      color: #555 !important;
+      transition: all 0.25s ease;
+
+      &:hover {
+        background-color: #dcdcdc !important;
+        transform: scale(1.03);
+      }
+
+      &:disabled {
+        background-color: #f0f0f0 !important;
+        color: #999 !important;
+        box-shadow: none;
+        transform: none;
+      }
+    }
+
+    .page-info {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #555;
+
+      .current {
+        color: #5ee6eb; // 메인 민트 강조
+        font-size: 1.05rem;
+        font-weight: 700;
+      }
+
+      .divider {
+        margin: 0 2px;
+        color: #999;
+      }
+
+      .total {
+        color: #999;
+        font-size: 0.95rem;
+      }
+    }
   }
 }
 
