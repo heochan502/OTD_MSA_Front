@@ -58,8 +58,7 @@ function makeKey(f) {
 async function loadServerImages(postId) {
   try {
     const { data } = await fetchPostFiles(postId);
-    const baseURL = (await import('@/services/httpRequester')).default.defaults
-      .baseURL;
+    const baseURL = import.meta.env.VITE_BASE_URL;
     const list = Array.isArray(data) ? data : [];
     serverImages.value = list.map((f) => {
       const id = f.fileId ?? f.id;
