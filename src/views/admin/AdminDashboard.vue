@@ -10,9 +10,10 @@ import {
 } from '@/services/admin/adminService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { computed, onMounted, reactive } from 'vue';
+import { useRouter } from 'vue-router';
 const auth = useAuthenticationStore();
 const myRole = computed(() => auth?.state?.signedUser?.userRole ?? '');
-
+const router = useRouter();
 const state = reactive({
   userData: {},
   challengeData: {},
@@ -74,7 +75,16 @@ const formatDate = (dateStr) => {
       <h1 class="mb-6 text-h5 font-weight-bold">관리자 대시보드</h1>
       <!-- 회원 요약 -->
       <v-card class="mb-6 pa-4">
-        <h2 class="section-title">회원 통계</h2>
+        <div class="section-header">
+          <h2 class="section-title">회원 통계</h2>
+          <v-btn
+            size="small"
+            variant="text"
+            color="primary"
+            @click="router.push('/admin/user')"
+            >더보기</v-btn
+          >
+        </div>
         <v-row>
           <v-col cols="12" md="4">
             <v-sheet class="info-box">
@@ -105,7 +115,16 @@ const formatDate = (dateStr) => {
 
       <!-- 챌린지 요약 -->
       <v-card class="mb-6 pa-4">
-        <h2 class="section-title">챌린지 통계</h2>
+        <div class="section-header">
+          <h2 class="section-title">챌린지 통계</h2>
+          <v-btn
+            size="small"
+            variant="text"
+            color="primary"
+            @click="router.push('/admin/challenge')"
+            >더보기</v-btn
+          >
+        </div>
         <v-row>
           <v-col cols="12" md="3">
             <v-sheet class="info-box">
@@ -158,7 +177,16 @@ const formatDate = (dateStr) => {
 
       <!-- 포인트 요약 -->
       <v-card class="mb-6 pa-4">
-        <h2 class="section-title">포인트 통계</h2>
+        <div class="section-header">
+          <h2 class="section-title">포인트 통계</h2>
+          <v-btn
+            size="small"
+            variant="text"
+            color="primary"
+            @click="router.push('/admin/point')"
+            >더보기</v-btn
+          >
+        </div>
         <v-row>
           <v-col cols="12" md="4">
             <v-sheet class="info-box">
@@ -183,7 +211,16 @@ const formatDate = (dateStr) => {
 
       <!-- ===== 커뮤니티 요약 ===== -->
       <v-card class="mb-6 pa-4">
-        <h2 class="section-title">커뮤니티 통계</h2>
+        <div class="section-header">
+          <h2 class="section-title">커뮤니티 통계</h2>
+          <v-btn
+            size="small"
+            variant="text"
+            color="primary"
+            @click="router.push('/admin/community')"
+            >더보기</v-btn
+          >
+        </div>
         <v-row>
           <v-col cols="12" md="3">
             <v-sheet class="info-box">
@@ -249,7 +286,16 @@ const formatDate = (dateStr) => {
 
       <!-- 운동 요약 -->
       <v-card class="mb-6 pa-4">
-        <h2 class="section-title">운동 통계</h2>
+        <div class="section-header">
+          <h2 class="section-title">운동 통계</h2>
+          <v-btn
+            size="small"
+            variant="text"
+            color="primary"
+            @click="router.push('/admin/exercise')"
+            >더보기</v-btn
+          >
+        </div>
         <v-row>
           <v-col cols="12" md="4">
             <v-sheet class="info-box">
@@ -282,7 +328,16 @@ const formatDate = (dateStr) => {
 
       <!-- 식단 요약 -->
       <v-card class="mb-6 pa-4">
-        <h2 class="section-title">식단 통계</h2>
+        <div class="section-header">
+          <h2 class="section-title">식단 통계</h2>
+          <v-btn
+            size="small"
+            variant="text"
+            color="primary"
+            @click="router.push('/admin/meal')"
+            >더보기</v-btn
+          >
+        </div>
         <v-row>
           <v-col cols="12" md="4">
             <v-sheet class="info-box">
@@ -311,7 +366,16 @@ const formatDate = (dateStr) => {
 
       <!-- 문의 요약 -->
       <v-card class="mb-6 pa-4">
-        <h2 class="section-title">문의 통계</h2>
+        <div class="section-header">
+          <h2 class="section-title">문의 통계</h2>
+          <v-btn
+            size="small"
+            variant="text"
+            color="primary"
+            @click="router.push('/admin/qna')"
+            >더보기</v-btn
+          >
+        </div>
         <v-row>
           <v-col cols="12" md="3">
             <v-sheet class="info-box">
@@ -365,7 +429,16 @@ const formatDate = (dateStr) => {
 
       <!-- 문의 요약 -->
       <v-card class="mb-6 pa-4">
-        <h2 class="section-title">문의 통계</h2>
+        <div class="section-header">
+          <h2 class="section-title">문의 통계</h2>
+          <v-btn
+            size="small"
+            variant="text"
+            color="primary"
+            @click="router.push('/admin/qna')"
+            >더보기</v-btn
+          >
+        </div>
         <v-row>
           <v-col cols="12" md="3">
             <v-sheet class="info-box">
@@ -416,7 +489,16 @@ const formatDate = (dateStr) => {
 
       <!-- ===== 커뮤니티 요약 ===== -->
       <v-card class="mb-6 pa-4">
-        <h2 class="section-title">커뮤니티 통계</h2>
+        <div class="section-header">
+          <h2 class="section-title">커뮤니티 통계</h2>
+          <v-btn
+            size="small"
+            variant="text"
+            color="primary"
+            @click="router.push('/admin/community')"
+            >더보기</v-btn
+          >
+        </div>
         <v-row>
           <v-col cols="12" md="3">
             <v-sheet class="info-box">
@@ -482,7 +564,16 @@ const formatDate = (dateStr) => {
 
       <!-- 포인트 요약 -->
       <v-card class="mb-6 pa-4">
-        <h2 class="section-title">포인트 통계</h2>
+        <div class="section-header">
+          <h2 class="section-title">포인트 통계</h2>
+          <v-btn
+            size="small"
+            variant="text"
+            color="primary"
+            @click="router.push('/admin/point')"
+            >더보기</v-btn
+          >
+        </div>
         <v-row>
           <v-col cols="12" md="4">
             <v-sheet class="info-box">
@@ -507,7 +598,16 @@ const formatDate = (dateStr) => {
 
       <!-- 챌린지 요약 -->
       <v-card class="mb-6 pa-4">
-        <h2 class="section-title">챌린지 통계</h2>
+        <div class="section-header">
+          <h2 class="section-title">챌린지 통계</h2>
+          <v-btn
+            size="small"
+            variant="text"
+            color="primary"
+            @click="router.push('/admin/challenge')"
+            >더보기</v-btn
+          >
+        </div>
         <v-row>
           <v-col cols="12" md="3">
             <v-sheet class="info-box">
@@ -560,7 +660,16 @@ const formatDate = (dateStr) => {
 
       <!-- 운동 요약 -->
       <v-card class="mb-6 pa-4">
-        <h2 class="section-title">운동 통계</h2>
+        <div class="section-header">
+          <h2 class="section-title">운동 통계</h2>
+          <v-btn
+            size="small"
+            variant="text"
+            color="primary"
+            @click="router.push('/admin/exercise')"
+            >더보기</v-btn
+          >
+        </div>
         <v-row>
           <v-col cols="12" md="4">
             <v-sheet class="info-box">
@@ -593,7 +702,16 @@ const formatDate = (dateStr) => {
 
       <!-- 식단 요약 -->
       <v-card class="mb-6 pa-4">
-        <h2 class="section-title">식단 통계</h2>
+        <div class="section-header">
+          <h2 class="section-title">식단 통계</h2>
+          <v-btn
+            size="small"
+            variant="text"
+            color="primary"
+            @click="router.push('/admin/meal')"
+            >더보기</v-btn
+          >
+        </div>
         <v-row>
           <v-col cols="12" md="4">
             <v-sheet class="info-box">
@@ -628,9 +746,15 @@ const formatDate = (dateStr) => {
   background-color: #fafafa;
 }
 
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .section-title {
   font-weight: 600;
-  margin-bottom: 12px;
+  font-size: 18px;
 }
 
 .info-box {
