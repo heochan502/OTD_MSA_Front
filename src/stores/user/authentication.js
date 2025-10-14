@@ -13,6 +13,7 @@ export const useAuthenticationStore = defineStore(
         nickName: '',
         email: '',
         pic: DEFAULT_PROFILE,
+        gender: '',
         point: 0,
         xp: 0,
         challengeRole: '',
