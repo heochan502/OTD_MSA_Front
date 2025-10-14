@@ -17,7 +17,6 @@ import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
 
 import effortLevels from "@/assets/effortLevels.json";
 import WeeklyCalendar from "@/components/exercise/WeeklyCalendar.vue";
-import WeeklyChart from "@/components/exercise/WeeklyChart.vue";
 import BarChart from "@/components/exercise/BarChart.vue";
 import Modal from "@/components/user/Modal.vue";
 

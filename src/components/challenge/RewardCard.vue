@@ -42,6 +42,7 @@
 .card-wrap {
   display: flex;
   gap: 15px;
+  justify-content: center;
   .otd-box-style {
     display: flex;
     min-width: 107px;

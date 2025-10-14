@@ -374,10 +374,10 @@ export const useCommunityStore = defineStore('community', {
       }
     },
 
-    async removePost(postId) {
+    async removePost(postId, role) {
       this.error = null;
       try {
-        await deletePost(postId);
+        await deletePost(postId, role);
         const asNum = (v) => Number(v ?? 0);
         this.posts = (this.posts || []).filter(
           (p) => asNum(p.postId ?? p.id) !== asNum(postId)

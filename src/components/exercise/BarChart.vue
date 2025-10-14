@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { calcDuration } from "@/utils/exerciseUtils";
+import { getAvgDuration } from "@/services/exercise/exerciseService";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 // Chart.js
@@ -47,6 +48,36 @@ const props = defineProps({
 // x축 라벨
 const labels = ref(["월", "화", "수", "목", "금", "토", "일"]);
 
+// 전체 평균 운동 시간
+const avgData = ref([]);
+
+const fetchAvgData = async () => {
+  try {
+    const res = await getAvgDuration(); // [{ date, averageDuration }]
+    const data = res.data;
+
+    const startOfWeek = dayjs(props.selectedDate).startOf("isoWeek");
+    const endOfWeek = dayjs(props.selectedDate).endOf("isoWeek");
+
+    const weekAvg = Array(7).fill(null);
+    data.forEach((d) => {
+      const day = dayjs(d.date);
+      if (
+        day.isAfter(startOfWeek.subtract(1, "day")) &&
+        day.isBefore(endOfWeek.add(1, "day"))
+      ) {
+        const idx = day.isoWeekday() - 1;
+        weekAvg[idx] = d.averageDuration;
+      }
+    });
+    avgData.value = weekAvg;
+  } catch (err) {
+    console.error("평균 운동시간 불러오기 실패:", err);
+  }
+};
+
+onMounted(fetchAvgData);
+watch(() => props.selectedDate, fetchAvgData);
 // 주차 데이터 매핑 (월~일, 빈 값은 null)
 const weeklyData = computed(() => {
   const days = Array(7).fill(0);
@@ -63,14 +94,28 @@ const weeklyData = computed(() => {
   return days;
 });
 
-// 데이터셋
 const chartData = computed(() => ({
   labels: labels.value,
   datasets: [
     {
+      type: "line",
+      label: "전체 평균",
+      data: avgData.value,
+      borderColor: "#00D5DF",
+      backgroundColor: "#00D5DF",
+      borderWidth: 2,
+      pointRadius: 2,
+      pointBackgroundColor: "#00D5DF",
+      fill: false,
+      yAxisID: "y",
+    },
+    {
+      type: "bar",
+      label: "나의 운동시간",
       data: weeklyData.value,
-      backgroundColor: "rgba(0, 213, 223, 1)",
+      backgroundColor: "#FFE864",
       borderRadius: 10,
+      yAxisID: "y",
     },
   ],
 }));
@@ -80,7 +125,18 @@ const chartOptions = {
   maintainAspectRatio: false,
   plugins: {
     legend: {
-      display: false,
+      display: true,
+      position: "top", // 상단 표시 (bottom, left, right 도 가능)
+      labels: {
+        usePointStyle: true, // 둥근 점으로 표시
+        pointStyle: "circle",
+        padding: 10,
+        font: {
+          size: 10,
+          weight: "500",
+        },
+        color: "#666",
+      },
     },
   },
   scales: {
@@ -117,5 +173,6 @@ const chartOptions = {
   min-width: 210px;
   height: 215px;
   padding: 12px;
+  border-radius: 10px;
 }
 </style>
