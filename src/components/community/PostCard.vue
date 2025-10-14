@@ -29,18 +29,25 @@ const getTime = (p) => p?.time ?? p?.createdAt ?? '';
 const getLikes = (p) => p?.likes ?? p?.like ?? p?.likeCount ?? 0;
 const getComments = (p) => p?.comments ?? p?.commentCount ?? 0;
 
+
+const API_BASE =
+  (import.meta.env.VITE_BASE_URL ).replace(/\/$/, '');
+
+
 function toAbsUrl(p) {
-  if (!p) return '';
+  if (!p) return ''; 
   if (/^https?:\/\//i.test(p)) return p;
+  if (p.startsWith('/static/')) return `${API_BASE}${p}`;
+  if (p.startsWith('static/')) return `${API_BASE}/${p}`;
+
   try {
-    return new URL(p, axios.defaults.baseURL).toString();
+    return new URL(p, `${API_BASE}/`).toString();
   } catch {
     return p.startsWith('/')
       ? p
       : import.meta.env.BASE_URL + p.replace(/^\.?\//, '');
   }
 }
-
 /** 프로필: DB profile 컬럼 우선 */
 function getAvatar(p) {
   const raw =

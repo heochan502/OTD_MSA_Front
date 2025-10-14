@@ -28,14 +28,13 @@ const cacheBust = ref(`?v=${Date.now()}`);
 
 const API_BASE =
   (import.meta.env.VITE_BASE_URL ).replace(/\/$/, '');
+
 function toAbsUrl(p) {
-  if (!p) return '';
-  if (p.startsWith('/otd/image/main/')) {
-    return import.meta.env.BASE_URL + p.replace(/^\//, '');
-  }
+  if (!p) return ''; 
   if (/^https?:\/\//i.test(p)) return p;
   if (p.startsWith('/static/')) return `${API_BASE}${p}`;
   if (p.startsWith('static/')) return `${API_BASE}/${p}`;
+
   try {
     return new URL(p, `${API_BASE}/`).toString();
   } catch {
