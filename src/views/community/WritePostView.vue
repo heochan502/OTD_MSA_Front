@@ -6,7 +6,7 @@ import ComposeForm from '@/components/community/ComposeForm.vue';
 const router = useRouter();
 const route = useRoute();
 
-// ✅ 라우트 파라미터를 반응형으로
+// 라우트 파라미터를 반응형으로
 const category = computed(() =>
   typeof route.params.category === 'string' ? route.params.category : 'free'
 );
@@ -33,7 +33,7 @@ async function onSubmitted({ categoryKey, postId }) {
 </script>
 
 <template>
-  <!-- ✅ key로 카테고리 변경 시 폼 리셋/재생성 보장 -->
+  <!--key로 카테고리 변경 시 폼 리셋/재생성 보장 -->
   <ComposeForm
     :key="category"
     :category="category"
