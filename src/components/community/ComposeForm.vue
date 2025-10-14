@@ -54,7 +54,6 @@ function getMemberId() {
 function makeKey(f) {
   return `${f.name}__${f.size}__${f.lastModified ?? 0}`;
 }
-
 async function loadServerImages(postId) {
   try {
     const { data } = await fetchPostFiles(postId);
@@ -64,7 +63,10 @@ async function loadServerImages(postId) {
       const id = f.fileId ?? f.id;
       const name = f.fileName ?? '';
       const raw = f.filePath || '';
-      const url = new URL(raw, baseURL).toString();
+
+      // 어떤 입력이 와도 baseURL 기준으로 절대경로 생성
+      const url = `${baseURL.replace(/\/$/, '')}/${raw.replace(/^\/+/, '')}`;
+
       return { fileId: id, id, name, url };
     });
   } catch (e) {
