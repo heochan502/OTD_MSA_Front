@@ -153,6 +153,7 @@ const hasData = computed(() => {
   flex-direction: column;
   justify-content: center;
   text-align: center;
+  max-width: 350px;
   height: 250px;
   padding: 20px 10px;
   margin: 0 0 15px 0;
