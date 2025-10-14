@@ -73,8 +73,8 @@ const tableSet = computed(() => {
         :headers="headers"
         :items="tableSet"
         :search="search"
-        :items-per-page="10"
-        height="580"
+        :items-per-page="12"
+        height="700"
         fixed-header
         class="styled-table"
       >

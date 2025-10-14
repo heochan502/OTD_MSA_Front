@@ -1,18 +1,13 @@
 <script setup>
-import {
-  getCommunity,
-  getCommunityDetail,
-  deleteCommunity,
-  deleteComment,
-  deleteFile,
-} from '@/services/admin/adminService';
+import { getCommunity } from '@/services/admin/adminService';
 import { onMounted, ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAdminStore } from '@/stores/admin/adminStore';
+const adminStore = useAdminStore();
+const router = useRouter();
 
 const posts = ref([]);
 const selectedCategory = ref('전체');
-const selectedPost = ref(null);
-const detailDialog = ref(false);
-const deleteDialog = ref(false);
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -23,6 +18,7 @@ const itemsPerPage = 8; // 한 페이지당 게시글 개수 (2열 × 3행 = 6�
 // 목록 로드
 const loadPosts = async () => {
   const res = await getCommunity();
+  console.log('commu', res.data);
   posts.value = res.data;
 };
 
@@ -49,46 +45,26 @@ const pageCount = computed(() =>
   Math.ceil(filteredPosts.value.length / itemsPerPage)
 );
 
-// 상세보기
-const openDetail = async (postId) => {
-  const res = await getCommunityDetail(postId);
-  selectedPost.value = res.data;
-  detailDialog.value = true;
+const formatDate = (dateStr) => {
+  const d = new Date(dateStr);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+
+  const h24 = d.getHours();
+  const dayPeriod = h24 < 12 ? '오전' : '오후';
+  const h12 = String(h24 % 12 || 12).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  const sec = String(d.getSeconds()).padStart(2, '0');
+
+  return `${y}-${m}-${day} ${dayPeriod} ${h12}:${min}:${sec}`;
 };
 
-// 댓글 삭제
-const removeComment = async (id) => {
-  await deleteComment(id);
-  selectedPost.value.comments = selectedPost.value.comments.filter(
-    (c) => c.id !== id
-  );
-};
-
-// 파일 삭제
-const removeFile = async (id) => {
-  await deleteFile(id);
-  selectedPost.value.files = selectedPost.value.files.filter(
-    (f) => f.id !== id
-  );
-};
-
-// 게시글 삭제
-const openDelete = (postId) => {
-  selectedPost.value = { postId };
-  deleteDialog.value = true;
-};
-const confirmDelete = async () => {
-  await deleteCommunity(selectedPost.value.postId);
-  deleteDialog.value = false;
-  await loadPosts();
-};
-
-const formatNumber = (n) => String(n).padStart(2, '0');
-const formatDate = (date) => {
-  const y = date.getFullYear();
-  const m = formatNumber(date.getMonth() + 1);
-  const d = formatNumber(date.getDate());
-  return `${y}-${m}-${d}`;
+const toCommunityDetail = (postId) => {
+  console.log('user', postId);
+  adminStore.setSelectedPostId(postId);
+  console.log(adminStore.state.selectedPostId);
+  router.push({ path: '/admin/community/detail' });
 };
 </script>
 
@@ -103,7 +79,7 @@ const formatDate = (date) => {
           <v-btn
             v-for="cat in categories"
             :key="cat"
-            :class="['filter-btn', { active: selectedCategory === cat }]"
+            :class="['btn', { active: selectedCategory === cat }]"
             variant="outlined"
             density="comfortable"
             @click="
@@ -145,17 +121,12 @@ const formatDate = (date) => {
               <div class="post-bottom">
                 <v-card-text class="post-writer">
                   <span>작성자 : {{ post.nickName ?? post.userId }}</span>
-                  <span
-                    >작성일 : {{ formatDate(new Date(post.createdAt)) }}</span
-                  >
+                  <span>작성일 : {{ formatDate(post.createdAt) }}</span>
                 </v-card-text>
 
                 <v-card-actions class="justify-end btn-area">
-                  <v-btn class="btn-detail" @click="openDetail(post.postId)"
+                  <v-btn class="btn" @click="toCommunityDetail(post.postId)"
                     >상세</v-btn
-                  >
-                  <v-btn class="btn-delete" @click="openDelete(post.postId)"
-                    >삭제</v-btn
                   >
                 </v-card-actions>
               </div>
@@ -164,114 +135,35 @@ const formatDate = (date) => {
         </v-row>
       </v-container>
 
-      <!-- 🔹 페이지네이션 -->
+      <!-- 페이지네이션 -->
       <div class="pagination">
         <v-btn
+          class="page-btn"
           :disabled="page === 1"
-          variant="text"
+          variant="tonal"
+          prepend-icon="mdi-chevron-left"
           @click="page--"
-          class="pg-btn"
         >
           이전
         </v-btn>
-        <span>{{ page }} / {{ pageCount }}</span>
+
+        <div class="page-info">
+          <span class="current">{{ page }}</span>
+          <span class="divider">/</span>
+          <span class="total">{{ pageCount }}</span>
+        </div>
+
         <v-btn
+          class="page-btn"
           :disabled="page >= pageCount"
-          variant="text"
+          variant="tonal"
+          append-icon="mdi-chevron-right"
           @click="page++"
-          class="pg-btn"
         >
           다음
         </v-btn>
       </div>
     </v-card>
-    <!-- ✅ 상세보기 모달 -->
-    <v-dialog v-model="detailDialog" max-width="700">
-      <v-card class="admin-dialog pa-6">
-        <v-card-title class="dialog-title mb-3">
-          {{ selectedPost?.title }}
-        </v-card-title>
-
-        <v-card-subtitle class="dialog-sub">
-          [{{ selectedPost?.category }}]
-        </v-card-subtitle>
-
-        <v-card-text>
-          <p>
-            <strong>작성자:</strong>
-            {{ selectedPost?.nickName ?? selectedPost?.userId }}
-          </p>
-          <p><strong>내용:</strong> {{ selectedPost?.content }}</p>
-
-          <v-divider class="my-4" />
-
-          <div class="section">
-            <h4>댓글</h4>
-            <ul v-if="selectedPost?.comments?.length">
-              <li
-                v-for="c in selectedPost.comments"
-                :key="c.id"
-                class="comment-item"
-              >
-                {{ c.content }}
-                <v-btn
-                  icon
-                  size="small"
-                  color="#ef9a9a"
-                  variant="tonal"
-                  @click="removeComment(c.id)"
-                >
-                  <v-icon size="18">mdi-delete</v-icon>
-                </v-btn>
-              </li>
-            </ul>
-            <p v-else class="empty-text">댓글 없음</p>
-          </div>
-
-          <v-divider class="my-4" />
-
-          <div class="section">
-            <h4>파일</h4>
-            <div v-if="selectedPost?.files?.length" class="file-wrap">
-              <div
-                v-for="f in selectedPost.files"
-                :key="f.id"
-                class="file-item"
-              >
-                <a :href="BASE_URL + f.filePath" target="_blank">
-                  <img :src="BASE_URL + f.filePath" class="preview" />
-                </a>
-                <v-btn
-                  icon
-                  size="x-small"
-                  color="#ef9a9a"
-                  variant="tonal"
-                  @click="removeFile(f.id)"
-                >
-                  <v-icon size="18">mdi-close</v-icon>
-                </v-btn>
-              </div>
-            </div>
-            <p v-else class="empty-text">첨부 파일 없음</p>
-          </div>
-        </v-card-text>
-
-        <v-card-actions class="justify-end">
-          <v-btn class="btn-cancel" @click="detailDialog = false">닫기</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <!-- ✅ 삭제 확인 모달 -->
-    <v-dialog v-model="deleteDialog" max-width="380">
-      <v-card class="admin-dialog pa-5">
-        <v-card-text>정말로 게시글을 삭제하시겠습니까?</v-card-text>
-        <v-card-actions class="justify-end mt-2">
-          <v-btn class="btn-cancel" @click="deleteDialog = false">취소</v-btn>
-          <v-btn class="btn-delete" @click="confirmDelete">삭제</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </div>
 </template>
 <style lang="scss" scoped>
@@ -303,15 +195,39 @@ const formatDate = (date) => {
   text-transform: none;
   color: #555;
   border: none !important;
-  background-color: #e0e0e0;
+  background-color: #eee;
+}
+.btn {
+  min-width: 72px;
+  height: 38px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: -0.2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+  background-color: #eee !important;
+  color: #555 !important;
 
   &.active {
     background-color: #5ee6eb !important;
     color: #fff !important;
-    border-color: #5ee6eb !important;
+  }
+  &.active:hover {
+    background-color: #3dd4da !important;
+    box-shadow: 0 3px 10px rgba(61, 212, 218, 0.35);
+    transform: scale(1.03);
   }
 }
 
+.btn:hover {
+  background-color: #dcdcdc !important;
+  transform: scale(1.03);
+}
 /* 🔹 카드 레이아웃 (이전 그대로 유지 가능) */
 .post-grid {
   display: flex;
@@ -328,7 +244,7 @@ const formatDate = (date) => {
 
 .post-card {
   flex: 1;
-  height: 170px;
+  height: 165px;
   border-radius: 12px;
   border: 1px solid #e0e0e0;
   transition: all 0.25s ease;
@@ -390,50 +306,149 @@ const formatDate = (date) => {
   color: #999;
 }
 
-.btn-area {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  padding: 0 4px 4px 0 !important;
-  margin-top: 4px !important;
+.section {
+  margin-top: 10px;
 }
-// 버튼 공통
-.btn-detail,
-.btn-delete {
-  min-width: 72px;
-  height: 40px;
-  border-radius: 10px;
-  font-weight: 600;
+
+.comment-item {
+  padding: 6px 0;
+  border-bottom: 1px solid #eee;
   font-size: 0.9rem;
-  line-height: 1;
-  text-transform: none;
-  letter-spacing: -0.2px;
+  color: #444;
+}
+
+.file-wrap {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.file-item {
+  position: relative;
+}
+
+.preview {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.delete-btn {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+}
+
+.empty-text {
+  font-size: 0.85rem;
+  color: #888;
+  text-align: center;
+  margin-top: 8px;
+}
+
+.content-box {
+  white-space: pre-wrap;
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 10px 12px;
+  border: 1px solid #e2e2e2;
+  font-size: 0.9rem;
+  color: #333;
+}
+.comment-item {
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+  color: #444;
+}
+
+.file-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.file-item {
+  position: relative;
+}
+
+.preview {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.delete-btn {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+}
+
+.empty-text {
+  font-size: 0.85rem;
+  color: #888;
+  text-align: center;
+  margin-top: 8px;
+}
+
+.pagination {
+  display: flex;
   justify-content: center;
-  transition: all 0.25s ease;
-}
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0 13px 0 ;
 
-// 상세 버튼
-.btn-detail {
-  background-color: #ffe082 !important;
-  color: #fff !important;
-  border-radius: 10px;
-}
-.btn-detail:hover {
-  background-color: #ffd54f !important;
-  transform: scale(1.03);
-}
+  .page-btn {
+    min-width: 90px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-radius: 10px;
+    background-color: #eee !important;
+    color: #555 !important;
+    transition: all 0.25s ease;
 
-// 삭제 버튼
-.btn-delete {
-  background-color: #ffb4b4 !important;
-  color: #fff !important;
-  border-radius: 10px;
-}
-.btn-delete:hover {
-  background-color: #ff8a8a !important;
-  box-shadow: 0 3px 10px rgba(61, 212, 218, 0.35);
-  transform: scale(1.03);
+    &:hover {
+      background-color: #dcdcdc !important;
+      transform: scale(1.03);
+    }
+
+    &:disabled {
+      background-color: #f0f0f0 !important;
+      color: #999 !important;
+      box-shadow: none;
+      transform: none;
+    }
+  }
+
+  .page-info {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+    font-size: 1rem;
+    color: #555;
+
+    .current {
+      color: #5ee6eb; // 메인 민트 강조
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .divider {
+      margin: 0 2px;
+      color: #999;
+    }
+
+    .total {
+      color: #999;
+      font-size: 0.95rem;
+    }
+  }
 }
 </style>

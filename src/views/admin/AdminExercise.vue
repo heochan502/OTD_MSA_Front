@@ -15,8 +15,8 @@ const isEdit = ref(false);
 const successDialog = ref(false);
 const cancelDialog = ref(false);
 
-const exercise = ref({});
-const search = ref('');
+const editExercise = ref({});
+const deleteTarget = ref(null);
 
 // 테이블 헤더
 const headers = [
@@ -44,6 +44,7 @@ const loadExercises = async () => {
 
 // 검색 필터링
 const filteredExercises = computed(() => {
+  if (!Array.isArray(exercises.value)) return [];
   if (!keyword.value) return exercises.value;
   return exercises.value.filter((e) =>
     e.exerciseName.toLowerCase().includes(keyword.value.toLowerCase())
@@ -118,19 +119,18 @@ const removeExercise = async () => {
 const cancel = () => {
   cancelDialog.value = false;
   formDialog.value = false;
-}
+};
 onMounted(() => {
   loadExercises();
 });
-
 </script>
 
 <template>
-    <div class="admin-exercise">
+  <div class="admin-exercise">
     <v-card class="data-card pa-2">
       <!-- 상단 툴바 -->
       <v-card-title class="d-flex justify-space-between align-center">
-        <span class="title">운동 관리</span>
+        <span class="title">운동 종목 관리</span>
         <div class="d-flex align-center search" style="gap: 12px">
           <v-text-field
             v-model="keyword"
@@ -150,7 +150,8 @@ onMounted(() => {
       <v-data-table
         :headers="headers"
         :items="filteredExercises"
-        :items-per-page="10"
+        :items-per-page="12"
+        height="700"
         class="styled-table"
         fixed-header
       >
@@ -268,99 +269,20 @@ onMounted(() => {
       </v-card>
     </v-dialog>
 
-        <!-- 취소 모달 -->
+    <!-- 취소 모달 -->
     <v-dialog v-model="cancelDialog" max-width="380" min-height="100">
       <v-card class="admin-dialog pa-6">
         <v-card-text>
-          취소하고 돌아가시겠습니까? 
-          <br></br>
+          취소하고 돌아가시겠습니까?
+          <br />
           해당 내용은 저장되지 않습니다.
         </v-card-text>
         <v-card-actions class="btn-area">
           <v-btn class="btn-yes" @click="cancel()">네</v-btn>
-          <v-btn class="btn-no" @click="cancelDialog = false"
-            >아니오</v-btn
-          >
+          <v-btn class="btn-no" @click="cancelDialog = false">아니오</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
-
-    <v-card>
-      <v-card-title class="d-flex justify-space-between align-center">
-        <span class="title">운동 종목 관리</span>
-        <v-text-field
-          v-model="search"
-          label="검색"
-          prepend-inner-icon="mdi-magnify"
-          density="compact"
-          hide-details
-          single-line
-          variant="outlined"
-          style="max-width: 250px"
-        />
-        <v-btn >챌린지 추가하기</v-btn>
-      </v-card-title>
-
-      <v-data-table
-        :headers="headers"
-        :items="exercise"
-        style="max-height: calc(100vh - 200px)"
-        :search="search"
-        fixed-header
-        :items-per-page="10"
-        class="styled-table"
-      >
-        타입 변환
-        <!-- <template #item.cdType="{ item }">
-          <v-chip
-            :color="
-              item.cdType === 'daily'
-                ? 'blue'
-                : item.cdType === 'weekly'
-                ? 'green'
-                : item.cdType === 'competition'
-                ? 'red'
-                : 'purple'
-            "
-            text-color="white"
-            small
-          >
-            {{ formatType(item.cdType) }}
-          </v-chip>
-        </template> -->
-
-        <!-- 목표 -->
-        <!-- <template #item.cdGoal="{ item }">
-          {{ Number(item.cdGoal).toLocaleString() }}
-        </template> -->
-
-        <!-- 챌린지 등급 -->
-        <!-- <template #item.tier="{ item }">
-          <v-chip
-            :color="
-              item.tier === '브론즈'
-                ? '#ce7430'
-                : item.tier === '실버'
-                ? '#7a7a7a'
-                : item.tier === '골드'
-                ? '#ffba57'
-                : item.tier === '다이아'
-                ? '#00c6ff'
-                : '#ff8a80' // 그 외
-            "
-            small
-          >
-            {{ item.tier }}
-          </v-chip>
-        </template> -->
-
-        <!-- 관리 -->
-        <!-- <template #item.setting="{ item }">
-          <v-btn @click="toForm(item)">수정</v-btn>
-          <v-btn @click="openDelete(item.cdId)">삭제</v-btn>
-        </template> -->
-      </v-data-table>
-    </v-card>
   </div>
 </template>
 

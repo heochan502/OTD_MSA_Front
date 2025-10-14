@@ -86,7 +86,8 @@ const reversedUser = computed(() => {
         :headers="headers"
         :items="reversedUser"
         :search="search"
-        :items-per-page="10"
+        :items-per-page="12"
+        height="700"
         fixed-header
         class="styled-table"
         :row-props="rowProps"

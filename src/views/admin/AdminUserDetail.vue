@@ -350,7 +350,7 @@ const openMealDialog = async (meal) => {
         </v-card-actions>
       </v-card>
     </v-dialog>
-    
+
     <v-container fluid>
       <!-- 회원 정보 카드 -->
       <v-row dense>
@@ -714,6 +714,7 @@ const openMealDialog = async (meal) => {
 .title {
   font-weight: 700;
   font-size: 18px;
+  margin-bottom: 10px;
 }
 
 // 화면 버튼
@@ -741,13 +742,13 @@ const openMealDialog = async (meal) => {
   bottom: 0;
   left: 0;
   height: 40px;
-  background-color: #e0e0e0 !important;
-  color: #333 !important;
+  background-color: #f28b82 !important;
+  color: #fff !important;
   border-radius: 10px;
   font-weight: 600;
 }
 .btn-ban:hover {
-  background-color: #d6d6d6 !important;
+  background-color: #ef5350 !important;
 }
 
 // 관리 모달 카드
@@ -805,12 +806,12 @@ const openMealDialog = async (meal) => {
 
 // 취소 버튼
 .btn-no {
-  background-color: #e0e0e0 !important;
-  color: #333 !important;
+  background-color: #eee !important;
+  color: #555 !important;
   border-radius: 10px;
 }
 .btn-no:hover {
-  background-color: #d6d6d6 !important;
+  background-color: #dcdcdc !important;
   transform: scale(1.03);
 }
 
