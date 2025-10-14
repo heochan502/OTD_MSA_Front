@@ -30,6 +30,8 @@ onMounted(async () => {
     authenticationStore.userRole === "MANAGER"
   ) {
     return;
+  } else if (hasRecord) {
+    return;
   } else {
     const res = await getUserBasicBodyInfo();
 
