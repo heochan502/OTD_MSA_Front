@@ -81,8 +81,8 @@ const calcKcal = computed(() => {
   // MET × 체중(kg) × 운동시간(분) × 0.0175 = 소모 칼로리(kcal).
   const met = selectedExercise.value ? selectedExercise.value.exerciseMet : 0;
   const bodyWeight =
-    bodyCompositionStore.lastest?.weight ??
     bodyCompositionStore.recentBodyInfo?.weight ??
+    bodyCompositionStore.lastest?.weight ??
     0;
   const duration = exerciseDuration.value;
   console.log("계산", bodyWeight);
