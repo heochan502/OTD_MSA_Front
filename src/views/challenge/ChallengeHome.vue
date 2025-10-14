@@ -249,8 +249,8 @@ const settlementButton = async () => {
         </div>
       </div>
       <!-- 경쟁 -->
-      <div>
-        <div class="sub-title">> 경쟁 챌린지</div>
+      <div class="sub-title">> 경쟁 챌린지</div>
+      <div class="card-wrap">
         <div class="challenge-card">
           <ChallengeCard
             v-for="challenge in state.competitionChallenge"
@@ -275,8 +275,8 @@ const settlementButton = async () => {
         </div>
       </div>
       <!-- 개인 -->
-      <div>
-        <div class="sub-title">> 개인 챌린지</div>
+      <div class="sub-title">> 개인 챌린지</div>
+      <div class="card-wrap">
         <div class="challenge-card">
           <ChallengeCard
             v-for="challenge in state.personalChallenge"
@@ -305,7 +305,7 @@ const settlementButton = async () => {
     <div>
       <div>
         <div class="title">진행중인 주간 챌린지</div>
-        <div class="weekly">
+        <div class="weekly card-wrap">
           <!-- <div class="route-list" @click="toChallengeList">
           > 챌린지 목록 보기
           </div> -->
@@ -411,8 +411,8 @@ const settlementButton = async () => {
   margin-bottom: 15px;
 }
 .challenge-card {
-  display: grid;
-  grid-template-columns: repeat(2, 168px); // 가로 2칸
+  display: flex;
+  // grid-template-columns: repeat(2, 168px); // 가로 2칸
   gap: 15px;
   justify-content: center;
   justify-items: center;

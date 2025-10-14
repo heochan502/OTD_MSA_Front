@@ -29,15 +29,16 @@ const FILE_URL = import.meta.env.VITE_BASE_URL;
 
 <style lang="scss" scoped>
 .challenge-card {
-  position: relative;
+  position: relative; /* ← point-box 기준 */
   width: 168px;
   height: 121px;
+  border-radius: 10px;
   overflow: hidden;
-  margin-bottom: 15px;
+  cursor: pointer;
   .challenge-img {
-    width: 168px;
-    height: 121px;
-    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   .point-box {
@@ -52,6 +53,7 @@ const FILE_URL = import.meta.env.VITE_BASE_URL;
     top: 5px;
     right: 5px;
     gap: 2px;
+
     .point {
       margin-left: 4px;
       width: 14px;
