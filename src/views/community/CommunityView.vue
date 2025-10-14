@@ -34,11 +34,9 @@ const categories = [
 ];
 
 const searchVal = ref('');
-
 const allPosts = computed(() =>
   ['free', 'diet', 'work', 'love'].flatMap((k) => store.list(k) ?? [])
 );
-
 const query = computed(() => searchVal.value.trim().toLowerCase());
 const TOP_N = 3;
 
@@ -80,10 +78,15 @@ const handleClickPost = (post) =>
 const showOverlay = ref(false);
 const composeStep = ref('none');
 const selectedCategory = ref('');
+const pickerPos = ref({ top: 0, left: 0 });
 
-function openCompose() {
+function openCompose(e) {
   showOverlay.value = true;
   composeStep.value = 'pick';
+  if (e && e.currentTarget) {
+    const r = e.currentTarget.getBoundingClientRect();
+    pickerPos.value = { top: r.bottom + 10, left: r.left + r.width / 2 };
+  }
 }
 function closeOverlay() {
   showOverlay.value = false;
@@ -119,7 +122,7 @@ async function onSubmitSuccess() {
             <button
               class="compose-emoji"
               aria-label="글쓰기"
-              @click="openCompose"
+              @click="(e) => openCompose(e)"
             >
               +
             </button>
@@ -153,8 +156,17 @@ async function onSubmitSuccess() {
       </div>
     </section>
 
-    <div v-if="showOverlay" class="overlay-full" @click.self="closeOverlay">
-      <div v-if="composeStep === 'pick'" class="picker-floating">
+    <div
+      v-if="showOverlay"
+      class="overlay-full"
+      :class="{ centered: composeStep === 'form' }"
+      @click.self="closeOverlay"
+    >
+      <div
+        v-if="composeStep === 'pick'"
+        class="picker-floating"
+        :style="{ top: pickerPos.top + 'px', left: pickerPos.left + 'px' }"
+      >
         <button class="pill" @click="onPickCategory('free')">자유수다</button>
         <button class="pill" @click="onPickCategory('diet')">다이어트</button>
         <button class="pill" @click="onPickCategory('work')">운동</button>
@@ -253,29 +265,36 @@ async function onSubmitSuccess() {
   padding: 0 2px;
   margin: 0;
 }
+
+/* Overlay 기본: 좌상단 기준(픽커 뜰 때) */
 .overlay-full {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%;
-  height: 100%;
-  border-radius: 0;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
   background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(2px);
   z-index: 999;
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-end;
-  padding-left: 12px;
-  padding-top: 96px;
-  padding-right: 12px;
 }
+
+/* ComposeForm 단계에서 중앙 정렬 */
+.overlay-full.centered {
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+/* 카테고리 픽커: + 버튼 바로 아래 고정 */
 .picker-floating {
+  position: fixed;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   gap: 12px;
+  z-index: 1001;
 }
+
 .pill {
   min-width: 96px;
   padding: 10px 14px;
@@ -288,10 +307,7 @@ async function onSubmitSuccess() {
   cursor: pointer;
   text-align: center;
 }
-.pill-cancel {
-  background: #f7f7f7;
-  color: #666;
-}
+
 *,
 *::before,
 *::after {
