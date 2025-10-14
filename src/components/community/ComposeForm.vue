@@ -64,9 +64,7 @@ async function loadServerImages(postId) {
       const id = f.fileId ?? f.id;
       const name = f.fileName ?? '';
       const raw = f.filePath || '';
-      const url = /^https?:\/\//i.test(raw)
-        ? raw
-        : new URL(raw, baseURL).toString();
+      const url = new URL(raw, baseURL).toString();
       return { fileId: id, id, name, url };
     });
   } catch (e) {
