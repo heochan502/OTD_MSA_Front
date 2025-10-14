@@ -56,12 +56,12 @@ export const useCommentsStore = defineStore('comments', {
       this.byPost[k] = [next, ...(this.byPost[k] ?? [])];
     },
 
-    async remove(mentId, postId) {
+    async remove(mentId, postId, myrole) {
       const k = String(postId);
       const auth = useAuthenticationStore();
       const me = auth?.state?.signedUser ?? { userId: 0 };
 
-      await deleteMent(mentId, me.userId);
+      await deleteMent(mentId, me.userId, myrole);
       this.byPost[k] = (this.byPost[k] ?? []).filter(
         (m) => m.commentId !== mentId
       );

@@ -12,7 +12,8 @@ import { useAuthenticationStore } from '@/stores/user/authentication';
 const route = useRoute();
 const router = useRouter();
 const store = useCommunityStore();
-useAuthenticationStore();
+const auth = useAuthenticationStore();
+const myRole = computed(() => auth?.state?.signedUser?.userRole ?? '');
 
 const routeId = computed(() => String(route.params.id));
 const post = computed(() => store.getById(routeId.value));
@@ -131,13 +132,18 @@ const like = async () => {
 
 const myId = computed(() => store.currentUserId);
 const postOwnerId = computed(() => post.value?.authorId);
-const canEdit = computed(
-  () =>
+const canEdit = computed(() => {
+  // 관리자면 무조건 true
+  if (myRole.value === 'ADMIN') return true;
+
+  // 아니면 본인 글만
+  return (
     post.value?.isMine === true ||
     (myId.value != null &&
       postOwnerId.value != null &&
       Number(myId.value) === Number(postOwnerId.value))
-);
+  );
+});
 
 const removePost = async () => {
   if (!post.value) return;
