@@ -116,6 +116,7 @@ const confirmYes = async () => {
   saveDialog.value = false;
   successDialog.value = true;
 };
+
 const goToMain = () => {
   successDialog.value = false;
   router.push("/exercise/main");

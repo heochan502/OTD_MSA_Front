@@ -1,15 +1,17 @@
 <script setup>
-import { computed, ref } from "vue";
+import { computed, reactive, ref } from "vue";
 import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
+import { saveUserBasicBodyInfo } from "@/services/body_composition/bodyCompositionService";
 import Modal from "../user/Modal.vue";
 const bodyCompositionStore = useBodyCompositionStore();
 const showDialog = ref(false);
 
 // bmi 데이터 유무
 const hasBmiData = computed(() => {
-  const { lastest, bmiInfo } = bodyCompositionStore;
+  const { lastest, basicInfo } = bodyCompositionStore;
   return (
-    (lastest?.height && lastest?.weight) || (bmiInfo?.height && bmiInfo?.weight)
+    (lastest?.height && lastest?.weight) ||
+    (basicInfo?.height && basicInfo?.weight)
   );
 });
 
@@ -34,10 +36,10 @@ function calculateBmi(height, weight) {
 }
 
 const bmi = computed(() => {
-  const { lastest, bmiInfo } = bodyCompositionStore;
+  const { lastest, basicInfo } = bodyCompositionStore;
 
-  const height = lastest?.height || bmiInfo?.height;
-  const weight = lastest?.weight || bmiInfo?.weight;
+  const height = lastest?.height || basicInfo?.height;
+  const weight = lastest?.weight || basicInfo?.weight;
 
   return calculateBmi(height, weight);
 });
@@ -51,6 +53,32 @@ const bmiStatus = computed(() => {
   else if (userBmi < 35) return "비만";
   else return "고도비만";
 });
+
+const state = reactive({
+  form: {
+    weight: null,
+    height: null,
+    bmi: null,
+    bmr: null,
+  },
+});
+
+const saveFormData = async () => {
+  state.form.bmi = bmi.value;
+  state.form.bmr = null;
+  
+  const res = await saveUserBasicBodyInfo(state.form);
+  if (res === undefined || res.status !== 200) {
+    alert("에러발생");
+    return;
+  }
+  // 모달창 닫기 전에 입력된 내용 지우기
+  state.form.height = null;
+  state.form.weight = null;
+
+  // 모달창 닫기
+  showDialog.value = false;
+};
 </script>
 
 <template>
@@ -114,7 +142,9 @@ const bmiStatus = computed(() => {
       >
         BMI 계산기
       </v-btn>
-      <span class="otd-body-3">체중, 키를 입력하고 BMI를 계산해보세요!</span>
+      <span class="otd-body-3"
+        >체중, 키를 입력하고 BMI와 기초대사량을 계산해보세요!</span
+      >
     </div>
   </div>
 
@@ -124,13 +154,13 @@ const bmiStatus = computed(() => {
       <v-card-title class="text-h6">BMI 계산기</v-card-title>
       <v-card-text>
         <v-text-field
-          v-model="bodyCompositionStore.bmiInfo.height"
+          v-model="state.form.height"
           label="신장 (cm)"
           type="number"
           variant="outlined"
         />
         <v-text-field
-          v-model="bodyCompositionStore.bmiInfo.weight"
+          v-model="state.form.weight"
           label="체중 (kg)"
           type="number"
           variant="outlined"
@@ -141,7 +171,7 @@ const bmiStatus = computed(() => {
         <v-btn class="btn btn-cancel" variant="text" @click="showDialog = false"
           >취소</v-btn
         >
-        <v-btn class="btn btn-confirm" @click="showDialog = false">저장</v-btn>
+        <v-btn class="btn btn-confirm" @click="saveFormData">저장</v-btn>
       </v-card-actions>
     </div>
   </v-dialog>
