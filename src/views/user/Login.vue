@@ -10,7 +10,7 @@ const router = useRouter();
 const authentication = useAuthenticationStore();
 const beBaseUrl = import.meta.env.VITE_BASE_URL;
 const feBaseUrl = window.location.origin;
-const redirectUrl = `${feBaseUrl}/fe/redirect`;
+const redirectUrl = `${feBaseUrl}/otd/fe/redirect`;
 
 const state = reactive({
   form: {

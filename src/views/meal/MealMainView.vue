@@ -61,11 +61,11 @@ onMounted (async () => {
 
   <MealDateStrip v-model="selectedDate" :before="365" :after="365" />
 
-  <div class="wrap wrap-top">
+  <div class="wrap wrap-top ">
     <!-- 나의 하루 -->
-    <div >
+    
       <MealSummaryCard @more="goDetail" />
-    </div>
+   
 
     <!-- 식단 -->
     <div class="section-panel otd-top-margin">
@@ -85,8 +85,27 @@ onMounted (async () => {
 <style setup >
 /* 이 뷰는 공통 유틸(main.css) + 각 카드 내부 스타일을 사용
    */
+.wrap {
+  margin-top: 30px;  
+  justify-self: center;
+ 
+}
+
+/* // 화면이 391px 이상일 때만 max-width + 중앙정렬 적용 */
+@media (min-width: 391px) {  
+  .wrap {   
+    width: 100%;
+    max-width: 391px;
+    margin: 0 auto;
+    margin-top: 30px;
+    
+  }
+}
+
+
  /* 뷰 스타일에 추가 */
  .section-panel {
+  
    background: #F2F2F2;
    /* 연한 회색 배경 */
    border-radius: 16px;
