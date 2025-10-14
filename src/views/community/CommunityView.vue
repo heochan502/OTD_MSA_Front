@@ -23,7 +23,7 @@ const router = useRouter();
 const store = useCommunityStore();
 
 onMounted(async () => {
-  await store.loadPosts(1, 20, '');
+  await store.loadPosts(1, 60, '');
 });
 
 const categories = [
@@ -102,7 +102,7 @@ async function onSubmitSuccess() {
   if (typeof store.reloadFirstPage === 'function') {
     await store.reloadFirstPage();
   } else {
-    await store.loadPosts(1, 20, '');
+    await store.loadPosts(1, 60, '');
   }
 }
 </script>
