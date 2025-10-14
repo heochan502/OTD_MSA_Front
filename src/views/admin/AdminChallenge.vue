@@ -5,8 +5,11 @@ import {
   putChallenge,
   deleteChallenge,
   getChallenge,
+  getChallengeProgress,
 } from '@/services/admin/adminService';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 const challenges = ref([]);
 const search = ref('');
 const selectedType = ref('');
@@ -54,6 +57,7 @@ const headers = [
   { title: '경험치(XP)', key: 'xp' },
   { title: '티어', key: 'tier' },
   { title: '이미지 경로', key: 'cdImage' },
+  { title: '더보기', key: 'progress'},
   { title: '관리', key: 'setting' },
 ];
 
@@ -210,6 +214,14 @@ const submit = async () => {
     alert('저장에 실패했습니다. 다시 시도해주세요.');
   }
   deleteDialog.value = false;
+};
+// 챌린지 현황
+const progress = async (id) => {
+  try {
+    router.push({ name: 'AdminChallengeDetail', query: { id } });
+  } catch (e) {
+    console.error('현황 조회 실패', e);
+  }
 };
 
 // 삭제 api
@@ -486,6 +498,11 @@ const remove = async () => {
           >
             {{ item.tier }}
           </v-chip>
+        </template>
+
+        <!-- 챌린지 현황 -->
+        <template #item.progress="{item}">
+          <v-bt @click="progress(item.cdId)">챌린지 현황</v-bt>
         </template>
 
         <!-- 관리 -->
