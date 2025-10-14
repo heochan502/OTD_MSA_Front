@@ -949,10 +949,7 @@ const loadTermsContent = (type) => {
 };
 
 // 약관 모달 닫기
-const closeTermsModal = () => {
-  console.log('약관 모달 닫기');
-  showTermsModal.value = false;
-};
+
 
 // 약관 모달 닫기
 const closeTermsModal = () => {
