@@ -451,9 +451,9 @@ const remove = async () => {
       <v-data-table
         :headers="headers"
         :items="filteredChallenges"
-        style="max-height: calc(100vh - 200px)"
         fixed-header
-        :items-per-page="10"
+        :items-per-page="12"
+        height="700"
         class="styled-table"
       >
         <!-- 타입 변환 -->

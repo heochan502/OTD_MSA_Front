@@ -89,25 +89,43 @@ const searchFoodName = async (keyword) => {
 
       items.foodList = Array.from(
         new Map(
-          res.map((item) => [
-            item.foodName.trim(),
-            {
-              foodDbId: item.foodDbId,
-              foodName: item.foodName.trim(),
-              kcal:  Math.floor(item.kcal *(item.foodCapacity/100)),
-               // 처음 가져오는건 식품기준 용량 이지만 이후는 사용자가 섭취량으로 인식하기 떄문에 amount로 설정
-              amount: item.foodCapacity,
-              flag: item.flag,
-              protein : item.protein,
-              carbohydrate : item.carbohydrate,
-              fat : item.fat,
-              sugar : item.sugar,
-              natrium: item.natrium,
-              checked: false
-            },
-          ])
-        ).values() // foodName 기준으로 중복 제거 공백까지 포함
+          res.map((item) => {
+            const isDb = item.foodDbId != null;
+
+            // DB 음식: per100 * (capacity/100)
+            // 커스텀 음식: kcal 그대로, amount는 1회
+            const kcal = isDb
+              ? Math.floor((Number(item.kcal) || 0) * ((Number(item.foodCapacity) || 0) / 100))
+              : Math.round(Number(item.kcal) || 0);
+
+            const amount = isDb
+              ? Number(item.foodCapacity) || 0
+              : 1;
+
+            // 매크로도 동일 규칙로 스케일(커스텀은 그대로)
+            const scale = (v) => Number(v) || 0;
+            const scaled = (v) => isDb ? scale(v) * (amount / 100) : scale(v);
+
+            return [
+              item.foodName.trim(),
+              {
+                foodDbId: item.foodDbId,
+                foodName: item.foodName.trim(),
+                kcal,
+                amount,
+                flag: item.flag,                 // 커스텀이라면 '회' 등으로 바꾸고 싶으면 여기서 변경
+                protein: scaled(item.protein),
+                carbohydrate: scaled(item.carbohydrate),
+                fat: scaled(item.fat),
+                sugar: scaled(item.sugar),
+                natrium: scaled(item.natrium),
+                checked: false,
+              },
+            ];
+          })
+        ).values() // 중복제거 
       );
+
       // console.log('음식확인 ', items.foodList);
     } else {
       return null;
@@ -119,16 +137,36 @@ const searchFoodName = async (keyword) => {
 
 // 체크여부 & 표시값 헬퍼 함수
 //역할은 해당 키(key)가 Map 안에 존재하는지 확인하는 것.
-const isSelected = (id) =>
-  id != null && (selectedFoods.value ?? []).some(food => food?.foodDbId === id);
+// 1) 동일 음식 비교(공용)
+const sameFood = (a, b) => {
+  // DB 음식: id로 비교
+  if (a?.foodDbId != null && b?.foodDbId != null) {
+    return a.foodDbId === b.foodDbId;
+  }
+  // 커스텀 음식: 이름(+옵션으로 flag)로 비교
+  if (a?.foodDbId == null && b?.foodDbId == null) {
+    const an = (a?.foodName ?? '').trim().toLowerCase();
+    const bn = (b?.foodName ?? '').trim().toLowerCase();
+    const af = (a?.flag ?? '').trim().toLowerCase();
+    const bf = (b?.flag ?? '').trim().toLowerCase();
+    // 이름만 쓰면 동명이인 충돌 가능 → flag까지 붙여 충돌 완화
+    return an === bn && af === bf;
+  }
+  // 한쪽만 null인 경우는 다른 출처로 간주
+  return false;
+};
+
+// 2) 선택 여부
+const isSelectedItem = (item) =>
+  (selectedFoods.value ?? []).some(f => sameFood(f, item));
 
 const displayAmount = (item) => {
-  const sel = (selectedFoods.value ?? []).find(f => f?.foodDbId === item?.foodDbId);
+  const sel = (selectedFoods.value ?? []).find(f => sameFood(f, item));
   return Number(sel?.amount ?? item?.amount ?? 0);
 };
 
 const displayKcal = (item) => {
-  const sel = (selectedFoods.value ?? []).find(f => f?.foodDbId === item?.foodDbId);
+  const sel = (selectedFoods.value ?? []).find(f => sameFood(f, item));
   return Number(sel?.kcal ?? item?.kcal ?? 0);
 };
 
@@ -174,30 +212,76 @@ const customFood = ref ({
 //   sheetOpen.value = true
 // }
 
+// 유틸: 커스텀(유저) 음식인지
+const isCustomFood = (f) => f?.foodDbId == null;
+
+// openSheet에서 per100은 DB 음식에만 셋업
 const openSheet = (food) => {
-  const kcalPer100 = food.amount
-    ? Math.round((food.kcal * 100) / food.amount) : 0;
+  const dbItem = !isCustomFood(food);
 
-  clickFood.value = { ...food, _kcalPer100: kcalPer100 };
+  // DB 음식이면 per100 역산 저장
+  const kcalPer100 = dbItem && food.amount
+    ? Math.round((food.kcal * 100) / food.amount)
+    : 0;
 
-  const saved = (selectedFoods.value ?? []).find(f => f.foodDbId === food.foodDbId);
+  // 커스텀이면 perServing 저장(선택)
+  const perServing = isCustomFood(food) ? {
+    kcal: Number(food.kcal) || 0,
+    protein: Number(food.protein) || 0,
+    carbohydrate: Number(food.carbohydrate) || 0,
+    fat: Number(food.fat) || 0,
+    sugar: Number(food.sugar) || 0,
+    natrium: Number(food.natrium) || 0,
+  } : null;
+
+  clickFood.value = {
+    ...food,
+    _kcalPer100: dbItem ? kcalPer100 : 0,
+    _perServing: perServing,
+  };
+  const saved = (selectedFoods.value ?? []).find(f =>
+    (f.foodDbId ?? null) === (food.foodDbId ?? null) && f.foodName === food.foodName
+  );
+
   customFood.value = saved
-    ? { ...saved, _kcalPer100: kcalPer100 }
-    : { ...food, _kcalPer100: kcalPer100 };
+    ? { ...saved, _kcalPer100: kcalPer100, _perServing: perServing }
+    : { ...food, _kcalPer100: kcalPer100, _perServing: perServing };
+
+  // 커스텀 음식은 기본 1회로 고정(또는 서빙 개수 입력 허용 시 1로 초기화)
+  if (isCustomFood(customFood.value)) {
+    customFood.value.amount = customFood.value.amount || 1;
+  }
 
   sheetOpen.value = true;
 };
-
 // 양 변경 시 kcal 재계산
 const recalc = () => {
-  const result = (customFood.value.amount || 0) / 100;
-  customFood.value.kcal = Math.round((clickFood.value._kcalPer100 || 0) * result);
-  customFood.value.protein = Math.round((clickFood.value.protein || 0) * result);
-  customFood.value.carbohydrate = Math.round((clickFood.value.carbohydrate || 0) * result);
-  customFood.value.fat = Math.round((clickFood.value.fat || 0) * result);
-  customFood.value.sugar = Math.round((clickFood.value.sugar || 0) * result);
-  customFood.value.natrium = Math.round((clickFood.value.natrium || 0) * result);
-}
+  if (isCustomFood(clickFood.value)) {
+    //  유저 음식: 1회 제공량 기준
+    // - "고정 1회"라면 그대로 출력
+    // - "서빙 개수"로 허용하고 싶다면 amount(서빙수)만큼 곱하기
+    const servings = Number(customFood.value.amount) || 1; // 고정 1이면 1로 둠
+    const ps = clickFood.value._perServing || {};
+
+    // 고정 1회 출력만 원하면 아래를 모두 ps.xxx로 그대로 대입
+    customFood.value.kcal = Math.round((ps.kcal || 0) * 100);
+    customFood.value.protein = Math.round((ps.protein || 0) * servings);
+    customFood.value.carbohydrate = Math.round((ps.carbohydrate || 0) * servings);
+    customFood.value.fat = Math.round((ps.fat || 0) * servings);
+    customFood.value.sugar = Math.round((ps.sugar || 0) * servings);
+    customFood.value.natrium = Math.round((ps.natrium || 0) * servings);
+
+  } else {
+    //  DB 음식: 100g 기준
+    const factor = (customFood.value.amount || 0) / 100;
+    customFood.value.kcal = Math.round((clickFood.value._kcalPer100 || 0) * factor);
+    customFood.value.protein = Math.round((clickFood.value.protein || 0) * factor);
+    customFood.value.carbohydrate = Math.round((clickFood.value.carbohydrate || 0) * factor);
+    customFood.value.fat = Math.round((clickFood.value.fat || 0) * factor);
+    customFood.value.sugar = Math.round((clickFood.value.sugar || 0) * factor);
+    customFood.value.natrium = Math.round((clickFood.value.natrium || 0) * factor);
+  }
+};
 // + / - 버튼
 const changeAmount = (delta) => {
   const next = Math.max(0, (Number(customFood.value.amount) || 0) + delta)
@@ -223,7 +307,7 @@ const addToList = () => {
     natrium: Number(modiFood.natrium) || 0,
   };
 
-  const idx = selectedFoods.value.findIndex(v => v?.foodDbId === modiFood.foodDbId);
+  const idx = (selectedFoods.value ?? []).findIndex(v => sameFood(v, modiFood));
   if (idx === -1) selectedFoods.value.push(payload);
   else selectedFoods.value[idx] = payload;
 
@@ -232,26 +316,21 @@ const addToList = () => {
 
 
 // 체크 아이콘 전용 토글
+// toggleSelect
 const toggleSelect = (food) => {
-  if (isSelected(food.foodDbId)) {
-    // 이미 담겨 있으면 해제
-    cancelFood(food.foodDbId);
+  if (isSelectedItem(food)) {
+    cancelFood(food);
   } else {
-    // 아직 없으면 상세에서 양 설정 후 담게 하기
     openSheet(food);
-    // 만약 상세 없이 즉시 담고 싶다면 openSheet 대신 바로 push:
-    // selectedFoods.value.push({ ...food });
   }
 };
 
-
-const cancelFood = (foodId) => {
-  const idx = (selectedFoods.value ?? []).findIndex(v => v?.foodDbId === foodId);
+// cancelFood
+const cancelFood = (food) => {
+  const idx = (selectedFoods.value ?? []).findIndex(v => sameFood(v, food));
   if (idx > -1) selectedFoods.value.splice(idx, 1);
   sheetOpen.value = false;
 };
-
-
 
 
 //  확정 버튼 → 식단 저장 화면으로 이동
@@ -327,17 +406,14 @@ const frameEl = ref(null); // 모달을 붙일 프레임
           <span>{{ displayAmount(food) }}</span> <!-- 선택되면 selected.amount -->
         </div>
         <div class="d-flex align-center">
-          <span class="mr-2">{{ displayKcal(food) }} kcal</span> <!-- 선택되면 selected.kcal -->
-          <img class="check" :src="isSelected(food.foodDbId) ? checkOn : checkOff"
-            :alt="isSelected(food.foodDbId) ? 'Checked' : 'Default'" @click.stop="toggleSelect(food)" />
+          <span class="mr-2">{{ displayKcal(food) }} kcal</span>
+          <img class="check" :src="isSelectedItem(food) ? checkOn : checkOff"
+            :alt="isSelectedItem(food) ? 'Checked' : 'Default'" @click.stop="toggleSelect(food)" />
         </div>
       </div>
     </div>
     <v-dialog v-model="sheetOpen" transition="dialog-bottom-transition" :scrim="true" :persistent="true"
-      :contained="false" 
-      content-class="otd-sheet" 
-      @click:outside="sheetOpen = false"
-      >
+      :contained="false" content-class="otd-sheet" @click:outside="sheetOpen = false">
       <div class="sheet-card">
         <!-- 핸들바 -->
         <div class="sheet-handle" @click="sheetOpen = false" />
@@ -369,12 +445,16 @@ const frameEl = ref(null); // 모달을 붙일 프레임
             <v-icon>mdi-minus</v-icon>
           </v-btn>
 
-          <v-text-field v-model.number="customFood.amount" type="number" min="0" variant="outlined"
-            density="comfortable" class="amount-field" hide-details suffix="g" @update:model-value="recalc" />
+          <v-text-field v-model.number="customFood.amount" type="number" :min="isCustomFood(customFood) ? 1 : 0"
+            variant="outlined" density="comfortable" class="amount-field" hide-details
+            
+            :suffix="isCustomFood(customFood) ? '회' : 'g'"
+            @update:model-value="recalc"
+            />
 
-          <v-btn icon variant="flat" class="step-btn" @click="changeAmount(10)">
-            <v-icon>mdi-plus</v-icon>
-          </v-btn>
+            <v-btn icon variant="flat" class="step-btn" @click="changeAmount(10)">
+              <v-icon>mdi-plus</v-icon>
+            </v-btn>
         </div>
 
         <!-- 액션 버튼 -->
