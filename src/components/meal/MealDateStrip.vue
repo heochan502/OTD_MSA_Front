@@ -31,7 +31,7 @@ const KOREAN_DOW = ['일', '월', '화', '수', '목', '금', '토'];
 const toDate = (value) => (value instanceof Date ? value : new Date(value));
 const fmt2 = (n) => String(n).padStart(2, '0');
 
-const today = computed(() => startOfDay(new Date()));
+const today = computed(() =>  selectedDay.selectedDay.setDay ?? startOfDay(new Date()));
 const selected = ref(startOfDay(toDate(props.modelValue)));
 
 watch(
