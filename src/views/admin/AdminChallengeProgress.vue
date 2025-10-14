@@ -105,7 +105,6 @@ const filteredProgress = computed(() => {
 <style lang="scss" scoped>
 .admin-challenge-progress {
   padding: 10px;
-
   .data-card {
     border-radius: 15px;
     background: #fff;
