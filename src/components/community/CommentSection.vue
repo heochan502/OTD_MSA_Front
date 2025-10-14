@@ -40,7 +40,7 @@ function toAbsUrl(p) {
   }
 }
 
-/** ✅ 댓글 프로필도 profile 우선 */
+/** 댓글 프로필도 profile 우선 */
 function getAvatar(c) {
   const raw =
     c.profile || // 백엔드에서 내려주는 댓글 작성자 프로필(있다면)

@@ -141,15 +141,18 @@ const canEdit = computed(
 
 const removePost = async () => {
   if (!post.value) return;
-  const prevCategory = post.value.category || 'free';
 
   showConfirm('이 게시글을 삭제할까요?', async () => {
     try {
       await store.removePost(routeId.value);
-      router.replace({
-        name: 'CommunityCategory',
-        params: { category: prevCategory },
-      });
+
+      // 삭제 성공 후 커뮤니티 메인으로 이동
+      if (router.hasRoute('CommunityView')) {
+        router.replace({ name: 'CommunityView' });
+      } else {
+        // 혹시 라우트 이름이 다르면 경로 기준으로 폴백
+        router.replace('/community');
+      }
     } catch {
       showInfo('삭제에 실패했습니다.', '오류');
     }

@@ -19,7 +19,7 @@ const router = useRouter();
 const DEFAULT_AVATAR =
   import.meta.env.BASE_URL + 'image/main/default-profile.png';
 
-// ✅ 썸네일 캐시(카드 여러개일 때 중복 API 방지)
+//  썸네일 캐시(카드 여러개일 때 중복 API 방지)
 const thumbCache = (globalThis.__postThumbCache ||= new Map());
 
 const getId = (p) => p?.[props.idKey] ?? p?.id ?? p?.postId;
@@ -41,7 +41,7 @@ function toAbsUrl(p) {
   }
 }
 
-/** ✅ 프로필: DB profile 컬럼 우선 */
+/** 프로필: DB profile 컬럼 우선 */
 function getAvatar(p) {
   const raw =
     p?.profile || // ← 새로 들어온 컬럼
