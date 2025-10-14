@@ -29,12 +29,23 @@ const cacheBust = ref(`?v=${Date.now()}`);
 const API_BASE =
   (import.meta.env.VITE_BASE_URL ).replace(/\/$/, '');
 
-function toAbsUrl(path) {
-  const base = import.meta.env.VITE_BASE_URL.replace(/\/$/, ''); // https://greenart.n-e.kr/otd-api
-  if (!path) return base;
+function toAbsUrl(p) {
+  if (!p) return '';
+  if (p.startsWith('/otd/image/main/')) {
+    return import.meta.env.BASE_URL + p.replace(/^\//, '');
+  }
+  if (!p) return ''; 
+  if (/^https?:\/\//i.test(p)) return p;
+  if (p.startsWith('/static/')) return `${API_BASE}${p}`;
+  if (p.startsWith('static/')) return `${API_BASE}/${p}`;
 
-  // 슬래시 중복 방지해서 안전하게 합침
-  return `${base}/${path.replace(/^\/+/, '')}`;
+  try {
+    return new URL(p, `${API_BASE}/`).toString();
+  } catch {
+    return p.startsWith('/')
+      ? p
+      : import.meta.env.BASE_URL + p.replace(/^\.?\//, '');
+  }
 }
 
 const avatarUrl = computed(() => {
