@@ -57,7 +57,7 @@ const headers = [
   { title: '경험치(XP)', key: 'xp' },
   { title: '티어', key: 'tier' },
   { title: '이미지 경로', key: 'cdImage' },
-  { title: '더보기', key: 'progress'},
+  { title: '더보기', key: 'progress' },
   { title: '관리', key: 'setting' },
 ];
 
@@ -355,12 +355,8 @@ const remove = async () => {
         <v-divider class="my-2" />
 
         <v-card-actions class="justify-end btn-area">
-          <v-btn class="btn-no"@click="cancelDialog = true">
-            취소
-          </v-btn>
-          <v-btn class="btn-yes" @click="submit()">
-            저장
-          </v-btn>
+          <v-btn class="btn-no" @click="cancelDialog = true"> 취소 </v-btn>
+          <v-btn class="btn-yes" @click="submit()"> 저장 </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -369,15 +365,13 @@ const remove = async () => {
     <v-dialog v-model="cancelDialog" max-width="380" min-height="100">
       <v-card class="admin-dialog pa-6">
         <v-card-text>
-          취소하고 돌아가시겠습니까? 
-          <br></br>
+          취소하고 돌아가시겠습니까?
+          <br />
           해당 내용은 저장되지 않습니다.
         </v-card-text>
         <v-card-actions class="btn-area">
           <v-btn class="btn-yes" @click="cancel()">네</v-btn>
-          <v-btn class="btn-no" @click="cancelDialog = false"
-            >아니오</v-btn
-          >
+          <v-btn class="btn-no" @click="cancelDialog = false">아니오</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -387,10 +381,7 @@ const remove = async () => {
       <v-card class="admin-dialog pa-6">
         <v-card-text> 성공적으로 완료되었습니다. </v-card-text>
         <v-card-actions>
-          <v-btn
-            class="btn-yes"
-            text
-            @click="successDialog = false"
+          <v-btn class="btn-yes" text @click="successDialog = false"
             >확인</v-btn
           >
         </v-card-actions>
@@ -400,14 +391,13 @@ const remove = async () => {
     <!-- 삭제 모달 -->
     <v-dialog v-model="deleteDialog" max-width="380" min-height="100">
       <v-card class="admin-dialog pa-6">
-        <v-card-text> 정말 <strong>{{ deleteTarget.cdName }}</strong> 챌린지를 삭제하시겠습니까? </v-card-text>
+        <v-card-text>
+          정말 <strong>{{ deleteTarget.cdName }}</strong> 챌린지를
+          삭제하시겠습니까?
+        </v-card-text>
         <v-card-actions class="btn-area">
           <v-btn class="btn-yes" @click="remove()"> 네 </v-btn>
-          <v-btn
-            class="btn-no"
-            variant="flat"
-            @click="deleteDialog = false"
-          >
+          <v-btn class="btn-no" variant="flat" @click="deleteDialog = false">
             아니오
           </v-btn>
         </v-card-actions>
@@ -501,8 +491,8 @@ const remove = async () => {
         </template>
 
         <!-- 챌린지 현황 -->
-        <template #item.progress="{item}">
-          <v-bt @click="progress(item.cdId)">챌린지 현황</v-bt>
+        <template #item.progress="{ item }">
+          <v-btn @click="progress(item.cdId)">챌린지 현황</v-btn>
         </template>
 
         <!-- 관리 -->
@@ -519,10 +509,10 @@ const remove = async () => {
 .admin-challenge {
   padding: 10px;
 
-  .data-card{
-  background: #fff;
-  border-radius: 15px; 
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  .data-card {
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
   }
 
   .title {
@@ -573,14 +563,12 @@ const remove = async () => {
   text-align: center;
 }
 
-
 .field-label {
   font-weight: 600;
   color: #555;
   font-size: 0.9rem;
   margin-bottom: 6px;
 }
-
 
 .field-input :deep(.v-field) {
   border: 1px solid #d7d7d7 !important;

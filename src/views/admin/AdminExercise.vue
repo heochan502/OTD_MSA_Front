@@ -14,8 +14,9 @@ const deleteDialog = ref(false);
 const isEdit = ref(false);
 const successDialog = ref(false);
 const cancelDialog = ref(false);
+const deleteTarget = ref({});
 
-const exercise = ref([]);
+const editExercise = ref({});
 const search = ref('');
 
 // 테이블 헤더
@@ -154,6 +155,7 @@ onMounted(() => {
         height="700"
         class="styled-table"
         fixed-header
+        :search="search"
       >
         <!-- 거리 기반 -->
         <template #item.hasDistance="{ item }">
@@ -283,83 +285,6 @@ onMounted(() => {
         </v-card-actions>
       </v-card>
     </v-dialog>
-
-    <v-card>
-      <v-card-title class="d-flex justify-space-between align-center">
-        <span class="title">운동 종목 관리</span>
-        <v-text-field
-          v-model="search"
-          label="검색"
-          prepend-inner-icon="mdi-magnify"
-          density="compact"
-          hide-details
-          single-line
-          variant="outlined"
-          style="max-width: 250px"
-        />
-        <v-btn>챌린지 추가하기</v-btn>
-      </v-card-title>
-
-      <v-data-table
-        :headers="headers"
-        :items="exercise"
-        style="max-height: calc(100vh - 200px)"
-        :search="search"
-        fixed-header
-        :items-per-page="10"
-        class="styled-table"
-      >
-        타입 변환
-        <!-- <template #item.cdType="{ item }">
-          <v-chip
-            :color="
-              item.cdType === 'daily'
-                ? 'blue'
-                : item.cdType === 'weekly'
-                ? 'green'
-                : item.cdType === 'competition'
-                ? 'red'
-                : 'purple'
-            "
-            text-color="white"
-            small
-          >
-            {{ formatType(item.cdType) }}
-          </v-chip>
-        </template> -->
-
-        <!-- 목표 -->
-        <!-- <template #item.cdGoal="{ item }">
-          {{ Number(item.cdGoal).toLocaleString() }}
-        </template> -->
-
-        <!-- 챌린지 등급 -->
-        <!-- <template #item.tier="{ item }">
-          <v-chip
-            :color="
-              item.tier === '브론즈'
-                ? '#ce7430'
-                : item.tier === '실버'
-                ? '#7a7a7a'
-                : item.tier === '골드'
-                ? '#ffba57'
-                : item.tier === '다이아'
-                ? '#00c6ff'
-                : '#ff8a80' // 그 외
-            "
-            small
-          >
-            {{ item.tier }}
-          </v-chip>
-        </template> -->
-
-        <!-- 관리 -->
-        <!-- <template #item.setting="{ item }">
-          <v-btn @click="toForm(item)">수정</v-btn>
-          <v-btn @click="openDelete(item.cdId)">삭제</v-btn>
-        </template> -->
-      </v-data-table>
-    </v-card>
   </div>
 </template>
 
