@@ -1,18 +1,18 @@
 <script setup>
-import { useRoute, useRouter } from 'vue-router'
-import { computed, onMounted, } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { computed, onMounted } from 'vue';
 import weather from '@/components/weather/weather.vue';
 import { useHeaderStore } from '@/stores/challenge/headerStore';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { reissue } from '@/services/user/userService';
 
 // 알림 스토어
-import { storeToRefs } from 'pinia'
+import { storeToRefs } from 'pinia';
 import { useNotificationStore } from '@/stores/notification/notification';
 
 // 알림 스토어 인스턴스/배지 개수
-const n = useNotificationStore()
-const { unreadCount } = storeToRefs(n)
+const n = useNotificationStore();
+const { unreadCount } = storeToRefs(n);
 
 const route = useRoute();
 const router = useRouter();
@@ -24,11 +24,13 @@ const userInfo = computed(() => ({
   pic: authentication.state.signedUser.pic,
   xp: authentication.state.signedUser.xp,
 }));
+const myRole = computed(() => authentication.state.signedUser?.userRole || '');
+
 const categoryLabelMap = {
-  free:'자유수다',
+  free: '자유수다',
   diet: '다이어트',
   work: '운동',
-  love: '연애'
+  love: '연애',
 };
 const headerType = computed(() => route.meta.headerType ?? 'logo');
 const showUserPanel = computed(() => route.meta.showUserPanel === true);
@@ -41,18 +43,18 @@ const headerTitle = computed(() => {
 
   // 1. meta.title이 함수라면 실행 결과 리턴
   if (typeof metaTitle === 'function') {
-    return metaTitle(route)
+    return metaTitle(route);
   }
   // 2. 문자열이면 그대로 사용
   if (typeof metaTitle === 'string') {
-    return metaTitle
+    return metaTitle;
   }
   // 3. meta.title이 없고, 커뮤니티 카테고리 라우트라면 categoryLabelMap 활용
   if (route.name === 'CommunityCategory') {
-    return categoryLabelMap[route.params.category] ?? '커뮤니티'
+    return categoryLabelMap[route.params.category] ?? '커뮤니티';
   }
-  return ''
-})
+  return '';
+});
 
 const defaultProfile = '/otd/image/main/default-profile.png';
 // pic이 있으면 그걸 쓰고, 없으면 기본 이미지
@@ -62,72 +64,99 @@ const profileImage = computed(() => {
 
 // 알람 클릭
 const handleClick = async () => {
-  try {
-    await reissue()
-  } catch (_) {
-    console.warn('토큰 재발급 실패, 게스트 상태로 계속 진행')
-  }
-
   // 알림 목록 새로 불러오기
   try {
-    await n.load()
+    await n.load();
   } catch (err) {
-    console.error('알림 불러오기 실패:', err)
+    console.error('알림 불러오기 실패:', err);
   }
 
   // 알림 페이지로 이동
-  router.push({ name: 'NotificationsView' })
-}
+  router.push({ name: 'NotificationsView' });
+};
 
 // 포인트 포맷팅
 const formatPoint = (point) => {
   return point?.toLocaleString() || '0';
 };
-onMounted(() => {
-})
+onMounted(() => {});
 </script>
 
 <template>
   <div class="top-header">
-    <!-- 로고 출력 해야할 때 -->
+    <!-- 로고 출력 -->
     <div class="title" v-if="headerType === 'logo'">
       <img class="otd-logo" src="/image/main/ontoday_logo.png" alt="로고" />
-      <img class="alram" src="/image/main/alarm.png" alt="알람" @click="handleClick" />
+      <img
+        class="alram"
+        src="/image/main/alarm.png"
+        alt="알람"
+        @click="handleClick"
+      />
     </div>
-    <!-- 타이틀 출력 할때 -->
+    <!-- 타이틀 출력 -->
     <div class="title" v-else>
       <button class="black-btn" @click="$router.back()" aria-label="뒤로가기">
-        <img class="back-btn" src="/image/main/back_icon.png" alt="뒤로가기"></button>
+        <img class="back-btn" src="/image/main/back_icon.png" alt="뒤로가기" />
+      </button>
       <div class="hearder-text">{{ headerTitle }}</div>
-      <img class="alram" src="/image/main/alarm.png" alt="알람" @click="handleClick" />
+      <img
+        class="alram"
+        src="/image/main/alarm.png"
+        alt="알람"
+        @click="handleClick"
+      />
     </div>
   </div>
 
-
-
-
-  <div class="user " v-if="route.name ==='Home'">
-    <div class="user-profile">
-      <img class="avatar otd-shadow" :src="profileImage" alt="프로필"></img>
-      <div class="info">
-        <weather/>
-        <span class="otd-title">{{userInfo.nickName}} 님</span>
-      </div>  
-    </div>
-    <div class="point otd-body-1">
-      <router-link to="/pointshop" class="pointShop" :class="{active : route.path.startsWith('/pointshop')}">
-        <div class="point-wrap">
-        <img class="point-img" src="/image/main/point.png" alt="포인트"/>
-        <span >{{ formatPoint(userInfo.userPoint)}} </span>
+  <div class="user" v-if="route.name === 'Home'">
+    <!-- 일반 유저 -->
+    <template v-if="['USER_1', 'USER_2'].includes(myRole)">
+      <div class="user-profile">
+        <img class="avatar otd-shadow" :src="profileImage" alt="프로필" />
+        <div class="info">
+          <weather />
+          <span class="otd-title">{{ userInfo.nickName }} 님</span>
         </div>
-      </router-link>
-    </div>
+      </div>
+      <div class="point otd-body-1">
+        <router-link
+          to="/pointshop"
+          class="pointShop"
+          :class="{ active: route.path.startsWith('/pointshop') }"
+        >
+          <div class="point-wrap">
+            <img class="point-img" src="/image/main/point.png" alt="포인트" />
+            <span>{{ formatPoint(userInfo.userPoint) }}</span>
+          </div>
+        </router-link>
+      </div>
+    </template>
+
+    <!-- ADMIN & MANAGER -->
+    <template v-else>
+      <div class="admin-profile">
+        <span class="otd-title">관리자 님</span>
+        <div class="admin-panel">
+          <router-link to="/admin" class="admin-btn">
+            관리자 페이지로 이동
+          </router-link>
+        </div>
+      </div>
+    </template>
   </div>
-
 </template>
-
-<style scoped>
-.image{
+<style lang="scss" scoped>
+.admin-btn {
+  display: inline-block;
+  padding: 10px 16px;
+  background: #ffe864;
+  color: #000;
+  font-weight: 700;
+  border-radius: 10px;
+  text-decoration: none;
+}
+.image {
   /* position: absolute; */
   position: fixed;
   width: 390px;
@@ -138,39 +167,38 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   position: absolute;
-  
+
   bottom: 10px;
   /* margin-top: 38px; */
   /* margin-bottom: 15px; */
   margin: 0 20px 0;
 
   height: 43px;
-  max-width: 100%;
+  max-width: 350px;
   min-width: 320px;
-
 
   /* background: #00D5DF; */
 }
-.point-img{
+.point-img {
   width: 20px;
   height: 20px;
 }
-.point-wrap{
+.point-wrap {
   display: flex;
   justify-content: center;
   align-items: center;
 }
-.otd-logo {  
+.otd-logo {
   max-width: 500px;
 }
 .hearder-text {
-  color: #FAFAFA;
+  color: #fafafa;
   font-size: 20px;
   font-weight: bold;
   align-self: center;
 }
 
-.back-btn{
+.back-btn {
   width: 12px;
   height: 24px;
   cursor: pointer;
@@ -186,7 +214,7 @@ onMounted(() => {
 .info {
   display: flex;
   flex-direction: column;
-  justify-content:end;
+  justify-content: end;
   font-size: 12px;
   row-gap: 5px;
   margin-left: 15px;
@@ -195,50 +223,51 @@ onMounted(() => {
 .top-header {
   display: flex;
   justify-content: center;
-  
+
   position: relative;
-  background: #00D5DF;
+  background: #00d5df;
   color: #000;
   padding-bottom: 15px;
   height: 70px;
   width: 100%;
   /* 노치 safezone 설정 */
-  padding-top: env(safe-area-inset-top);  
+  padding-top: env(safe-area-inset-top);
 }
-.user-profile
-{
+.user-profile {
   display: flex;
   flex-direction: row;
 }
-
-.user {
-  margin: 20px;
+.admin-profile {
   display: flex;
   align-items: center;
-  
-  justify-content: space-between; 
+  // gap: 40px;
+  justify-content: space-between;
 }
-.point{
-  display: flex;  
-  justify-content: center; 
-  align-self:flex-end; 
+.user {
+  margin: 20px auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 350px;
+  width: 100%;
+}
+.point {
+  display: flex;
+  justify-content: center;
+  align-self: flex-end;
   gap: 5px;
   cursor: pointer;
- 
-  }  
-  .pointShop{
-    padding-top: 2px;   
-    color: #303030; 
-    text-decoration: none;
-    display: flex;
-    align-items: end; 
-    span {
-      margin-left: 7px;
-    }
-   }
-   
-
-
+}
+.pointShop {
+  padding-top: 2px;
+  color: #303030;
+  text-decoration: none;
+  display: flex;
+  align-items: end;
+  span {
+    margin-left: 7px;
+  }
+}
 
 .avatar {
   /* font-size: 32px; */

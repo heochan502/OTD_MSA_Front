@@ -1,23 +1,68 @@
 <script setup>
-import { computed, ref } from "vue";
+import { computed, reactive, ref, onMounted, watch } from "vue";
 import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
+import { useAuthenticationStore } from "@/stores/user/authentication";
+import { saveUserBasicBodyInfo } from "@/services/body_composition/bodyCompositionService";
+import { getUserBasicBodyInfo } from "@/services/body_composition/bodyCompositionService";
 import Modal from "../user/Modal.vue";
+
 const bodyCompositionStore = useBodyCompositionStore();
+const authenticationStore = useAuthenticationStore();
 const showDialog = ref(false);
+const noticeDialog = ref(false);
+
+const hasRecord = computed(() => {
+  const r = bodyCompositionStore.lastest;
+  if (!r) return false;
+  return (
+    r.height > 0 &&
+    r.weight > 0 &&
+    r.skeletal_muscle_mass > 0 &&
+    r.bmi > 0 &&
+    r.percent_body_fat > 0
+  );
+});
+
+onMounted(async () => {
+  if (
+    //관리자 계정이면 신체정보입력 X
+    authenticationStore.userRole === "ADMIN" ||
+    authenticationStore.userRole === "MANAGER"
+  ) {
+    return;
+  } else if (hasRecord.value) {
+    return;
+  } else {
+    const res = await getUserBasicBodyInfo();
+    if (res === undefined || res.status !== 200) {
+      if (hasRecord.value) {
+        //인바디 기록이 있으면 X
+        return;
+      }
+      noticeDialog.value = true; // 기본 신체정보입력 모달
+    }
+    bodyCompositionStore.basicInfo = res.data;
+    bodyCompositionStore.setRecentBodyInfo();
+  }
+});
 
 // bmi 데이터 유무
 const hasBmiData = computed(() => {
-  const { lastest, bmiInfo } = bodyCompositionStore;
+  const { lastest, recentBodyInfo } = bodyCompositionStore;
   return (
-    (lastest?.height && lastest?.weight) || (bmiInfo?.height && bmiInfo?.weight)
+    (lastest?.height && lastest?.weight) ||
+    (recentBodyInfo?.height && recentBodyInfo?.weight)
   );
 });
 
 // 수정 가능 여부: bmiInfo 기반일 때만 true
 const isBmiInfo = computed(() => {
-  const { lastest, bmiInfo } = bodyCompositionStore;
+  const { lastest, recentBodyInfo } = bodyCompositionStore;
   return (
-    !lastest?.height && !lastest?.weight && bmiInfo?.height && bmiInfo?.weight
+    !lastest?.height &&
+    !lastest?.weight &&
+    recentBodyInfo?.height &&
+    recentBodyInfo?.weight
   );
 });
 
@@ -34,10 +79,10 @@ function calculateBmi(height, weight) {
 }
 
 const bmi = computed(() => {
-  const { lastest, bmiInfo } = bodyCompositionStore;
+  const { lastest, recentBodyInfo } = bodyCompositionStore;
 
-  const height = lastest?.height || bmiInfo?.height;
-  const weight = lastest?.weight || bmiInfo?.weight;
+  const height = lastest?.height || recentBodyInfo?.height;
+  const weight = lastest?.weight || recentBodyInfo?.weight;
 
   return calculateBmi(height, weight);
 });
@@ -50,6 +95,74 @@ const bmiStatus = computed(() => {
   else if (userBmi < 30) return "과체중";
   else if (userBmi < 35) return "비만";
   else return "고도비만";
+});
+
+// 기초대사량 bmr
+const userGender = computed(() => authenticationStore.state.signedUser.gender);
+const userAge = computed(() => authenticationStore.state.signedUser.age);
+
+function calculateBmr(height, weight, age, gender) {
+  if (!height || !weight || !age || !gender) return 0;
+
+  let bmr;
+
+  // 남성 BMR 공식: 66.47 + (13.75 * W) + (5 * H) - (6.76 * A)
+  if (gender === "M") {
+    bmr = 66.47 + 13.75 * weight + 5 * height - 6.76 * age;
+  }
+  // 여성 BMR 공식: 655.1 + (9.56 * W) + (1.85 * H) - (4.68 * A)
+  else if (gender === "F") {
+    bmr = 655.1 + 9.56 * weight + 1.85 * height - 4.68 * age;
+  } else {
+    // 성별 정보가 없는 경우 0 반환
+    return 0;
+  }
+
+  // 소수점 첫째 자리에서 반올림하여 정수로 반환
+  return Math.round(bmr);
+}
+
+const state = reactive({
+  form: {
+    weight: null,
+    height: null,
+    bmi: null,
+    bmr: null,
+  },
+});
+
+const saveFormData = async () => {
+  const height = state.form.height;
+  const weight = state.form.weight;
+
+  const calcBmi = calculateBmi(height, weight);
+  const calcBmr = calculateBmr(height, weight, userAge.value, userGender.value);
+
+  state.form.bmi = calcBmi;
+  state.form.bmr = calcBmr;
+
+  const res = await saveUserBasicBodyInfo(state.form);
+  if (res === undefined || res.status !== 200) {
+    alert("에러발생");
+    return;
+  }
+  bodyCompositionStore.setBasicInfo(state.form);
+  bodyCompositionStore.recentBodyInfo = { ...state.form };
+
+  // 모달창 닫기
+  showDialog.value = false;
+};
+
+watch(showDialog, (isModalOpen) => {
+  if (isModalOpen) {
+    state.form.height = bodyCompositionStore.recentBodyInfo?.height || null;
+    state.form.weight = bodyCompositionStore.recentBodyInfo?.weight || null;
+    // 모달이 닫힐 때는 임시 폼 데이터를 초기화
+    state.form.height = null;
+    state.form.weight = null;
+    state.form.bmi = null;
+    state.form.bmr = null;
+  }
 });
 </script>
 
@@ -114,7 +227,9 @@ const bmiStatus = computed(() => {
       >
         BMI 계산기
       </v-btn>
-      <span class="otd-body-3">체중, 키를 입력하고 BMI를 계산해보세요!</span>
+      <span class="otd-body-3"
+        >체중, 키를 입력하고 BMI와 기초대사량을 계산해보세요!</span
+      >
     </div>
   </div>
 
@@ -124,13 +239,13 @@ const bmiStatus = computed(() => {
       <v-card-title class="text-h6">BMI 계산기</v-card-title>
       <v-card-text>
         <v-text-field
-          v-model="bodyCompositionStore.bmiInfo.height"
+          v-model="state.form.height"
           label="신장 (cm)"
           type="number"
           variant="outlined"
         />
         <v-text-field
-          v-model="bodyCompositionStore.bmiInfo.weight"
+          v-model="state.form.weight"
           label="체중 (kg)"
           type="number"
           variant="outlined"
@@ -141,10 +256,19 @@ const bmiStatus = computed(() => {
         <v-btn class="btn btn-cancel" variant="text" @click="showDialog = false"
           >취소</v-btn
         >
-        <v-btn class="btn btn-confirm" @click="showDialog = false">저장</v-btn>
+        <v-btn class="btn btn-confirm" @click="saveFormData">저장</v-btn>
       </v-card-actions>
     </div>
   </v-dialog>
+
+  <Modal
+    :show="noticeDialog"
+    title="키와 체중을 알려주세요!"
+    message="기본 신체 정보로 bmi를 계산해드릴게요."
+    type="info"
+    confirmText="입력하기"
+    @close="(noticeDialog = false), (showDialog = true)"
+  />
 </template>
 
 <style lang="scss" scoped>

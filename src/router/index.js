@@ -399,6 +399,11 @@ const router = createRouter({
           component: () => import('@/views/admin/AdminChallenge.vue'),
         },
         {
+          path: '/admin/challenge/progress',
+          name: 'AdminChallengeDetail',
+          component: () => import('@/views/admin/AdminChallengeProgress.vue'),
+        },
+        {
           path: 'point',
           name: 'AdminPoint',
           component: () => import('@/views/admin/AdminPoint.vue'),
@@ -484,7 +489,7 @@ router.beforeEach((to, from) => {
   }
   if (to.path.startsWith('/admin')) {
     const user = authenticationStore.state.signedUser;
-    if (!user || user.userRole !== 'ADMIN') {
+    if (!user || (user.userRole !== 'ADMIN' && user.userRole !== 'MANAGER')) {
       alert('관리자만 접근 가능합니다.');
       return { path: '/' }; // 일반 유저는 홈으로 돌려보내기
     }

@@ -2,28 +2,46 @@
 import { reactive, computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
+import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
 import effortLevels from "@/assets/effortLevels.json";
 import { calcDuration } from "@/utils/exerciseUtils";
+import { formatDateDayTimeKR } from "@/utils/dateTimeUtils";
 import { saveExerciseRecord } from "@/services/exercise/exerciseService";
 import Modal from "@/components/user/Modal.vue";
 
 const router = useRouter();
 const exerciseRecordStore = useExerciseRecordStore();
+const bodyCompositionStore = useBodyCompositionStore();
 const saveDialog = ref(false);
 const successDialog = ref(false);
+const menuStart = ref(false);
+const menuEnd = ref(false);
+
+const onStartPick = (val) => {
+  state.form.startAt = val;
+  menuStart.value = false; // 선택 후 자동 닫기
+};
+
+const onEndPick = (val) => {
+  state.form.endAt = val;
+  menuEnd.value = false; // 선택 후 자동 닫기
+};
 
 const state = reactive({
   form: {
     exerciseId: null,
     effortLevel: 1,
-    startAt: "",
-    endAt: "",
+    startAt: new Date(),
+    endAt: new Date(),
     duration: 0,
     distance: null,
     reps: null,
     activityKcal: 0,
   },
 });
+
+const startDisplay = computed(() => formatDateDayTimeKR(state.form.startAt));
+const endDisplay = computed(() => formatDateDayTimeKR(state.form.endAt));
 
 // 운동강도 색상
 const color = computed(() => {
@@ -62,9 +80,12 @@ const exerciseDuration = computed(() => {
 const calcKcal = computed(() => {
   // MET × 체중(kg) × 운동시간(분) × 0.0175 = 소모 칼로리(kcal).
   const met = selectedExercise.value ? selectedExercise.value.exerciseMet : 0;
-  const bodyWeight = 68;
+  const bodyWeight =
+    bodyCompositionStore.recentBodyInfo?.weight ??
+    bodyCompositionStore.lastest?.weight ??
+    0;
   const duration = exerciseDuration.value;
-
+  console.log("계산", bodyWeight);
   return met * bodyWeight * duration * 0.0175;
 });
 
@@ -100,6 +121,7 @@ const confirmYes = async () => {
   saveDialog.value = false;
   successDialog.value = true;
 };
+
 const goToMain = () => {
   successDialog.value = false;
   router.push("/exercise/main");
@@ -112,21 +134,65 @@ const goToMain = () => {
       <div class="content_main">
         <div>운동 시작</div>
         <div class="input_box otd-box-style otd-shadow">
-          <input
-            type="datetime-local"
-            v-model="state.form.startAt"
-            class="otd-body-1"
-          />
+          <v-menu
+            v-model="menuStart"
+            :close-on-content-click="false"
+            transition="scale-transition"
+            offset-y
+          >
+            <template #activator="{ props }">
+              <v-text-field
+                v-bind="props"
+                v-model="startDisplay"
+                readonly
+                placeholder="시작 시간 선택"
+                variant="plain"
+                density="compact"
+                hide-details
+              ></v-text-field>
+            </template>
+            <vc-date-picker
+              v-model="state.form.startAt"
+              mode="dateTime"
+              is24hr
+              is-inline
+              :is-expanded="true"
+              :show-time="true"
+              @update:model-value="onStartPick"
+            />
+          </v-menu>
         </div>
       </div>
       <div class="content_main">
         <div>운동 종료</div>
         <div class="input_box otd-box-style otd-shadow">
-          <input
-            type="datetime-local"
-            v-model="state.form.endAt"
-            class="otd-body-1"
-          />
+          <v-menu
+            v-model="menuEnd"
+            :close-on-content-click="false"
+            transition="scale-transition"
+            offset-y
+          >
+            <template #activator="{ props }">
+              <v-text-field
+                v-bind="props"
+                v-model="endDisplay"
+                readonly
+                placeholder="종료 시간 선택"
+                variant="plain"
+                density="compact"
+                hide-details
+              ></v-text-field>
+            </template>
+            <vc-date-picker
+              v-model="state.form.endAt"
+              mode="dateTime"
+              is24hr
+              is-inline
+              :is-expanded="true"
+              :show-time="true"
+              @update:model-value="onEndPick"
+            />
+          </v-menu>
         </div>
       </div>
       <div class="content_main">
@@ -289,6 +355,17 @@ const goToMain = () => {
   ::v-deep(.v-field__input) {
     padding: 0 !important; /* 내부 padding 제거 */
   }
+}
+.btn_submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 350px;
+  height: 50px;
+  margin-top: 15px;
+
+  background-color: #ffe864;
+  border-radius: 10px;
 }
 .content_result {
   display: flex;

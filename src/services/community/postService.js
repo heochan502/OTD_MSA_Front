@@ -21,7 +21,13 @@ export const updatePost = async (postId, payload) => {
   return data;
 };
 
-export const deletePost = (postId) => axios.delete(`${BASE}/${postId}`);
+export const deletePost = (postId, role) => {
+  const headers = {};
+  if (role) {
+    headers['X-ROLE'] = role;
+  }
+  axios.delete(`${BASE}/${postId}`, { headers });
+};
 
 export const putLifeUserProfile = (imgPath) => {
   return axios

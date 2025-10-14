@@ -240,3 +240,9 @@ export const deleteMealMake = (mealId) => {
     .delete(`${LIFE_URL}/mealmake/${mealId}`)
     .catch((e) => e.response);
 };
+
+export const getChallengeProgress = (id) => {
+  return axios
+    .get(`${BASE_URL}/challenge/progress/${id}`)
+    .catch((e) => e.response);
+};
