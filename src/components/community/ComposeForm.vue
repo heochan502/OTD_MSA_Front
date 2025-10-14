@@ -54,20 +54,19 @@ function getMemberId() {
 function makeKey(f) {
   return `${f.name}__${f.size}__${f.lastModified ?? 0}`;
 }
-
 async function loadServerImages(postId) {
   try {
     const { data } = await fetchPostFiles(postId);
-    const baseURL = (await import('@/services/httpRequester')).default.defaults
-      .baseURL;
+    const baseURL = import.meta.env.VITE_BASE_URL;
     const list = Array.isArray(data) ? data : [];
     serverImages.value = list.map((f) => {
       const id = f.fileId ?? f.id;
       const name = f.fileName ?? '';
       const raw = f.filePath || '';
-      const url = /^https?:\/\//i.test(raw)
-        ? raw
-        : new URL(raw, baseURL).toString();
+
+      // 어떤 입력이 와도 baseURL 기준으로 절대경로 생성
+      const url = `${baseURL.replace(/\/$/, '')}/${raw.replace(/^\/+/, '')}`;
+
       return { fileId: id, id, name, url };
     });
   } catch (e) {
@@ -668,18 +667,20 @@ function openLightboxFromNew(i) {
 }
 .m-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between; /* 좌/우 끝으로 벌리기 */
+  align-items: center;
   gap: 8px;
   margin-top: 6px;
 }
 .m-btn {
   height: 36px;
-  padding: 0 14px;
+  padding: 0 16px; /* 살짝 더 넉넉하게 */
   border-radius: 10px;
   border: 1px solid #e5e7eb;
   background: #fff;
   cursor: pointer;
   font-weight: 700;
+  min-width: 96px; /* 최소 버튼 폭 확보 */
 }
 .m-btn.primary {
   background: #06b6d4;

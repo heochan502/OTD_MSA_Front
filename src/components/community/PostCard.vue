@@ -29,16 +29,17 @@ const getTime = (p) => p?.time ?? p?.createdAt ?? '';
 const getLikes = (p) => p?.likes ?? p?.like ?? p?.likeCount ?? 0;
 const getComments = (p) => p?.comments ?? p?.commentCount ?? 0;
 
-function toAbsUrl(p) {
-  if (!p) return '';
-  if (/^https?:\/\//i.test(p)) return p;
-  try {
-    return new URL(p, axios.defaults.baseURL).toString();
-  } catch {
-    return p.startsWith('/')
-      ? p
-      : import.meta.env.BASE_URL + p.replace(/^\.?\//, '');
-  }
+
+const API_BASE =
+  (import.meta.env.VITE_BASE_URL ).replace(/\/$/, '');
+
+
+function toAbsUrl(path) {
+  const base = import.meta.env.VITE_BASE_URL.replace(/\/$/, ''); // https://greenart.n-e.kr/otd-api
+  if (!path) return base;
+
+  // 슬래시 중복 방지해서 안전하게 합침
+  return `${base}/${path.replace(/^\/+/, '')}`;
 }
 
 /** 프로필: DB profile 컬럼 우선 */

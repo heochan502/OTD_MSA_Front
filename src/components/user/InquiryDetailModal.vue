@@ -18,8 +18,9 @@ const loadInquiryDetail = async () => {
   loading.value = true;
   try {
     const data = await getInquiryDetail(props.inquiryId);
-
     inquiry.value = data.data || data;
+    console.log('문의 상세:', inquiry.value); // 디버깅용
+    console.log('상태 값:', inquiry.value?.status); // 디버깅용
   } catch (error) {
     console.error('문의 상세 조회 실패:', error);
     alert('문의 상세 정보를 불러오는데 실패했습니다.');
@@ -33,32 +34,41 @@ const closeModal = () => {
 };
 
 const getStatusText = (status) => {
+  if (!status) return '대기중';
 
-  if (status === '대기 중' || status === '답변 완료') {
-    return status;
-  }
+  // 이미 한글인 경우
+  if (status === '대기 중' || status === '대기중') return '대기중';
+  if (status === '답변 완료' || status === '완료') return '완료';
 
+  // 영문 또는 코드로 변환
+  const upperStatus = status.toString().toUpperCase();
   const statusTextMap = {
-    'PENDING': '대기 중',
-    'RESOLVED': '답변 완료',
-    '00': '대기 중',
-    '01': '답변 완료'
+    'PENDING': '대기중',
+    'RESOLVED': '완료',
+    '00': '대기중',
+    '01': '완료'
   };
 
-  return statusTextMap[status] || '알 수 없음';
+  return statusTextMap[upperStatus] || statusTextMap[status] || '대기중';
 };
 
 const getStatusClass = (status) => {
+  if (!status) return 'pending';
+
+  const upperStatus = status.toString().toUpperCase();
   const statusMap = {
     'PENDING': 'pending',
     'RESOLVED': 'completed',
     '00': 'pending',
     '01': 'completed',
+    '대기중': 'pending',
     '대기 중': 'pending',
+    '완료': 'completed',
     '답변 완료': 'completed'
   };
-  return statusMap[status] || 'pending';
+  return statusMap[upperStatus] || statusMap[status] || 'pending';
 };
+
 const formatDate = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);

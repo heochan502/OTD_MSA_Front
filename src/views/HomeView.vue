@@ -384,7 +384,7 @@ const fetchLastestBodyComposition = async () => {
 
 .meal {
   display: flex;
-  margin: 0 15px;
+  margin: 0 20px;
   justify-content: center;
 }
 

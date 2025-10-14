@@ -26,19 +26,15 @@ const DEFAULT_AVATAR =
 
 const cacheBust = ref(`?v=${Date.now()}`);
 
-function toAbsUrl(p) {
-  if (!p) return '';
-  if (p.startsWith('/otd/image/main/')) {
-    return import.meta.env.BASE_URL + p.replace(/^\//, '');
-  }
-  if (/^https?:\/\//i.test(p)) return p;
-  try {
-    return new URL(p, axios.defaults.baseURL).toString();
-  } catch {
-    return p.startsWith('/')
-      ? p
-      : import.meta.env.BASE_URL + p.replace(/^\.?\//, '');
-  }
+const API_BASE =
+  (import.meta.env.VITE_BASE_URL ).replace(/\/$/, '');
+
+function toAbsUrl(path) {
+  const base = import.meta.env.VITE_BASE_URL.replace(/\/$/, ''); // https://greenart.n-e.kr/otd-api
+  if (!path) return base;
+
+  // 슬래시 중복 방지해서 안전하게 합침
+  return `${base}/${path.replace(/^\/+/, '')}`;
 }
 
 const avatarUrl = computed(() => {
