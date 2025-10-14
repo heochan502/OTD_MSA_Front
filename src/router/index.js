@@ -33,6 +33,7 @@ import ModifyPassword from '@/views/user/ModifyPassword.vue';
 import PointHistory from '@/views/user/pointHistory.vue';
 import Term from '@/views/user/Term.vue';
 import Oauth2 from '@/views/auth/OAuth2Handler.vue';
+import Onboarding from '@/views/user/Onboarding.vue';
 
 //마이페이지
 import MyPost from '@/views/user/MyPost.vue';
@@ -287,6 +288,16 @@ const router = createRouter({
       component: MyComment,
     },
     {
+      path: '/user/onboarding',
+      name: 'Onboarding',
+      component: Onboarding,
+      meta: { 
+        headerType: 'title', 
+        title: '온보딩', 
+        showUserPanel: false 
+      },
+    },
+    {
       path: '/pointshop',
       name: 'PointShopList',
       component: PointShopListView,
@@ -441,10 +452,16 @@ const unSignedPathList = [
   '/user/password',
   '/user/findid',
 ];
+const onboardingExcludedPaths = [
+  '/user/onboarding',
+  '/user/login',
+  '/user/join',
+  '/fe/redirect',
+];
 
 //navigation guard
 router.beforeEach((to, from) => {
-  const authentcationStore = useAuthenticationStore();
+  const authenticationStore = useAuthenticationStore(); 
   const isUnsignedPath = unSignedPathList.some((path) =>
     to.path.startsWith(path)
   );
@@ -456,23 +473,30 @@ router.beforeEach((to, from) => {
     document.body.classList.remove('is-admin');
   }
   if (to.path.startsWith('/admin')) {
-    const user = authentcationStore.state.signedUser;
+     const user = authenticationStore.state.signedUser;
     if (!user || user.userRole !== 'ADMIN') {
       alert('관리자만 접근 가능합니다.');
       return { path: '/' }; // 일반 유저는 홈으로 돌려보내기
     }
   }
-  if (unSignedPathList.includes(to.path) && authentcationStore.state.isSigned) {
+  if (unSignedPathList.includes(to.path) && authenticationStore.state.isSigned) {
     //로그인 상태에서 /user/login, /user/join 경로로 이동하려고 하면
     return { path: '/' };
   } else if (
-    !authentcationStore.state.isSigned &&
+     !authenticationStore.state.isSigned &&
     !unSignedPathList.includes(to.path)
   ) {
     console.log('로그아웃 상태에서 접근 불가 경로');
     //로그아웃 상태에서 /user/login, /user/join 경로가 아닌 경우
     return { path: '/user/login' };
   }
+   if (authenticationStore.state.isSigned && authenticationStore.needsOnboarding()) {
+    const isExcluded = onboardingExcludedPaths.some(path => to.path.startsWith(path));
+    
+    if (!isExcluded) {
+      console.log('온보딩 미완료 - 온보딩 페이지로 리다이렉트');
+      return { path: '/user/onboarding' };
+    }
+  }
 });
-
 export default router;
