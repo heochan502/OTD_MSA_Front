@@ -96,6 +96,7 @@ const selectedField = ref(
 
 onMounted(async () => {
   console.log("여기");
+  bodyCompositionStore.resetStore();
   await fetchMonthlySettlement(todayDate);
   await fetchWeeklySettlement(todayDate);
   console.log("state", state.monthlySettlementLog, state.weeklySettlementLog);
@@ -115,7 +116,6 @@ onMounted(async () => {
   await bodyCompositionStore.fetchBodyCompositionMetrics();
   fetchBodyCompositionSeries();
   fetchLastestBodyComposition();
-  
 });
 
 const challengeHome = () => {

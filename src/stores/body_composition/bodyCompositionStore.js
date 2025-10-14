@@ -63,12 +63,9 @@ export const useBodyCompositionStore = defineStore("bodyComposition", {
       this.basicInfo = data;
     },
     resetStore() {
-      this.recentBodyInfo = {
-        height: null,
-        weight: null,
-        bmi: null,
-        bmr: null,
-      };
+      console.log("비우기");
+      this.basicInfo = [];
+      this.recentBodyInfo = {};
     },
     setRecentBodyInfo() {
       const recentIdx = this.basicInfo.length - 1;
