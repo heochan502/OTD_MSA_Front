@@ -12,10 +12,12 @@ const state = reactive({
   challengeList: [],
   selectedChallenge: null,
 });
+
 const openDialog = (challenge) => {
   state.selectedChallenge = challenge;
   dialog.value = true;
 };
+
 const confirmYes = async () => {
   dialog.value = false;
   const params = {
@@ -34,9 +36,9 @@ const confirmYes = async () => {
     alert('저장에 실패했습니다. 다시 시도해주세요.');
   }
 };
+
 onMounted(async () => {
   const type = history.state.type;
-
   console.log('type', type);
   const res = await getChallengeList(type);
   console.log('resdata', res.data);
@@ -47,19 +49,19 @@ onMounted(async () => {
 <template>
   <div class="wrap">
     <div class="card-wrap">
-      <div v-for="challenge in state.challengeList" :key="challenge.id">
-        <ChallengeCard
-          class="challenge-card"
-          :key="challenge.id"
-          :id="challenge.id"
-          :image="challenge.image"
-          :name="challenge.name"
-          :reward="challenge.reward"
-          @click="openDialog(challenge)"
-        ></ChallengeCard>
-      </div>
+      <ChallengeCard
+        v-for="challenge in state.challengeList"
+        :key="challenge.id"
+        :id="challenge.id"
+        :image="challenge.image"
+        :name="challenge.name"
+        :reward="challenge.reward"
+        class="challenge-card"
+        @click="openDialog(challenge)"
+      />
     </div>
   </div>
+
   <v-dialog v-model="dialog" max-width="380" min-height="100">
     <v-card>
       <v-card-title class="text-h8">확인</v-card-title>
@@ -101,14 +103,34 @@ onMounted(async () => {
 </template>
 
 <style lang="scss" scoped>
+.wrap {
+  margin-top: 30px;
+}
+// 화면이 391px 이상일 때만 max-width + 중앙정렬 적용
+@media (min-width: 391px) {
+  .wrap {
+    max-width: 391px;
+    margin: 0 auto;
+    margin-top: 30px;
+  }
+}
+
 .challenge-card {
   cursor: pointer;
 }
+
 .warning {
   margin-top: 10px;
   color: #e53935; /* 빨간색 경고 */
   font-size: 0.85rem;
 }
+.card-wrap {
+  display: flex;
+  flex-wrap: wrap; /* 줄바꿈 허용 */
+  gap: 15px; /* 카드 간격 */
+  justify-content: center; /* 가운데 정렬 */
+}
+
 .challenge-info {
   margin-bottom: 8px;
 }

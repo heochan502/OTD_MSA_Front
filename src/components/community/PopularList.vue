@@ -8,8 +8,8 @@ defineProps({
   navigateOnClick: { type: Boolean, default: true },
   idKey: { type: String, default: 'postId' },
   routeParamKey: { type: String, default: 'id' },
-  showBadge: { type: Boolean, default: true }, // ✅ 추가: 뱃지 표시 여부
-  badgeText: { type: String, default: '인기' }, // ✅ 추가: 문구 변경 가능
+  showBadge: { type: Boolean, default: true }, // 추가: 뱃지 표시 여부
+  badgeText: { type: String, default: '인기' }, // 추가: 문구 변경 가능
 });
 defineEmits(['click-post']);
 </script>

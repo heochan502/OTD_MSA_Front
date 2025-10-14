@@ -7,6 +7,10 @@ import{ postMealRecord }from '@/services/meal/mealService.js';
 
 import { useMealSelectedStore } from '@/stores/meal/mealStore.js';
 
+//모달창
+import Modal from '@/components/user/Modal.vue'
+import { result } from 'lodash';
+
 // const selectedFoods = useMealSelectedStore();
 const store = useMealSelectedStore();
 const { selectedFoods } = storeToRefs(store);   // Ref<Food[]>
@@ -83,9 +87,9 @@ const macroPct = computed(() => {
 
 onMounted(async () => {
   // console.log('피니아 데이터',foods.value);
-  console.log('토탕', selectedFoods);
-  console.log('isArray?', Array.isArray(selectedFoods.value))     // true여야 함
-console.log('has reduce?', typeof selectedFoods.value?.reduce)  // 'function'이어야 함
+//   console.log('토탕', selectedFoods);
+//   console.log('isArray?', Array.isArray(selectedFoods.value))     // true여야 함
+// console.log('has reduce?', typeof selectedFoods.value?.reduce)  // 'function'이어야 함
 });
 
 const clickAddFood = () => {
@@ -105,7 +109,7 @@ const res = await postMealRecord({
     mealDay : store.selectedDay.setDay,    // 날짜
     foods : foods.value                     // 음식들
   });
-  console.log('입력 데이터', res);
+  // console.log('입력 데이터', res);
   if (res.savedCount > 0) {
     openResultModal(true);
   } 
@@ -129,34 +133,73 @@ const res = await postMealRecord({
 });
 
 // 모달 상태
+
+
 const resultModal = ref({
   open: false,
   success: false,
   title: '',
   message: '',
-  modify : false,
-});
+  modify: false,     // 수정 플래그 유지
+})
 
-// 모달 열기
-function openResultModal(success) {
-  resultModal.value = {
-    open: true,
-    success,
-    title: success ? (resultModal.modify ? '수정 성공': '기록 성공' ) : '기록 실패',
-    message: success
-      ? (resultModal.modify ? '식단이 성공적으로 수정되었어요.' : '식단이 성공적으로 기록되었어요.')
-      : '식단 기록에 실패했어요. 다시 시도해주세요.',
-  };
+//  모달 열기
+
+
+
+const openResultModal = (success, opts = { modify: resultModal.modify }) => {
+  // 기존 객체를 유지한 채 필요한 필드만 갱신(reactivity 안전)
+  resultModal.value.modify = !!opts.modify
+  resultModal.value.success = !!success
+  resultModal.value.title = success
+    ? (resultModal.value.modify ? '수정 성공' : '기록 성공')
+    : '기록 실패'
+  resultModal.value.message = success
+    ? (resultModal.value.modify ? '식단이 성공적으로 수정되었어요.' : '식단이 성공적으로 기록되었어요.')
+    : '식단 기록에 실패했어요. 다시 시도해주세요.'
+  resultModal.value.open = true
 }
 
 // 모달 닫기(성공 시 초기화 + 이동)
 function closeResultModal() {
-  resultModal.value.open = false;
-  if (resultModal.value.success) {
-    selectedFoods.value = [];
-    router.push({ name: 'MealMainView' });
+  const wasSuccess = resultModal.value.success
+  resultModal.value.open = false
+
+  if (wasSuccess) {
+    selectedFoods.value = []
+    router.push({ name: 'MealMainView' })
   }
 }
+
+
+// const resultModal = ref({
+//   open: false,
+//   success: false,
+//   title: '',
+//   message: '',
+//   modify : false,
+// });
+
+// // 모달 열기
+// function openResultModal(success) {
+//   resultModal.value = {
+//     open: true,
+//     success,
+//     title: success ? (resultModal.modify ? '수정 성공': '기록 성공' ) : '기록 실패',
+//     message: success
+//       ? (resultModal.modify ? '식단이 성공적으로 수정되었어요.' : '식단이 성공적으로 기록되었어요.')
+//       : '식단 기록에 실패했어요. 다시 시도해주세요.',
+//   };
+// }
+
+// // 모달 닫기(성공 시 초기화 + 이동)
+// function closeResultModal() {
+//   resultModal.value.open = false;
+//   if (resultModal.value.success) {
+//     selectedFoods.value = [];
+//     router.push({ name: 'MealMainView' });
+//   }
+// }
 
 
 </script>
@@ -222,7 +265,13 @@ function closeResultModal() {
     </div>
   </div>
   <!-- 모달창  -->
-  <v-dialog v-model="resultModal.open" width="320" :scrim="true">
+  <Modal :show="resultModal.open" :title="resultModal.title" :message="resultModal.message"
+    :type="resultModal.success ? 'success' : 'error'" 
+    confirm-text="확인"
+    @confirm="closeResultModal"
+    @close="closeResultModal"
+    />
+    <!-- <v-dialog v-model="resultModal.open" width="320" :scrim="true">
     <v-card class="pa-4 rounded-xl">
       <div class="d-flex align-center mb-2">
         <v-icon :color="resultModal.success ? 'teal' : 'red'">
@@ -243,7 +292,7 @@ function closeResultModal() {
         </v-btn>
       </div>
     </v-card>
-  </v-dialog>
+  </v-dialog> -->
 
 
 </template>
