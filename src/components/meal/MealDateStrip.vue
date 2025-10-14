@@ -31,8 +31,13 @@ const KOREAN_DOW = ['일', '월', '화', '수', '목', '금', '토'];
 const toDate = (value) => (value instanceof Date ? value : new Date(value));
 const fmt2 = (n) => String(n).padStart(2, '0');
 
-const today = computed(() =>  selectedDay.selectedDay.setDay ?? startOfDay(new Date()));
-const selected = ref(startOfDay(toDate(props.modelValue)));
+const today = computed(() =>
+  startOfDay(toDate(selectedDay.selectedDay.setDay ?? new Date()))
+);
+const selected = ref(
+  startOfDay(toDate(selectedDay.selectedDay.setDay ?? props.modelValue ?? new Date()))
+);
+
 
 watch(
  () => props.modelValue,
@@ -41,7 +46,17 @@ watch(
     // const res = await getMealRecord(selectedDay.selectedDay.setDay);
   }
 );
-
+watch(
+  () => selectedDay.selectedDay.setDay,
+  (val) => {
+    if (!val) return;
+    selected.value = startOfDay(new Date(val));
+    // 선택 인덱스/외부 v-model도 갱신
+    emit('update:modelValue', selected.value);
+    emit('change', selected.value);
+  },
+  { immediate: true }  // 컴포넌트 마운트 시점에 이미 값이 있으면 곧바로 반영
+);
 function startOfDay(day) {
   const x = new Date(day);
   x.setHours(0, 0, 0, 0);
