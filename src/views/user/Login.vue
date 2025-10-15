@@ -173,6 +173,12 @@ const submit = async () => {
 </template>
 
 <style scoped>
+
+.login{
+  /* align-items: center; */
+  justify-self: center;
+}
+
 .container {
   max-width: 576px;
   padding: 0px;
