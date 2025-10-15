@@ -375,13 +375,13 @@ const settlementButton = async () => {
   margin-top: 30px;
 }
 // 화면이 391px 이상일 때만 max-width + 중앙정렬 적용
-@media (min-width: 391px) {
-  .wrap {
-    max-width: 391px;
-    margin: 0 auto;
-    margin-top: 30px;
-  }
-}
+// @media (min-width: 391px) {
+//   .wrap {
+//     max-width: 391px;
+//     margin: 0 auto;
+//     margin-top: 30px;
+//   }
+// }
 .daily {
   display: flex;
   justify-content: center;
@@ -523,10 +523,6 @@ const settlementButton = async () => {
 @media (max-width: 360px) {
   .challenge-card {
     grid-template-columns: repeat(2, 150px); // 카드 폭 줄임
-  }
-  .empty-card {
-    width: 150px;
-    height: 110px;
   }
 }
 

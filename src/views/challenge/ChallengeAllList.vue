@@ -32,7 +32,7 @@ onMounted(async () => {
       <Swiper
         :modules="[Autoplay]"
         :slides-per-view="2"
-        :space-between="14"
+        :space-between="15"
         loop
         :autoplay="{ delay: 3000, disableOnInteraction: false }"
       >
@@ -65,7 +65,7 @@ onMounted(async () => {
         <Swiper
           :modules="[Autoplay]"
           :slides-per-view="2"
-          :space-between="14"
+          :space-between="15"
           loop
           :autoplay="{ delay: 5000, disableOnInteraction: false }"
         >
@@ -90,7 +90,7 @@ onMounted(async () => {
         <Swiper
           :modules="[Autoplay]"
           :slides-per-view="2"
-          :space-between="14"
+          :space-between="15"
           loop
           :autoplay="{ delay: 5000, disableOnInteraction: false }"
         >
@@ -118,28 +118,32 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 .wrap {
+  display: flex;
+  flex-direction: column;
   margin-top: 30px;
-}
-// 화면이 391px 이상일 때만 max-width + 중앙정렬 적용
-@media (min-width: 391px) {
-  .wrap {
-    max-width: 391px;
-    margin: 0 auto;
-    margin-top: 30px;
-  }
+  width: 390px;
 }
 .weekly-challenge,
 .monthly-challenge {
-  margin: 0 15px;
+  margin: 0 20px;
   box-sizing: border-box;
 }
 :deep(.swiper) {
+  width: 100%;
   overflow: hidden;
-  margin-right: 12px;
 }
+
 :deep(.swiper-wrapper) {
   display: flex;
   cursor: grab;
+}
+
+:deep(.swiper-slide) {
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+  width: calc(50% - 8px) !important; /* 2개씩 균등 */
+  box-sizing: border-box;
 }
 .first-title {
   margin-bottom: 15px;
@@ -147,7 +151,7 @@ onMounted(async () => {
   font-weight: bold;
 }
 .title {
-  margin-top: 30px;
+  margin-top: 20px;
   margin-bottom: 15px;
   font-size: 20px;
   font-weight: bold;
@@ -155,5 +159,10 @@ onMounted(async () => {
 .sub-title {
   font-size: 12px;
   margin: 15px 0;
+}
+.challenge-card {
+  width: 100%;
+  max-width: 168px;
+  border-radius: 10px;
 }
 </style>

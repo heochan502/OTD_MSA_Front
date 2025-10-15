@@ -4,51 +4,84 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
-const props = defineProps ({
- item: { type: Object, required: true },
- userPoints: { type: Number, required: true },
- isPurchased: { type: Function, required: true },
- onPurchase: { type: Function, required: true }
+const props = defineProps({
+  item: { type: Object, required: true },
+  userPoints: { type: Number, required: true },
+  isPurchased: { type: Function, required: true },
+  onPurchase: { type: Function, required: true },
 });
 
-const getItemPrice = (priceStr) => {
-  return parseInt(priceStr.toString().replace(/,/g, ''), 10);
+// 가격 숫자 변환
+const getItemPrice = (price) => {
+  if (typeof price === 'number') return price;
+  return parseInt(String(price).replace(/,/g, ''), 10) || 0;
 };
 
+// 구매 버튼 비활성화 조건
 const isDisabled = computed(() => {
-  return props.isPurchased(props.item.id) || props.userPoints < getItemPrice(props.item.price) || props.item.stock === 0;
+  return (
+    props.isPurchased(props.item.pointId) ||
+    props.userPoints < getItemPrice(props.item.pointScore) ||
+    props.item.stock === 0
+  );
 });
 
+// 버튼 라벨 계산
 const buttonLabel = computed(() => {
-  if (props.isPurchased(props.item.id)) return '구매 완료';
+  if (props.isPurchased(props.item.pointId)) return '구매 완료';
   if (props.item.stock === 0) return '품절';
-  if (props.userPoints < getItemPrice(props.item.price)) return '포인트 부족';
+  if (props.userPoints < getItemPrice(props.item.pointScore)) return '포인트 부족';
   return '구매';
 });
 
+// 클릭 시 동작
 const handleClick = () => {
-  if (props.userPoints < getItemPrice(props.item.price)) {
-    if(confirm('포인트가 부족합니다. 챌린지 페이지로 이동할까요?')) {
-      router.push("/challenge");
+  const itemPrice = getItemPrice(props.item.pointScore);
+
+  if (props.userPoints < itemPrice) {
+    if (confirm('포인트가 부족합니다. 챌린지 페이지로 이동할까요?')) {
+      router.push('/challenge');
     }
     return;
   }
+
   props.onPurchase(props.item);
- };
+};
+
+// 이미지 경로 (백엔드 이미지 서빙 경로 반영)
+const imageSrc = computed(() => {
+  return props.item.imageUrl
+    ? props.item.imageUrl
+    : `/api/OTD/pointshop/image/${props.item.pointId}`;
+});
 </script>
 
 <template>
   <div class="item-container">
-    <img :src="`/image/pointshop/item${item.id}.png`" alt="Item Image" class="item-image" />
+    <!-- 상품 이미지 -->
+    <img
+      :src="imageSrc"
+      alt="Item Image"
+      class="item-image"
+      loading="lazy"
+      @error="(e) => (e.target.src = '/image/pointshop/default.png')"
+    />
+
+    <!-- 상품 상세 -->
     <div class="item-details">
-      <h5 class="item-name">{{ item.name }}</h5>
-      <p class="item-price">Price: {{ item.price }} Points</p>
+      <h5 class="item-name">{{ item.pointItemName }}</h5>
+      <p class="item-price">가격: {{ item.pointScore.toLocaleString() }} P</p>
       <p class="item-stock">남은 수량: {{ item.stock ?? '∞' }}개</p>
+
+      <!-- 구매 버튼 -->
       <button
         class="b-button"
         :disabled="isDisabled"
         @click="handleClick"
-        :class="{ insufficient: userPoints < getItemPrice(item.price) && !isPurchased(item.id) }"
+        :class="{
+          insufficient:
+            userPoints < getItemPrice(item.pointScore) && !isPurchased(item.pointId),
+        }"
       >
         {{ buttonLabel }}
       </button>
@@ -57,6 +90,7 @@ const handleClick = () => {
 </template>
 
 <style scoped>
+/* 카드 컨테이너 */
 .item-container {
   display: flex;
   flex-direction: column;
@@ -66,15 +100,19 @@ const handleClick = () => {
   border-radius: 8px;
   padding: 10px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
 }
 
+/* 상품 이미지 */
 .item-image {
   width: 100px;
   height: 100px;
   object-fit: contain;
   margin-bottom: 10px;
+  border-radius: 4px;
 }
 
+/* 상세 정보 */
 .item-details {
   text-align: center;
 }
@@ -106,6 +144,7 @@ const handleClick = () => {
   margin-bottom: 6px;
 }
 
+/* 구매 버튼 */
 .b-button {
   font-size: 12px;
   padding: 5px 10px;

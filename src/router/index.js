@@ -40,9 +40,12 @@ import MyLike from "@/views/user/MyLike.vue";
 import MyComment from "@/views/user/MyComment.vue";
 
 // 포인트샵
-import PointShopListView from "@/views/pointshop/PointShopListView.vue";
-import PointUserView from "@/views/pointshop/PointUserView.vue";
-import PointPurchaseHistoryTable from "@/components/pointshop/PointPurchaseHistoryTable.vue";
+import PointDashboardView from "@/views/pointshop/PointDashboardView.vue";
+import PointPurchaseHistoryView from "@/views/pointshop/PointPurchaseHistoryView.vue";
+import PointRechargeHistoryView from "@/views/pointshop/PointRechargeHistoryView.vue";
+import AdminPointDashboardView from "@/views/pointshop/AdminPointDashboardView.vue";
+import AdminPointChargeView from "@/views/pointshop/AdminPointChargeView.vue";
+
 //식단
 import MealMainView from "@/views/meal/MealMainView.vue";
 import MealDetailView from "@/views/meal/MealDetailView.vue";
@@ -282,6 +285,10 @@ const router = createRouter({
       component: MyComment,
     },
     {
+      path: '/pointshop',
+      name: 'PointDashboard',
+      component: () => import('@/views/pointshop/PointDashboardView.vue'),
+      meta: { headerType: 'title', title: '포인트샵', showUserPanel: false },
       path: "/user/onboarding",
       name: "Onboarding",
       component: Onboarding,
@@ -297,14 +304,28 @@ const router = createRouter({
       component: PointShopListView,
     },
     {
-      path: "/point/history",
-      name: "PointPurchaseHistory",
-      component: PointPurchaseHistoryTable,
+      path: '/pointshop/purchase-history',
+      name: 'PointPurchaseHistory',
+      component: () => import('@/views/pointshop/PointPurchaseHistoryView.vue'),
+      meta: { headerType: 'title', title: '구매 내역', showUserPanel: false },
     },
     {
-      path: "/point/user",
-      name: "PointUserView",
-      component: PointUserView,
+      path: '/pointshop/recharge-history',
+      name: 'PointRechargeHistory',
+      component: () => import('@/views/pointshop/PointRechargeHistoryView.vue'),
+      meta: { headerType: 'title', title: '충전 내역', showUserPanel: false },
+    },
+    {
+      path: '/admin/pointshop/dashboard',
+      name: 'AdminPointDashboard',
+      component: () => import('@/views/pointshop/AdminPointDashboardView.vue'),
+      meta: { headerType: 'title', title: '포인트샵 통계 대시보드', requiresAdmin: true },
+    },
+    {
+      path: '/admin/pointshop/charge',
+      name: 'AdminPointCharge',
+      component: () => import('@/views/pointshop/AdminPointChargeView.vue'),
+      meta: { headerType: 'title', title: '포인트 충전 (관리자)', requiresAdmin: true },
     },
     {
       path: "/meal",
