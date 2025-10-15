@@ -223,62 +223,42 @@ onMounted(async () => {
 <style lang="scss" scoped>
 .wrap {
   margin-top: 30px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
-
-/* 중앙정렬 및 폭 제한 */
-.swiper-warp {
-  width: 100%;
-  max-width: 391px; /* 모바일 레이아웃 기준 */
-  margin: 0 auto 20px auto; /* 중앙정렬 + 아래 여백 */
-  box-sizing: border-box;
-
-  .otd-category {
-    margin-bottom: 15px;
-    text-align: left;
-    width: 100%;
+@media (min-width: 391px) {
+  .wrap {
     max-width: 391px;
+    margin: 0 auto;
+    margin-top: 30px;
   }
 }
-
-/* Swiper 내부 구조 */
-:deep(.swiper) {
-  width: 100%;
-  overflow: hidden;
-  min-width: 360px;
+.swiper-warp {
+  margin: 0 15px 15px 15px;
+  .otd-category {
+    margin-bottom: 15px;
+  }
 }
-
+:deep(.swiper) {
+  overflow: hidden;
+  margin-right: 12px;
+}
 :deep(.swiper-wrapper) {
   display: flex;
   cursor: grab;
 }
-
-/* 핵심 수정 부분 */
-:deep(.swiper-slide) {
-  display: flex;
-  justify-content: center;
-  flex-shrink: 0;
-  width: calc(50% - 8px) !important; /* 2개씩 균등 */
-  box-sizing: border-box;
+.warning {
+  margin-top: 10px;
+  color: #e53935;
+  font-size: 0.85rem;
+}
+.challenge-info {
+  margin-bottom: 8px;
 }
 .card-grid {
   display: grid;
   grid-template-columns: repeat(2, 168px);
   gap: 15px;
-  max-width: 391px;
-  box-sizing: border-box;
-  padding-bottom: 30px;
+  justify-items: center;
 }
-/* 카드 고정폭 제거 */
-.challenge-card {
-  width: 100%;
-  max-width: 168px;
-  border-radius: 10px;
-}
-
-/* 오버레이 관련 */
 .challenge-card-swiper-wrapper {
   position: relative;
 }
@@ -286,23 +266,22 @@ onMounted(async () => {
   position: relative;
   width: 168px;
 }
-.overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 10px;
-  pointer-events: none;
-}
-
 .overlay-2 {
   position: absolute;
   align-items: center;
   justify-content: center;
   inset: 0;
+  width: 168px;
 }
-
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  border-radius: 10px;
+  align-items: center;
+  pointer-events: none;
+}
 .lock {
   width: 100%;
   border-radius: 10px;

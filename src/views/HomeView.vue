@@ -489,7 +489,7 @@ const fetchLastestBodyComposition = async () => {
   }
 }
 .top-wrap {
-  // margin: 10px 20px 0 20px;
+  margin: 10px  20px 0 20px;
 }
 .wrap_content {
   display: flex;
@@ -547,6 +547,8 @@ const fetchLastestBodyComposition = async () => {
   color: #303030;
   overflow: visible;
 }
+
+
 
 .meal-top-img {
   width: 50px;
