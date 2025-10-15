@@ -141,7 +141,7 @@ const verifyCode = async () => {
   }
 };
 
-// Step 3: 비밀번호 변경
+
 const resetPassword = async () => {
   const passwordValidation = validatePassword(newPassword.value);
   const confirmValidation = validateConfirmPassword(confirmPassword.value, newPassword.value);
