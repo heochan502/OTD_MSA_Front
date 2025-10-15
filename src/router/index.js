@@ -298,11 +298,7 @@ const router = createRouter({
         showUserPanel: false,
       },
     },
-    {
-      path: "/pointshop",
-      name: "PointShopList",
-      component: PointShopListView,
-    },
+    
     {
       path: '/pointshop/purchase-history',
       name: 'PointPurchaseHistory',
