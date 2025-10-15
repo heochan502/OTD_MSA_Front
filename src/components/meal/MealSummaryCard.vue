@@ -30,7 +30,7 @@ const myDayData = ref({
   selectDay : '',
   activityKcal: 0, // 칼로리 소모
 
-  basalMetabolicRate : 0  // 기초 대사량 
+  basal_metabolic_rate : 0  // 기초 대사량 
 });
 
 // 선택 한 날짜 가져오기위한거 
@@ -59,7 +59,7 @@ const totalFat = computed(() =>
 // 목표/소모(운동) - 필요시 스토어/프로프 연동
 const kcalGoal = computed(() => {
   // 1) 우선 서버에서 가져온 하루 데이터 우선
-  const dayBmr = Number(myDayData.value?.basalMetabolicRate) || 0;
+  const dayBmr = Number(myDayData.value?.basal_metabolic_rate) || 0;
   if (dayBmr > 0) return dayBmr;
 
   // 2) 스토어의 bmr (배열인지/객체인지 상황에 따라 경로 보정)
@@ -100,7 +100,9 @@ watch(
     
     myDayData.value = await getMyDay(mealSelectedDay.selectedDay.setDay);
     console.log('선택', myDayData.value);
-    console.log('bodyComposition.basicInfo?.bmr', bodyComposition.basicInfo[0].bmr);
+    console.log('bodyComposition.basicInfo?.bmr', bodyComposition.basicInfo[0]?.bmr);
+    console.log('bodyComposition.metrics', bodyComposition.series.points);
+    
   } 
 );
 
