@@ -1,8 +1,8 @@
 <script setup>
-import { useScroll } from "@vueuse/core";
-import Breadcrumb from "./Breadcrumb.vue";
-import Content from "./Content.vue";
-import Footer from "./Footer.vue";
+import { useScroll } from '@vueuse/core';
+import Breadcrumb from './Breadcrumb.vue';
+import Content from './Content.vue';
+import Footer from './Footer.vue';
 </script>
 <template>
   <div class="app-layout">

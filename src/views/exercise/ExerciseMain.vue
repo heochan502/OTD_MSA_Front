@@ -61,44 +61,46 @@ const onDateClick = async (date) => {
 </script>
 
 <template>
-  <div class="wrap content_wrap">
-    <div class="weekly_calendar">
-      <WeeklyCalendar :recordDate="selectedDate" @click-date="onDateClick" />
-    </div>
-    <div class="exercise_report">
-      <div class="subtitle ga-1">
-        <div class="d-flex align-center ga-1 mb-3">
-          <span class="otd-subtitle-1 mb-0">운동기록</span>
-          <router-link to="/exercise/record_form">
-            <img class="btn_add" :src="btnAdd" alt="운동기록 추가 버튼" />
+  <div class="wrap">
+    <div class="content_wrap">
+      <div class="weekly_calendar">
+        <WeeklyCalendar :recordDate="selectedDate" @click-date="onDateClick" />
+      </div>
+      <div class="exercise_report">
+        <div class="subtitle ga-1">
+          <div class="d-flex align-center ga-1 mb-3">
+            <span class="otd-subtitle-1 mb-0">운동기록</span>
+            <router-link to="/exercise/record_form">
+              <img class="btn_add" :src="btnAdd" alt="운동기록 추가 버튼" />
+            </router-link>
+          </div>
+          <div>
+            <router-link
+              :to="{
+                path: '/exercise/record',
+                query: {
+                  date: monthly,
+                },
+              }"
+            >
+              <span class="otd-body-2">더보기</span>
+            </router-link>
+          </div>
+        </div>
+        <ExerciseRecordList />
+      </div>
+      <div class="body_composition">
+        <div class="subtitle">
+          <div class="d-flex align-center ga-1 mb-3">
+            <span class="otd-subtitle-1">체성분</span>
+            <!-- <img class="btn_add" :src="btnAdd" alt="체성분 추가 버튼" /> -->
+          </div>
+          <router-link to="/exercise/body_composition">
+            <span class="otd-body-2">변화 보기</span>
           </router-link>
         </div>
-        <div>
-          <router-link
-            :to="{
-              path: '/exercise/record',
-              query: {
-                date: monthly,
-              },
-            }"
-          >
-            <span class="otd-body-2">더보기</span>
-          </router-link>
-        </div>
+        <BodyCompositionSummary />
       </div>
-      <ExerciseRecordList />
-    </div>
-    <div class="body_composition">
-      <div class="subtitle">
-        <div class="d-flex align-center ga-1 mb-3">
-          <span class="otd-subtitle-1">체성분</span>
-          <!-- <img class="btn_add" :src="btnAdd" alt="체성분 추가 버튼" /> -->
-        </div>
-        <router-link to="/exercise/body_composition">
-          <span class="otd-body-2">변화 보기</span>
-        </router-link>
-      </div>
-      <BodyCompositionSummary />
     </div>
   </div>
 </template>
@@ -107,9 +109,21 @@ const onDateClick = async (date) => {
 * {
   text-decoration: none;
 }
+.wrap {
+  margin-top: 30px;
+}
+// 화면이 391px 이상일 때만 max-width + 중앙정렬 적용
+@media (min-width: 391px) {
+  .wrap {
+    max-width: 391px;
+    margin: 0 auto;
+    margin-top: 30px;
+  }
+}
 .content_wrap {
   display: flex;
   flex-direction: column;
+  align-items: center;
   margin-bottom: 15px;
 }
 .subtitle {

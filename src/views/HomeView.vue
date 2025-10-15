@@ -489,7 +489,7 @@ const fetchLastestBodyComposition = async () => {
   }
 }
 .top-wrap {
-  margin: 5px 0px;
+  margin: 10px 0px;
 }
 .wrap_content {
   display: flex;
@@ -512,7 +512,7 @@ const fetchLastestBodyComposition = async () => {
 
 .meal {
   display: flex;
-  margin: 0 20px;
+  margin: 0 0px;
   justify-content: center;
 }
 
