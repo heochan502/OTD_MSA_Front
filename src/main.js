@@ -27,7 +27,7 @@ import 'bootstrap';
 import fallbackAvatar from '@/assets/img/community/default-profile.png';
 
 window.addEventListener('load', () => {
-  localStorage.removeItem('authentication');
+  // localStorage.removeItem('authentication');
 });
 // 모든 <img> 에러를 전역에서 잡아 기본 아바타로 교체
 window.addEventListener(
