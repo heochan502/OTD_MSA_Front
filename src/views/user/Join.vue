@@ -958,6 +958,7 @@ const closeTermsModal = () => {
             placeholder="이메일"
             v-model="email"
             class="input-field"
+            @keyup.enter="sendVerificationEmail"
           />
 
           <button
@@ -982,6 +983,7 @@ const closeTermsModal = () => {
               maxlength="6"
               class="input-field"
               :disabled="isEmailVerified"
+              @keyup.enter="verifyEmailCode"
             />
          
             <button
