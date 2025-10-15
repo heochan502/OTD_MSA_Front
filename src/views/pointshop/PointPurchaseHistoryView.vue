@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { usePointShop } from '@/components/pointshop/usePointshop.js';
+import { usePointshop } from '@/components/pointshop/usePointshop.js';
 
 const router = useRouter();
 
@@ -11,7 +11,7 @@ const {
   isLoading,
   fetchUserPoints,
   fetchPurchasedItems,
-} = usePointShop();
+} = usePointshop();
 
 // 날짜 포맷 변환
 const formatDate = (dateStr) => {

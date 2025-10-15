@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted } from 'vue';
-import { usePointShop } from '@/components/pointshop/usePointShop.js';
+import { usePointshop } from '@/components/pointshop/usePointshop.js';
 
 const {
   userPoints,
@@ -12,7 +12,7 @@ const {
   fetchPurchasedItems,
   purchaseItem,
   isPurchased,
-} = usePointShop();
+} = usePointshop();
 
 // 🔹 초기 데이터 불러오기
 onMounted(async () => {
