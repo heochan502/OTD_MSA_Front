@@ -21,7 +21,7 @@ const filterRange = ref({
       </router-link> -->
     </div>
     <div class="d-flex align-center flex-row-reverse ga-2">
-      <span>최근</span>
+      <span>전체</span>
       <v-switch
         v-model="toggle"
         hide-details
@@ -29,7 +29,7 @@ const filterRange = ref({
         density="compact"
         color="#989898"
       ></v-switch>
-      <span>전체</span>
+      <span>최근</span>
     </div>
     <div>
       <!-- <lineChart :logs="bodyCompositionStore.series" /> -->
