@@ -153,7 +153,7 @@ const submit = async () => {
         <router-link to="/user/findid" class="link">아이디 찾기</router-link>
         <span class="link-separator">|</span>
         <router-link to="/user/password" class="link"
-          >비밀번호 찾기</router-link
+          >비밀번호 재설정</router-link
         >
       </div>
     </div>
