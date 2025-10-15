@@ -449,12 +449,20 @@ const openMealDialog = async (meal) => {
                   </v-col>
 
                   <v-col cols="6">
-                    <v-card-subtitle>보유 경험치</v-card-subtitle>
-                    <v-card-text
-                      >{{
-                        Number(state.userInfo.xp).toLocaleString()
-                      }}XP</v-card-text
-                    >
+                    <v-card-subtitle>마지막 접속일</v-card-subtitle>
+                    <v-card-text>{{
+                      new Date(state.userInfo.lastLogin).toLocaleString(
+                        'ko-KR',
+                        {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit',
+                        }
+                      )
+                    }}</v-card-text>
                   </v-col>
                 </v-row>
                 <div class="btn-area">
