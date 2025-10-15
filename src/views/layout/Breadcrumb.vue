@@ -87,20 +87,23 @@ onMounted(() => {});
     <!-- 로고 출력 -->
     <div class="title" v-if="headerType === 'logo'">
       <img class="otd-logo" src="/image/main/ontoday_logo.png" alt="로고" />
-      <!--<img class="alram" src="/image/main/alarm.png" alt="알람" @click="handleClick" />-->
+      <!-- <div></div> -->
+      <img class="alram" src="/image/main/alarm.png"  style="visibility:hidden" alt="알람" @click="handleClick" />
     </div>
     <!-- 타이틀 출력 -->
     <div class="title" v-else>
-      <button class="black-btn" @click="$router.back()" aria-label="뒤로가기">
+      <button class="black-btn " @click="$router.back()" aria-label="뒤로가기">
         <img class="back-btn" src="/image/main/back_icon.png" alt="뒤로가기" />
       </button>
       <div class="hearder-text">{{ headerTitle }}</div>
-      <!-- <img
+      <!-- <div></div> -->
+      <img
         class="alram"
         src="/image/main/alarm.png"
         alt="알람"
         @click="handleClick"
-      />-->
+        style="visibility:hidden"
+      />
     </div>
   </div>
 
@@ -174,6 +177,7 @@ onMounted(() => {});
 
   /* background: #00D5DF; */
 }
+
 .point-img {
   width: 20px;
   height: 20px;
@@ -197,6 +201,8 @@ onMounted(() => {});
   width: 12px;
   height: 24px;
   cursor: pointer;
+  // align-items: start;
+  // justify-content: start;
 }
 .alram {
   align-self: center;
