@@ -85,6 +85,7 @@
 
 
 <style scoped>
+
 /* 전체 스타일 */
 .terms-of-service {
   max-width: 900px;

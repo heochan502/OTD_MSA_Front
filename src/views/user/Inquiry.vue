@@ -183,6 +183,8 @@ const sendEmailInquiry = async () => {
     state.isLoading = false;
   }
 };
+
+
 </script>
 
 <template>
@@ -259,7 +261,6 @@ const sendEmailInquiry = async () => {
   margin: 0 auto;
   padding: 20px;
   background: #fff;
-  min-height: 100vh;
 }
 
 .form-control:focus {
