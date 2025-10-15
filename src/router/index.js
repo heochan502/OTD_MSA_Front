@@ -40,18 +40,11 @@ import MyLike from '@/views/user/MyLike.vue';
 import MyComment from '@/views/user/MyComment.vue';
 
 // 포인트샵
-<<<<<<< HEAD
-import PointShopListView from '@/views/pointshop/PointShopListView.vue';
-import PointUserPurchaseHistoryView from '@/views/pointshop/PointUserPurchaseHistoryView.vue';
-import PointUserView from '@/views/pointshop/PointUserView.vue';
-import PointPurchaseHistoryTable from '@/components/pointshop/PointPurchaseHistoryTable.vue';
-import PointRechargeView from '@/views/pointshop/PointRechargeView.vue';
-=======
-import PointShopListView from "@/views/point/PointShopListView.vue";
-import PointUserPurchaseHistoryView from "@/views/point/PointUserPurchaseHistoryView.vue";
-import PointUserView from "@/views/point/PointUserView.vue";
-import PointPurchaseHistoryTable from "@/components/pointshop/PointPurchaseHistoryTable.vue";
->>>>>>> 0172eee5dd3b7054040a23c51cbefdd21e39e04e
+import PointDashboardView from "@/views/pointshop/PointDashboardView.vue";
+import PointPurchaseHistoryView from "@/views/pointshop/PointPurchaseHistoryView.vue";
+import PointRechargeHistoryView from "@/views/pointshop/PointRechargeHistoryView.vue";
+import AdminPointDashboardView from "@/views/pointshop/AdminPointDashboardView.vue";
+import AdminPointChargeView from "@/views/pointshop/AdminPointChargeView.vue";
 
 //식단
 import MealMainView from "@/views/meal/MealMainView.vue";
@@ -298,33 +291,37 @@ const router = createRouter({
     },
     {
       path: '/pointshop',
-      name: 'PointShopList',
-      component: PointShopListView,
+      name: 'PointDashboard',
+      component: () => import('@/views/pointshop/PointDashboardView.vue'),
+      meta: { headerType: 'title', title: '포인트샵', showUserPanel: false },
     },
     {
-      path: "/point/history",
-      name: "PointPurchaseHistory",
-      component: PointPurchaseHistoryTable,
+      path: '/pointshop/purchase-history',
+      name: 'PointPurchaseHistory',
+      component: () => import('@/views/pointshop/PointPurchaseHistoryView.vue'),
+      meta: { headerType: 'title', title: '구매 내역', showUserPanel: false },
     },
     {
-      path: "/point/user",
-      name: "PointUserView",
-      component: PointUserView,
+      path: '/pointshop/recharge-history',
+      name: 'PointRechargeHistory',
+      component: () => import('@/views/pointshop/PointRechargeHistoryView.vue'),
+      meta: { headerType: 'title', title: '충전 내역', showUserPanel: false },
     },
     {
-<<<<<<< HEAD
-      path: '/pointshop/recharge',
-      name: 'PointRechargeView',
-      component: PointRechargeView.vue,
-      meta: { headerType: 'title', title: '포인트 충전', showUserPanel: false },
+      path: '/admin/pointshop/dashboard',
+      name: 'AdminPointDashboard',
+      component: () => import('@/views/pointshop/AdminPointDashboardView.vue'),
+      meta: { headerType: 'title', title: '포인트샵 통계 대시보드', requiresAdmin: true },
     },
     {
-      path: '/meal',
-      name: 'MealMainView',
-=======
+      path: '/admin/pointshop/charge',
+      name: 'AdminPointCharge',
+      component: () => import('@/views/pointshop/AdminPointChargeView.vue'),
+      meta: { headerType: 'title', title: '포인트 충전 (관리자)', requiresAdmin: true },
+    },
+    {
       path: "/meal",
       name: "MealMainView",
->>>>>>> 0172eee5dd3b7054040a23c51cbefdd21e39e04e
       component: MealMainView,
       meta: { headerType: "title", title: "식단", showUserPanel: false },
     },
