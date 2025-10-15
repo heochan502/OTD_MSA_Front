@@ -1314,8 +1314,8 @@ const closeTermsModal = () => {
             <option value="M">남성</option>
             <option value="F">여성</option>
           </select>
-
-          <div class="form-group">
+        </div>
+        <div class="form-group">
             <label for="nickname"></label>
             <div class="input-wrapper">
               <input
@@ -1357,7 +1357,6 @@ const closeTermsModal = () => {
               {{ validation.nickname.message }}
             </div>
           </div>
-        </div>
       </div>
 
       <!-- Step 5: 설문조사 -->
@@ -1502,7 +1501,6 @@ const closeTermsModal = () => {
 }
 
 .signup-container {
-  min-height: 100vh;
   background-color: #ffffff;
 }
 

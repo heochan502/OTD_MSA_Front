@@ -58,6 +58,31 @@ const handleLogoutConfirm = async () => {
 };
 
 
+const modal = ref({
+  show: false,
+  type: 'info',
+  title: '',
+  message: '',
+  confirmText: '확인',
+  cancelText: '취소',
+  onConfirm: null,
+  onCancel: null,
+});
+
+const showAlert = (config) => {
+  modal.value.show = true;
+  modal.value.type = config.type || 'info';
+  modal.value.title = config.title || '';
+  modal.value.message = config.message || '';
+  modal.value.confirmText = config.confirmText || '확인';
+  modal.value.cancelText = config.cancelText || '취소';
+  modal.value.onConfirm = config.onConfirm || null;
+  modal.value.onCancel = config.onCancel || null;
+};
+
+const closeAlert = () => {
+  modal.value.show = false;
+};
 
 // 프로필 사진 클릭 시 모달 열기
 const openPhotoModal = (e) => {
@@ -72,26 +97,37 @@ const closePhotoModal = () => {
   previewUrl.value = null;
 };
 
-// 파일 선택
-const handleFileSelect = (event) => {
-  const file = event.target.files[0];
-  if (file && file.type.startsWith('image/')) {
-    selectedFile.value = file;
-    previewUrl.value = URL.createObjectURL(file);
-  } else {
-    alert('이미지 파일만 선택할 수 있습니다.');
-  }
-};
 
-// 파일 업로드 트리거
+
+
 const triggerFileInput = () => {
   document.getElementById('photoInput').click();
 };
 
 // 프로필 사진 저장
+const handleFileSelect = (e) => {
+  const file = e.target.files[0];
+  if (file && file.type.startsWith('image/')) {
+    selectedFile.value = file;
+    previewUrl.value = URL.createObjectURL(file);
+  } else {
+    showAlert({
+      type: 'warning',
+      title: '파일 선택 오류',
+      message: '이미지 파일만 선택할 수 있습니다.',
+    });
+  }
+};
+
+
+// 저장
 const saveProfilePhoto = async () => {
   if (!selectedFile.value) {
-    alert('사진을 선택해주세요.');
+    showAlert({
+      type: 'warning',
+      title: '저장 실패',
+      message: '사진을 선택해주세요.',
+    });
     return;
   }
 
@@ -99,54 +135,63 @@ const saveProfilePhoto = async () => {
     const formData = new FormData();
     formData.append('pic', selectedFile.value);
 
-
-
     const response = await patchUserProfilePic(formData);
-
-
-
     if (response.data && response.data.result) {
       const fileName = response.data.result;
       const imagePath = `${BASE_URL}/profile/${userInfo.value.userId}/${fileName}`;
-
       authStore.state.signedUser.pic = imagePath;
 
       const lifePic = await putLifeUserProfile(imagePath);
-      console.log('lifePic', lifePic);
-      alert('프로필 사진이 변경되었습니다.');
-      closePhotoModal();
+      //console.log('lifePic', lifePic);
+
+      showAlert({
+        type: 'success',
+        title: '저장 완료',
+        message: '프로필 사진이 변경되었습니다.',
+        onConfirm: () => showPhotoModal.value = false,
+      });
     }
-  } catch (error) {
-    console.error('프로필 사진 업로드 실패:', error);
-    console.error('에러 상세:', error.response);
-    alert('프로필 사진 업로드에 실패했습니다.');
+  } catch (err) {
+    console.error(err);
+    showAlert({
+      type: 'error',
+      title: '저장 실패',
+      message: '프로필 사진 업로드에 실패했습니다.',
+    });
   }
 };
 
-// 프로필 사진 삭제
-const deleteProfilePhoto = async () => {
-  if (!confirm('프로필 사진을 삭제하시겠습니까?')) return;
-
-  try {
-    //console.log('프로필 사진 삭제 시작...');
-
-    const response = await deleteUserProfilePic();
-
-    //console.log('삭제 응답:', response);
-
-    if (response.status === 200) {
-      authStore.state.signedUser.pic = null;
-
-      //console.log('프로필 사진이 삭제되었습니다.');
-
-      alert('프로필 사진이 삭제되었습니다.');
-      closePhotoModal();
-    }
-  } catch (error) {
-    console.error('프로필 사진 삭제 실패:', error);
-    console.error('에러 상세:', error.response);
-    alert('프로필 사진 삭제에 실패했습니다.');
-  }
+// 삭제
+const deleteProfilePhoto = () => {
+  showAlert({
+    type: 'confirm',
+    title: '사진 삭제',
+    message: '프로필 사진을 삭제하시겠습니까?',
+    confirmText: '삭제',
+    cancelText: '취소',
+    onConfirm: async () => {
+      try {
+        const response = await deleteUserProfilePic();
+        if (response.status === 200) {
+          authStore.state.signedUser.pic = null;
+          previewUrl.value = null;
+          showAlert({
+            type: 'success',
+            title: '삭제 완료',
+            message: '프로필 사진이 삭제되었습니다.',
+            onConfirm: () => showPhotoModal.value = false,
+          });
+        }
+      } catch (err) {
+        console.error(err);
+        showAlert({
+          type: 'error',
+          title: '삭제 실패',
+          message: '프로필 사진 삭제에 실패했습니다.',
+        });
+      }
+    },
+  });
 };
 
 // 최근 포인트 히스토리 가져오기
@@ -264,7 +309,7 @@ const formatDate = (dateString) => {
     .replace(/\.$/, '');
 };
 
-const logoutAccount = async () => {
+const logoutAccount = async  () => {
   if (!confirm('로그아웃 하시겠습니까?')) return;
   const res = await logout();
   if (res === undefined || res.status !== 200) return;
@@ -381,9 +426,9 @@ onMounted(() => {
 
     <!-- 약관 및 로그아웃 섹션 -->
     <div class="footer-section">
-      <router-link to="/user/term" class="footer-link"
+      <!-- <router-link to="/user/term" class="footer-link"
         >약관 및 보안</router-link
-      >
+      > -->
       <button
     class="logout-btn"
     @click="openLogoutModal"
@@ -445,6 +490,18 @@ onMounted(() => {
       </div>
     </div>
   </div>
+  <!-- AlertModal -->
+  <AlertModal
+    :show="modal.show"
+    :title="modal.title"
+    :message="modal.message"
+    :type="modal.type"
+    :confirmText="modal.confirmText"
+    :cancelText="modal.cancelText"
+    @confirm="modal.onConfirm ? modal.onConfirm() : closeAlert()"
+    @cancel="modal.onCancel ? modal.onCancel() : closeAlert()"
+    @close="closeAlert"
+  />
 </template>
 
 <style scoped lang="scss">
