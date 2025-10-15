@@ -1,38 +1,35 @@
 import axios from '@/services/httpRequester';
 
 const PointPurchaseService = {
-  // [GET] 사용자 구매 내역 조회
-  async getUserPurchaseHistory() {
-    try {
-      const res = await axios.get('/pointshop/purchase/history');
-      return res;
-    } catch (e) {
-      console.error('[PointPurchaseService] 구매 이력 조회 실패:', e);
-      return e?.response || null;
-    }
-  },
-
-  // [POST] 아이템 구매 요청
-  async createPurchase(pointId) {
+  // [POST] 사용자 포인트 아이템 구매
+  async purchaseItem(pointId) {
     try {
       const res = await axios.post(`/pointshop/purchase/${pointId}`);
-      return res;
-    } catch (e) {
-      console.error('[PointPurchaseService] 구매 요청 실패:', e);
-      return e?.response || null;
+      return res.data;
+    } catch (err) {
+      console.error('[PointPurchaseService] 구매 실패:', err);
+      return {
+        success: false,
+        message: err.response?.data?.message || '구매 요청 실패',
+        data: null,
+      };
     }
   },
 
-  // [DELETE] 구매 취소
-  async deletePurchase(purchaseId) {
+  // [GET] 사용자 본인 구매 내역 조회
+  async getUserPurchaseHistory() {
     try {
-      const res = await axios.delete(`/pointshop/purchase/${purchaseId}`);
-      return res;
-    } catch (e) {
-      console.error('[PointPurchaseService] 구매 취소 실패:', e);
-      return e?.response || null;
+      const res = await axios.get('/pointshop/purchase/history/user');
+      return res.data;
+    } catch (err) {
+      console.error('[PointPurchaseService] 구매 이력 조회 실패:', err);
+      return {
+        success: false,
+        message: err.response?.data?.message || '구매 이력 불러오기 실패',
+        data: [],
+      };
     }
-  }
+  },
 };
 
 export default PointPurchaseService;

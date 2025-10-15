@@ -5,34 +5,40 @@ const PointShopService = {
   async getAllItems() {
     try {
       const res = await axios.get('/pointshop/list');
-      return res;
-    } catch (e) {
-      console.error('[PointShopService] 아이템 목록 요청 실패:', e);
-      return e?.response || null;
+      return res.data;
+    } catch (err) {
+      console.error('[PointShopService] 아이템 목록 요청 실패:', err);
+      return { success: false, message: '아이템 목록 불러오기 실패', data: [] };
     }
   },
 
-  // [GET] 사용자 포인트 조회 (중복 방지 위해 이름 구분)
-  async getUserPoints() {
+  // [GET] 키워드 기반 아이템 검색
+  async getItemsByKeyword(keyword) {
     try {
-      const res = await axios.get('/pointshop/user/points');
-      return res;
-    } catch (e) {
-      console.error('[PointShopService] 포인트 조회 실패:', e);
-      return e?.response || null;
+      const res = await axios.get('/pointshop/keyword', { params: { keyword } });
+      return res.data;
+    } catch (err) {
+      console.error('[PointShopService] 키워드 검색 실패:', err);
+      return { success: false, message: '검색 실패', data: [] };
     }
   },
 
-  // [POST] 포인트 차감 (아이템 구매 후 서버 포인트 차감용)
-  async redeemUserPoints(amount) {
+  // [POST] 아이템 등록 (관리자)
+  async addItem(formData) {
     try {
-      const res = await axios.post('/pointshop/user/redeem', { amount });
-      return res;
-    } catch (e) {
-      console.error('[PointShopService] 포인트 차감 실패:', e);
-      return e?.response || null;
+      const res = await axios.post('/pointshop/add', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return res.data;
+    } catch (err) {
+      console.error('[PointShopService] 아이템 등록 실패:', err);
+      return {
+        success: false,
+        message: err.response?.data?.message || '아이템 등록 실패',
+        data: null,
+      };
     }
-  }
+  },
 };
 
 export default PointShopService;
