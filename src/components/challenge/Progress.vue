@@ -57,9 +57,9 @@ defineExpose({
 watch(
   () => props.indataProgress,
   (data) => {
-      targetValue.value = data;
-      animateProgress(data);
-    },
+    targetValue.value = data;
+    animateProgress(data);
+  },
   { immediate: true }
 );
 </script>

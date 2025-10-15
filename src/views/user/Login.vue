@@ -109,6 +109,7 @@ const submit = async () => {
             id="upw"
             placeholder="비밀번호"
             v-model="state.form.upw"
+            @keyup.enter="submit"
             autocomplete="off"
             not-null-message="비밀번호는 필수로 입력하셔야 합니다."
             regexp="^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':\&quot;\\|,.<>\/?])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':\&quot;\\|,.<>\/?]{10,}$"
@@ -153,7 +154,7 @@ const submit = async () => {
         <router-link to="/user/findid" class="link">아이디 찾기</router-link>
         <span class="link-separator">|</span>
         <router-link to="/user/password" class="link"
-          >비밀번호 찾기</router-link
+          >비밀번호 재설정</router-link
         >
       </div>
     </div>
