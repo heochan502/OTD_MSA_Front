@@ -292,8 +292,7 @@ const router = createRouter({
         title: '온보딩',
         showUserPanel: false,
       },
-    },
-
+    },   
     {
       path: '/pointshop/purchase-history',
       name: 'PointPurchaseHistory',

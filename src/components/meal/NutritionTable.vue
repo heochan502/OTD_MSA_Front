@@ -19,13 +19,13 @@ const props = defineProps({
     <div class="head">
       <div class="title">영양정보</div>
       <div class="kcal">
-        <span>총 열량</span><b>{{ totalKcal }} kcal</b>
+        <span>총 열량</span><b>{{ totalKcal.toLocaleString() }} kcal</b>
       </div>
     </div>
     <ul class="table">
       <li class="row" v-for="r in rows" :key="r.label">
         <span class="label">{{ r.label }}</span>
-        <span v-if="r.label==='나트륨'" class="value">{{ r.value }} mg</span>
+        <span v-if="r.label==='나트륨'" class="value">{{ (Number(r.value)).toLocaleString() }} mg</span>
         <span v-else class="value">{{ r.value }} g/ml</span>
       </li>
     </ul>
