@@ -23,12 +23,12 @@ const loadInquiries = async () => {
   } catch (error) {
     console.error('문의 내역 로딩 오류:', error);
   } finally {
-    loading.value = false; 
+    loading.value = false;
   }
 };
 
 const viewDetail = (inquiryId) => {
-  selectedInquiryId.value = Number(inquiryId); 
+  selectedInquiryId.value = Number(inquiryId);
   showDetailModal.value = true;
 };
 
@@ -47,23 +47,22 @@ const goToInquiry = () => {
 
 const getStatusClass = (status) => {
   if (!status) return 'pending';
-  
+
   const upperStatus = status.toString().toUpperCase();
   const statusMap = {
-    'PENDING': 'pending',
-    'RESOLVED': 'resolved',
+    PENDING: 'pending',
+    RESOLVED: 'resolved',
     '00': 'pending',
     '01': 'resolved',
-    '대기중': 'pending',
+    대기중: 'pending',
     '대기 중': 'pending',
-    '완료': 'resolved'
+    완료: 'resolved',
   };
   return statusMap[upperStatus] || statusMap[status] || 'pending';
 };
 
 const getStatusText = (status) => {
   if (!status) return '대기중';
-  
 
   if (status === '대기 중' || status === '대기중') {
     return '대기중';
@@ -71,14 +70,13 @@ const getStatusText = (status) => {
   if (status === '완료') {
     return '완료';
   }
-  
 
   const upperStatus = status.toString().toUpperCase();
   const statusTextMap = {
-    'PENDING': '대기중',
-    'RESOLVED': '완료',
+    PENDING: '대기중',
+    RESOLVED: '완료',
     '00': '대기중',
-    '01': '완료'
+    '01': '완료',
   };
 
   return statusTextMap[upperStatus] || statusTextMap[status] || '대기중';
@@ -91,7 +89,7 @@ const formatDate = (dateString) => {
   const day = String(date.getDate()).padStart(2, '0');
   const hours = String(date.getHours()).padStart(2, '0');
   const minutes = String(date.getMinutes()).padStart(2, '0');
-  
+
   return `${year}-${month}-${day} ${hours}:${minutes}`;
 };
 
@@ -104,9 +102,7 @@ onMounted(() => {
   <div class="inquiry-list-container">
     <!-- 상단 버튼 그룹 -->
     <div class="top-buttons">
-      <button @click="goBack" class="back-btn">
-        ← 뒤로가기
-      </button>
+      <button @click="goBack" class="back-btn">← 뒤로가기</button>
       <button @click="loadInquiries" class="refresh-btn">
         <span>새로고침</span>
       </button>
@@ -129,8 +125,8 @@ onMounted(() => {
 
     <!-- 문의 목록 -->
     <div v-else class="inquiry-list">
-      <div 
-        v-for="inquiry in inquiries" 
+      <div
+        v-for="inquiry in inquiries"
         :key="inquiry.id"
         class="inquiry-item"
         @click="viewDetail(inquiry.id)"
@@ -276,7 +272,7 @@ onMounted(() => {
   font-weight: 600;
   color: #1f2937;
   margin: 0;
-  flex: 1;
+  width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -309,17 +305,17 @@ onMounted(() => {
   .inquiry-list-container {
     padding: 15px;
   }
-  
+
   .header h2 {
     font-size: 20px;
   }
-  
+
   .inquiry-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
   }
-  
+
   .status {
     margin-left: 0;
   }
