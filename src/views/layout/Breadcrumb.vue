@@ -87,12 +87,7 @@ onMounted(() => {});
     <!-- 로고 출력 -->
     <div class="title" v-if="headerType === 'logo'">
       <img class="otd-logo" src="/image/main/ontoday_logo.png" alt="로고" />
-      <img
-        class="alram"
-        src="/image/main/alarm.png"
-        alt="알람"
-        @click="handleClick"
-      />
+      <!--<img class="alram" src="/image/main/alarm.png" alt="알람" @click="handleClick" />-->
     </div>
     <!-- 타이틀 출력 -->
     <div class="title" v-else>
@@ -100,12 +95,12 @@ onMounted(() => {});
         <img class="back-btn" src="/image/main/back_icon.png" alt="뒤로가기" />
       </button>
       <div class="hearder-text">{{ headerTitle }}</div>
-      <img
+      <!-- <img
         class="alram"
         src="/image/main/alarm.png"
         alt="알람"
         @click="handleClick"
-      />
+      />-->
     </div>
   </div>
 
