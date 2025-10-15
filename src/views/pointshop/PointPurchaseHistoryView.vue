@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { usePointShop } from '@/components/pointshop/usePointShop';
+import { usePointShop } from '@/components/pointshop/usePointshop.js';
 
 const router = useRouter();
 
