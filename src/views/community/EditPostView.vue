@@ -14,7 +14,7 @@ const post = computed(() => store.getById(id.value));
 
 onMounted(async () => {
   if (!post.value) {
-    await store.loadPostDetail(id.value); // ✅ 상세 먼저 로드
+    await store.loadPostDetail(id.value);
   }
 });
 
@@ -31,22 +31,34 @@ async function onSubmitted() {
 </script>
 
 <template>
-  <ComposeForm
-    v-if="post"
-    mode="edit"
-    :category="post.category || 'free'"
-    :initial="{
-      id: post.id ?? post.postId,
-      title: post.title ?? '',
-      content: post.content ?? '',
-    }"
-    @cancel="onCancel"
-    @submitted="onSubmitted"
-  />
-  <div v-else class="hint">불러오는 중…</div>
+  <div class="edit-wrap">
+    <ComposeForm
+      v-if="post"
+      mode="edit"
+      :category="post.category || 'free'"
+      :initial="{
+        id: post.id ?? post.postId,
+        title: post.title ?? '',
+        content: post.content ?? '',
+      }"
+      @cancel="onCancel"
+      @submitted="onSubmitted"
+    />
+    <div v-else class="hint">불러오는 중…</div>
+  </div>
 </template>
 
 <style scoped>
+.edit-wrap {
+  display: flex;
+  justify-content: center; /* 가로 중앙 */
+  align-items: center; /* 세로 중앙 */
+  height: 100vh; /* 전체 화면 중앙 기준 */
+  background: rgba(0, 0, 0, 0.45); /* 작성 화면처럼 반투명 배경 (선택) */
+  backdrop-filter: blur(2px); /* 선택: 흐림 효과 */
+  z-index: 999;
+}
+
 .hint {
   text-align: center;
   color: #8b8b8b;

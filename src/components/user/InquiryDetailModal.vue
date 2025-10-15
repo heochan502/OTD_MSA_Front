@@ -18,8 +18,8 @@ const loadInquiryDetail = async () => {
   loading.value = true;
   try {
     const data = await getInquiryDetail(props.inquiryId);
-
     inquiry.value = data.data || data;
+
   } catch (error) {
     console.error('문의 상세 조회 실패:', error);
     alert('문의 상세 정보를 불러오는데 실패했습니다.');
@@ -32,25 +32,40 @@ const closeModal = () => {
   emit('close');
 };
 
-const getStatusClass = (status) => {
-  const statusMap = {
-    'PENDING': 'pending',
-    'COMPLETED': 'completed'
-  };
-  return statusMap[status] || 'pending';
-};
-
 const getStatusText = (status) => {
+  if (!status) return '대기중';
+
+  // 이미 한글인 경우
+  if (status === '대기 중' || status === '대기중') return '대기중';
+  if (status === '답변 완료' || status === '완료') return '완료';
+
+  // 영문 또는 코드로 변환
+  const upperStatus = status.toString().toUpperCase();
   const statusTextMap = {
     'PENDING': '대기중',
-    'COMPLETED': '완료'
+    'RESOLVED': '완료',
+    '00': '대기중',
+    '01': '완료'
   };
 
-  if (status === '대기 중' || status === '완료') {
-    return status;
-  }
+  return statusTextMap[upperStatus] || statusTextMap[status] || '대기중';
+};
 
-  return statusTextMap[status] || '알 수 없음';
+const getStatusClass = (status) => {
+  if (!status) return 'pending';
+
+  const upperStatus = status.toString().toUpperCase();
+  const statusMap = {
+    'PENDING': 'pending',
+    'RESOLVED': 'completed',
+    '00': 'pending',
+    '01': 'completed',
+    '대기중': 'pending',
+    '대기 중': 'pending',
+    '완료': 'completed',
+    '답변 완료': 'completed'
+  };
+  return statusMap[upperStatus] || statusMap[status] || 'pending';
 };
 
 const formatDate = (dateString) => {
@@ -84,22 +99,11 @@ onMounted(() => {
 
       <div v-else-if="inquiry" class="modal-body">
         <div class="detail-row">
-          <label>문의 번호</label>
-          <span>{{ inquiry.id }}</span>
-        </div>
-
-        <div class="detail-row">
           <label>상태</label>
           <span :class="['status-badge', getStatusClass(inquiry.status)]">
             {{ getStatusText(inquiry.status) }}
           </span>
         </div>
-
-        <div class="detail-row">
-          <label>제목</label>
-          <span class="subject">{{ inquiry.subject }}</span>
-        </div>
-
         <div class="detail-row">
           <label>작성자</label>
           <span>{{ inquiry.senderName }}</span>
@@ -113,6 +117,11 @@ onMounted(() => {
         <div class="detail-row">
           <label>작성일시</label>
           <span>{{ formatDate(inquiry.createdAt) }}</span>
+        </div>
+
+        <div class="detail-row">
+          <label>제목</label>
+          <span class="subject">{{ inquiry.subject }}</span>
         </div>
 
         <div class="detail-content">

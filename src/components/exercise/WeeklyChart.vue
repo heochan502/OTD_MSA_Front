@@ -43,25 +43,6 @@ const props = defineProps({
   label: String,
 });
 
-// 해당 주차 범위
-const weekRange = computed(() => {
-  const base = dayjs(props.selectedDate);
-  return {
-    startOfWeek: base.startOf("isoWeek"), // 월요일
-    endOfWeek: base.endOf("isoWeek"), // 일요일
-  };
-});
-
-// const weeklyRecords = computed(() => {
-//   return props.records.filter((records) => {
-//     const day = dayjs(records.startAt);
-//     return (
-//       day.isAfter(weekRange.value.start.subtract(1, "day")) &&
-//       day.isBefore(weekRange.value.end.add(1, "day"))
-//     );
-//   });
-// });
-
 // 주차 데이터 매핑 (월~일, 빈 값은 null)
 const weeklyData = computed(() => {
   const days = Array(7).fill(0);

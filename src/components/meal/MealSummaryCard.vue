@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useMealSelectedStore, useMealRecordStore } from '@/stores/meal/mealStore'
 
@@ -30,9 +30,16 @@ const myDayData = ref({
   selectDay : '',
   activityKcal: 0, // 칼로리 소모
 
-  basalMetabolicRate : 0  // 기초 대사량 
+  basal_metabolic_rate : 0  // 기초 대사량 
 });
 
+const points = bodyComposition?.series?.points ?? []
+const lastPoint = points.length ? points[points.length - 1] : null
+
+const myBMR = ref({
+  basal_metabolic_rate: lastPoint?.values?.basal_metabolic_rate ?? null,
+  date: lastPoint?.date ?? null
+})
 // 선택 한 날짜 가져오기위한거 
  const mealSelectedDay = useMealSelectedStore();
 
@@ -42,36 +49,37 @@ const { eatenFoodList } = storeToRefs(store)
 
 // 총합
 const totalKcal = computed(() =>
-  
-  (eatenFoodList.value ?? []).reduce((s, f) => s + ((f?.userFoodId ? Number(f.kcal) : (f.amount * f.kcal) / 100) || 0 ), 0)
-)
+  (eatenFoodList.value ?? []).reduce((s, f) => s +  Number(f.kcal) || 0, 0)
+);
 const totalCarb = computed(() =>
-  (eatenFoodList.value ?? []).reduce((s, f) => s + ((f?.userFoodId ? Number(f.carbohydrate) : (f.amount * f.carbohydrate) / 100) || 0), 0)
-)
+  (eatenFoodList.value ?? []).reduce((s, f) => s +  Number(f.carbohydrate) || 0, 0)
+);
 const totalProtein = computed(() =>
-  (eatenFoodList.value ?? []).reduce((s, f) => s + ((f?.protein ? Number(f.protein) : (f.amount * f.protein) / 100) || 0), 0)
-)
+  (eatenFoodList.value ?? []).reduce((s, f) => s +  Number(f.protein) || 0, 0)
+);
 const totalFat = computed(() =>
-  (eatenFoodList.value ?? []).reduce((s, f) => s + ((f?.fat ? Number(f.fat) : (f.amount * f.fat) / 100) || 0), 0)
-)
+  (eatenFoodList.value ?? []).reduce((s, f) => s +  Number(f.fat) || 0, 0)
+);
 
 
 
 // 목표/소모(운동) - 필요시 스토어/프로프 연동
 const kcalGoal = computed(() => {
-  const pts = bodyComposition.series?.points ?? [];
-  if (!pts.length) return myDayData.value.basalMetabolicRate || 0;
+  // 1) 우선 서버에서 가져온 하루 데이터 우선
+  const dayBmr = Number(myDayData.value?.basal_metabolic_rate) || 0;
+  if (dayBmr > 0) return dayBmr;
 
-  // 우선 myDayData에 값이 있으면 그걸 우선 사용
-  if ((myDayData.value?.basalMetabolicRate ?? 0) > 0) {
-    return myDayData.value.basalMetabolicRate;
-  }
+  // 2) 스토어의 bmr (배열인지/객체인지 상황에 따라 경로 보정)
+  const storeBmr =
+    Number(bodyComposition.basicInfo?.[0]?.bmr) ||
+    Number(bodyComposition.recentBodyInfo?.bmr) ||
+    Number( myBMR?.value?.basal_metabolic_rate )|| 0;
 
-  // 아니면 최신 측정치
-  const latest = pts.reduce((a, b) => (a.date > b.date ? a : b));
-  return latest?.values?.basal_metabolic_rate ?? 0;
+  if (storeBmr > 0) return storeBmr;
+
+  // 3) 없으면 0
+  return 0;
 });
-
 
 
 const progressPct = computed(() => {
@@ -98,9 +106,16 @@ watch(
   async (newDay, oldDay) => {
     
     myDayData.value = await getMyDay(mealSelectedDay.selectedDay.setDay);
-    console.log('선택', myDayData.value);
+    // console.log('선택', myDayData.value);
+    // console.log('bodyComposition.basicInfo?.bmr', bodyComposition.basicInfo[0]?.bmr);
+    // console.log('bodyComposition.metrics', bodyComposition.series.points);
+    
   } 
 );
+onMounted ( async () => {
+  myDayData.value = await getMyDay(mealSelectedDay.selectedDay.setDay);
+  // console.log('선택', myDayData.value);
+});
 
 
 </script>

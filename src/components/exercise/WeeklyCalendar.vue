@@ -49,6 +49,12 @@ const goNextWeek = () => {
 
 const isToday = (day) => day.isSame(today, "day");
 const isSelected = (day) => day.isSame(currentDate.value, "day");
+const isFuture = (day) => day.isAfter(today, "day");
+const isCurrentWeek = computed(() => {
+  const startOfCurrentWeek = today.startOf("isoWeek");
+  // 표시된 주의 시작일(weekStart.value)이 이번 주의 시작일과 같은지 확인
+  return weekStart.value.isSame(startOfCurrentWeek, "day");
+});
 
 const selectDate = (day) => {
   if (day.isAfter(today, "day")) return; // 미래 날짜 선택 불가
@@ -61,6 +67,7 @@ const selectDate = (day) => {
 watch(
   () => props.recordDate,
   (newDate) => {
+    // console.log("선택 날짜 확인", newDate);
     if (newDate) {
       currentDate.value = dayjs(newDate);
       weekStart.value = dayjs(newDate).startOf("isoWeek");
@@ -82,14 +89,14 @@ const onSelectDate = (date) => {
 
 // 적용 버튼 클릭 시 (날짜 반영 + 모달 닫기)
 const applyDate = (date) => {
-  emit("click-date", date);
   openCalendar.value = false; // 모달 닫기
+  emit("click-date", date);
 };
 </script>
 
 <template>
   <div class="d-flex align-center ga-2">
-    <div class="d-flex align-center ga-2">
+    <div class="d-flex align-center ga-2 ml-2">
       <img
         src="\image\exercise\calender.png"
         alt="캘린더 아이콘"
@@ -113,6 +120,7 @@ const applyDate = (date) => {
         :class="{
           today: isToday(day),
           selected: isSelected(day),
+          future: isFuture(day),
         }"
         @click="selectDate(day)"
       >
@@ -123,7 +131,7 @@ const applyDate = (date) => {
       </div>
     </div>
 
-    <button class="btn" @click="goNextWeek">
+    <button class="btn" @click="goNextWeek" :disabled="isCurrentWeek">
       <img src="\image\exercise\btn_next.png" alt="" width="10" />
     </button>
   </div>
@@ -161,13 +169,17 @@ const applyDate = (date) => {
 .weekly-calendar {
   display: flex;
   justify-content: center;
-  max-width: 300px;
-  // width: 100%;
   margin: 0 auto;
   padding: 16px;
 
   .btn {
     padding: 5px;
+
+    &:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      border: none;
+    }
   }
   .days {
     display: grid;
@@ -179,7 +191,13 @@ const applyDate = (date) => {
       padding: 8px 13px;
 
       cursor: pointer;
-
+      &.future {
+        pointer-events: none; /* 클릭 방지 로직이 있지만 UI에서도 비활성화 */
+      }
+      &.future .date,
+      &.future .weekday {
+        color: #e6e6e6; /* 글자색을 #e6e6e6으로 변경 */
+      }
       .date {
         // 기본 날짜 스타일 (선택되지 않은 상태)
         color: #989898;

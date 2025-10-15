@@ -12,7 +12,7 @@ const FILE_URL = import.meta.env.VITE_BASE_URL;
   <div class="settlement-card">
     <div class="left">
       <img
-        :src="`${FILE_URL}${props.settlementData.image}`"
+        :src="`${FILE_URL}/${props.settlementData.image}`"
         :alt="`${props.settlementData.name}`"
         class="challenge-card otd-box-shadow"
       />

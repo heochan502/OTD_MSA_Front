@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useCommentsStore } from '@/stores/community/comments';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { formatYMDHM } from '@/stores/community/date';
+import axios from '@/services/httpRequester';
 
 const props = defineProps({
   postId: { type: [String, Number], required: true },
@@ -18,22 +19,62 @@ const count = computed(() => commentsStore.count(props.postId));
 const input = ref('');
 const meUserId = computed(() => auth.state.signedUser?.userId || 0);
 const meNickName = computed(() => auth.state.signedUser?.nickName || '회원');
+const myRole = computed(() => auth.state.signedUser?.userRole || '');
+
+const DEFAULT_AVATAR =
+  import.meta.env.BASE_URL + 'image/main/default-profile.png';
+
+function toAbsUrl(p) {
+  if (!p) return '';
+  // 1) data URI/절대 URL은 그대로
+  if (/^data:image\//i.test(p)) return p;
+  if (/^https?:\/\//i.test(p)) return p;
+  if (p.startsWith('//')) return window.location.protocol + p;
+  // 2) 프론트 정적 경로는 프론트 BASE_URL과 합치기 (백엔드 baseURL로 바꾸지 말기)
+  if (p.startsWith('/otd/')) return p;
+  // 3) 그 외 상대경로는 백엔드 baseURL 기준으로 절대화
+  try {
+    return new URL(p, axios.defaults.baseURL).toString();
+  } catch {
+    const clean = p.replace(/^\.?\//, '');
+    return '/' + clean;
+  }
+}
+
+/** 댓글 프로필도 profile 우선 */
+function getAvatar(c) {
+  const raw =
+    c.profile || // 백엔드에서 내려주는 댓글 작성자 프로필(있다면)
+    c.profilePath ||
+    c.profileUrl ||
+    c.memberImg ||
+    c.profileImg ||
+    c.profileImage ||
+    c.writer?.memberImg ||
+    '';
+  // 기본 이미지 경로는 프론트 자산으로 고정
+  if (!raw) return DEFAULT_AVATAR;
+  if (raw.startsWith('/otd/')) return raw;
+  const url = toAbsUrl(raw);
+
+  return url || DEFAULT_AVATAR;
+}
 
 async function submit() {
   const v = input.value.trim();
   if (!v) return;
-
-  // ✅ 닉네임/권한 옵션을 store로 전달 (헤더에 실리도록)
-  await commentsStore.add(props.postId, v, meNickName.value);
+  await commentsStore.add(props.postId, v, { nickName: meNickName.value });
   input.value = '';
 }
 
 async function removeOne(c) {
-  await commentsStore.remove(c.commentId, props.postId);
+  await commentsStore.remove(c.commentId, props.postId, myRole.value);
 }
 
-// ✅ 내가 쓴 댓글 판별 (userId 기준)
-const isMine = (c) => Number(c.userId) === Number(meUserId.value);
+const isMine = (c) => {
+  if (myRole.value === 'ADMIN') return true;
+  return Number(c.userId) === Number(meUserId.value);
+};
 
 onMounted(() => {
   commentsStore.load(props.postId);
@@ -60,13 +101,16 @@ onMounted(() => {
     <div class="list" v-if="!loading && comments.length">
       <div v-for="c in comments" :key="c.commentId" class="item">
         <div class="meta">
-          <span class="avatar" aria-hidden="true"></span>
-          <span class="nick">
-            {{ c.nickName || '익명' }}
-          </span>
+          <div class="avatar">
+            <img
+              :src="getAvatar(c)"
+              alt="프로필"
+              @error="(e) => (e.target.src = DEFAULT_AVATAR)"
+            />
+          </div>
+          <span class="nick">{{ c.nickName || '익명' }}</span>
           <span class="time">{{ formatYMDHM(c.createdAt) }}</span>
 
-          <!-- ✅ 내 댓글일 때만 보이도록 -->
           <button v-if="isMine(c)" class="del" @click="removeOne(c)">
             삭제
           </button>
@@ -127,10 +171,17 @@ onMounted(() => {
   color: #777;
 }
 .avatar {
-  width: 20px;
-  height: 20px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
+  overflow: hidden;
   background: #eaeaea;
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 .nick {
   font-weight: 700;

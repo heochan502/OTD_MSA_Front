@@ -26,8 +26,8 @@ const hasRecord = computed(() => {
       v-if="!hasRecord"
       class="content_main d-flex flex-column align-center justify-center ga-1"
     >
-      <span class="text-h4">☹️</span>
-      <span class="otd-subtitle-2"> 체성분 측정 데이터가 없어요 </span>
+      <span class="text-h4">🤸🏻</span>
+      <span class="otd-subtitle-2"> InBody 데이터가 없어요. </span>
     </div>
 
     <div v-else class="content_main">
@@ -66,11 +66,10 @@ const hasRecord = computed(() => {
 
 <style lang="scss" scoped>
 .content_wrap {
-  max-width: 350px;
   padding: 10px;
 }
 .content_main {
-  max-width: 350px;
+  // max-width: 350px;
   width: 100%;
   padding: 10px;
 

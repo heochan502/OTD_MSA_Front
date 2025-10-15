@@ -20,7 +20,7 @@ const emit = defineEmits(['pick', 'close']);
 </template>
 
 <style scoped>
-/* ✅ 오버레이 위에서 ‘화면 우상단’에 고정 */
+/* 오버레이 위에서 ‘화면 우상단’에 고정 */
 .picker-floating {
   position: fixed;
   top: 80px;

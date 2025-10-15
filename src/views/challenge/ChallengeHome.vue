@@ -10,10 +10,13 @@ import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 import { useChallengeStore } from '@/stores/challenge/challengeStore.js';
 import Progress from '@/components/challenge/Progress.vue';
 import { useAuthenticationStore } from '@/stores/user/authentication';
+import Modal from '@/components/user/Modal.vue';
 
 const challengeStore = useChallengeStore();
 const authentication = useAuthenticationStore();
 const router = useRouter();
+const saveDialog = ref();
+const successDialog = ref();
 
 const state = reactive({
   weeklyChallenge: [],
@@ -24,6 +27,7 @@ const state = reactive({
   missionComplete: [],
   success: 0,
   tier: '',
+  selectedMission: {},
 });
 
 const tierImg = {
@@ -116,7 +120,9 @@ const setMissionState = () => {
 };
 
 // 로그인 제대로 되면 수정(userId 안보냄)
-const completeMission = async (mission) => {
+const completeMission = async () => {
+  const mission = state.selectedMission;
+  console.log('mission', mission);
   if (mission.done) {
     return;
   } else {
@@ -127,6 +133,7 @@ const completeMission = async (mission) => {
     );
     state.user.point = authentication.state.signedUser.point;
     // window.location.reload();
+    successDialog.value = true;
   }
 };
 
@@ -214,12 +221,15 @@ const settlementButton = async () => {
         </div>
       </div>
     </div>
+    <div class="title">일일 미션</div>
     <div class="daily">
-      <div class="title">일일 미션</div>
       <div class="mission-box">
         <div
           v-for="mission in missionDone"
-          @click="completeMission(mission)"
+          @click="
+            state.selectedMission = mission;
+            saveDialog = true;
+          "
           class="mission-card otd-list-box-style"
           :class="{ 'mission-done': mission.done }"
         >
@@ -249,8 +259,8 @@ const settlementButton = async () => {
         </div>
       </div>
       <!-- 경쟁 -->
-      <div>
-        <div class="sub-title">> 경쟁 챌린지</div>
+      <div class="competition-sub-title">> 경쟁 챌린지</div>
+      <div class="card-wrap">
         <div class="challenge-card">
           <ChallengeCard
             v-for="challenge in state.competitionChallenge"
@@ -275,8 +285,8 @@ const settlementButton = async () => {
         </div>
       </div>
       <!-- 개인 -->
-      <div>
-        <div class="sub-title">> 개인 챌린지</div>
+      <div class="personal-sub-title">> 개인 챌린지</div>
+      <div class="card-wrap">
         <div class="challenge-card">
           <ChallengeCard
             v-for="challenge in state.personalChallenge"
@@ -305,7 +315,7 @@ const settlementButton = async () => {
     <div>
       <div>
         <div class="title">진행중인 주간 챌린지</div>
-        <div class="weekly">
+        <div class="weekly card-wrap">
           <!-- <div class="route-list" @click="toChallengeList">
           > 챌린지 목록 보기
           </div> -->
@@ -335,28 +345,77 @@ const settlementButton = async () => {
         </div>
       </div>
     </div>
+    <!-- 저장 완료 모달 -->
+    <Modal
+      :show="successDialog"
+      title="저장 완료"
+      :message="`<strong>${state.selectedMission?.cdName} 미션</strong>이 성공적으로 완료되었습니다!`"
+      type="success"
+      confirm-text="확인"
+      @confirm="successDialog = false"
+      @close="successDialog = false"
+    />
+    <!-- 도전 확인 모달 -->
+    <Modal
+      :show="saveDialog"
+      title="일일미션 완료하기"
+      :message="`<strong>${state.selectedMission?.cdName} 미션</strong>을 완료 처리 할까요?\n<strong style='color:#f28b82'>⚠ 한 번 완료한 미션은 되돌릴 수 없습니다.</strong>`"
+      type="confirm"
+      confirm-text="네"
+      cancel-text="아니오"
+      @confirm="completeMission"
+      @cancel="saveDialog = false"
+      @close="saveDialog = false"
+    />
   </div>
 </template>
 
 <style lang="scss" scoped>
+.wrap {
+  margin-top: 30px;
+}
+// 화면이 391px 이상일 때만 max-width + 중앙정렬 적용
+@media (min-width: 391px) {
+  .wrap {
+    max-width: 391px;
+    margin: 0 auto;
+    margin-top: 30px;
+  }
+}
 .daily {
+  display: flex;
+  justify-content: center;
+  justify-items: center;
   .mission-box {
-    width: 351px;
-    height: 170px;
+    display: flex;
+    flex-direction: column;
+    max-width: 351px;
+    min-width: 280px;
+    width: 100%;
+    height: auto;
+    gap: 10px;
     .mission-card {
-      margin-bottom: 10px;
-      width: 311px;
+      justify-content: space-between;
+      max-width: 351px;
+      min-width: 280px;
+      width: 100%;
       height: 40px;
       display: flex;
       align-items: center;
       justify-content: space-around;
-      gap: 15px;
+      gap: 10px;
+      padding: 0 15px;
+      text-align: center;
       cursor: pointer;
       .mission-image {
         width: 25px;
+        margin-right: 25px;
       }
       .img {
         width: 25px;
+      }
+      span {
+        flex: 1;
       }
     }
     .mission-done {
@@ -386,14 +445,21 @@ const settlementButton = async () => {
   font-size: 20px;
   font-weight: bold;
 }
-.sub-title {
+.competition-sub-title,
+.personal-sub-title {
   font-size: 12px;
   margin-bottom: 15px;
 }
+
+.personal-sub-title {
+  margin-top: 15px;
+}
 .challenge-card {
-  display: grid;
-  grid-template-columns: repeat(2, 168px); // 가로 2칸
+  display: flex;
+  // grid-template-columns: repeat(2, 168px); // 가로 2칸
   gap: 15px;
+  justify-content: center;
+  justify-items: center;
 }
 .empty-card {
   display: flex;
@@ -411,7 +477,9 @@ const settlementButton = async () => {
 }
 .sub-wrap {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
+  justify-items: center;
+  gap: 15px;
 }
 .point-wrap,
 .success-challenge {
@@ -433,6 +501,10 @@ const settlementButton = async () => {
 }
 .info {
   display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+  max-width: 351px;
   gap: 15px;
   .tier-img {
     width: 100px;
@@ -445,6 +517,28 @@ const settlementButton = async () => {
     .progress {
       // width: 70%;
     }
+  }
+}
+/* 360px 이하에서는 카드 조금 줄여주기 */
+@media (max-width: 360px) {
+  .challenge-card {
+    grid-template-columns: repeat(2, 150px); // 카드 폭 줄임
+  }
+  .empty-card {
+    width: 150px;
+    height: 110px;
+  }
+}
+
+/* 320px 이하에서는 1열로 변경 */
+@media (max-width: 320px) {
+  .challenge-card {
+    grid-template-columns: 1fr; // 한 줄만
+  }
+  .empty-card {
+    width: 80%; // 부모 폭 기준
+    max-width: 168px;
+    margin: 0 auto; // 가운데 정렬
   }
 }
 </style>

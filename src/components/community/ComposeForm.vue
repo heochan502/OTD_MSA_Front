@@ -22,37 +22,31 @@ const props = defineProps({
       { key: 'love', label: '연애' },
     ],
   },
-  mode: { type: String, default: 'create' }, // 'create' | 'edit'
-  initial: { type: Object, default: null }, // { id/postId, title, content }
+  mode: { type: String, default: 'create' },
+  initial: { type: Object, default: null },
 });
 
 const emit = defineEmits(['cancel', 'submitted', 'update:category']);
 const store = useCommunityStore();
 const auth = useAuthenticationStore();
 
-/** 본문 */
 const title = ref('');
 const content = ref('');
 
-/** 신규로 추가할 파일들(여러 번 선택 → 누적) */
-const newFiles = ref([]); // File[]
-const previews = ref([]); // { key, url, name, size, lm }[]
+const newFiles = ref([]);
+const previews = ref([]);
 const fileInput = ref(null);
 
-/** 수정 모드: 서버에 이미 있는 첨부 이미지 */
-const serverImages = ref([]); // [{ fileId, id, url, name }]
+const serverImages = ref([]);
 
-/** 상태 */
 const submitting = ref(false);
 const errorMsg = ref('');
 const hydrated = ref(false);
 
-/** 제한 */
 const MAX_MB = 15;
 const MAX_SIZE = MAX_MB * 1024 * 1024;
 const MAX_FILES = 12;
 
-/* ---------- 유틸 ---------- */
 function getMemberId() {
   const me = auth?.state?.signedUser ?? null;
   return me?.userId ?? me?.memberNoLogin ?? 0;
@@ -60,28 +54,22 @@ function getMemberId() {
 function makeKey(f) {
   return `${f.name}__${f.size}__${f.lastModified ?? 0}`;
 }
-
-/* ---------- 초기값/첨부 로드 ---------- */
 async function loadServerImages(postId) {
   try {
     const { data } = await fetchPostFiles(postId);
-    const baseURL = (await import('@/services/httpRequester')).default.defaults
-      .baseURL;
+    const baseURL = import.meta.env.VITE_BASE_URL;
     const list = Array.isArray(data) ? data : [];
     serverImages.value = list.map((f) => {
       const id = f.fileId ?? f.id;
       const name = f.fileName ?? '';
       const raw = f.filePath || '';
-      const url = /^https?:\/\//i.test(raw)
-        ? raw
-        : new URL(raw, baseURL).toString();
+
+      // 어떤 입력이 와도 baseURL 기준으로 절대경로 생성
+      const url = `${baseURL.replace(/\/$/, '')}/${raw.replace(/^\/+/, '')}`;
+
       return { fileId: id, id, name, url };
     });
   } catch (e) {
-    console.warn(
-      '[ComposeForm] fetchPostFiles failed:',
-      e?.response?.data || e
-    );
     serverImages.value = [];
   }
 }
@@ -100,7 +88,6 @@ function applyInitial() {
 onMounted(applyInitial);
 watch(() => props.initial, applyInitial);
 
-/* ---------- 카테고리 ---------- */
 const pickerOpen = ref(false);
 const categoryLabel = computed(
   () =>
@@ -114,7 +101,6 @@ function chooseCategory(key) {
   pickerOpen.value = false;
 }
 
-/* ---------- 전송 가능 여부 ---------- */
 const canSubmit = computed(
   () =>
     title.value.trim().length >= 2 &&
@@ -122,27 +108,22 @@ const canSubmit = computed(
     !submitting.value
 );
 
-/* ---------- 파일 추가(핵심: 누적 append) ---------- */
 function addFiles(filesLike) {
   const incoming = Array.from(filesLike || []);
   if (!incoming.length) return;
 
-  // 1) 이미지/사이즈 필터
   const imgs = incoming.filter(
     (f) => f.type?.startsWith('image/') && f.size <= MAX_SIZE
   );
   if (!imgs.length) return;
 
-  // 2) 기존 + 신규 → map으로 dedupe
   const merged = [...newFiles.value, ...imgs];
   const map = new Map();
   for (const f of merged) map.set(makeKey(f), f);
   let deduped = Array.from(map.values());
 
-  // 3) 최대 개수 제한
   if (deduped.length > MAX_FILES) deduped = deduped.slice(0, MAX_FILES);
 
-  // 4) 미리보기: 새로 들어온 키만 URL 생성 (기존 것 유지!)
   const existingKeys = new Set(previews.value.map((p) => p.key));
   const nextPreviews = [...previews.value];
   for (const f of deduped) {
@@ -158,16 +139,15 @@ function addFiles(filesLike) {
     }
   }
 
-  newFiles.value = deduped; // ✅ 덮어쓰기 아님: dedupe된 전체 집합
-  previews.value = nextPreviews; // ✅ 기존 미리보기 유지 + 새로 추가된 것만 append
+  newFiles.value = deduped;
+  previews.value = nextPreviews;
 }
 
 function onFileChange(e) {
   addFiles(e.target.files);
-  e.target.value = ''; // 같은 파일 재선택 허용
+  e.target.value = '';
 }
 
-/* 드래그&드롭(선택) */
 function onDrop(e) {
   e.preventDefault();
   addFiles(e.dataTransfer?.files);
@@ -176,7 +156,6 @@ function onDragOver(e) {
   e.preventDefault();
 }
 
-/* 신규 첨부 제거 */
 function removeNewAt(i) {
   const pv = [...previews.value];
   const removed = pv[i];
@@ -188,33 +167,63 @@ function removeNewAt(i) {
   }
 }
 
-/* 서버 첨부 제거 (수정 모드) */
-async function removeServerImage(img, postId) {
-  if (!img?.fileId || !postId) return;
-  const ok = confirm('이 첨부 이미지를 삭제할까요?');
-  if (!ok) return;
-  try {
-    await deletePostFile(postId, img.fileId, getMemberId());
-    serverImages.value = serverImages.value.filter(
-      (x) => x.fileId !== img.fileId
-    );
-  } catch (e) {
-    console.error(
-      '[ComposeForm] deletePostFile failed:',
-      e?.response?.data || e
-    );
-    alert('이미지 삭제에 실패했습니다.');
-  }
+const modalOpen = ref(false);
+const modalTitle = ref('');
+const modalMessage = ref('');
+const modalMode = ref('info');
+const modalConfirmText = ref('확인');
+const modalCancelText = ref('취소');
+let onModalConfirm = null;
+
+function showInfo(message, title = '안내') {
+  modalTitle.value = title;
+  modalMessage.value = message;
+  modalMode.value = 'info';
+  modalConfirmText.value = '확인';
+  modalOpen.value = true;
+  onModalConfirm = null;
+}
+function showConfirm(message, onYes, title = '확인') {
+  modalTitle.value = title;
+  modalMessage.value = message;
+  modalMode.value = 'confirm';
+  modalConfirmText.value = '삭제';
+  modalCancelText.value = '취소';
+  modalOpen.value = true;
+  onModalConfirm = typeof onYes === 'function' ? onYes : null;
+}
+function handleModalOk() {
+  const fn = onModalConfirm;
+  modalOpen.value = false;
+  onModalConfirm = null;
+  if (fn) fn();
+}
+function handleModalCancel() {
+  modalOpen.value = false;
+  onModalConfirm = null;
 }
 
-/* 미리보기 URL 정리 */
+async function removeServerImage(img, postId) {
+  if (!img?.fileId || !postId) return;
+
+  showConfirm('이 첨부 이미지를 삭제할까요?', async () => {
+    try {
+      await deletePostFile(postId, img.fileId, getMemberId());
+      serverImages.value = serverImages.value.filter(
+        (x) => x.fileId !== img.fileId
+      );
+    } catch (e) {
+      showInfo('이미지 삭제에 실패했습니다.', '오류');
+    }
+  });
+}
+
 function revokeAll() {
   previews.value.forEach((p) => URL.revokeObjectURL(p.url));
   previews.value = [];
 }
 onBeforeUnmount(revokeAll);
 
-/* ---------- 업로드 ---------- */
 async function maybeUploadFiles(postId) {
   if (!postId || newFiles.value.length === 0) return;
   await uploadPostFiles(postId, newFiles.value, getMemberId());
@@ -222,19 +231,29 @@ async function maybeUploadFiles(postId) {
   revokeAll();
 }
 
-/* ---------- 제출 ---------- */
 async function submit() {
   if (!canSubmit.value) return;
   submitting.value = true;
   errorMsg.value = '';
   try {
-    const myProfile = auth.state.signedUser;
+    const myProfile = auth.state.signedUser || {};
+    const myProfileUrl =
+      myProfile.memberImg ||
+      myProfile.profileImg ||
+      myProfile.profile_img ||
+      myProfile.profile_img_path ||
+      myProfile.pic ||
+      myProfile.avatar ||
+      '';
+
     const payload = {
       categoryKey: props.category,
       title: title.value.trim(),
       content: content.value.trim(),
       nickName: myProfile.nickName,
-      profile: myProfile.pic,
+      profile: myProfileUrl,
+      memberImg: myProfileUrl,
+      profileImg: myProfileUrl,
     };
 
     let postId;
@@ -257,17 +276,17 @@ async function submit() {
 
     emit('submitted', { categoryKey: props.category, postId });
   } catch (e) {
-    console.error('[ComposeForm] submit failed:', e?.response?.data || e);
-    errorMsg.value =
+    const msg =
       e?.response?.data?.message ||
       e?.message ||
       '게시글 저장 중 오류가 발생했습니다.';
+    errorMsg.value = msg;
+    showInfo(msg, '오류');
   } finally {
     submitting.value = false;
   }
 }
 
-/* ---------- 라이트박스 ---------- */
 const lbOpen = ref(false);
 const lbStart = ref(0);
 const lbImages = computed(() => {
@@ -334,7 +353,15 @@ function openLightboxFromNew(i) {
     </v-slide-y-transition>
 
     <label class="label">제목</label>
-    <input class="input" v-model="title" placeholder="제목을 입력해 주세요" />
+    <input
+      class="input"
+      v-model="title"
+      type="text"
+      inputmode="text"
+      autocomplete="off"
+      placeholder="제목을 입력해 주세요"
+      @focus="onTitleFocus"
+    />
 
     <label class="label">내용</label>
     <textarea
@@ -345,7 +372,6 @@ function openLightboxFromNew(i) {
       placeholder="내용을 입력해 주세요"
     />
 
-    <!-- (수정 모드) 기존 첨부 -->
     <div v-if="props.mode === 'edit' && serverImages.length" class="block">
       <div class="label">기존 첨부 이미지</div>
       <div class="attach">
@@ -373,7 +399,6 @@ function openLightboxFromNew(i) {
       </div>
     </div>
 
-    <!-- 새로 추가할 이미지 (여러 번 선택 → 누적) -->
     <label class="label">
       새 이미지 첨부
       <span class="hint">({{ previews.length }}/{{ MAX_FILES }})</span>
@@ -420,8 +445,28 @@ function openLightboxFromNew(i) {
 
     <div v-if="errorMsg" class="err">{{ errorMsg }}</div>
 
-    <!-- 라이트박스 -->
     <ImageLightbox v-model:open="lbOpen" :images="lbImages" :start="lbStart" />
+
+    <teleport to="body">
+      <div v-if="modalOpen" class="m-backdrop" @click="handleModalCancel">
+        <div class="m-panel" @click.stop>
+          <div class="m-title">{{ modalTitle }}</div>
+          <div class="m-body">{{ modalMessage }}</div>
+          <div class="m-actions">
+            <button
+              v-if="modalMode === 'confirm'"
+              class="m-btn ghost"
+              @click="handleModalCancel"
+            >
+              {{ modalCancelText }}
+            </button>
+            <button class="m-btn primary" @click="handleModalOk">
+              {{ modalConfirmText }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </teleport>
   </div>
 </template>
 
@@ -432,6 +477,7 @@ function openLightboxFromNew(i) {
   font-size: 13px;
 }
 .form-card {
+  margin-left: 5px;
   width: 100%;
   max-width: 380px;
   background: #fff;
@@ -514,7 +560,6 @@ function openLightboxFromNew(i) {
 .block {
   margin-top: 8px;
 }
-
 .attach {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -550,7 +595,6 @@ function openLightboxFromNew(i) {
   color: #fff;
   cursor: pointer;
 }
-
 .uploader {
   position: relative;
   width: 100%;
@@ -577,7 +621,6 @@ function openLightboxFromNew(i) {
   font-size: 32px;
   color: #bdbdbd;
 }
-
 .submit {
   width: 100%;
   padding: 14px;
@@ -601,5 +644,58 @@ function openLightboxFromNew(i) {
   border: 1px solid #eaeaea;
   font-weight: 700;
   cursor: pointer;
+}
+.m-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.45);
+  display: grid;
+  place-items: center;
+  z-index: 99999;
+}
+.m-panel {
+  width: min(92vw, 380px);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.18);
+  padding: 14px 14px 12px;
+  display: grid;
+  gap: 10px;
+}
+.m-title {
+  font-weight: 800;
+  color: #0f172a;
+  font-size: 16px;
+}
+.m-body {
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+.m-actions {
+  display: flex;
+  justify-content: space-between; /* 좌/우 끝으로 벌리기 */
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.m-btn {
+  height: 36px;
+  padding: 0 16px; /* 살짝 더 넉넉하게 */
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 700;
+  min-width: 96px; /* 최소 버튼 폭 확보 */
+}
+.m-btn.primary {
+  background: #06b6d4;
+  color: #fff;
+  border-color: #06b6d4;
+}
+.m-btn.ghost {
+  background: #f8fafc;
 }
 </style>

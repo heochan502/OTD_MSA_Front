@@ -46,3 +46,11 @@ export const deleteUser = (userId) => {
 };
 
 export const getSelectedAll = () => axios.get(`${path}/missions/complete`);
+
+export const completeOnboardingAPI = async ({ userId, agreedTermsIds, surveyScore }) => {
+  return axios.post('/api/user/onboarding/complete', {
+    userId,
+    agreedTermsIds,
+    surveyScore
+  });
+};

@@ -9,6 +9,8 @@ import {
 import { getSelectedAll } from '@/services/user/userService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { ref, computed, onMounted } from 'vue';
+import { putLifeUserProfile } from '@/services/community/postService';
+import AlertModal from '@/components/user/Modal.vue';
 
 const router = useRouter();
 const authStore = useAuthenticationStore();
@@ -18,6 +20,7 @@ const loadingHistory = ref(true);
 const showPhotoModal = ref(false);
 const selectedFile = ref(null);
 const previewUrl = ref(null);
+const showLogoutModal = ref(false);
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const defaultProfile = '/otd/image/main/default-profile.png';
@@ -39,6 +42,48 @@ const userInfo = computed(() => {
   };
 });
 
+const openLogoutModal = () => {
+  showLogoutModal.value = true;
+};
+
+// 모달 confirm → 실제 로그아웃 처리
+const handleLogoutConfirm = async () => {
+  showLogoutModal.value = false;
+  isLoggingOut.value = true;
+  const res = await logout();
+  isLoggingOut.value = false;
+  if (!res || res.status !== 200) return;
+  authStore.logout();
+  router.push('/user/login');
+};
+
+
+const modal = ref({
+  show: false,
+  type: 'info',
+  title: '',
+  message: '',
+  confirmText: '확인',
+  cancelText: '취소',
+  onConfirm: null,
+  onCancel: null,
+});
+
+const showAlert = (config) => {
+  modal.value.show = true;
+  modal.value.type = config.type || 'info';
+  modal.value.title = config.title || '';
+  modal.value.message = config.message || '';
+  modal.value.confirmText = config.confirmText || '확인';
+  modal.value.cancelText = config.cancelText || '취소';
+  modal.value.onConfirm = config.onConfirm || null;
+  modal.value.onCancel = config.onCancel || null;
+};
+
+const closeAlert = () => {
+  modal.value.show = false;
+};
+
 // 프로필 사진 클릭 시 모달 열기
 const openPhotoModal = (e) => {
   e.preventDefault();
@@ -52,26 +97,37 @@ const closePhotoModal = () => {
   previewUrl.value = null;
 };
 
-// 파일 선택
-const handleFileSelect = (event) => {
-  const file = event.target.files[0];
-  if (file && file.type.startsWith('image/')) {
-    selectedFile.value = file;
-    previewUrl.value = URL.createObjectURL(file);
-  } else {
-    alert('이미지 파일만 선택할 수 있습니다.');
-  }
-};
 
-// 파일 업로드 트리거
+
+
 const triggerFileInput = () => {
   document.getElementById('photoInput').click();
 };
 
 // 프로필 사진 저장
+const handleFileSelect = (e) => {
+  const file = e.target.files[0];
+  if (file && file.type.startsWith('image/')) {
+    selectedFile.value = file;
+    previewUrl.value = URL.createObjectURL(file);
+  } else {
+    showAlert({
+      type: 'warning',
+      title: '파일 선택 오류',
+      message: '이미지 파일만 선택할 수 있습니다.',
+    });
+  }
+};
+
+
+// 저장
 const saveProfilePhoto = async () => {
   if (!selectedFile.value) {
-    alert('사진을 선택해주세요.');
+    showAlert({
+      type: 'warning',
+      title: '저장 실패',
+      message: '사진을 선택해주세요.',
+    });
     return;
   }
 
@@ -79,52 +135,63 @@ const saveProfilePhoto = async () => {
     const formData = new FormData();
     formData.append('pic', selectedFile.value);
 
-    console.log('프로필 사진 업로드 시작...');
-
     const response = await patchUserProfilePic(formData);
-
-    console.log('업로드 응답:', response);
-
     if (response.data && response.data.result) {
       const fileName = response.data.result;
       const imagePath = `${BASE_URL}/profile/${userInfo.value.userId}/${fileName}`;
-
       authStore.state.signedUser.pic = imagePath;
 
-      alert('프로필 사진이 변경되었습니다.');
-      closePhotoModal();
+      const lifePic = await putLifeUserProfile(imagePath);
+      //console.log('lifePic', lifePic);
+
+      showAlert({
+        type: 'success',
+        title: '저장 완료',
+        message: '프로필 사진이 변경되었습니다.',
+        onConfirm: () => showPhotoModal.value = false,
+      });
     }
-  } catch (error) {
-    console.error('프로필 사진 업로드 실패:', error);
-    console.error('에러 상세:', error.response);
-    alert('프로필 사진 업로드에 실패했습니다.');
+  } catch (err) {
+    console.error(err);
+    showAlert({
+      type: 'error',
+      title: '저장 실패',
+      message: '프로필 사진 업로드에 실패했습니다.',
+    });
   }
 };
 
-// 프로필 사진 삭제
-const deleteProfilePhoto = async () => {
-  if (!confirm('프로필 사진을 삭제하시겠습니까?')) return;
-
-  try {
-    console.log('프로필 사진 삭제 시작...');
-
-    const response = await deleteUserProfilePic();
-
-    console.log('삭제 응답:', response);
-
-    if (response.status === 200) {
-      authStore.state.signedUser.pic = null;
-
-      console.log('프로필 사진이 삭제되었습니다.');
-
-      alert('프로필 사진이 삭제되었습니다.');
-      closePhotoModal();
-    }
-  } catch (error) {
-    console.error('프로필 사진 삭제 실패:', error);
-    console.error('에러 상세:', error.response);
-    alert('프로필 사진 삭제에 실패했습니다.');
-  }
+// 삭제
+const deleteProfilePhoto = () => {
+  showAlert({
+    type: 'confirm',
+    title: '사진 삭제',
+    message: '프로필 사진을 삭제하시겠습니까?',
+    confirmText: '삭제',
+    cancelText: '취소',
+    onConfirm: async () => {
+      try {
+        const response = await deleteUserProfilePic();
+        if (response.status === 200) {
+          authStore.state.signedUser.pic = null;
+          previewUrl.value = null;
+          showAlert({
+            type: 'success',
+            title: '삭제 완료',
+            message: '프로필 사진이 삭제되었습니다.',
+            onConfirm: () => showPhotoModal.value = false,
+          });
+        }
+      } catch (err) {
+        console.error(err);
+        showAlert({
+          type: 'error',
+          title: '삭제 실패',
+          message: '프로필 사진 삭제에 실패했습니다.',
+        });
+      }
+    },
+  });
 };
 
 // 최근 포인트 히스토리 가져오기
@@ -242,7 +309,7 @@ const formatDate = (dateString) => {
     .replace(/\.$/, '');
 };
 
-const logoutAccount = async () => {
+const logoutAccount = async  () => {
   if (!confirm('로그아웃 하시겠습니까?')) return;
   const res = await logout();
   if (res === undefined || res.status !== 200) return;
@@ -340,18 +407,6 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- 설정 섹션 -->
-    <div class="settings-section">
-      <h3 class="section-title">설정</h3>
-      <div class="settings-list">
-        <router-link to="/user/signal" class="settings-item">
-          <div class="settings-icon">🔔</div>
-          <span>알림 설정</span>
-          <div class="arrow">›</div>
-        </router-link>
-      </div>
-    </div>
-
     <!-- 고객센터 섹션 -->
     <div class="support-section">
       <h3 class="section-title">고객센터</h3>
@@ -371,16 +426,27 @@ onMounted(() => {
 
     <!-- 약관 및 로그아웃 섹션 -->
     <div class="footer-section">
-      <router-link to="/user/term" class="footer-link"
+      <!-- <router-link to="/user/term" class="footer-link"
         >약관 및 보안</router-link
-      >
+      > -->
       <button
-        class="logout-btn"
-        @click="logoutAccount"
-        :disabled="isLoggingOut"
-      >
-        {{ isLoggingOut ? '로그아웃 중...' : '로그아웃' }}
-      </button>
+    class="logout-btn"
+    @click="openLogoutModal"
+    :disabled="isLoggingOut"
+  >
+    {{ isLoggingOut ? '로그아웃 중...' : '로그아웃' }}
+  </button>
+
+  <AlertModal
+    v-model:show="showLogoutModal"
+    type="confirm"
+    title="로그아웃"
+    message="정말 로그아웃 하시겠습니까?"
+    confirmText="로그아웃"
+    cancelText="취소"
+    @confirm="handleLogoutConfirm"
+    @cancel="showLogoutModal = false"
+  />
     </div>
 
     <!-- 프로필 사진 수정 모달 -->
@@ -424,6 +490,18 @@ onMounted(() => {
       </div>
     </div>
   </div>
+  <!-- AlertModal -->
+  <AlertModal
+    :show="modal.show"
+    :title="modal.title"
+    :message="modal.message"
+    :type="modal.type"
+    :confirmText="modal.confirmText"
+    :cancelText="modal.cancelText"
+    @confirm="modal.onConfirm ? modal.onConfirm() : closeAlert()"
+    @cancel="modal.onCancel ? modal.onCancel() : closeAlert()"
+    @close="closeAlert"
+  />
 </template>
 
 <style scoped lang="scss">
@@ -893,7 +971,7 @@ onMounted(() => {
   }
 
   .logout-btn {
-    background: #dc3545;
+    background: #393E46;
     color: white;
     border: none;
     padding: 12px 24px;
@@ -904,7 +982,7 @@ onMounted(() => {
     transition: all 0.2s ease;
 
     &:hover:not(:disabled) {
-      background: #c82333;
+      background: #303030;
       transform: translateY(-1px);
     }
 
@@ -931,7 +1009,6 @@ onMounted(() => {
 
       .activity-icon {
         margin-bottom: 0;
-        margin-right: 12px;
       }
     }
   }

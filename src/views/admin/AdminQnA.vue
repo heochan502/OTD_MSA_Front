@@ -1,59 +1,39 @@
 <script setup>
 import { ref, onMounted, computed, reactive } from 'vue';
 import { getQna, putQna } from '@/services/admin/adminService';
+import { useAdminStore } from '@/stores/admin/adminStore';
 import { reactify } from '@vueuse/core';
+import { useRouter } from 'vue-router';
+
+const adminStore = useAdminStore();
+const router = useRouter();
 
 const qna = ref([]);
-const selectedQna = ref({
-  senderName: '',
-  senderEmail: '',
-  createdAt: '',
-  subject: '',
-  content: '',
-  reply: '',
-  replyAt: '',
-});
 
 const search = ref('');
-const qnaDialog = ref(false);
-const cancelDialog = ref(false);
-const successDialog = ref(false);
+
 
 const headers = [
-  { title: 'ID', key: 'id' },
-  { title: '제목', key: 'subject' },
-  { title: '작성자', key: 'senderName' },
-  { title: '이메일', key: 'senderEmail' },
-  { title: '작성일', key: 'createdAt' },
-  { title: '상태', key: 'status' },
+  { title: 'ID', key: 'id' , align: 'center' },
+  { title: '제목', key: 'subject' , align: 'center' },
+  { title: '작성자', key: 'senderName' , align: 'center' },
+  { title: '이메일', key: 'senderEmail' , align: 'center' },
+  { title: '작성일', key: 'createdAt', align: 'center'  },
+  { title: '상태', key: 'status' , align: 'center' },
 ];
 
-const formatNumber = (n) => String(n).padStart(2, '0');
-const formatDate = (date) => {
-  const y = date.getFullYear();
-  const m = formatNumber(date.getMonth() + 1);
-  const d = formatNumber(date.getDate());
-  return `${y}-${m}-${d}`;
-};
-
 const rowProps = ({ item }) => ({
-  onClick: () => onpenQnaDialog(item),
+  onClick: () => toQnaDetail(item),
   style: 'cursor: pointer;',
 });
 
-const onpenQnaDialog = (qna) => {
-  console.log('qna', qna);
-  selectedQna.value.reply = '';
-  selectedQna.value.replyAt = '';
-  selectedQna.value.repliedNickName = '';
-  Object.assign(selectedQna.value, qna);
-  qnaDialog.value = true;
+const toQnaDetail = (item) => {
+  const qnaId = item.id;
+  adminStore.setSelectedQnaId(qnaId);
+  console.log(adminStore.state.selectedQnaId);
+  router.push({ path: '/admin/qna/detail' });
 };
 
-const cancel = () => {
-  cancelDialog.value = false;
-  qnaDialog.value = false;
-};
 
 onMounted(async () => {
   const res = await getQna();
@@ -65,89 +45,26 @@ const reversedQna = computed(() => {
   return [...qna.value].reverse();
 });
 
-const submit = async () => {
-  const jsonBody = selectedQna.value;
-  console.log('json', jsonBody);
-  const res = await putQna(jsonBody);
-  if (res && res.status === 200) {
-    // 성공하면 저장 완료 모달 열기
-    const refresh = await getQna();
-    qna.value = refresh.data;
-    qnaDialog.value = false;
-    successDialog.value = true;
-  } else {
-    alert('저장에 실패했습니다. 다시 시도해주세요.');
-  }
+
+const formatDate = (dateStr) => {
+  const d = new Date(dateStr);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+
+  const h24 = d.getHours();
+  const dayPeriod = h24 < 12 ? '오전' : '오후';
+  const h12 = String(h24 % 12 || 12).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  const sec = String(d.getSeconds()).padStart(2, '0');
+
+  return `${y}-${m}-${day} ${dayPeriod} ${h12}:${min}:${sec}`;
 };
 </script>
 
 <template>
   <div class="admin-qna">
-    <!-- 문의 모달 -->
-    <v-dialog v-model="qnaDialog" max-width="300" min-height="100">
-      <v-card>
-        <v-card-title class="text-h8">문의 상세</v-card-title>
-
-        <v-card-subtitle>작성자 닉네임</v-card-subtitle>
-        <v-card-text>{{ selectedQna.senderName }}</v-card-text>
-
-        <v-card-subtitle>작성자 이메일</v-card-subtitle>
-        <v-card-text>{{ selectedQna.senderEmail }}</v-card-text>
-
-        <v-card-subtitle>작성일</v-card-subtitle>
-        <v-card-text>{{ selectedQna.createdAt }}</v-card-text>
-
-        <v-card-subtitle>제목</v-card-subtitle>
-        <v-card-text>{{ selectedQna.subject }}</v-card-text>
-
-        <v-card-subtitle>내용</v-card-subtitle>
-        <v-card-text>{{ selectedQna.content }}</v-card-text>
-
-        <v-card-subtitle v-if="selectedQna.reply != ''"
-          >문의 답변</v-card-subtitle
-        >
-        <v-card-subtitle v-else>답변하기</v-card-subtitle>
-        <v-text-field v-model="selectedQna.reply"></v-text-field>
-
-        <template v-if="selectedQna.replyAt != ''">
-          <v-card-subtitle>답변 시각</v-card-subtitle>
-          <v-card-text>{{ selectedQna.replyAt }}</v-card-text>
-        </template>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn color="dark" text @click="cancelDialog = true">취소</v-btn>
-          <v-btn color="dark" text @click="submit()">저장</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <!-- 취소 모달 -->
-    <v-dialog v-model="cancelDialog" max-width="380" min-height="100">
-      <v-card>
-        <v-card-text>
-          취소하고 돌아가시겠습니까? 해당 내용은 저장되지 않습니다.
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn color="dark" text @click="cancel()">네</v-btn>
-          <v-btn color="dark" text @click="cancelDialog = false">아니오</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <!-- 수정 완료 모달 -->
-    <v-dialog v-model="successDialog" max-width="380" min-height="100">
-      <v-card>
-        <v-card-title class="text-h8">완료</v-card-title>
-        <v-card-text> 성공적으로 완료되었습니다. </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn color="dark" text @click="successDialog = false">확인</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <v-card>
+    <v-card class="data-card pa-2">
       <v-card-title class="d-flex justify-space-between align-center">
         <span class="title">문의 목록</span>
         <v-text-field
@@ -168,14 +85,16 @@ const submit = async () => {
         class="styled-table"
         :row-props="rowProps"
         :search="search"
+        :items-per-page="12"
+        height="700"
       >
         <!-- 작성일 -->
         <template #item.createdAt="{ item }">
-          {{ formatDate(new Date(item.createdAt)) }}
+          {{ formatDate(item.createdAt) }}
         </template>
 
         <template #item.status="{ item }">
-          <v-chip :color="item.status === '대기 중' ? 'red' : 'blue'" dark>
+          <v-chip :color="item.status === '대기 중' ? 'red' : 'green'" dark>
             {{ item.status }}
           </v-chip>
         </template>
@@ -186,11 +105,16 @@ const submit = async () => {
 
 <style lang="scss" scoped>
 .admin-qna {
-  padding: 20px;
+  padding: 10px;
 
+  .data-card {
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  }
   .title {
     font-weight: 700;
-    font-size: 18px;
+    font-size: 23px;
   }
 }
 .styled-table {
@@ -219,4 +143,5 @@ const submit = async () => {
     font-size: 0.85rem;
   }
 }
+
 </style>

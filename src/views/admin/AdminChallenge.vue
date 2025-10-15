@@ -5,17 +5,23 @@ import {
   putChallenge,
   deleteChallenge,
   getChallenge,
+  getChallengeProgress,
 } from '@/services/admin/adminService';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 const challenges = ref([]);
 const search = ref('');
 const selectedType = ref('');
-const deleteTargetId = ref(null);
+const deleteTarget = ref(null);
 
 const formDialog = ref(false);
 const successDialog = ref(false);
 const cancelDialog = ref(false);
 const deleteDialog = ref(false);
+const saveDialog = ref(false);
+const errorDialog = ref(false);
+const validationDialog = ref(false);
 
 const editChallenge = ref({});
 const challnegeUnit = ref([]);
@@ -45,16 +51,17 @@ const goal = computed({
 });
 
 const headers = [
-  { title: 'ID', key: 'cdId' },
-  { title: '이름', key: 'cdName' },
-  { title: '타입', key: 'cdType' },
-  { title: '목표', key: 'cdGoal' },
-  { title: '단위', key: 'cdUnit' },
-  { title: '보상(P)', key: 'cdReward' },
-  { title: '경험치(XP)', key: 'xp' },
-  { title: '티어', key: 'tier' },
-  { title: '이미지 경로', key: 'cdImage' },
-  { title: '관리', key: 'setting' },
+  { title: 'ID', key: 'cdId', align: 'center' },
+  { title: '이름', key: 'cdName', align: 'center' },
+  { title: '타입', key: 'cdType', align: 'center' },
+  { title: '목표', key: 'cdGoal', align: 'center' },
+  { title: '단위', key: 'cdUnit', align: 'center' },
+  { title: '보상(P)', key: 'cdReward', align: 'center' },
+  { title: '경험치(XP)', key: 'xp', align: 'center' },
+  { title: '티어', key: 'tier', align: 'center' },
+  { title: '이미지 경로', key: 'cdImage', align: 'center' },
+  { title: '더보기', key: 'progress', align: 'center' },
+  { title: '관리', key: 'setting', align: 'center' },
 ];
 
 const typeOptions = [
@@ -115,7 +122,8 @@ onMounted(async () => {
 
 const toForm = (item) => {
   if (item) {
-    editChallenge.value = item;
+    // 깊은복사
+    editChallenge.value = JSON.parse(JSON.stringify(item));
     plainGoal.value = item.cdGoal;
     isEdit.value = true;
   } else {
@@ -127,9 +135,14 @@ const toForm = (item) => {
 };
 
 const cancel = () => {
+  isEdit.value = false;
+  editChallenge.value = { ...addChallenge };
+  plainGoal.value = null;
+  console.log('edit', editChallenge.value);
   cancelDialog.value = false;
   formDialog.value = false;
 };
+
 const onFileChange = (event) => {
   const file = event.target.files[0];
   if (!file) return;
@@ -137,8 +150,7 @@ const onFileChange = (event) => {
   editChallenge.value.cdImage = file.name; // 파일명
 };
 
-// 수정 / 추가 api
-const submit = async () => {
+const validation = () => {
   const fields = [
     'cdName',
     'cdType',
@@ -149,17 +161,17 @@ const submit = async () => {
     'tier',
     'cdImage',
   ];
-
-  // 0은 허용, null/''만 막기
   const isEmpty = fields.some(
     (key) =>
       editChallenge.value[key] === null || editChallenge.value[key] === ''
   );
   if (isEmpty) {
-    alert('모든 항목을 입력해주세요.');
+    validationDialog.value = true;
     return;
-  }
-
+  } else saveDialog.value = true;
+};
+// 수정 / 추가 api
+const submit = async () => {
   console.log('json', editChallenge.value);
 
   const formData = new FormData();
@@ -197,22 +209,32 @@ const submit = async () => {
     // 성공하면 저장 완료 모달 열기
     successDialog.value = true;
     formDialog.value = false;
+    saveDialog.value = false;
     const refresh = await getChallenge();
     setIdType(refresh.data);
     setChallengeUnit(refresh.data);
   } else {
-    alert('저장에 실패했습니다. 다시 시도해주세요.');
+    errorDialog.value = true;
+    saveDialog.value = false;
   }
-  deleteDialog.value = false;
+};
+// 챌린지 현황
+const progress = async (id) => {
+  try {
+    router.push({ name: 'AdminChallengeDetail', query: { id } });
+  } catch (e) {
+    console.error('현황 조회 실패', e);
+  }
 };
 
 // 삭제 api
-const openDelete = (id) => {
-  deleteTargetId.value = id;
+const openDelete = (item) => {
+  deleteTarget.value = item;
   deleteDialog.value = true;
 };
+
 const remove = async () => {
-  const id = deleteTargetId.value;
+  const id = deleteTarget.value.cdId;
   console.log('removeid', id);
   const res = await deleteChallenge(id);
   if (res && res.status === 200) {
@@ -222,144 +244,236 @@ const remove = async () => {
     setIdType(refresh.data);
     setChallengeUnit(refresh.data);
   } else {
-    alert('삭제에 실패했습니다. 다시 시도해주세요.');
+    errorDialog.value = true;
   }
   deleteDialog.value = false;
 };
 </script>
 
 <template>
-  <div class="challenge-admin">
+  <div class="admin-challenge">
     <!-- 수정 / 추가 모달 -->
-    <v-dialog v-model="formDialog" max-width="300" min-height="100">
-      <v-card>
-        <v-card-title class="text-h8">{{
-          isEdit ? '챌린지 수정' : '챌린지 추가'
-        }}</v-card-title>
-        <v-card-subtitle>이름</v-card-subtitle>
-        <v-text-field v-model="editChallenge.cdName" />
+    <v-dialog v-model="formDialog" max-width="700">
+      <v-card class="admin-dialog pa-6">
+        <v-card-title class="dialog-title mb-4">
+          {{ isEdit ? '챌린지 수정' : '챌린지 추가' }}
+        </v-card-title>
 
-        <v-card-subtitle>타입</v-card-subtitle>
-        <v-select
-          :items="['competition', 'personal', 'weekly', 'daily']"
-          v-model="editChallenge.cdType"
-        />
+        <v-container fluid>
+          <v-row dense>
+            <v-col cols="6">
+              <v-card-subtitle class="field-label">이름</v-card-subtitle>
+              <v-text-field
+                v-model="editChallenge.cdName"
+                hide-details
+                density="comfortable"
+                class="field-input"
+                placeholder="챌린지 이름 입력"
+              />
+            </v-col>
 
-        <v-card-subtitle>단위</v-card-subtitle>
-        <v-combobox
-          :items="challnegeUnit"
-          v-model="editChallenge.cdUnit"
-          no-filter
-        />
+            <v-col cols="6">
+              <v-card-subtitle class="field-label">타입</v-card-subtitle>
+              <v-select
+                :items="['competition', 'personal', 'weekly', 'daily']"
+                v-model="editChallenge.cdType"
+                hide-details
+                density="comfortable"
+                class="field-input"
+              />
+            </v-col>
 
-        <v-card-subtitle>목표</v-card-subtitle>
-        <v-text-field v-model="goal" />
+            <v-col cols="6">
+              <v-card-subtitle class="field-label">단위</v-card-subtitle>
+              <v-combobox
+                :items="challnegeUnit"
+                v-model="editChallenge.cdUnit"
+                hide-details
+                density="comfortable"
+                class="field-input"
+                no-filter
+              />
+            </v-col>
 
-        <v-card-subtitle>티어</v-card-subtitle>
-        <v-select
-          :items="['없음', '브론즈', '실버', '골드', '다이아']"
-          v-model="editChallenge.tier"
-        />
+            <v-col cols="6">
+              <v-card-subtitle class="field-label">목표</v-card-subtitle>
+              <v-text-field
+                v-model="goal"
+                hide-details
+                density="comfortable"
+                class="field-input"
+                placeholder="목표값 입력"
+              />
+            </v-col>
 
-        <v-card-subtitle>이미지</v-card-subtitle>
-        <v-file-input
-          accept="image/*"
-          label="이미지 선택"
-          @change="onFileChange"
-        />
+            <v-col cols="6">
+              <v-card-subtitle class="field-label">티어</v-card-subtitle>
+              <v-select
+                :items="['없음', '브론즈', '실버', '골드', '다이아']"
+                v-model="editChallenge.tier"
+                hide-details
+                density="comfortable"
+                class="field-input"
+              />
+            </v-col>
 
-        <v-card-subtitle>포인트 보상</v-card-subtitle>
-        <v-text-field
-          type="number"
-          v-model.number="editChallenge.cdReward"
-          placeholder="포인트 보상 입력"
-        />
+            <v-col cols="6">
+              <v-card-subtitle class="field-label">이미지</v-card-subtitle>
+              <v-file-input
+                label="이미지 선택"
+                accept="image/*"
+                hide-details
+                density="comfortable"
+                class="field-input"
+                @change="onFileChange"
+              />
+            </v-col>
 
-        <v-card-subtitle>경험치</v-card-subtitle>
-        <v-text-field
-          type="number"
-          v-model.number="editChallenge.xp"
-          placeholder="획득 경험치 입력"
-        />
+            <v-col cols="6">
+              <v-card-subtitle class="field-label">포인트 보상</v-card-subtitle>
+              <v-text-field
+                type="number"
+                v-model.number="editChallenge.cdReward"
+                placeholder="포인트 입력"
+                hide-details
+                density="comfortable"
+                class="field-input"
+              />
+            </v-col>
 
-        <v-card-actions>
-          <v-spacer />
-          <v-btn color="dark" text @click="cancelDialog = true">취소</v-btn>
-          <v-btn color="dark" text @click="submit()">저장</v-btn>
-        </v-card-actions>
+            <v-col cols="6">
+              <v-card-subtitle class="field-label">경험치</v-card-subtitle>
+              <v-text-field
+                type="number"
+                v-model.number="editChallenge.xp"
+                placeholder="획득 경험치 입력"
+                hide-details
+                density="comfortable"
+                class="field-input"
+              />
+            </v-col>
+          </v-row>
+        </v-container>
+
+        <v-divider class="my-2" />
+
+        <div class="justify-end btn-area">
+          <v-btn class="btn-gray" @click="cancelDialog = true"> 취소 </v-btn>
+          <v-btn class="btn-blue" @click="validation()"> 저장 </v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+
+    <!-- 저장 -->
+    <v-dialog v-model="saveDialog" max-width="380" min-height="100">
+      <v-card class="admin-dialog pa-6">
+        <v-card-text> 저장하시겠습니까? </v-card-text>
+        <div class="btn-area">
+          <v-btn class="btn-blue" @click="submit()">네</v-btn>
+          <v-btn class="btn-gray" @click="saveDialog = false">아니오</v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+
+    <!-- 밸리데이션 모달 -->
+    <v-dialog v-model="validationDialog" max-width="380" min-height="100">
+      <v-card class="admin-dialog pa-6">
+        <v-card-text> 모든 항목을 입력해주세요. </v-card-text>
+        <div class="btn-area">
+          <v-btn class="btn-blue" @click="validationDialog = false">확인</v-btn>
+        </div>
       </v-card>
     </v-dialog>
 
     <!-- 취소 모달 -->
     <v-dialog v-model="cancelDialog" max-width="380" min-height="100">
-      <v-card>
+      <v-card class="admin-dialog pa-6">
         <v-card-text>
-          취소하고 돌아가시겠습니까? 해당 내용은 저장되지 않습니다.
+          취소하고 돌아가시겠습니까?
+          <br />
+          해당 내용은 저장되지 않습니다.
         </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn color="dark" text @click="cancel()">네</v-btn>
-          <v-btn color="dark" text @click="cancelDialog = false">아니오</v-btn>
-        </v-card-actions>
+        <div class="btn-area">
+          <v-btn class="btn-blue" @click="cancel()">네</v-btn>
+          <v-btn class="btn-gray" @click="cancelDialog = false">아니오</v-btn>
+        </div>
       </v-card>
     </v-dialog>
 
     <!-- 수정 / 저장 완료 모달 -->
     <v-dialog v-model="successDialog" max-width="380" min-height="100">
-      <v-card>
-        <v-card-title class="text-h8">완료</v-card-title>
+      <v-card class="admin-dialog pa-6">
         <v-card-text> 성공적으로 완료되었습니다. </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn color="dark" text @click="successDialog = false">확인</v-btn>
-        </v-card-actions>
+        <div class="btn-area">
+          <v-btn class="btn-blue" @click="successDialog = false">확인</v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+
+    <!-- 저장 실패 모달 -->
+    <v-dialog v-model="errorDialog" max-width="380" min-height="100">
+      <v-card class="admin-dialog pa-6">
+        <v-card-text> 실패했습니다. </v-card-text>
+        <div class="btn-area">
+          <v-btn class="btn-blue" @click="errorDialog = false">확인</v-btn>
+        </div>
       </v-card>
     </v-dialog>
 
     <!-- 삭제 모달 -->
     <v-dialog v-model="deleteDialog" max-width="380" min-height="100">
-      <v-card>
-        <v-card-text> 해당 챌린지를 삭제하시겠습니까? </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn color="dark" text @click="remove()">네</v-btn>
-          <v-btn color="dark" text @click="deleteDialog = false">아니오</v-btn>
-        </v-card-actions>
+      <v-card class="admin-dialog pa-6">
+        <v-card-text>
+          정말 <strong>{{ deleteTarget.cdName }}</strong> 챌린지를
+          삭제하시겠습니까?
+        </v-card-text>
+        <div class="btn-area">
+          <v-btn class="btn-blue" @click="remove()"> 네 </v-btn>
+          <v-btn class="btn-gray" @click="deleteDialog = false"> 아니오 </v-btn>
+        </div>
       </v-card>
     </v-dialog>
 
-    <v-card>
+    <v-card class="data-card pa-2">
       <v-card-title class="d-flex justify-space-between align-center">
-        <span class="title">챌린지 관리</span>
-        <v-select
-          v-model="selectedType"
-          :items="typeOptions"
-          item-title="title"
-          item-value="value"
-          label="타입 선택"
-          density="compact"
-          variant="outlined"
-          style="max-width: 200px"
-        />
-        <v-text-field
-          v-model="search"
-          label="검색"
-          prepend-inner-icon="mdi-magnify"
-          density="compact"
-          hide-details
-          single-line
-          variant="outlined"
-          style="max-width: 250px"
-        />
-        <v-btn @Click="toForm()">챌린지 추가하기</v-btn>
+        <!-- 왼쪽 -->
+        <div class="d-flex align-center" style="gap: 12px">
+          <span class="title">챌린지 관리</span>
+          <v-select
+            v-model="selectedType"
+            :items="typeOptions"
+            item-title="title"
+            item-value="value"
+            label="타입 선택"
+            density="compact"
+            hide-details
+            variant="outlined"
+            style="max-width: 200px"
+          />
+        </div>
+
+        <!-- 오른쪽 -->
+        <div class="d-flex align-center search" style="gap: 12px">
+          <v-text-field
+            v-model="search"
+            label="검색 (챌린지명)"
+            prepend-inner-icon="mdi-magnify"
+            density="compact"
+            hide-details
+            single-line
+            variant="outlined"
+            style="max-width: 450px"
+          />
+          <v-btn class="btn-blue" @click="toForm()">챌린지 추가하기</v-btn>
+        </div>
       </v-card-title>
 
       <v-data-table
         :headers="headers"
         :items="filteredChallenges"
-        style="max-height: calc(100vh - 200px)"
         fixed-header
-        :items-per-page="10"
+        :items-per-page="12"
+        height="700"
         class="styled-table"
       >
         <!-- 타입 변환 -->
@@ -406,10 +520,21 @@ const remove = async () => {
           </v-chip>
         </template>
 
+        <!-- 챌린지 현황 -->
+        <template #item.progress="{ item }">
+          <v-btn class="btn-blue-outline" @click="progress(item.cdId)"
+            >챌린지 현황</v-btn
+          >
+        </template>
+
         <!-- 관리 -->
         <template #item.setting="{ item }">
-          <v-btn @click="toForm(item)">수정</v-btn>
-          <v-btn @click="openDelete(item.cdId)">삭제</v-btn>
+          <div class="btn-area-main">
+            <v-btn class="btn-gray-outline" @click="toForm(item)">수정</v-btn>
+            <v-btn class="btn-red-outline" @click="openDelete(item)"
+              >삭제</v-btn
+            >
+          </div>
         </template>
       </v-data-table>
     </v-card>
@@ -417,15 +542,28 @@ const remove = async () => {
 </template>
 
 <style lang="scss" scoped>
-.challenge-admin {
-  padding: 20px;
+.admin-challenge {
+  padding: 10px;
+
+  .data-card {
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  }
 
   .title {
     font-weight: 700;
-    font-size: 18px;
+    font-size: 23px;
   }
   border-radius: 12px;
   overflow: hidden;
+}
+.search {
+  width: 50%;
+  justify-content: end;
+}
+.btn {
+  min-width: 150px;
 }
 .styled-table {
   :deep(td),
@@ -433,7 +571,6 @@ const remove = async () => {
     // text-align: center !important;
     vertical-align: middle;
   }
-
   thead {
     background-color: #393e46;
     color: #fff;
@@ -447,5 +584,156 @@ const remove = async () => {
   .v-data-table-footer {
     background: #fafafa;
   }
+}
+
+/* 정렬 아이콘 항상 보이게 */
+.styled-table :deep(.v-data-table__th .v-icon) {
+  opacity: 1 !important; /* 항상 표시 */
+  color: #bbb !important; /* 기본은 연한 회색으로 */
+  transition: color 0.2s ease;
+}
+
+/* 활성 정렬 컬럼 아이콘 강조 */
+.styled-table :deep(.v-data-table__th--sorted .v-icon) {
+  color: #5ee6eb !important; /* 활성 정렬 컬럼만 민트 */
+}
+
+// 카드
+.admin-dialog {
+  border-radius: 15px !important;
+  background-color: #fff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.dialog-title {
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: #333;
+  text-align: center;
+}
+
+.field-label {
+  font-weight: 600;
+  color: #555;
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+}
+
+.field-input :deep(.v-field) {
+  border: 1px solid #d7d7d7 !important;
+  border-radius: 14px !important;
+  background-color: #f9f9f9 !important;
+  height: 54px !important;
+  padding-inline: 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  box-shadow: none !important;
+  transition: all 0.25s ease;
+}
+
+// 선 제거
+.field-input :deep(.v-field__outline),
+.field-input :deep(.v-field__overlay) {
+  display: none !important;
+}
+
+// hover시 강조
+.field-input:hover :deep(.v-field),
+.field-input:focus-within :deep(.v-field) {
+  background-color: #f0f0f0 !important;
+  border-color: #b0b0b0 !important;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+}
+
+// 텍스트 중앙 정렬
+.field-input :deep(.v-field__input) {
+  font-size: 0.95rem !important;
+  color: #333;
+  line-height: normal !important;
+  align-items: center !important;
+  display: flex !important;
+}
+
+.btn-area-main {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 4px 4px 0 !important;
+  margin-top: 4px !important;
+}
+
+// 모달 버튼
+.btn-area {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 0 4px 4px 0 !important;
+  margin-top: 4px !important;
+}
+
+// 버튼 공통
+.btn-gray,
+.btn-blue,
+.btn-red {
+  min-width: 72px;
+  height: 38px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: -0.2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+}
+
+// 취소 버튼
+.btn-gray {
+  background-color: #e0e0e0 !important;
+  color: #333 !important;
+  border-radius: 10px;
+}
+// 저장 버튼
+.btn-blue {
+  background-color: #5ee6eb !important;
+  color: #fff !important;
+  border-radius: 10px;
+}
+
+// 삭제 버튼
+.btn-red {
+  background-color: #f28b82 !important;
+  color: #fff !important;
+  border-radius: 10px;
+}
+
+// 화면버튼
+.btn-blue-outline {
+  background-color: transparent !important;
+  border: 1.5px solid #5ee6eb !important;
+  color: #009ca0 !important;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.25s ease;
+}
+
+.btn-gray-outline {
+  background-color: transparent !important;
+  border: 1.5px solid #cccccc !important;
+  color: #555 !important;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.25s ease;
+}
+
+.btn-red-outline {
+  background-color: transparent !important;
+  border: 1.5px solid #f28b82 !important;
+  color: #e25b4b !important;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.25s ease;
 }
 </style>

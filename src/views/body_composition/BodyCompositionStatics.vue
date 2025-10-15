@@ -14,22 +14,22 @@ const filterRange = ref({
 <template>
   <div class="wrap">
     <div class="d-flex align-center justify-space-between">
-      <router-link to="/exercise/body_composition/filter">
+      <!-- <router-link to="/exercise/body_composition/filter">
         <div class="day_picker otd-border">
           <div class="otd-body-2">조회 필터링</div>
         </div>
-      </router-link>
-      <div class="d-flex align-center ga-2">
-        <span>최근</span>
-        <v-switch
-          v-model="toggle"
-          hide-details
-          inset
-          density="compact"
-          color="#989898"
-        ></v-switch>
-        <span>전체</span>
-      </div>
+      </router-link> -->
+    </div>
+    <div class="d-flex align-center flex-row-reverse ga-2">
+      <span>전체</span>
+      <v-switch
+        v-model="toggle"
+        hide-details
+        inset
+        density="compact"
+        color="#989898"
+      ></v-switch>
+      <span>최근</span>
     </div>
     <div>
       <!-- <lineChart :logs="bodyCompositionStore.series" /> -->

@@ -36,7 +36,7 @@ export const useCommentsStore = defineStore('comments', {
       }
     },
 
-    // ✅ opts 추가 (닉네임/권한 헤더용)
+    // opts 추가 (닉네임/권한 헤더용)
     async add(postId, content, opts = {}) {
       const k = String(postId);
       const auth = useAuthenticationStore();
@@ -49,7 +49,7 @@ export const useCommentsStore = defineStore('comments', {
         opts.nickName ?? me.nickName
       );
 
-      // ✅ 낙관적 갱신: 응답 + 내 닉네임 보강
+      // 낙관적 갱신: 응답 + 내 닉네임 보강
       const next = {
         ...data,
       };

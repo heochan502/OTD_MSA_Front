@@ -10,6 +10,8 @@ const route = useRoute();
 const authStore = useAuthenticationStore();
 const isActive = computed(() => route.path === '/admin');
 
+const myRole = computed(() => authStore?.state?.signedUser?.userRole ?? '');
+
 const logoutAccount = async () => {
   if (!confirm('로그아웃 하시겠습니까?')) return;
   const res = await logout();
@@ -46,6 +48,7 @@ const logoutAccount = async () => {
           class="menu-item otd-subtitle-1 d-flex"
           active-class="active"
           :class="{ active: route.path.startsWith('/admin/user') }"
+          v-if="myRole === 'ADMIN'"
         >
           <img
             class="icon"
@@ -78,6 +81,7 @@ const logoutAccount = async () => {
           class="menu-item otd-subtitle-1 d-flex"
           active-class="active"
           :class="{ active: route.path.startsWith('/admin/point') }"
+          v-if="myRole === 'ADMIN'"
         >
           <img
             class="icon"
@@ -88,6 +92,39 @@ const logoutAccount = async () => {
             "
           />
           <span>포인트 관리</span>
+        </router-link>
+
+        <router-link
+          to="/admin/exercise"
+          class="menu-item otd-subtitle-1 d-flex"
+          active-class="active"
+          :class="{ active: route.path.startsWith('/admin/exercise') }"
+        >
+          <img
+            class="icon"
+            :src="
+              route.path.startsWith('/admin/exercise')
+                ? '/otd/image/admin_page/exercise-s.png'
+                : '/otd/image/admin_page/exercise.png'
+            "
+          />
+          <span>운동 종목 관리</span>
+        </router-link>
+        <router-link
+          to="/admin/meal"
+          class="menu-item otd-subtitle-1 d-flex"
+          active-class="active"
+          :class="{ active: route.path.startsWith('/admin/meal') }"
+        >
+          <img
+            class="icon"
+            :src="
+              route.path.startsWith('/admin/meal')
+                ? '/otd/image/admin_page/food-s.png'
+                : '/otd/image/admin_page/food.png'
+            "
+          />
+          <span>식품 정보 관리</span>
         </router-link>
         <router-link
           to="/admin/community"
@@ -110,6 +147,7 @@ const logoutAccount = async () => {
           class="menu-item otd-subtitle-1 d-flex"
           active-class="active"
           :class="{ active: route.path.startsWith('/admin/statistics') }"
+          v-if="myRole === 'ADMIN'"
         >
           <img
             class="icon"

@@ -21,7 +21,6 @@ import ChallengeDay from "@/views/challenge/ChallengeDay.vue";
 import Login from "@/views/user/Login.vue";
 import Join from "@/views/user/Join.vue";
 import Profile from "@/views/user/Profile.vue";
-import Signal from "@/views/user/Signal.vue";
 import Inquiry from "@/views/user/Inquiry.vue";
 import NickName from "@/views/user/Nickname.vue";
 import Email from "@/views/user/Email.vue";
@@ -33,11 +32,12 @@ import ModifyPassword from "@/views/user/ModifyPassword.vue";
 import PointHistory from "@/views/user/pointHistory.vue";
 import Term from "@/views/user/Term.vue";
 import Oauth2 from "@/views/auth/OAuth2Handler.vue";
+import Onboarding from "@/views/user/Onboarding.vue";
 
 //마이페이지
-import MyPost from '@/views/user/MyPost.vue';
-import MyLike from '@/views/user/MyLike.vue';
-import MyComment from '@/views/user/MyComment.vue';
+import MyPost from "@/views/user/MyPost.vue";
+import MyLike from "@/views/user/MyLike.vue";
+import MyComment from "@/views/user/MyComment.vue";
 
 // 포인트샵
 import PointDashboardView from "@/views/pointshop/PointDashboardView.vue";
@@ -120,9 +120,9 @@ const router = createRouter({
       props: true,
     },
     {
-      path: '/community/post/:id/edit',
-      name: 'CommunityEdit',
-      component: () => import('@/views/community/EditPostView.vue'),
+      path: "/community/post/:id/edit",
+      name: "CommunityEdit",
+      component: () => import("@/views/community/EditPostView.vue"),
     },
     {
       path: "/test",
@@ -215,11 +215,6 @@ const router = createRouter({
       component: Profile,
     },
     {
-      path: "/user/signal",
-      name: "signal",
-      component: Signal,
-    },
-    {
       path: "/user/email/inquiry",
       name: "Inquiry",
       component: Inquiry,
@@ -275,18 +270,18 @@ const router = createRouter({
       component: Password,
     },
     {
-      path: '/user/post',
-      name: 'myPost',
+      path: "/user/post",
+      name: "myPost",
       component: MyPost,
     },
     {
-      path: '/user/like',
-      name: 'myLike',
+      path: "/user/like",
+      name: "myLike",
       component: MyLike,
     },
     {
-      path: '/user/comment',
-      name: 'myComment',
+      path: "/user/comment",
+      name: "myComment",
       component: MyComment,
     },
     {
@@ -294,6 +289,19 @@ const router = createRouter({
       name: 'PointDashboard',
       component: () => import('@/views/pointshop/PointDashboardView.vue'),
       meta: { headerType: 'title', title: '포인트샵', showUserPanel: false },
+      path: "/user/onboarding",
+      name: "Onboarding",
+      component: Onboarding,
+      meta: {
+        headerType: "title",
+        title: "온보딩",
+        showUserPanel: false,
+      },
+    },
+    {
+      path: "/pointshop",
+      name: "PointShopList",
+      component: PointShopListView,
     },
     {
       path: '/pointshop/purchase-history',
@@ -406,6 +414,11 @@ const router = createRouter({
           component: () => import("@/views/admin/AdminChallenge.vue"),
         },
         {
+          path: "/admin/challenge/progress",
+          name: "AdminChallengeDetail",
+          component: () => import("@/views/admin/AdminChallengeProgress.vue"),
+        },
+        {
           path: "point",
           name: "AdminPoint",
           component: () => import("@/views/admin/AdminPoint.vue"),
@@ -416,9 +429,29 @@ const router = createRouter({
           component: () => import("@/views/admin/AdminCommunity.vue"),
         },
         {
+          path: "community/detail",
+          name: "AdminCommunityDetail",
+          component: () => import("@/views/admin/AdminCommunityDetail.vue"),
+        },
+        {
+          path: "exercise",
+          name: "AdminExercise",
+          component: () => import("@/views/admin/AdminExercise.vue"),
+        },
+        {
+          path: "meal",
+          name: "AdminMeal",
+          component: () => import("@/views/admin/AdminMeal.vue"),
+        },
+        {
           path: "qna",
           name: "AdminQnA",
           component: () => import("@/views/admin/AdminQnA.vue"),
+        },
+        {
+          path: "qna/detail",
+          name: "AdminQnADetail",
+          component: () => import("@/views/admin/AdminQnADetail.vue"),
         },
         {
           path: "statistics",
@@ -449,10 +482,16 @@ const unSignedPathList = [
   "/user/password",
   "/user/findid",
 ];
+const onboardingExcludedPaths = [
+  "/user/onboarding",
+  "/user/login",
+  "/user/join",
+  "/fe/redirect",
+];
 
 //navigation guard
 router.beforeEach((to, from) => {
-  const authentcationStore = useAuthenticationStore();
+  const authenticationStore = useAuthenticationStore();
   const isUnsignedPath = unSignedPathList.some((path) =>
     to.path.startsWith(path)
   );
@@ -464,23 +503,38 @@ router.beforeEach((to, from) => {
     document.body.classList.remove("is-admin");
   }
   if (to.path.startsWith("/admin")) {
-    const user = authentcationStore.state.signedUser;
-    if (!user || user.userRole !== "ADMIN") {
+    const user = authenticationStore.state.signedUser;
+    if (!user || (user.userRole !== "ADMIN" && user.userRole !== "MANAGER")) {
       alert("관리자만 접근 가능합니다.");
       return { path: "/" }; // 일반 유저는 홈으로 돌려보내기
     }
   }
-  if (unSignedPathList.includes(to.path) && authentcationStore.state.isSigned) {
+  if (
+    unSignedPathList.includes(to.path) &&
+    authenticationStore.state.isSigned
+  ) {
     //로그인 상태에서 /user/login, /user/join 경로로 이동하려고 하면
     return { path: "/" };
   } else if (
-    !authentcationStore.state.isSigned &&
+    !authenticationStore.state.isSigned &&
     !unSignedPathList.includes(to.path)
   ) {
     console.log("로그아웃 상태에서 접근 불가 경로");
     //로그아웃 상태에서 /user/login, /user/join 경로가 아닌 경우
     return { path: "/user/login" };
   }
-});
+  if (
+    authenticationStore.state.isSigned &&
+    authenticationStore.needsOnboarding()
+  ) {
+    const isExcluded = onboardingExcludedPaths.some((path) =>
+      to.path.startsWith(path)
+    );
 
+    if (!isExcluded) {
+      console.log("온보딩 미완료 - 온보딩 페이지로 리다이렉트");
+      return { path: "/user/onboarding" };
+    }
+  }
+});
 export default router;

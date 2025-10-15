@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import { getPointHistory } from '@/services/user/userService';
 import { getSelectedAll } from '@/services/user/userService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
+import { useRouter } from 'vue-router';
 
 const authStore = useAuthenticationStore();
 const pointHistory = ref([]);
@@ -10,6 +11,7 @@ const missionComplete = ref([]);
 const dailyMission = ref([]);
 const loading = ref(true);
 const error = ref(null);
+const router = useRouter();
 
 // 페이징 관련 상태
 const currentPage = ref(1);
@@ -102,10 +104,10 @@ const allHistory = computed(() => {
       });
       
       if (index < 3) {
-        console.log(`미션 ${index + 1} 추가:`, missionDetail.cdName, mission.successDate);
+        //console.log(`미션 ${index + 1} 추가:`, missionDetail.cdName, mission.successDate);
       }
     } else if (index < 3) {
-      console.log(`미션 ${index + 1} 매칭 실패 - cdId:`, mission.cdId);
+      //console.log(`미션 ${index + 1} 매칭 실패 - cdId:`, mission.cdId);
     }
   });
   
@@ -227,6 +229,10 @@ const formatReason = (item) => {
 onMounted(() => {
   fetchData();
 });
+
+const goBack = () => {
+  router.push('/user/profile')
+};
 </script>
 
 <template>
@@ -305,7 +311,15 @@ onMounted(() => {
         </button>
       </div>
     </div>
+    <div class="top-buttons">
+      <button @click="goBack" class="back-btn">
+        ← 뒤로가기
+      </button>
+     
+    </div>
   </div>
+  
+  
 </template>
 
 <style scoped>
@@ -500,4 +514,27 @@ onMounted(() => {
 .page-number {
   min-width: 40px;
 }
+.top-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  justify-content: flex-end;
+  padding-top: 20px;
+}
+.back-btn {
+  padding: 10px 20px;
+  background-color: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+  
+}
+
+.back-btn:hover {
+  background-color: #4b5563;
+}
+
 </style>

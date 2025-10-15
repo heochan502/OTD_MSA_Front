@@ -13,7 +13,7 @@ export const fetchPostById = (postId) => axios.get(`${BASE}/${postId}`);
 
 export const createPost = async (payload) => {
   const { data } = await axios.post(`${BASE}`, payload);
-  return data; // ✅ data만 반환
+  return data; // data만 반환
 };
 
 export const updatePost = async (postId, payload) => {
@@ -21,7 +21,29 @@ export const updatePost = async (postId, payload) => {
   return data;
 };
 
-export const deletePost = (postId) => axios.delete(`${BASE}/${postId}`);
+export const deletePost = (postId, role) => {
+  const headers = {};
+  if (role) {
+    headers['X-ROLE'] = role;
+  }
+  axios.delete(`${BASE}/${postId}`, { headers });
+};
+
+export const putLifeUserProfile = (imgPath) => {
+  return axios
+    .put(`${BASE}/modify/profile`, { imgPath })
+    .catch((e) => e.response);
+};
+
+export const updateLifeNickname = (nickname) => {
+  return axios
+    .put(`${BASE}/modify/nickname`, { nickname })
+    .catch((e) => e.response);
+};
+
+export const updateLifeUserInfo = (jsonBody) => {
+  return axios.put(`${BASE}/modify/info`, jsonBody).catch((e) => e.response);
+};
 
 export const toggleLike = (postId, userId) =>
   axios.post(`${BASE}/${postId}/likes/toggle`, null, {
