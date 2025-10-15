@@ -1,115 +1,138 @@
-// src/composables/usePointShop.js
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import PointUserService from '@/services/pointshop/PointUserService';
-import PointPurchaseService from '@/services/pointshop/PointPurchaseService';
 import PointShopService from '@/services/pointshop/PointShopService';
-
-const userPoints = ref(0);
-const purchasedItemIds = ref([]);
-const allItems = ref([]);
+import PointPurchaseService from '@/services/pointshop/PointPurchaseService';
+import PointRechargeService from '@/services/pointshop/PointRechargeService';
 
 export function usePointShop() {
-  const router = useRouter();
+  // 🔹 상태
+  const userPoints = ref(0); // 사용자 포인트 잔액
+  const allItems = ref([]); // 전체 포인트 아이템 목록
+  const purchasedItems = ref([]); // 구매 내역
+  const isLoading = ref(false); // 공통 로딩 상태
+  const errorMessage = ref(''); // 에러 메시지 (문자열)
 
-  // 전체 아이템 불러오기
+  // 내부 로딩 컨트롤
+  const setLoading = (state) => {
+    isLoading.value = state;
+  };
+
+  // [GET] 내 포인트 조회
+  const fetchUserPoints = async () => {
+    setLoading(true);
+    try {
+      const res = await PointRechargeService.getMyBalance();
+
+      if (res?.success) {
+        userPoints.value = res.data || 0;
+      } else if (res?.status === 200 && typeof res.data === 'number') {
+        userPoints.value = res.data;
+      } else {
+        console.warn('[usePointShop] 포인트 조회 실패:', res);
+      }
+    } catch (e) {
+      console.error('[usePointShop] 포인트 조회 오류:', e);
+      errorMessage.value = '포인트 정보를 불러오지 못했습니다.';
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // [GET] 전체 아이템 목록 조회
   const fetchAllItems = async () => {
+    setLoading(true);
     try {
       const res = await PointShopService.getAllItems();
-      if (res?.status === 200 && res.data?.success) {
-      allItems.value = Array.isArray(res.data.data) ? res.data.data : [];
+
+      if (res?.success) {
+        allItems.value = res.data || [];
+      } else if (res?.status === 200 && Array.isArray(res.data)) {
+        allItems.value = res.data;
       } else {
-        console.warn('[usePointShop] 아이템 목록 응답 오류:', res);
-        allItems.value = [];
-        alert('아이템 목록을 불러올 수 없습니다.');
+        console.warn('[usePointShop] 아이템 목록 조회 실패:', res);
+        errorMessage.value = '아이템 목록을 불러올 수 없습니다.';
       }
-    } catch (err) {
-      console.error('[usePointShop] 아이템 목록 요청 실패:', err);
-      allItems.value = [];
-      alert('서버와 연결할 수 없습니다. 잠시 후 다시 시도해주세요.');
+    } catch (e) {
+      console.error('[usePointShop] 아이템 목록 오류:', e);
+      errorMessage.value = '서버 연결 오류가 발생했습니다.';
+    } finally {
+      setLoading(false);
     }
   };
 
-  // 사용자 포인트 조회
-  const fetchUserPoints = async () => {
-    try {
-      const res = await PointUserService.getUserPoints();
-      if (res?.status === 200 && res.data?.success) {
-        userPoints.value = res.data.data;
-      } else {
-        console.warn('[usePointShop] 포인트 정보 응답 오류:', res);
-        alert('포인트 정보를 불러올 수 없습니다.');
-      }
-    } catch (err) {
-      console.error('[usePointShop] 포인트 조회 실패:', err);
-      alert('서버와 연결할 수 없습니다. 잠시 후 다시 시도해주세요.');
-    }
-  };
-
-  // 구매 내역 조회
+  // [GET] 구매 내역 조회
   const fetchPurchasedItems = async () => {
+    setLoading(true);
     try {
       const res = await PointPurchaseService.getUserPurchaseHistory();
-      if (res?.status === 200 && res.data?.success) {
-        purchasedItemIds.value = res.data.data.map(item => item.pointId);
+
+      if (res?.success) {
+        purchasedItems.value = res.data || [];
+      } else if (res?.status === 200 && Array.isArray(res.data)) {
+        purchasedItems.value = res.data;
       } else {
-        console.warn('[usePointShop] 구매 내역 응답 오류:', res);
-        alert('구매 내역을 불러올 수 없습니다.');
+        console.warn('[usePointShop] 구매 내역 조회 실패:', res);
+        purchasedItems.value = [];
       }
-    } catch (err) {
-      console.error('[usePointShop] 구매 내역 요청 실패:', err);
-      alert('서버와 연결할 수 없습니다. 잠시 후 다시 시도해주세요.');
+    } catch (e) {
+      console.error('[usePointShop] 구매 내역 오류:', e);
+      errorMessage.value = '구매 이력을 불러오지 못했습니다.';
+      purchasedItems.value = [];
+    } finally {
+      setLoading(false);
     }
   };
 
-  // 아이템 구매
+  // [CHECK] 포인트 아이템 구매 여부 확인
+  const isPurchased = (pointId) => {
+    return purchasedItems.value.some((p) => p.pointId === pointId);
+  };
+
+  // [POST] 포인트 아이템 구매
   const purchaseItem = async (item) => {
-    try {
-      const ok = confirm(`${item.name} (${item.price}포인트)를 구매하시겠습니까?`);
-      if (!ok) return;
+    const pointId = item.pointId || item.id;
+    const name = item.pointItemName || item.name;
+    const price = item.pointScore || item.price;
 
-      // 중복 구매 방지
-      if (purchasedItemIds.value.includes(item.id)) {
-        alert('이미 구매한 아이템입니다.');
-        return;
-      }
-
-      // 포인트 부족 확인
-    const itemPrice = parseInt(item.price.toString().replace(/,/g, ''), 10);
-    if (userPoints.value < itemPrice) {
-      alert('포인트가 부족합니다.');
-      const move = confirm('포인트 충전 페이지로 이동할까요?');
-      if (move) router.push('/challenge');
+    if (!pointId) {
+      alert('유효하지 않은 아이템입니다.');
+      console.warn('[usePointShop] 잘못된 아이템 데이터:', item);
       return;
     }
 
-    // 구매 요청
-    const res = await PointPurchaseService.createPurchase(item.id);
-      if (res?.status === 200) {
-        purchasedItemIds.value.push(item.id);
-        userPoints.value -= itemPrice;
-        alert('구매가 완료되었습니다.');
+    const formattedPrice = Number(price || 0).toLocaleString();
+    const confirmBuy = confirm(`${name} (${formattedPrice}P)를 구매하시겠습니까?`);
+    if (!confirmBuy) return;
+
+    setLoading(true);
+    try {
+      const res = await PointPurchaseService.purchaseItem(pointId);
+
+      if (res?.success) {
+        alert('구매 완료!');
+        await Promise.all([fetchUserPoints(), fetchPurchasedItems()]);
       } else {
-        console.warn('[usePointShop] 구매 응답 오류:', res);
-        alert('구매 중 오류가 발생했습니다.');
+        console.warn('[usePointShop] 구매 실패 응답:', res);
+        alert(res?.message || '구매 실패');
       }
-    } catch (err) {
-      console.error('[usePointShop] 구매 요청 실패:', err);
-      alert('서버와 연결할 수 없습니다. 잠시 후 다시 시도해주세요.');
+    } catch (e) {
+      console.error('[usePointShop] 구매 요청 실패:', e);
+      alert('서버 오류로 구매를 진행할 수 없습니다.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // 아이템 구매 여부 확인
-  const isPurchased = (itemId) => {
-    return purchasedItemIds.value.includes(itemId);
-  };
-
   return {
+    // 상태
     userPoints,
-    purchasedItemIds,
     allItems,
-    fetchAllItems,
+    purchasedItems,
+    isLoading,
+    errorMessage,
+
+    // 메서드
     fetchUserPoints,
+    fetchAllItems,
     fetchPurchasedItems,
     purchaseItem,
     isPurchased,
