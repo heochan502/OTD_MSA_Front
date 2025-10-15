@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useMealSelectedStore, useMealRecordStore } from '@/stores/meal/mealStore'
 
@@ -33,6 +33,13 @@ const myDayData = ref({
   basal_metabolic_rate : 0  // 기초 대사량 
 });
 
+const points = bodyComposition?.series?.points ?? []
+const lastPoint = points.length ? points[points.length - 1] : null
+
+const myBMR = ref({
+  basal_metabolic_rate: lastPoint?.values?.basal_metabolic_rate ?? null,
+  date: lastPoint?.date ?? null
+})
 // 선택 한 날짜 가져오기위한거 
  const mealSelectedDay = useMealSelectedStore();
 
@@ -66,7 +73,7 @@ const kcalGoal = computed(() => {
   const storeBmr =
     Number(bodyComposition.basicInfo?.[0]?.bmr) ||
     Number(bodyComposition.recentBodyInfo?.bmr) ||
-    Number(bodyComposition.lastest?.bmr) || 0;
+    Number( myBMR?.value?.basal_metabolic_rate )|| 0;
 
   if (storeBmr > 0) return storeBmr;
 
@@ -99,12 +106,16 @@ watch(
   async (newDay, oldDay) => {
     
     myDayData.value = await getMyDay(mealSelectedDay.selectedDay.setDay);
-    console.log('선택', myDayData.value);
-    console.log('bodyComposition.basicInfo?.bmr', bodyComposition.basicInfo[0]?.bmr);
-    console.log('bodyComposition.metrics', bodyComposition.series.points);
+    // console.log('선택', myDayData.value);
+    // console.log('bodyComposition.basicInfo?.bmr', bodyComposition.basicInfo[0]?.bmr);
+    // console.log('bodyComposition.metrics', bodyComposition.series.points);
     
   } 
 );
+onMounted ( async () => {
+  myDayData.value = await getMyDay(mealSelectedDay.selectedDay.setDay);
+  // console.log('선택', myDayData.value);
+});
 
 
 </script>

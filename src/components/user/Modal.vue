@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch } from 'vue';
 
 const props = defineProps({
   show: Boolean,
@@ -7,33 +7,33 @@ const props = defineProps({
   message: String,
   type: {
     type: String,
-    default: "info", // 'info', 'success', 'error', 'warning', 'confirm'
+    default: 'info', // 'info', 'success', 'error', 'warning', 'confirm'
   },
   confirmText: {
     type: String,
-    default: "확인",
+    default: '확인',
   },
   cancelText: {
     type: String,
-    default: "취소",
+    default: '취소',
   },
 });
 
-const emit = defineEmits(["close", "confirm", "cancel"]);
+const emit = defineEmits(['close', 'confirm', 'cancel']);
 
 const handleConfirm = () => {
-  emit("confirm");
-  emit("close");
+  emit('confirm');
+  emit('close');
 };
 
 const handleCancel = () => {
-  emit("cancel");
-  emit("close");
+  emit('cancel');
+  emit('close');
 };
 
 const handleOverlayClick = () => {
-  if (props.type !== "confirm") {
-    emit("close");
+  if (props.type !== 'confirm') {
+    emit('close');
   }
 };
 </script>
@@ -70,7 +70,7 @@ const handleOverlayClick = () => {
             <span v-else class="icon">ℹ</span>
           </div>
 
-          <p class="modal-message">{{ message }}</p>
+          <p class="modal-message" v-html="message"></p>
         </div>
 
         <div class="modal-footer">
