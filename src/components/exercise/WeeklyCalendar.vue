@@ -55,6 +55,7 @@ const isCurrentWeek = computed(() => {
   // 표시된 주의 시작일(weekStart.value)이 이번 주의 시작일과 같은지 확인
   return weekStart.value.isSame(startOfCurrentWeek, "day");
 });
+
 const selectDate = (day) => {
   if (day.isAfter(today, "day")) return; // 미래 날짜 선택 불가
 
@@ -66,6 +67,7 @@ const selectDate = (day) => {
 watch(
   () => props.recordDate,
   (newDate) => {
+    // console.log("선택 날짜 확인", newDate);
     if (newDate) {
       currentDate.value = dayjs(newDate);
       weekStart.value = dayjs(newDate).startOf("isoWeek");
