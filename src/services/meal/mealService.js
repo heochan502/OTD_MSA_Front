@@ -22,13 +22,13 @@ export const postMealRecord = async (payload) => {
 export const getMealRecord = async (mealDay) => {
   // console.log("식단 기록 날짜", mealDay);
   const res = await axios.get(`${path}`, { params: { mealDay } });
-  console.log("식단 기록 데이터", res.data);
+  // console.log("식단 기록 데이터", res.data);
   return res.data;
 };
 
 export const getMyDay = async (mealDay) => {
   const res = await axios.get(`${path}/myday`, { params: { mealDay } });
-  console.log('나의, 하루', res.data);
+  // console.log('나의, 하루', res.data);
   return res.data;
 };
 
