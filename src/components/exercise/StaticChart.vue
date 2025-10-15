@@ -71,7 +71,8 @@ const makeChartData = (metric) => {
             0,
             chartArea.bottom
           );
-          gradient.addColorStop(0, "rgba(255, 232, 100, 0.6)"); // 위쪽 진한색
+          gradient.addColorStop(0, "rgba(255, 232, 100, 1)"); // 위쪽 진한색
+          gradient.addColorStop(0.2, "rgba(255, 232, 100, 0.4)"); // 위쪽 진한색
           gradient.addColorStop(1, "rgba(255, 232, 100, 0)"); // 아래쪽 투명
           return gradient;
         },
@@ -79,7 +80,7 @@ const makeChartData = (metric) => {
         pointRadius: 5,
         pointBackgroundColor: "#FFE864",
         pointBorderColor: "#ffffff", // 점 테두리는 조금 연한 오렌지색으로
-        pointBorderWidth: 2, // 테두리 두께 조절
+        pointBorderWidth: 1, // 테두리 두께 조절
         tension: 0.4,
       },
     ],
@@ -110,9 +111,9 @@ const makeChartOptions = (metricCode) => ({
     },
   },
   scales: {
-    // x: { ticks: { font: { size: 10 } }, grid: { display: false } },
+    x: { ticks: { font: { size: 10 } }, grid: { display: false } },
     y: {
-      grace: "30%",
+      grace: "50%",
       suggestedMax: undefined, // c최대값은 데이터에 따라 자동 조절
     },
   },
