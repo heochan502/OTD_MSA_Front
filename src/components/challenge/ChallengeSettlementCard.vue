@@ -18,7 +18,7 @@ const FILE_URL = import.meta.env.VITE_BASE_URL;
       />
     </div>
     <div class="right">
-      <div>{{ props.settlementData.name }} 챌린지</div>
+      <h8>{{ props.settlementData.name }} 챌린지</h8>
       <div>
         <span>획득 포인트 : {{ props.settlementData.reward }}P</span>
         <br />
@@ -34,6 +34,8 @@ const FILE_URL = import.meta.env.VITE_BASE_URL;
 <style lang="scss" scoped>
 .settlement-card {
   display: flex;
+  gap: 20px;
+  justify-content: center;
   .left {
     .challenge-card {
       width: 100px;
@@ -41,5 +43,18 @@ const FILE_URL = import.meta.env.VITE_BASE_URL;
   }
   .right {
   }
+}
+
+h8 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #222;
+  align-self: center;
+  margin-bottom: 8px;
+}
+span {
+  font-size: 13px;
+  color: #444;
+  width: 100%;
 }
 </style>

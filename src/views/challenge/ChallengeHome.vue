@@ -442,6 +442,7 @@ const settlementButton = async () => {
   .route-list {
     margin-top: 10px;
     font-size: 12px;
+    cursor: pointer;
   }
 }
 .first-title {
@@ -524,9 +525,6 @@ const settlementButton = async () => {
     display: flex;
     flex-direction: column;
     gap: 5px;
-    .progress {
-      // width: 70%;
-    }
   }
 }
 /* 360px 이하에서는 카드 조금 줄여주기 */
