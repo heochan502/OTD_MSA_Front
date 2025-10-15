@@ -10,6 +10,7 @@ import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 import { useChallengeStore } from '@/stores/challenge/challengeStore.js';
 import Progress from '@/components/challenge/Progress.vue';
 import { useAuthenticationStore } from '@/stores/user/authentication';
+import SaveModal from '@/components/user/Modal.vue';
 
 const challengeStore = useChallengeStore();
 const authentication = useAuthenticationStore();
@@ -249,7 +250,7 @@ const settlementButton = async () => {
         </div>
       </div>
       <!-- 경쟁 -->
-      <div class="sub-title">> 경쟁 챌린지</div>
+      <div class="competition-sub-title">> 경쟁 챌린지</div>
       <div class="card-wrap">
         <div class="challenge-card">
           <ChallengeCard
@@ -275,7 +276,7 @@ const settlementButton = async () => {
         </div>
       </div>
       <!-- 개인 -->
-      <div class="sub-title">> 개인 챌린지</div>
+      <div class="personal-sub-title">> 개인 챌린지</div>
       <div class="card-wrap">
         <div class="challenge-card">
           <ChallengeCard
@@ -360,9 +361,10 @@ const settlementButton = async () => {
     max-width: 351px;
     min-width: 280px;
     width: 100%;
-    height: 170px;
+    height: auto;
+    gap: 10px;
     .mission-card {
-      margin-bottom: 10px;
+      justify-content: space-between;
       max-width: 351px;
       min-width: 280px;
       width: 100%;
@@ -370,13 +372,19 @@ const settlementButton = async () => {
       display: flex;
       align-items: center;
       justify-content: space-around;
-      gap: 15px;
+      gap: 10px;
+      padding: 0 15px;
+      text-align: center;
       cursor: pointer;
       .mission-image {
         width: 25px;
+        margin-right: 25px;
       }
       .img {
         width: 25px;
+      }
+      span {
+        flex: 1;
       }
     }
     .mission-done {
@@ -406,9 +414,14 @@ const settlementButton = async () => {
   font-size: 20px;
   font-weight: bold;
 }
-.sub-title {
+.competition-sub-title,
+.personal-sub-title {
   font-size: 12px;
   margin-bottom: 15px;
+}
+
+.personal-sub-title {
+  margin-top: 15px;
 }
 .challenge-card {
   display: flex;
