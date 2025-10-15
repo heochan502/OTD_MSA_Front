@@ -19,6 +19,9 @@ const formDialog = ref(false);
 const successDialog = ref(false);
 const cancelDialog = ref(false);
 const deleteDialog = ref(false);
+const saveDialog = ref(false);
+const errorDialog = ref(false);
+const validationDialog = ref(false);
 
 const editChallenge = ref({});
 const challnegeUnit = ref([]);
@@ -147,8 +150,7 @@ const onFileChange = (event) => {
   editChallenge.value.cdImage = file.name; // 파일명
 };
 
-// 수정 / 추가 api
-const submit = async () => {
+const validation = () => {
   const fields = [
     'cdName',
     'cdType',
@@ -159,17 +161,17 @@ const submit = async () => {
     'tier',
     'cdImage',
   ];
-
-  // 0은 허용, null/''만 막기
   const isEmpty = fields.some(
     (key) =>
       editChallenge.value[key] === null || editChallenge.value[key] === ''
   );
   if (isEmpty) {
-    alert('모든 항목을 입력해주세요.');
+    validationDialog.value = true;
     return;
-  }
-
+  } else saveDialog.value = true;
+};
+// 수정 / 추가 api
+const submit = async () => {
   console.log('json', editChallenge.value);
 
   const formData = new FormData();
@@ -207,13 +209,14 @@ const submit = async () => {
     // 성공하면 저장 완료 모달 열기
     successDialog.value = true;
     formDialog.value = false;
+    saveDialog.value = false;
     const refresh = await getChallenge();
     setIdType(refresh.data);
     setChallengeUnit(refresh.data);
   } else {
-    alert('저장에 실패했습니다. 다시 시도해주세요.');
+    errorDialog.value = true;
+    saveDialog.value = false;
   }
-  deleteDialog.value = false;
 };
 // 챌린지 현황
 const progress = async (id) => {
@@ -241,7 +244,7 @@ const remove = async () => {
     setIdType(refresh.data);
     setChallengeUnit(refresh.data);
   } else {
-    alert('삭제에 실패했습니다. 다시 시도해주세요.');
+    errorDialog.value = true;
   }
   deleteDialog.value = false;
 };
@@ -356,7 +359,28 @@ const remove = async () => {
 
         <div class="justify-end btn-area">
           <v-btn class="btn-gray" @click="cancelDialog = true"> 취소 </v-btn>
-          <v-btn class="btn-blue" @click="submit()"> 저장 </v-btn>
+          <v-btn class="btn-blue" @click="validation()"> 저장 </v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+
+    <!-- 저장 -->
+    <v-dialog v-model="saveDialog" max-width="380" min-height="100">
+      <v-card class="admin-dialog pa-6">
+        <v-card-text> 저장하시겠습니까? </v-card-text>
+        <div class="btn-area">
+          <v-btn class="btn-blue" @click="submit()">네</v-btn>
+          <v-btn class="btn-gray" @click="saveDialog = false">아니오</v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+
+    <!-- 밸리데이션 모달 -->
+    <v-dialog v-model="validationDialog" max-width="380" min-height="100">
+      <v-card class="admin-dialog pa-6">
+        <v-card-text> 모든 항목을 입력해주세요. </v-card-text>
+        <div class="btn-area">
+          <v-btn class="btn-blue" @click="validationDialog = false">확인</v-btn>
         </div>
       </v-card>
     </v-dialog>
@@ -380,10 +404,18 @@ const remove = async () => {
     <v-dialog v-model="successDialog" max-width="380" min-height="100">
       <v-card class="admin-dialog pa-6">
         <v-card-text> 성공적으로 완료되었습니다. </v-card-text>
-        <div>
-          <v-btn class="btn-blue" @click="successDialog = false"
-            >확인</v-btn
-          >
+        <div class="btn-area">
+          <v-btn class="btn-blue" @click="successDialog = false">확인</v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+
+    <!-- 저장 실패 모달 -->
+    <v-dialog v-model="errorDialog" max-width="380" min-height="100">
+      <v-card class="admin-dialog pa-6">
+        <v-card-text> 실패했습니다. </v-card-text>
+        <div class="btn-area">
+          <v-btn class="btn-blue" @click="errorDialog = false">확인</v-btn>
         </div>
       </v-card>
     </v-dialog>
@@ -397,9 +429,7 @@ const remove = async () => {
         </v-card-text>
         <div class="btn-area">
           <v-btn class="btn-blue" @click="remove()"> 네 </v-btn>
-          <v-btn class="btn-gray" @click="deleteDialog = false">
-            아니오
-          </v-btn>
+          <v-btn class="btn-gray" @click="deleteDialog = false"> 아니오 </v-btn>
         </div>
       </v-card>
     </v-dialog>
@@ -501,7 +531,9 @@ const remove = async () => {
         <template #item.setting="{ item }">
           <div class="btn-area-main">
             <v-btn class="btn-gray-outline" @click="toForm(item)">수정</v-btn>
-            <v-btn class="btn-red-outline" @click="openDelete(item)">삭제</v-btn>
+            <v-btn class="btn-red-outline" @click="openDelete(item)"
+              >삭제</v-btn
+            >
           </div>
         </template>
       </v-data-table>
@@ -687,10 +719,9 @@ const remove = async () => {
   transition: all 0.25s ease;
 }
 
-
 .btn-gray-outline {
   background-color: transparent !important;
-  border: 1.5px solid  #cccccc  !important;
+  border: 1.5px solid #cccccc !important;
   color: #555 !important;
   border-radius: 10px;
   font-weight: 600;

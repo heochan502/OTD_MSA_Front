@@ -9,8 +9,6 @@ const router = useRouter();
 const posts = ref([]);
 const selectedCategory = ref('전체');
 
-const BASE_URL = import.meta.env.VITE_BASE_URL;
-
 // 페이지네이션 상태
 const page = ref(1);
 const itemsPerPage = 8; // 한 페이지당 게시글 개수 (2열 × 3행 = 6개)
@@ -105,7 +103,7 @@ const toCommunityDetail = (postId) => {
             <v-card
               class="post-card"
               elevation="2"
-              @click="toCommunityDetail()"
+              @click="toCommunityDetail(post.postId)"
             >
               <v-card-title class="card-header">
                 <span class="post-category">[{{ post.category }}]</span>
