@@ -141,7 +141,8 @@ const completeMission = async () => {
     authentication.setXp(res.data.user.xp);
     state.user.xp = res.data.user.xp;
     state.user.point = res.data.user.point;
-    window.location.reload();
+    totalXp.value = res.data.user.xp;
+
     successDialog.value = true;
   }
 };
