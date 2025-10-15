@@ -2,6 +2,15 @@ import axios from "@/services/httpRequester";
 
 const BASE_URL = "/body_composition";
 
+export const saveUserBasicBodyInfo = (formData) => {
+  // console.log("formData : ", formData);
+  return axios.post(BASE_URL, formData).catch((e) => e.response);
+};
+
+export const getUserBasicBodyInfo = () => {
+  return axios.get(`${BASE_URL}/basic`).catch((e) => e.response);
+};
+
 export const getLastestBodyComposition = () => {
   return axios.get(`${BASE_URL}/lastest`).catch((e) => e.response);
 };

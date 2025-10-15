@@ -3,6 +3,7 @@ import {
   getLastestBodyComposition,
   getMetrics,
   getSeries,
+  getUserBasicBodyInfo,
 } from "@/services/body_composition/bodyCompositionService";
 
 export const useBodyCompositionStore = defineStore("bodyComposition", {
@@ -12,11 +13,8 @@ export const useBodyCompositionStore = defineStore("bodyComposition", {
     metrics: [],
     selectionMetrics: [],
     filterList: [],
-    bmiInfo: {
-      height: null,
-      weight: null,
-      bmi: null,
-    },
+    basicInfo: [],
+    recentBodyInfo: {},
   }),
 
   actions: {
@@ -40,6 +38,15 @@ export const useBodyCompositionStore = defineStore("bodyComposition", {
         this.selectionMetrics = [];
       }
     },
+    // async fetchBasicBodyInfo() {
+    //   const res = await getUserBasicBodyInfo();
+    //   if (res === undefined || res.status !== 200) {
+    //     alert("에러발생");
+    //     return;
+    //   }
+    //   this.basicInfo = res.data;
+    //   console.log("통신", this.basicInfo);
+    // },
     addSeries(list) {
       this.series = [...list];
     },
@@ -51,6 +58,17 @@ export const useBodyCompositionStore = defineStore("bodyComposition", {
     },
     clearMetrics() {
       this.metrics = [];
+    },
+    setBasicInfo(data) {
+      this.basicInfo = data;
+    },
+    resetStore() {
+      this.basicInfo = [];
+      this.recentBodyInfo = {};
+    },
+    setRecentBodyInfo() {
+      const recentIdx = this.basicInfo.length - 1;
+      this.recentBodyInfo = this.basicInfo[recentIdx];
     },
   },
 

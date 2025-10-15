@@ -7,7 +7,7 @@ import {
   getExerciseStatistics,
   getMealStatistics,
 } from '@/services/admin/adminService';
-import { onMounted, ref, reactive } from 'vue';
+import { onMounted, reactive } from 'vue';
 import {
   Chart as ChartJS,
   Title,
@@ -22,7 +22,7 @@ import {
   LinearScale,
 } from 'chart.js';
 import { Pie, Bar, Line } from 'vue-chartjs';
-import Progress from '@/components/challenge/Progress.vue';
+
 ChartJS.register(
   Title,
   Tooltip,
@@ -37,157 +37,22 @@ ChartJS.register(
 );
 
 const state = reactive({
-  // 유저
   genderChartData: { labels: [], datasets: [{ data: [] }] },
   ageChartData: { labels: [], datasets: [{ data: [] }] },
   signInChartData: { labels: [], datasets: [{ data: [] }] },
-
-  // 챌린지
   tierChartData: { labels: [], datasets: [{ data: [] }] },
   challengeTypeChartData: { labels: [], datasets: [{ data: [] }] },
   challengeRateChartData: { labels: [], datasets: [{ data: [] }] },
-
-  // 커뮤니티
   postChartData: { labels: [], datasets: [{ data: [] }] },
   CategoryPostChartData: { labels: [], datasets: [{ data: [] }] },
-
-  // 운동
   exerciseRecordChartData: { labels: [], datasets: [{ data: [] }] },
   exerciseTypeRecordChartData: { labels: [], datasets: [{ data: [] }] },
   exerciseDistributionChartData: { labels: [], datasets: [{ data: [] }] },
-
-  // 식단
   mealRecordChartData: { labels: [], datasets: [{ data: [] }] },
   mealMacroAverageChartData: { labels: [], datasets: [{ data: [] }] },
-
-  // 문의
   inquiryCountData: { labels: [], datasets: [{ data: [] }] },
-  responseRate: '',
+  responseRateChartData: { labels: [], datasets: [{ data: [] }] },
 });
-
-// 퍼센트 계산용 원형차트 툴팁 콜백 함수 (마지막 조각 보정)
-const makePercentLabel = (context) => {
-  const values = context.dataset.data.map(Number);
-  const total = values.reduce((a, b) => a + b, 0);
-  const value = Number(context.raw);
-
-  if (!total) return `${context.label}: 0명 (0%)`;
-
-  // 소수점 한 자리 반올림
-  const round1 = (n) => Math.round(n * 10) / 10;
-
-  let pct = (value / total) * 100;
-
-  // 마지막 조각은 합계를 100%로 맞추도록 보정
-  if (context.dataIndex === values.length - 1) {
-    const prevSum = values
-      .slice(0, -1)
-      .map((v) => round1((v / total) * 100))
-      .reduce((a, b) => a + b, 0);
-    pct = 100 - prevSum;
-  } else {
-    pct = round1(pct);
-  }
-
-  return `${context.label}: ${value}명 (${pct.toFixed(1)}%)`;
-};
-
-// 원형차트 옵션
-const pieCommonOption = {
-  responsive: true,
-  plugins: {
-    legend: {
-      position: 'bottom',
-      labels: { color: '#333', font: { size: 14 } },
-    },
-    tooltip: {
-      enabled: true,
-      callbacks: { label: makePercentLabel },
-    },
-  },
-};
-
-// 바차트 옵션
-const barCommonOption = {
-  responsive: true,
-
-  plugins: {
-    legend: { display: false },
-    title: {
-      display: true,
-      font: { size: 18, weight: 'bold' },
-      color: '#222',
-    },
-    tooltip: {
-      enabled: true,
-      callbacks: {
-        label: (context) => {
-          return `${context.parsed.y}%`;
-        },
-      },
-    },
-  },
-  scales: {
-    x: {
-      grid: { display: false },
-      ticks: {
-        color: '#555',
-        font: { size: 13, weight: '500' },
-      },
-      // 막대 너비 조정
-      categoryPercentage: 0.6,
-      barPercentage: 0.8,
-    },
-    y: {
-      beginAtZero: true,
-      max: 100,
-      grid: {
-        color: '#eee',
-      },
-      ticks: {
-        color: '#555',
-        font: { size: 12 },
-        callback: (value) => `${value}%`,
-        stepSize: 20,
-      },
-    },
-  },
-};
-
-// 라인차트 옵션
-const lineCommonOption = {
-  responsive: true,
-
-  plugins: {
-    legend: { display: false },
-    title: { display: false },
-    tooltip: {
-      enabled: true,
-      callbacks: {
-        label: (context) => {
-          return `${context.parsed.y}명`;
-        },
-      },
-    },
-  },
-  scales: {
-    y: {
-      beginAtZero: true, // y축 0부터 시작
-      ticks: {
-        stepSize: 10,
-        callback: (value) => `${value}명`,
-      },
-    },
-  },
-  layout: {
-    padding: {
-      top: 20, // 차트 위쪽 여백 확보
-      bottom: 0,
-      left: 0,
-      right: 0,
-    },
-  },
-};
 
 onMounted(async () => {
   getUser();
@@ -198,483 +63,561 @@ onMounted(async () => {
   getMeal();
 });
 
-// 유저 통계 데이터 세팅
+// Tooltip Formatter
+const makeTooltipLabel = (unit) => (context) => {
+  const value = context.parsed.y ?? context.raw;
+  if (value == null) return '';
+  return `${context.label}: ${value}${unit}`;
+};
+
+// Pie 공통 옵션
+const makePieOption = (unit = '명') => ({
+  responsive: true,
+  maintainAspectRatio: true,
+  aspectRatio: 1,
+  plugins: {
+    legend: {
+      position: 'bottom',
+      labels: { color: '#333', font: { size: 13 }, padding: 8 },
+    },
+    tooltip: {
+      callbacks: {
+        label: (ctx) => {
+          const values = ctx.dataset.data.map(Number);
+          const total = values.reduce((a, b) => a + b, 0);
+          const value = Number(ctx.raw);
+          const pct = total ? ((value / total) * 100).toFixed(1) : 0;
+          return `${ctx.label}: ${value}${unit} (${pct}%)`;
+        },
+      },
+    },
+    layout: {
+      padding: { top: 0, bottom: 0 }, //  차트 위아래 여백 줄이기
+    },
+  },
+});
+
+// Bar 공통 옵션
+const makeBarOption = (unit = '', max = null) => ({
+  responsive: true,
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      callbacks: { label: makeTooltipLabel(unit) },
+    },
+  },
+  scales: {
+    x: {
+      grid: { display: false },
+      ticks: { color: '#555', font: { size: 12 } },
+    },
+    y: {
+      beginAtZero: true,
+      max,
+      grid: { color: '#eee' },
+      ticks: {
+        color: '#555',
+        font: { size: 12 },
+        callback: (v) => `${v}${unit}`,
+      },
+    },
+  },
+});
+
+// Line 공통 옵션
+const makeLineOption = (unit = '') => ({
+  responsive: true,
+  plugins: {
+    legend: { display: false },
+    tooltip: { callbacks: { label: makeTooltipLabel(unit) } },
+  },
+  scales: {
+    y: {
+      beginAtZero: true,
+      ticks: { stepSize: 10, callback: (v) => `${v}${unit}` },
+      grid: { color: '#f3f3f3' },
+    },
+  },
+});
+
+// 데이터 로드 함수
 const getUser = async () => {
   const res = await getUserStatistics();
-  console.log('user', res.data);
-
-  // 성별 비율 통계
-  const genderData = Array.isArray(res.data.genderCount)
-    ? res.data.genderCount
-    : [];
-
+  const genderData = res.data.genderCount || [];
   const male = Number(genderData.find((g) => g.gender === 'M')?.count ?? 0);
   const female = Number(genderData.find((g) => g.gender === 'F')?.count ?? 0);
-
   state.genderChartData = {
     labels: ['남성', '여성'],
     datasets: [
-      {
-        data: [male, female],
-        backgroundColor: ['#36A2EB', '#FF6384'],
-        borderWidth: 1,
-      },
+      { data: [male, female], backgroundColor: ['#81d4fa', '#f8b5a2'] },
     ],
   };
 
-  // 연령대 분포 통계
-  const ageData = (
-    Array.isArray(res.data.ageCount) ? res.data.ageCount : []
-  ).map((d) => ({
-    ageGroup: d.ageGroup,
-    count: Number(d.count),
-  }));
-
+  const ageData = res.data.ageCount || [];
   state.ageChartData = {
     labels: ageData.map((d) => d.ageGroup),
     datasets: [
       {
         data: ageData.map((d) => d.count),
         backgroundColor: [
-          '#4fc3f7',
-          '#81c784',
-          '#ffb74d',
-          '#e57373',
-          '#9575cd',
-          '#b0bec5',
+          '#ffe082',
+          '#f8b5a2',
+          '#ce93d8',
+          '#81d4fa',
+          '#aed581',
         ],
       },
     ],
   };
 
-  // 월별 가입자 추이 통계
-  const signInData = (
-    Array.isArray(res.data.signInCount) ? res.data.signInCount : []
-  ).map((d) => ({
-    month: d.month ?? '기타',
-    signInCount: Number(d.signInCount ?? 0),
-  }));
-
+  const signInData = res.data.signInCount || [];
   state.signInChartData = {
     labels: signInData.map((d) => d.month),
     datasets: [
       {
         data: signInData.map((d) => d.signInCount),
-        borderColor: '#42a5f5',
-        backgroundColor: '#bbdefb',
-        borderWidth: 2,
+        borderColor: '#ef9a9a',
+        backgroundColor: '#ffebee',
         fill: true,
       },
     ],
   };
 };
-// 챌린지 통계 데이터 세팅
+
 const getChallenge = async () => {
   const res = await getChallengeStatistics();
-  console.log('challenge', res.data);
-
-  // 챌린지 티어 분포
-  const tierData = (
-    Array.isArray(res.data.tierCount) ? res.data.tierCount : []
-  ).map((d) => ({
-    tier: d.tier ?? '기타',
-    count: Number(d.count ?? 0),
-  }));
-
+  const tierData = res.data.tierCount || [];
   state.tierChartData = {
     labels: tierData.map((d) => d.tier),
     datasets: [
       {
         data: tierData.map((d) => d.count),
         backgroundColor: [
-          '#c08a4d',
-          '#bfc7ce',
-          '#f6c453',
-          '#4db6e2',
-          '#f28379',
+          '#cd9777',
+          '#cfd8dc',
+          '#ffe082',
+          '#81d4fa',
+          '#a5d6a7',
         ],
-        borderWidth: 1,
       },
     ],
   };
 
-  // 챌린지 타입별 갯수 비율
-  const challengeTypeData = (
-    Array.isArray(res.data.challengeTypeCount)
-      ? res.data.challengeTypeCount
-      : []
-  ).map((d) => ({
-    type: d.type ?? '기타',
-    count: Number(d.count ?? 0),
-  }));
-
+  const challengeTypeData = res.data.challengeTypeCount || [];
   state.challengeTypeChartData = {
     labels: challengeTypeData.map((d) => d.type),
     datasets: [
       {
         data: challengeTypeData.map((d) => d.count),
-        backgroundColor: [
-          '#4fc3f7',
-          '#81c784',
-          '#ffb74d',
-          '#e57373',
-          '#9575cd',
-          '#b0bec5',
-        ],
-        borderWidth: 1,
+        backgroundColor: ['#81d4fa', '#a5d6a7', '#ffe082', '#b39ddb'],
       },
     ],
   };
 
-  // 챌린지 타입별 성공률
-  const challengeRateData = (
-    Array.isArray(res.data.challengeSuccessRateCount)
-      ? res.data.challengeSuccessRateCount
-      : []
-  ).map((d) => ({
-    challengeType: d.challengeType ?? '기타',
-    successRate: Number(d.successRate ?? 0),
-  }));
-
+  const challengeRateData = res.data.challengeSuccessRateCount || [];
   state.challengeRateChartData = {
     labels: challengeRateData.map((d) => d.challengeType),
     datasets: [
       {
         data: challengeRateData.map((d) => d.successRate),
-        backgroundColor: [
-          '#4db6e2',
-          '#81c784',
-          '#f6c453',
-          '#f28379',
-          '#9575cd',
-        ],
-        borderWidth: 1,
+        backgroundColor: ['#81d4fa', '#a5d6a7', '#ffd54f', '#f8b5a2'],
       },
     ],
   };
 };
 
-// 커뮤니티 통계 데이터 세팅
 const getCommunity = async () => {
   const res = await getCommunityStatistics();
-  console.log('community', res.data);
-
-  // 게시글 추이
-  const postData = Array.isArray(res.data.postCount) ? res.data.postCount : [];
+  const postData = res.data.postCount || [];
   state.postChartData = {
     labels: postData.map((d) => d.month),
     datasets: [
       {
-        data: postData.map((d) => Number(d.postCount)),
-        borderColor: '#42a5f5',
-        backgroundColor: '#bbdefb',
-        borderWidth: 2,
+        data: postData.map((d) => d.postCount),
+        borderColor: '#64b5f6',
+        backgroundColor: '#e3f2fd',
         fill: true,
       },
     ],
   };
 
-  // 카테고리별 게시글 수
-  const catData = Array.isArray(res.data.categoryPostCount)
-    ? res.data.categoryPostCount
-    : [];
+  const catData = res.data.categoryPostCount || [];
   state.CategoryPostChartData = {
     labels: catData.map((d) => d.categoryName),
     datasets: [
       {
-        data: catData.map((d) => Number(d.count)),
-        backgroundColor: ['#4db6e2', '#81c784', '#ffb74d', '#f06292'],
+        data: catData.map((d) => d.count),
+        backgroundColor: ['#81d4fa', '#a5d6a7', '#ffe082', '#f8b5a2'],
       },
     ],
   };
 };
 
-// 운동 통계 데이터 세팅
 const getExercise = async () => {
   const res = await getExerciseStatistics();
-  console.log('exercise', res.data);
-
-  // 월별 운동 기록 추이
-  const monthData = Array.isArray(res.data.exerciseRecordCountResList)
-    ? res.data.exerciseRecordCountResList
-    : [];
+  const monthData = res.data.exerciseRecordCountResList || [];
   state.exerciseRecordChartData = {
     labels: monthData.map((d) => d.month),
     datasets: [
       {
-        data: monthData.map((d) => Number(d.recordCount)),
-        borderColor: '#66bb6a',
-        backgroundColor: '#c8e6c9',
-        borderWidth: 2,
+        data: monthData.map((d) => d.recordCount),
+        borderColor: '#a5d6a7',
+        backgroundColor: '#e8f5e9',
         fill: true,
       },
     ],
   };
 
-  // 종목별 운동 수
-  const typeData = Array.isArray(res.data.exerciseNameRecordCountResList)
-    ? res.data.exerciseNameRecordCountResList
-    : [];
+  const typeData = res.data.exerciseNameRecordCountResList || [];
   state.exerciseTypeRecordChartData = {
     labels: typeData.map((d) => d.exerciseName),
     datasets: [
       {
-        data: typeData.map((d) => Number(d.recordCount)),
-        backgroundColor: '#81c784',
+        data: typeData.map((d) => d.recordCount),
+        backgroundColor: '#a5d6a7',
       },
     ],
   };
 
-  // 시간대별 운동 분포
-  const timeData = Array.isArray(res.data.exerciseDistributionCountResList)
-    ? res.data.exerciseDistributionCountResList
-    : [];
+  const timeData = res.data.exerciseDistributionCountResList || [];
   state.exerciseDistributionChartData = {
     labels: timeData.map((d) => d.timeRange),
     datasets: [
       {
-        data: timeData.map((d) => Number(d.count)),
-        backgroundColor: ['#aed581', '#4fc3f7', '#ba68c8', '#ffb74d'],
+        data: timeData.map((d) => d.count),
+        backgroundColor: ['#c5e1a5', '#81d4fa', '#ce93d8', '#ffe082'],
       },
     ],
   };
 };
 
-// 식단 통계 데이터 세팅
 const getMeal = async () => {
   const res = await getMealStatistics();
-  console.log('meal', res.data);
-
-  // 식단 기록 추이
-  const mealTrend = Array.isArray(res.data.mealRecordCount)
-    ? res.data.mealRecordCount
-    : [];
+  const mealTrend = res.data.mealRecordCount || [];
   state.mealRecordChartData = {
     labels: mealTrend.map((d) => d.month),
     datasets: [
       {
-        data: mealTrend.map((d) => Number(d.recordCount)),
-        borderColor: '#42a5f5',
-        backgroundColor: '#bbdefb',
+        data: mealTrend.map((d) => d.recordCount),
+        borderColor: '#ffe082',
+        backgroundColor: '#fffde7',
         fill: true,
-        borderWidth: 2,
       },
     ],
   };
 
-  // 탄단지 평균 섭취량
   const macro = res.data.mealMacroAverage ?? {};
   state.mealMacroAverageChartData = {
     labels: ['탄수화물', '단백질', '지방'],
     datasets: [
       {
         data: [
-          Number(macro.averageCarbohydrate ?? 0),
-          Number(macro.averageProtein ?? 0),
-          Number(macro.averageFat ?? 0),
+          macro.averageCarbohydrate ?? 0,
+          macro.averageProtein ?? 0,
+          macro.averageFat ?? 0,
         ],
-        backgroundColor: ['#81c784', '#64b5f6', '#ffb74d'],
+        backgroundColor: ['#a5d6a7', '#81d4fa', '#ffe082'],
       },
     ],
   };
 };
 
-// 문의 통계 데이터 세팅
 const getInquiry = async () => {
   const res = await getInquiryStatistics();
-  console.log('inquiry', res.data);
-
-  // 문의 건 수 추이
-  const inquiryCount = Array.isArray(res.data.inquiryCount)
-    ? res.data.inquiryCount
-    : [];
+  const inquiryCount = res.data.inquiryCount || [];
   state.inquiryCountData = {
     labels: inquiryCount.map((d) => d.month),
     datasets: [
       {
-        data: inquiryCount.map((d) => Number(d.inquiryCount)),
-        borderColor: '#42a5f5',
-        backgroundColor: '#bbdefb',
+        data: inquiryCount.map((d) => d.inquiryCount),
+        borderColor: '#b39ddb',
+        backgroundColor: '#f3e5f5',
         fill: true,
-        borderWidth: 2,
       },
     ],
   };
 
-  // 문의 답변율
-  state.responseRate = res.data.responseRate;
+  const responseRate = res.data.responseRate;
+  state.responseRateChartData = {
+    labels: ['답변 완료', '미답변'],
+    datasets: [
+      {
+        data: [responseRate, 100 - responseRate],
+        backgroundColor: ['#81d4fa', '#d1c4e9'],
+      },
+    ],
+  };
 };
 </script>
 
 <template>
-  <div class="chart-wrap">
-    <div class="chart-group">
-      <h3 class="title">사용자 성별</h3>
-      <Pie
-        :data="state.genderChartData"
-        :options="pieCommonOption"
-        class="pie"
-      />
-    </div>
+  <div class="admin-chart">
+    <v-card class="data-card pa-2">
+      <v-card-title
+        class="d-flex justify-space-between align-center mb-4 card-title"
+      >
+        <span class="title">통계</span>
+      </v-card-title>
 
-    <div class="chart-group">
-      <h3 class="title">사용자 연령대</h3>
-      <Pie :data="state.ageChartData" :options="pieCommonOption" class="pie" />
-    </div>
+      <div class="chart-wrap">
+        <!-- 기존 차트 그룹 그대로 -->
+        <div class="chart-group">
+          <h3 class="title">사용자 성별</h3>
+          <Pie
+            :data="state.genderChartData"
+            :options="makePieOption('명')"
+            class="pie"
+          />
+          <p class="chart-unit">단위: 명</p>
+        </div>
 
-    <div class="chart-group">
-      <h3 class="title">사용자 챌린지 티어</h3>
-      <Pie :data="state.tierChartData" :options="pieCommonOption" class="pie" />
-    </div>
+        <div class="chart-group">
+          <h3 class="title">사용자 연령대</h3>
+          <Pie
+            :data="state.ageChartData"
+            :options="makePieOption('명')"
+            class="pie"
+          />
+          <p class="chart-unit">단위: 명</p>
+        </div>
 
-    <div class="chart-group">
-      <h3 class="title">챌린지 타입 비율</h3>
-      <Pie
-        :data="state.challengeTypeChartData"
-        :options="pieCommonOption"
-        class="pie"
-      />
-    </div>
+        <div class="chart-group">
+          <h3 class="title">최근 6개월 회원가입 추이</h3>
+          <Line
+            :data="state.signInChartData"
+            :options="makeLineOption('명')"
+            class="line"
+          />
+          <p class="chart-unit">단위: 명</p>
+        </div>
+        <!-- 🏆 챌린지 -->
+        <div class="chart-group">
+          <h3 class="title">챌린지 티어 분포</h3>
+          <Pie
+            :data="state.tierChartData"
+            :options="makePieOption('개')"
+            class="pie"
+          />
+          <p class="chart-unit">단위: 개</p>
+        </div>
 
-    <div class="chart-group">
-      <h3 class="title">챌린지별 성공률</h3>
-      <Bar
-        :data="state.challengeRateChartData"
-        :options="barCommonOption"
-        class="bar"
-      />
-    </div>
+        <div class="chart-group">
+          <h3 class="title">챌린지 타입 비율</h3>
+          <Pie
+            :data="state.challengeTypeChartData"
+            :options="makePieOption('개')"
+            class="pie"
+          />
+          <p class="chart-unit">단위: 개</p>
+        </div>
 
-    <div class="chart-group">
-      <h3 class="title">최근 6개월 회원가입 추이</h3>
-      <Line
-        :data="state.signInChartData"
-        :options="lineCommonOption"
-        class="line"
-      />
-    </div>
+        <div class="chart-group">
+          <h3 class="title">챌린지 성공률</h3>
+          <Bar
+            :data="state.challengeRateChartData"
+            :options="makeBarOption('%', 100)"
+            class="bar"
+          />
+          <p class="chart-unit">단위: %</p>
+        </div>
 
-    <div class="chart-group">
-      <h3 class="title">게시글 추이</h3>
-      <Line
-        :data="state.postChartData"
-        :options="lineCommonOption"
-        class="bar"
-      />
-    </div>
+        <!-- 🗂 커뮤니티 -->
+        <div class="chart-group">
+          <h3 class="title">게시글 추이</h3>
+          <Line
+            :data="state.postChartData"
+            :options="makeLineOption('건')"
+            class="line"
+          />
+          <p class="chart-unit">단위: 건</p>
+        </div>
 
-    <div class="chart-group">
-      <h3 class="title">카테고리별 게시글 수</h3>
-      <Pie
-        :data="state.CategoryPostChartData"
-        :options="pieCommonOption"
-        class="pie"
-      />
-    </div>
+        <div class="chart-group">
+          <h3 class="title">카테고리별 게시글 수</h3>
+          <Pie
+            :data="state.CategoryPostChartData"
+            :options="makePieOption('건')"
+            class="pie"
+          />
+          <p class="chart-unit">단위: 건</p>
+        </div>
 
-    <div class="chart-group">
-      <h3 class="title">운동 기록 추이</h3>
-      <Line
-        :data="state.exerciseRecordChartData"
-        :options="lineCommonOption"
-        class="line"
-      />
-    </div>
+        <!-- 💪 운동 -->
+        <div class="chart-group">
+          <h3 class="title">운동 기록 추이</h3>
+          <Line
+            :data="state.exerciseRecordChartData"
+            :options="makeLineOption('건')"
+            class="line"
+          />
+          <p class="chart-unit">단위: 건</p>
+        </div>
 
-    <div class="chart-group">
-      <h3 class="title">운동 종목별 기록 수</h3>
-      <Bar
-        :data="state.exerciseTypeRecordChartData"
-        :options="barCommonOption"
-        class="bar"
-      />
-    </div>
+        <div class="chart-group">
+          <h3 class="title">운동 종목별 기록 수</h3>
+          <Bar
+            :data="state.exerciseTypeRecordChartData"
+            :options="makeBarOption('건')"
+            class="bar"
+          />
+          <p class="chart-unit">단위: 건</p>
+        </div>
 
-    <div class="chart-group">
-      <h3 class="title">시간대별 운동 분포</h3>
-      <Pie
-        :data="state.exerciseDistributionChartData"
-        :options="pieCommonOption"
-        class="pie"
-      />
-    </div>
+        <div class="chart-group">
+          <h3 class="title">시간대별 운동 분포</h3>
+          <Pie
+            :data="state.exerciseDistributionChartData"
+            :options="makePieOption('건')"
+            class="pie"
+          />
+          <p class="chart-unit">단위: 건</p>
+        </div>
 
-    <div class="chart-group">
-      <h3 class="title">식단 기록 추이</h3>
-      <Line
-        :data="state.mealRecordChartData"
-        :options="lineCommonOption"
-        class="line"
-      />
-    </div>
+        <!-- 🍽 식단 -->
+        <div class="chart-group">
+          <h3 class="title">식단 기록 추이</h3>
+          <Line
+            :data="state.mealRecordChartData"
+            :options="makeLineOption('건')"
+            class="line"
+          />
+          <p class="chart-unit">단위: 건</p>
+        </div>
 
-    <div class="chart-group">
-      <h3 class="title">탄단지 평균 섭취량</h3>
-      <Bar
-        :data="state.mealMacroAverageChartData"
-        :options="barCommonOption"
-        class="bar"
-      />
-    </div>
+        <div class="chart-group">
+          <h3 class="title">탄단지 평균 섭취량</h3>
+          <Bar
+            :data="state.mealMacroAverageChartData"
+            :options="makeBarOption('g')"
+            class="bar"
+          />
+          <p class="chart-unit">단위: g</p>
+        </div>
 
-    <div class="chart-group">
-      <h3 class="title">문의건수 추이</h3>
-      <Line
-        :data="state.inquiryCountData"
-        :options="lineCommonOption"
-        class="line"
-      />
-    </div>
-  </div>
+        <!-- 📩 문의 -->
+        <div class="chart-group">
+          <h3 class="title">문의 건수 추이</h3>
+          <Line
+            :data="state.inquiryCountData"
+            :options="makeLineOption('건')"
+            class="line"
+          />
+          <p class="chart-unit">단위: 건</p>
+        </div>
 
-  <div class="chart-group" v-if="state.responseRate != ''">
-    <h3 class="title">문의 답변율</h3>
-    <Progress :indata-progress="state.responseRate"></Progress>
+        <div class="chart-group">
+          <h3 class="title">문의 답변율</h3>
+          <Pie
+            :data="state.responseRateChartData"
+            :options="makePieOption('%')"
+            class="pie"
+          />
+          <p class="chart-unit">단위: %</p>
+        </div>
+      </div>
+    </v-card>
   </div>
 </template>
 
-<style lang="scss">
-.chart-wrap {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 20px;
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
+<style lang="scss" scoped>
+.admin-chart {
+  padding: 10px;
+
+  .title {
+    font-weight: 700;
+    font-size: 23px;
+  }
+
+  .data-card {
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  }
 }
 
+// 전체 그리드 (간격 줄임, 박스 크기 키움)
+.chart-wrap {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(400px, 1fr)
+  ); // 카드 크기 약간 확대
+  gap: 18px 20px; // 가로세로 간격 좁힘
+  justify-items: center;
+  align-items: start;
+  padding: 16px 0;
+}
+
+// 개별 차트 카드
 .chart-group {
   background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  padding: 24px 32px;
-  max-width: 1100px;
+  border-radius: 14px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  padding: 22px 26px;
+  text-align: center;
+  transition: all 0.25s ease;
+  width: 100%;
+  max-width: 460px;
+  min-height: 360px; // 카드 높이 일정하게
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 
-  .pie {
-    width: 100% !important;
-    max-width: 250px;
-    height: 250px !important;
-  }
-
-  .bar {
-    width: 100% !important;
-    max-width: 600px;
-    height: 250px !important;
-  }
-
-  .line {
-    width: 100% !important;
-    max-width: 600px;
-    height: 250px !important;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
   }
 
   .title {
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 600;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     color: #333;
-    text-align: center;
+  }
+
+  .chart-unit {
+    font-size: 12px;
+    color: #888;
+    margin-top: 6px;
+  }
+
+  // ✅ 모든 차트 크기 통일
+  .pie,
+  .bar,
+  .line {
+    width: 320px !important;
+    height: 240px !important;
+    margin: 0 auto;
+  }
+}
+
+.card-title {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 6px;
+  margin-bottom: 16px;
+}
+
+// 반응형
+@media (max-width: 1200px) {
+  .chart-wrap {
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .chart-wrap {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+
+  .chart-group {
+    min-height: 320px;
+  }
+
+  .chart-group .pie,
+  .chart-group .bar,
+  .chart-group .line {
+    width: 260px !important;
+    height: 200px !important;
   }
 }
 </style>

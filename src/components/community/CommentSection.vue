@@ -19,6 +19,7 @@ const count = computed(() => commentsStore.count(props.postId));
 const input = ref('');
 const meUserId = computed(() => auth.state.signedUser?.userId || 0);
 const meNickName = computed(() => auth.state.signedUser?.nickName || '회원');
+const myRole = computed(() => auth.state.signedUser?.userRole || '');
 
 const DEFAULT_AVATAR =
   import.meta.env.BASE_URL + 'image/main/default-profile.png';
@@ -67,10 +68,13 @@ async function submit() {
 }
 
 async function removeOne(c) {
-  await commentsStore.remove(c.commentId, props.postId);
+  await commentsStore.remove(c.commentId, props.postId, myRole.value);
 }
 
-const isMine = (c) => Number(c.userId) === Number(meUserId.value);
+const isMine = (c) => {
+  if (myRole.value === 'ADMIN') return true;
+  return Number(c.userId) === Number(meUserId.value);
+};
 
 onMounted(() => {
   commentsStore.load(props.postId);

@@ -3,18 +3,19 @@ import { defineStore } from 'pinia';
 import router from '@/router';
 import axios from '@/services/httpRequester';
 
-const DEFAULT_PROFILE = '/otd/image/main/default-profile.png';
+const DEFAULT_PROFILE = "/otd/image/main/default-profile.png";
 const FILE_URL = import.meta.env.VITE_BASE_URL;
 export const useAuthenticationStore = defineStore(
-  'authentication',
+  "authentication",
   () => {
     const state = reactive({
       signedUser: {
         userId: 0,
-        nickName: '',
-        email: '',
+        nickName: "",
+        email: "",
         pic: DEFAULT_PROFILE,
-        gender: '',
+        gender: "",
+        age: "",
         point: 0,
         xp: 0,
         challengeRole: '',
@@ -42,7 +43,7 @@ export const useAuthenticationStore = defineStore(
     };
 
     const formattedUserPic = (user) => {
-      return user.pic && user.pic.trim() !== ''
+      return user.pic && user.pic.trim() !== ""
         ? `${FILE_URL}/profile/${user.userId}/${user.pic}`
         : DEFAULT_PROFILE;
     };

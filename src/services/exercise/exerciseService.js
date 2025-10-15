@@ -18,17 +18,9 @@ export const getExerciseRecordWeekly = (params) => {
 };
 
 // 운동기록 상세조회
-// export const getExerciseRecordDetail = (recordId, params) => {
-//   return axios
-//     .get(`${BASE_URL}/${recordId}`, { params })
-//     .catch((e) => e.response);
-// };
 export const getExerciseRecordDetail = (recordId, params) => {
   return axios
-    .get(
-      `${BASE_URL}/${recordId}`,
-      { params } // 쿼리 파라미터
-    )
+    .get(`${BASE_URL}/${recordId}`, { params })
     .catch((e) => e.response);
 };
 
@@ -47,4 +39,9 @@ export const getExercise = () => {
 // admin
 export const getUserExerciseRecord = (userId) => {
   return axios.get(`${BASE_URL}/${userId}`).catch((e) => e.response);
+};
+
+// 일자별 평균 운동 소요시간
+export const getAvgDuration = () => {
+  return axios.get(`${BASE_URL}/average/duration`).catch((e) => e.response);
 };
