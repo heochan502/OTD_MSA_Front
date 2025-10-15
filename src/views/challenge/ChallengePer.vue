@@ -46,10 +46,19 @@ const gap = () => {
   );
   const myTotalRecord = Number(state.aroundRanking[myIdx].totalRecord);
 
-  // 앞뒤 값 안전하게 가져오기
-  const beforeMe = state.aroundRanking[myIdx - 1]?.totalRecord
-    ? Number(state.aroundRanking[myIdx - 1].totalRecord)
-    : null;
+  // 기본 앞사람
+  let beforeMe =
+    state.aroundRanking[myIdx - 1]?.totalRecord != null
+      ? Number(state.aroundRanking[myIdx - 1].totalRecord)
+      : null;
+
+  // 만약 앞사람과 내가 같다면 → 2단계 위 사람을 비교 대상으로 설정
+  if (beforeMe !== null && beforeMe === myTotalRecord) {
+    beforeMe =
+      state.aroundRanking[myIdx - 2]?.totalRecord != null
+        ? Number(state.aroundRanking[myIdx - 2].totalRecord)
+        : null;
+  }
   const afterMe = state.aroundRanking[myIdx + 1]?.totalRecord
     ? Number(state.aroundRanking[myIdx + 1].totalRecord)
     : null;
@@ -166,7 +175,7 @@ onMounted(async () => {
               {{ ment }}
             </template>
             <template v-else>
-              나는 현재 {{ state.progress.myRank }}위에 있어요!
+              저는 현재 {{ state.progress.myRank }}위에 있어요!
             </template>
           </div>
         </div>
