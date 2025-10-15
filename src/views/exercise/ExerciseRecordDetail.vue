@@ -104,16 +104,16 @@ const onDateClick = async (date) => {
   }
   exerciseRecordStore.records = res.data;
 
-  // console.log("기록 몇 개인가요?");
+  console.log("기록 몇 개인가요?");
   if (exerciseRecordStore.records.length === 0) {
-    // console.log("0개");
+    console.log("0개");
     noticeDialog.value = true;
   } else if (exerciseRecordStore.records.length === 1) {
-    // console.log("1개");
-    // console.log("[데이터]", exerciseRecordStore.records[0].exerciseRecordId);
+    console.log("1개");
+    console.log("[데이터]", exerciseRecordStore.records[0].exerciseRecordId);
     getData(exerciseRecordStore.records[0].exerciseRecordId);
   } else {
-    // console.log("기록이 여러개입니다.");
+    console.log("기록이 여러개입니다.");
     selectionItems.value = exerciseRecordStore.records;
     selectionDialog.value = true;
   }

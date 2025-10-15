@@ -89,8 +89,8 @@ const onSelectDate = (date) => {
 
 // 적용 버튼 클릭 시 (날짜 반영 + 모달 닫기)
 const applyDate = (date) => {
-  emit("click-date", date);
   openCalendar.value = false; // 모달 닫기
+  emit("click-date", date);
 };
 </script>
 
