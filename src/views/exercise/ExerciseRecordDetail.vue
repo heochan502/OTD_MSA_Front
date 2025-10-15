@@ -92,7 +92,7 @@ const onDateClick = async (date) => {
   // console.log("선택날짜", selectedDate.value);
   const params = {
     page: 1,
-    row_per_page: 10,
+    row_per_page: 2,
     type: "daily",
     date: date, // YYYY-MM-DD 형태
   };
