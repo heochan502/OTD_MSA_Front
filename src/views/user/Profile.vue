@@ -343,18 +343,6 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- 설정 섹션 -->
-    <div class="settings-section">
-      <h3 class="section-title">설정</h3>
-      <div class="settings-list">
-        <router-link to="/user/signal" class="settings-item">
-          <div class="settings-icon">🔔</div>
-          <span>알림 설정</span>
-          <div class="arrow">›</div>
-        </router-link>
-      </div>
-    </div>
-
     <!-- 고객센터 섹션 -->
     <div class="support-section">
       <h3 class="section-title">고객센터</h3>
