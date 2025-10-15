@@ -545,6 +545,7 @@ height: 22px;}
   height: 56px;
   align-items: center;
   box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+  padding: 0 15px;
 }
 
 /*  노치 제거: 왼쪽에 서있는 세로선 원인 */
