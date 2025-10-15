@@ -108,6 +108,7 @@ export const useAuthenticationStore = defineStore(
         onboardingCompleted: 0 
       };
       state.isSigned = false;
+      useAuthenticationStore().$reset();
     };
 
     return {
