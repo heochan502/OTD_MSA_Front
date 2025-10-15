@@ -94,7 +94,7 @@ const applyDate = (date) => {
 
 <template>
   <div class="d-flex align-center ga-2">
-    <div class="d-flex align-center ga-2">
+    <div class="d-flex align-center ga-2 ml-2">
       <img
         src="\image\exercise\calender.png"
         alt="캘린더 아이콘"
@@ -167,8 +167,6 @@ const applyDate = (date) => {
 .weekly-calendar {
   display: flex;
   justify-content: center;
-  max-width: 300px;
-  // width: 100%;
   margin: 0 auto;
   padding: 16px;
 
@@ -176,7 +174,6 @@ const applyDate = (date) => {
     padding: 5px;
 
     &:disabled {
-      /* ⭐ disabled 상태일 때 스타일 */
       opacity: 0.3;
       cursor: not-allowed;
       border: none;

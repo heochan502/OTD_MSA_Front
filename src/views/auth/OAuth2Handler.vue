@@ -11,8 +11,8 @@ onMounted(async () => {
   const error = route.query.error;
   const userId = route.query.user_id;
 
-  console.log('error:', error);
-  console.log('userId:', userId);
+  // console.log('error:', error);
+  // console.log('userId:', userId);
 
   if (error || !userId) {
     if (error) {
@@ -22,32 +22,32 @@ onMounted(async () => {
     return;
   }
 
-  // ⭐ 사용자 정보 추출
   const nickName = route.query.nick_name;
   const pic = route.query.pic;
   const email = route.query.email;
-  const providerType = route.query.provider_type;         // ⭐ KAKAO, NAVER, GOOGLE
-  const onboardingCompleted = route.query.onboarding_completed === 'true'; // ⭐ true/false
-  const challengeRole = route.query.challenge_role;       // ⭐ BRONZE, SILVER, GOLD, DIAMOND
-  const userRole = route.query.user_role;                 // ⭐ USER_2
+  const providerType = route.query.provider_type;         
+  //const onboardingCompleted = route.query.onboarding_completed === 'true'; 
+  const onboardingCompleted = parseInt(route.query.onboarding_completed); 
+  const challengeRole = route.query.challenge_role;       
+  const userRole = route.query.user_role;                
 
   const signedUser = { 
     userId, 
     nickName, 
     pic,
     email,
-    providerType,           // ⭐ 추가
-    onboardingCompleted,    // ⭐ 추가
-    challengeRole,          // ⭐ 추가
-    userRole                // ⭐ 추가
+    providerType,          
+    onboardingCompleted,   
+    challengeRole,         
+    userRole               
   };
 
-  console.log('signedUser:', signedUser);
+  //console.log('signedUser:', signedUser);
 
-  // 로그인 처리
+
   authentication.setSignedUser(signedUser);
 
-  // ⭐ 온보딩 필요 여부 확인
+
   if (authentication.needsOnboarding()) {
     console.log('온보딩 필요 - 온보딩 페이지로 이동');
     await router.push('/user/onboarding');

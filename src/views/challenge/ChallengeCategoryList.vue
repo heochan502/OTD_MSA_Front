@@ -119,20 +119,28 @@ onMounted(async () => {
 <template>
   <div
     v-if="challengeType === 'weekly' || challengeType === 'personal'"
-    class="wrap"
+    class="wrap card-grid"
   >
-    <div v-for="challenge in state.challengeList" :key="challenge.id">
+    <div
+      v-for="challenge in state.challengeList"
+      :key="challenge.id"
+      class="challenge-card-wrapper"
+      @click="handleClick(challenge)"
+    >
       <ChallengeCard
         class="challenge-card"
-        :key="challenge.id"
         :id="challenge.id"
         :image="challenge.image"
         :name="challenge.name"
         :reward="challenge.reward"
-        @click="openDialog(challenge)"
-      ></ChallengeCard>
+        :available="challenge.available"
+      />
+      <div v-if="!challenge.available" class="overlay">
+        <img :src="lockImg(challenge.tier)" alt="잠금" class="lock" />
+      </div>
     </div>
   </div>
+
   <div v-if="challengeType === 'competition'" class="wrap">
     <div v-for="(list, category) in state.challengeList" :key="category">
       <div class="otd-category">{{ `${category}` }}</div>
@@ -236,14 +244,16 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 .wrap {
-  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
 }
 // 화면이 391px 이상일 때만 max-width + 중앙정렬 적용
 @media (min-width: 391px) {
   .wrap {
     max-width: 391px;
     margin: 0 auto;
-    margin-top: 15px;
+    margin-top: 30px;
   }
 }
 :deep(.swiper) {
@@ -261,9 +271,18 @@ onMounted(async () => {
 .challenge-info {
   margin-bottom: 8px;
 }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 168px); // 2열
+  gap: 15px; // 카드 사이 여백
+  justify-items: center; // 가운데 정렬
+}
+
 .challenge-card-wrapper {
   position: relative;
+  width: 168px;
 }
+
 .overlay {
   position: absolute;
   inset: 0;

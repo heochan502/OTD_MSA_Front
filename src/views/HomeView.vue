@@ -10,11 +10,14 @@ import { useMealSelectedStore } from "@/stores/meal/mealStore.js";
 
 import BmiProg from "@/components/exercise/BmiProg.vue";
 import { getMyChallenge } from "@/services/challenge/challengeService";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 
 import { getChallengeSettlementLog } from "@/services/challenge/challengeService";
 import ChallengeSettlementCard from "@/components/challenge/ChallengeSettlementCard.vue";
 import { useChallengeStore } from "@/stores/challenge/challengeStore";
+
+import weather from "@/components/weather/weather.vue";
+import { useAuthenticationStore } from "@/stores/user/authentication";
 
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
@@ -34,6 +37,26 @@ const state = reactive({
 
 const challengeInfo = ref([]);
 const router = useRouter();
+const route = useRoute();
+const authentication = useAuthenticationStore();
+
+const userInfo = computed(() => ({
+  nickName: authentication.state.signedUser.nickName,
+  userPoint: authentication.state.signedUser.point,
+  pic: authentication.state.signedUser.pic,
+  xp: authentication.state.signedUser.xp,
+}));
+const defaultProfile = "/otd/image/main/default-profile.png";
+// pic이 있으면 그걸 쓰고, 없으면 기본 이미지
+const profileImage = computed(() => {
+  return userInfo.value?.pic ? userInfo.value.pic : defaultProfile;
+});
+const myRole = computed(() => authentication.state.signedUser?.userRole || "");
+
+// 포인트 포맷팅
+const formatPoint = (point) => {
+  return point?.toLocaleString() || "0";
+};
 
 const healthInfo = ref([
   { text: "체중(kg)", value: 70.5, check: true },
@@ -251,6 +274,42 @@ const fetchLastestBodyComposition = async () => {
     </v-dialog>
   </div>
   <div class="wrap">
+    <div class="user" v-if="route.name === 'Home'">
+      <!-- 일반 유저 -->
+      <template v-if="['USER_1', 'USER_2'].includes(myRole)">
+        <div class="user-profile">
+          <img class="avatar otd-shadow" :src="profileImage" alt="프로필" />
+          <div class="info">
+            <weather />
+            <span class="otd-title">{{ userInfo.nickName }} 님</span>
+          </div>
+        </div>
+        <div class="point otd-body-1">
+          <router-link
+            to="/pointshop"
+            class="pointShop"
+            :class="{ active: route.path.startsWith('/pointshop') }"
+          >
+            <div class="point-wrap">
+              <img class="point-img" src="/image/main/point.png" alt="포인트" />
+              <span>{{ formatPoint(userInfo.userPoint) }}</span>
+            </div>
+          </router-link>
+        </div>
+      </template>
+
+      <!-- ADMIN & MANAGER -->
+      <template v-else>
+        <div class="admin-profile">
+          <span class="otd-title">관리자 님</span>
+          <div class="admin-panel">
+            <router-link to="/admin" class="admin-btn">
+              관리자 페이지로 이동
+            </router-link>
+          </div>
+        </div>
+      </template>
+    </div>
     <div class="top-wrap">
       <section class="meal">
         <MealCard />
@@ -352,6 +411,75 @@ const fetchLastestBodyComposition = async () => {
 .wrap {
   margin-top: 15px;
 }
+.user {
+  margin: 20px auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 350px;
+  width: 100%;
+}
+.user-profile {
+  display: flex;
+  flex-direction: row;
+}
+.avatar {
+  /* font-size: 32px; */
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+}
+.info {
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  font-size: 12px;
+  row-gap: 5px;
+  margin-left: 15px;
+}
+.point-img {
+  width: 20px;
+  height: 20px;
+}
+.point {
+  display: flex;
+  justify-content: center;
+  align-self: flex-end;
+  gap: 5px;
+  cursor: pointer;
+}
+.pointShop {
+  padding-top: 2px;
+  color: #303030;
+  text-decoration: none;
+  display: flex;
+  align-items: end;
+  span {
+    margin-left: 7px;
+  }
+}
+.point-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.admin-profile {
+  display: flex;
+  align-items: center;
+  // gap: 40px;
+  justify-content: space-between;
+}
+.admin-btn {
+  display: inline-block;
+  padding: 10px 16px;
+  background: #ffe864;
+  color: #000;
+  font-weight: 700;
+  border-radius: 10px;
+  text-decoration: none;
+}
 // 화면이 391px 이상일 때만 max-width + 중앙정렬 적용
 @media (min-width: 391px) {
   .wrap {
@@ -361,7 +489,7 @@ const fetchLastestBodyComposition = async () => {
   }
 }
 .top-wrap {
-  margin: 5px 0px;
+  margin: 10px 0px;
 }
 .wrap_content {
   display: flex;
@@ -384,7 +512,7 @@ const fetchLastestBodyComposition = async () => {
 
 .meal {
   display: flex;
-  margin: 0 20px;
+  margin: 0 0px;
   justify-content: center;
 }
 

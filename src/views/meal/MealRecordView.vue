@@ -22,7 +22,7 @@ const router = useRouter();
 
 // 전달된 음식 목록
 // const foods = selectedFoods.selectedFoods.value ;
-// ✅ 합계들
+// 합계들
 const foods = computed(() => selectedFoods.value ?? []); // null 방어
 // const foods =
 //   Array.isArray(selectedFoods?.selectedFoods?.value)
@@ -109,7 +109,8 @@ const res = await postMealRecord({
     mealDay : store.selectedDay.setDay,    // 날짜
     foods : foods.value                     // 음식들
   });
-  // console.log('입력 데이터', res);
+
+  console.log('입력 데이터', foods.value );
   if (res.savedCount > 0) {
     openResultModal(true);
   } 

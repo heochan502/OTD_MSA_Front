@@ -63,8 +63,6 @@ const submit = async () => {
       // store 업데이트
       authentication.setSignedUser(result);
 
-      // store 상태 확인
-      console.log('업데이트 후 store 상태:', authentication.state.signedUser);
 
       if (result.userRole === 'ADMIN' || result.userRole === 'MANAGER') {
         await router.push('/role/select');
@@ -173,6 +171,12 @@ const submit = async () => {
 </template>
 
 <style scoped>
+
+.login{
+  /* align-items: center; */
+  justify-self: center;
+}
+
 .container {
   max-width: 576px;
   padding: 0px;

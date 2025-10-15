@@ -71,7 +71,8 @@ const makeChartData = (metric) => {
             0,
             chartArea.bottom
           );
-          gradient.addColorStop(0, "rgba(255, 232, 100, 0.6)"); // 위쪽 진한색
+          gradient.addColorStop(0, "rgba(255, 232, 100, 1)"); // 위쪽 진한색
+          gradient.addColorStop(0.2, "rgba(255, 232, 100, 0.4)"); // 위쪽 진한색
           gradient.addColorStop(1, "rgba(255, 232, 100, 0)"); // 아래쪽 투명
           return gradient;
         },
@@ -79,7 +80,7 @@ const makeChartData = (metric) => {
         pointRadius: 5,
         pointBackgroundColor: "#FFE864",
         pointBorderColor: "#ffffff", // 점 테두리는 조금 연한 오렌지색으로
-        pointBorderWidth: 2, // 테두리 두께 조절
+        pointBorderWidth: 1, // 테두리 두께 조절
         tension: 0.4,
       },
     ],
@@ -110,9 +111,9 @@ const makeChartOptions = (metricCode) => ({
     },
   },
   scales: {
-    // x: { ticks: { font: { size: 10 } }, grid: { display: false } },
+    x: { ticks: { font: { size: 10 } }, grid: { display: false } },
     y: {
-      grace: "30%",
+      grace: "50%",
       suggestedMax: undefined, // c최대값은 데이터에 따라 자동 조절
     },
   },
@@ -126,8 +127,8 @@ const hasData = computed(() => {
 <template>
   <div v-if="!hasData" class="no-data">
     <v-card class="chart otd-border otd-shadow otd-box-style">
-      <span class="text-h4">☹️</span>
-      <span class="otd-subtitle-2"> 체성분 측정 데이터가 없어요 </span>
+      <span class="text-h4">🤸🏻</span>
+      <span class="otd-subtitle-2"> InBody 데이터가 없어요. </span>
     </v-card>
   </div>
   <!-- selectedMetric 유무에 따라 표시할 metric 다르게 -->
@@ -153,6 +154,7 @@ const hasData = computed(() => {
   flex-direction: column;
   justify-content: center;
   text-align: center;
+  // max-width: 350px;
   height: 250px;
   padding: 20px 10px;
   margin: 0 0 15px 0;

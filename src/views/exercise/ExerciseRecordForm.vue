@@ -330,13 +330,13 @@ const goToMain = () => {
   justify-content: center;
   gap: 10px;
 
-  width: 310px;
+  // width: 310px;
   margin-bottom: 15px;
 }
 .input_box {
   display: flex;
   align-items: center;
-  width: 310px;
+  // width: 310px;
   height: 50px;
   padding: 20px 20px;
 
@@ -360,7 +360,7 @@ const goToMain = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  max-width: 350px;
+  // max-width: 350px;
   height: 50px;
   margin-top: 15px;
 

@@ -353,7 +353,15 @@ function openLightboxFromNew(i) {
     </v-slide-y-transition>
 
     <label class="label">제목</label>
-    <input class="input" v-model="title" placeholder="제목을 입력해 주세요" />
+    <input
+      class="input"
+      v-model="title"
+      type="text"
+      inputmode="text"
+      autocomplete="off"
+      placeholder="제목을 입력해 주세요"
+      @focus="onTitleFocus"
+    />
 
     <label class="label">내용</label>
     <textarea

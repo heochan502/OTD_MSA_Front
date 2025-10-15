@@ -26,8 +26,8 @@ const hasRecord = computed(() => {
 onMounted(async () => {
   if (
     //관리자 계정이면 신체정보입력 X
-    authenticationStore.userRole === "ADMIN" ||
-    authenticationStore.userRole === "MANAGER"
+    authenticationStore.state.signedUser.userRole === "ADMIN" ||
+    authenticationStore.state.signedUser.userRole === "MANAGER"
   ) {
     return;
   } else if (hasRecord.value) {
@@ -100,27 +100,31 @@ const bmiStatus = computed(() => {
 });
 
 // 기초대사량 bmr
-const userGender = computed(() => authenticationStore.state.signedUser?.gender || null);
-const userAge = computed(() => authenticationStore.state.signedUser?.age || null);
+const userGender = computed(
+  () => authenticationStore.state.signedUser?.gender || null
+);
+const userAge = computed(
+  () => authenticationStore.state.signedUser?.age || null
+);
 
 function calculateBmr(height, weight, age, gender) {
   const h = Number(height);
   const w = Number(weight);
   const a = Number(age);
-  const g = (gender ?? '').toUpperCase();
+  const g = (gender ?? "").toUpperCase();
 
   // 숫자 검증
   if (!Number.isFinite(h) || h <= 0) return 0;
   if (!Number.isFinite(w) || w <= 0) return 0;
   if (!Number.isFinite(a) || a <= 0) return 0;
-  if (g !== 'M' && g !== 'F') return 0;
+  if (g !== "M" && g !== "F") return 0;
 
   let bmr;
-  if (g === 'M') bmr = 66.47 + 13.75 * w + 5 * h - 6.76 * a;
+  if (g === "M") bmr = 66.47 + 13.75 * w + 5 * h - 6.76 * a;
   else bmr = 655.1 + 9.56 * w + 1.85 * h - 4.68 * a;
 
   return Math.round(bmr);
-};
+}
 
 const state = reactive({
   form: {
@@ -183,8 +187,19 @@ watch(showDialog, (isOpen) => {
 
       <div class="bmi-slider-wrapper">
         <div class="gradient-bar w-100"></div>
-        <v-slider :model-value="bmi" :min="minBmi" :max="maxBmi" step="0.1" track-size="12" thumb-size="6"
-          thumb-color="white" color="transparent" readonly thumb-label hide-details />
+        <v-slider
+          :model-value="bmi"
+          :min="minBmi"
+          :max="maxBmi"
+          step="0.1"
+          track-size="12"
+          thumb-size="6"
+          thumb-color="white"
+          color="transparent"
+          readonly
+          thumb-label
+          hide-details
+        />
       </div>
 
       <div class="bmi-legend">
@@ -198,16 +213,30 @@ watch(showDialog, (isOpen) => {
 
       <!-- bmiInfo 기반일 때만 수정 가능 -->
       <div v-if="isBmiInfo" class="overlay">
-        <v-btn class="btn_update otd-shadow otd-box-style" color="#ffe864" @click="showDialog = true">수정하기</v-btn>
+        <v-btn
+          class="btn_update otd-shadow otd-box-style"
+          color="#ffe864"
+          @click="showDialog = true"
+          >수정하기</v-btn
+        >
       </div>
     </div>
 
     <!-- BMI 미입력 상태 -->
-    <div v-else class="calc_bmi d-flex flex-column justify-center align-center ga-1">
-      <v-btn class="btn_bmi otd-shadow" color="#ffe864" @click="showDialog = true">
+    <div
+      v-else
+      class="calc_bmi d-flex flex-column justify-center align-center ga-1"
+    >
+      <v-btn
+        class="btn_bmi otd-shadow"
+        color="#ffe864"
+        @click="showDialog = true"
+      >
         BMI 계산기
       </v-btn>
-      <span class="otd-body-3">체중, 키를 입력하고 BMI와 기초대사량을 계산해보세요!</span>
+      <span class="otd-body-3"
+        >체중, 키를 입력하고 BMI와 기초대사량을 계산해보세요!</span
+      >
     </div>
   </div>
 
@@ -216,25 +245,43 @@ watch(showDialog, (isOpen) => {
     <div class="modal-container">
       <v-card-title class="text-h6">BMI 계산기</v-card-title>
       <v-card-text>
-        <v-text-field v-model.number="state.form.height" label="신장 (cm)" type="number" variant="outlined" />
-        <v-text-field v-model.number="state.form.weight" label="체중 (kg)" type="number" variant="outlined" />
+        <v-text-field
+          v-model.number="state.form.height"
+          label="신장 (cm)"
+          type="number"
+          variant="outlined"
+        />
+        <v-text-field
+          v-model.number="state.form.weight"
+          label="체중 (kg)"
+          type="number"
+          variant="outlined"
+        />
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn class="btn btn-cancel" variant="text" @click="showDialog = false">취소</v-btn>
+        <v-btn class="btn btn-cancel" variant="text" @click="showDialog = false"
+          >취소</v-btn
+        >
         <v-btn class="btn btn-confirm" @click="saveFormData">저장</v-btn>
       </v-card-actions>
     </div>
   </v-dialog>
 
-  <Modal :show="noticeDialog" title="키와 체중을 알려주세요!" message="기본 신체 정보로 bmi를 계산해드릴게요." type="info" confirmText="입력하기"
-    @close="(noticeDialog = false), (showDialog = true)" />
+  <Modal
+    :show="noticeDialog"
+    title="키와 체중을 알려주세요!"
+    message="기본 신체 정보로 bmi를 계산해드릴게요."
+    type="info"
+    confirmText="입력하기"
+    @close="(noticeDialog = false), (showDialog = true)"
+  />
 </template>
 
 <style lang="scss" scoped>
 .content_bmi {
   width: 100%;
-  max-width: 350px;
+  // max-width: 350px;
 
   .chip_bmi {
     display: flex;
@@ -255,7 +302,7 @@ watch(showDialog, (isOpen) => {
     top: 50%;
     transform: translateY(-50%);
     height: 8px;
-    max-width: 315px;
+    // max-width: 315px;
     border-radius: 6px;
     background: linear-gradient(
       to right,
@@ -273,7 +320,7 @@ watch(showDialog, (isOpen) => {
   justify-content: space-between;
   //   color: #ececec;
   font-size: 9px;
-  max-width: 315px;
+  // max-width: 315px;
 }
 
 .bmi-card {
