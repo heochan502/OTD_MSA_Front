@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted } from 'vue';
-import { usePointShop } from '@/components/pointshop/usePointShop.js';
+import { usePointShop } from '@/components/pointshop/usePointshop.js';
 
 const {
   userPoints,
