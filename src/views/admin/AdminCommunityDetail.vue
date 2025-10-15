@@ -7,13 +7,16 @@ import {
   deleteFile,
 } from '@/services/admin/adminService';
 import { useAdminStore } from '@/stores/admin/adminStore';
+import { useRouter } from 'vue-router';
 
 const adminStore = useAdminStore();
+const router = useRouter();
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const communityDetail = ref({});
 const deleteDialog = ref(false);
 const successDialog = ref(false);
+const errorDialog = ref(false);
 const deleteTarget = ref('');
 const deletePicId = ref(0);
 const deleteCommentId = ref(0);
@@ -59,10 +62,19 @@ const confirmDelete = async () => {
     }
     deleteDialog.value = false;
     successDialog.value = true;
-    await loadPosts(adminStore.state.selectedPostId);
   } catch (e) {
+    errorDialog.value = true;
+    deleteDialog.value = false;
     console.error('삭제 실패:', e);
   }
+};
+
+const toCommunity = () => {
+  console.log('dalete', deleteTarget.value);
+  if (deleteTarget.value === 'post') {
+    router.push({ path: '/admin/community' });
+  }
+  successDialog.value = false;
 };
 
 const loadPosts = async (postId) => {
@@ -97,11 +109,18 @@ const loadPosts = async (postId) => {
     <v-dialog v-model="successDialog" max-width="380" min-height="100">
       <v-card class="admin-dialog pa-6">
         <v-card-text> 성공적으로 완료되었습니다. </v-card-text>
-        <div>
-          <v-spacer />
-          <v-btn class="btn-yes" text @click="successDialog = false"
-            >확인</v-btn
-          >
+        <div class="btn-area">
+          <v-btn class="btn-yes" text @click="toCommunity">확인</v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+
+    <!-- 저장 실패 모달 -->
+    <v-dialog v-model="errorDialog" max-width="380" min-height="100">
+      <v-card class="admin-dialog pa-6">
+        <v-card-text> 실패했습니다. </v-card-text>
+        <div class="btn-area">
+          <v-btn class="btn-blue" @click="errorDialog = false">확인</v-btn>
         </div>
       </v-card>
     </v-dialog>
@@ -192,7 +211,7 @@ const loadPosts = async (postId) => {
 
               <!-- 파일 영역 -->
               <div>
-                <v-card-subtitle class="field-label mb-2"
+                <v-card-subtitle class="field-label detail-title mb-2"
                   >첨부 이미지</v-card-subtitle
                 >
                 <div v-if="communityDetail.files?.length" class="file-wrap">
@@ -228,7 +247,9 @@ const loadPosts = async (postId) => {
 
             <!-- 댓글 영역 -->
             <div>
-              <v-card-subtitle class="field-label mb-2">댓글</v-card-subtitle>
+              <v-card-subtitle class="field-label detail-title mb-2"
+                >댓글</v-card-subtitle
+              >
 
               <div v-if="communityDetail.comments?.length">
                 <v-row dense>
@@ -355,9 +376,22 @@ const loadPosts = async (postId) => {
   gap: 10px;
 }
 
+.file-item {
+  margin: 12px;
+}
+
+.delete-btn {
+  position: absolute;
+  right: -15px;
+  top: -15px;
+}
 .field-label {
   margin-bottom: 0 !important; // 라벨과 값 사이 간격 줄이기
   font-weight: 600; // 라벨이 너무 약해보이면 강조
+}
+
+.detail-title {
+  margin-bottom: 10px !important;
 }
 .preview {
   width: 120px;
@@ -445,5 +479,4 @@ const loadPosts = async (postId) => {
   color: #fff !important;
   border-radius: 10px;
 }
-
 </style>

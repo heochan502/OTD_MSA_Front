@@ -193,19 +193,19 @@ const toQna = () => {
                 </v-col>
 
                 <v-col cols="6" v-if="qnaDetail.replyAt != ''">
-                  <v-card-subtitle class="field-label"
+                  <v-card-subtitle class="field-label reply-title"
                     >답변 시각</v-card-subtitle
                   >
-                  <v-card-text class="field-field">{{
+                  <v-card-text class="field-field reply-content">{{
                     formatDate(qnaDetail.replyAt)
                   }}</v-card-text>
                 </v-col>
 
                 <v-col cols="6" v-if="qnaDetail.adminId?.name">
-                  <v-card-subtitle class="field-label"
+                  <v-card-subtitle class="field-label reply-title"
                     >답변 담당자</v-card-subtitle
                   >
-                  <v-card-text class="field-field">{{
+                  <v-card-text class="field-field reply-content">{{
                     qnaDetail.adminId.name
                   }}</v-card-text>
                 </v-col>
@@ -267,7 +267,12 @@ const toQna = () => {
 .reply-title {
   padding: 0 0 18px 2px;
 }
-/* 제목은 왼쪽 정렬 */
+
+.reply-content {
+  padding-top: 0;
+  padding-left: 1px;
+}
+// 제목은 왼쪽 정렬
 .qna-reply .v-card-title {
   display: flex !important;
   justify-content: flex-start !important;
@@ -277,25 +282,25 @@ const toQna = () => {
   padding-left: 12px;
 }
 
-/* ✅ 입력창 전체 감싸는 영역 중앙 정렬 */
+// 입력창 전체 감싸는 영역 중앙 정렬
 .reply-row {
   display: flex !important;
   justify-content: center !important;
   align-items: flex-start !important;
   width: 100%;
-  margin: 0 auto !important; /* 카드 기준으로 중앙에 배치 */
+  margin: 0 auto !important; // 카드 기준으로 중앙에 배치
 }
 
-/* ✅ 실제 입력창 박스 크기 */
+// 실제 입력창 박스 크기
 .reply-col {
   width: 100%;
-  max-width: 1300px; /* 카드 중앙 기준으로 폭 제한 */
+  max-width: 1600px; // 카드 중앙 기준으로 폭 제한
   flex: 0 0 auto;
-  margin: 0 auto; /* 중앙에 고정 */
+  margin: 0 auto; // 중앙에 고정
   padding-top: 0;
 }
 
-/* ✅ textarea 스타일 그대로 유지 */
+//textarea 스타일 그대로 유지
 .reply-textarea :deep(.v-field) {
   border: 1px solid #d7d7d7 !important;
   border-radius: 14px !important;
@@ -373,7 +378,6 @@ const toQna = () => {
   border-radius: 10px;
 }
 
-
 // 화면 버튼
 .btn-area {
   display: flex;
@@ -392,7 +396,6 @@ const toQna = () => {
   font-weight: 600;
 }
 
-
 .btn-cancel {
   height: 40px;
   background-color: #f28b82 !important;
@@ -400,5 +403,4 @@ const toQna = () => {
   border-radius: 10px;
   font-weight: 600;
 }
-
 </style>

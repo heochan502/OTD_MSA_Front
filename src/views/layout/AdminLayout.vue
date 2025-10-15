@@ -10,6 +10,8 @@ const route = useRoute();
 const authStore = useAuthenticationStore();
 const isActive = computed(() => route.path === '/admin');
 
+const myRole = computed(() => authStore?.state?.signedUser?.userRole ?? '');
+
 const logoutAccount = async () => {
   if (!confirm('로그아웃 하시겠습니까?')) return;
   const res = await logout();
@@ -46,6 +48,7 @@ const logoutAccount = async () => {
           class="menu-item otd-subtitle-1 d-flex"
           active-class="active"
           :class="{ active: route.path.startsWith('/admin/user') }"
+          v-if="myRole === 'ADMIN'"
         >
           <img
             class="icon"
@@ -78,6 +81,7 @@ const logoutAccount = async () => {
           class="menu-item otd-subtitle-1 d-flex"
           active-class="active"
           :class="{ active: route.path.startsWith('/admin/point') }"
+          v-if="myRole === 'ADMIN'"
         >
           <img
             class="icon"
@@ -143,6 +147,7 @@ const logoutAccount = async () => {
           class="menu-item otd-subtitle-1 d-flex"
           active-class="active"
           :class="{ active: route.path.startsWith('/admin/statistics') }"
+          v-if="myRole === 'ADMIN'"
         >
           <img
             class="icon"
