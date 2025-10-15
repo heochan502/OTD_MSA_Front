@@ -169,7 +169,7 @@ const confirmYes = async () => {
           <span class="emoji">{{
             effortLevels[state.record.effortLevel - 1]?.emoji
           }}</span>
-          <span class="otd-subtitle-2">{{
+          <span class="otd-body-1">{{
             effortLevels[state.record.effortLevel - 1]?.label
           }}</span>
         </div>
@@ -303,7 +303,8 @@ const confirmYes = async () => {
       flex-direction: column;
       align-items: center;
 
-      width: 130px;
+      // width: 130px;
+      width: 40%;
       height: 150px;
       padding: 20px;
 
@@ -312,7 +313,8 @@ const confirmYes = async () => {
       }
     }
     .content_detail {
-      width: 210px;
+      // width: 210px;
+      width: 55%;
       height: 150px;
       padding: 20px;
     }

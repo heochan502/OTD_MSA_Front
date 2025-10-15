@@ -167,8 +167,6 @@ const applyDate = (date) => {
 .weekly-calendar {
   display: flex;
   justify-content: center;
-  max-width: 350px;
-  // width: 100%;
   margin: 0 auto;
   padding: 16px;
 

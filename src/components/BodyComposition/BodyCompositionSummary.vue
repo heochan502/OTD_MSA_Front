@@ -66,11 +66,10 @@ const hasRecord = computed(() => {
 
 <style lang="scss" scoped>
 .content_wrap {
-  max-width: 350px;
   padding: 10px;
 }
 .content_main {
-  max-width: 350px;
+  // max-width: 350px;
   width: 100%;
   padding: 10px;
 
