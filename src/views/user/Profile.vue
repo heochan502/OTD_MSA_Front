@@ -966,7 +966,7 @@ onMounted(() => {
   }
 
   .logout-btn {
-    background: #dc3545;
+    background: #393E46;
     color: white;
     border: none;
     padding: 12px 24px;
@@ -977,7 +977,7 @@ onMounted(() => {
     transition: all 0.2s ease;
 
     &:hover:not(:disabled) {
-      background: #c82333;
+      background: #303030;
       transform: translateY(-1px);
     }
 
@@ -1004,7 +1004,6 @@ onMounted(() => {
 
       .activity-icon {
         margin-bottom: 0;
-        margin-right: 12px;
       }
     }
   }

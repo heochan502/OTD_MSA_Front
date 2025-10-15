@@ -10,11 +10,13 @@ import ChallengeCard from '@/components/challenge/ChallengeCard.vue';
 import { useChallengeStore } from '@/stores/challenge/challengeStore.js';
 import Progress from '@/components/challenge/Progress.vue';
 import { useAuthenticationStore } from '@/stores/user/authentication';
-import SaveModal from '@/components/user/Modal.vue';
+import Modal from '@/components/user/Modal.vue';
 
 const challengeStore = useChallengeStore();
 const authentication = useAuthenticationStore();
 const router = useRouter();
+const saveDialog = ref();
+const successDialog = ref();
 
 const state = reactive({
   weeklyChallenge: [],
@@ -25,6 +27,7 @@ const state = reactive({
   missionComplete: [],
   success: 0,
   tier: '',
+  selectedMission: {},
 });
 
 const tierImg = {
@@ -117,7 +120,9 @@ const setMissionState = () => {
 };
 
 // 로그인 제대로 되면 수정(userId 안보냄)
-const completeMission = async (mission) => {
+const completeMission = async () => {
+  const mission = state.selectedMission;
+  console.log('mission', mission);
   if (mission.done) {
     return;
   } else {
@@ -128,6 +133,7 @@ const completeMission = async (mission) => {
     );
     state.user.point = authentication.state.signedUser.point;
     // window.location.reload();
+    successDialog.value = true;
   }
 };
 
@@ -220,7 +226,10 @@ const settlementButton = async () => {
       <div class="mission-box">
         <div
           v-for="mission in missionDone"
-          @click="completeMission(mission)"
+          @click="
+            state.selectedMission = mission;
+            saveDialog = true;
+          "
           class="mission-card otd-list-box-style"
           :class="{ 'mission-done': mission.done }"
         >
@@ -336,6 +345,28 @@ const settlementButton = async () => {
         </div>
       </div>
     </div>
+    <!-- 저장 완료 모달 -->
+    <Modal
+      :show="successDialog"
+      title="저장 완료"
+      :message="`<strong>${state.selectedMission?.cdName} 미션</strong>이 성공적으로 완료되었습니다!`"
+      type="success"
+      confirm-text="확인"
+      @confirm="successDialog = false"
+      @close="successDialog = false"
+    />
+    <!-- 도전 확인 모달 -->
+    <Modal
+      :show="saveDialog"
+      title="일일미션 완료하기"
+      :message="`<strong>${state.selectedMission?.cdName} 미션</strong>을 완료 처리 할까요?\n<strong style='color:#f28b82'>⚠ 한 번 완료한 미션은 되돌릴 수 없습니다.</strong>`"
+      type="confirm"
+      confirm-text="네"
+      cancel-text="아니오"
+      @confirm="completeMission"
+      @cancel="saveDialog = false"
+      @close="saveDialog = false"
+    />
   </div>
 </template>
 

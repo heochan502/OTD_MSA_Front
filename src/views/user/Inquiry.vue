@@ -291,5 +291,21 @@ button:disabled {
 .button-group .btn {
   flex: 1;
   padding: 12px;
+  
+}
+.btn btn-primary {
+  background-color: #393E46;
+}
+
+/* 여기 수정 */
+.btn.btn-primary {
+  background-color: #393E46;
+  border-color: #393E46;
+}
+
+/* 호버 시 색 유지하고 싶으면 추가 */
+.btn.btn-primary:hover {
+  background-color: #303030;
+  border-color: #303030;
 }
 </style>
