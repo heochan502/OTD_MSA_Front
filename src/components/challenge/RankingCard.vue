@@ -78,7 +78,7 @@ onMounted(() => {
             </div>
           </div>
         </div>
-        <div class="value otd-body-3">
+        <div class="record otd-body-3">
           {{ props.rankingDetail.formattedTotalRecord }}
         </div>
         <img
@@ -145,7 +145,7 @@ onMounted(() => {
     }
   }
 }
-.value {
+.record {
   flex: 0 0 80px; // 오른쪽 값 고정폭
   text-align: right;
 }

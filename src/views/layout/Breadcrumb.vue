@@ -1,14 +1,14 @@
 <script setup>
-import { useRoute, useRouter } from 'vue-router';
-import { computed, onMounted } from 'vue';
-import weather from '@/components/weather/weather.vue';
-import { useHeaderStore } from '@/stores/challenge/headerStore';
-import { useAuthenticationStore } from '@/stores/user/authentication';
-import { reissue } from '@/services/user/userService';
+import { useRoute, useRouter } from "vue-router";
+import { computed, onMounted } from "vue";
+import weather from "@/components/weather/weather.vue";
+import { useHeaderStore } from "@/stores/challenge/headerStore";
+import { useAuthenticationStore } from "@/stores/user/authentication";
+import { reissue } from "@/services/user/userService";
 
 // 알림 스토어
-import { storeToRefs } from 'pinia';
-import { useNotificationStore } from '@/stores/notification/notification';
+import { storeToRefs } from "pinia";
+import { useNotificationStore } from "@/stores/notification/notification";
 
 // 알림 스토어 인스턴스/배지 개수
 const n = useNotificationStore();
@@ -24,39 +24,39 @@ const userInfo = computed(() => ({
   pic: authentication.state.signedUser.pic,
   xp: authentication.state.signedUser.xp,
 }));
-const myRole = computed(() => authentication.state.signedUser?.userRole || '');
+const myRole = computed(() => authentication.state.signedUser?.userRole || "");
 
 const categoryLabelMap = {
-  free: '자유수다',
-  diet: '다이어트',
-  work: '운동',
-  love: '연애',
+  free: "자유수다",
+  diet: "다이어트",
+  work: "운동",
+  love: "연애",
 };
-const headerType = computed(() => route.meta.headerType ?? 'logo');
+const headerType = computed(() => route.meta.headerType ?? "logo");
 const showUserPanel = computed(() => route.meta.showUserPanel === true);
 
 const headerTitle = computed(() => {
-  if (route.name === 'ChallengePer' || route.name === 'ChallengeDay') {
-    return headerStore.detailName + ' 챌린지';
+  if (route.name === "ChallengePer" || route.name === "ChallengeDay") {
+    return headerStore.detailName + " 챌린지";
   }
   const metaTitle = route.meta.title;
 
   // 1. meta.title이 함수라면 실행 결과 리턴
-  if (typeof metaTitle === 'function') {
+  if (typeof metaTitle === "function") {
     return metaTitle(route);
   }
   // 2. 문자열이면 그대로 사용
-  if (typeof metaTitle === 'string') {
+  if (typeof metaTitle === "string") {
     return metaTitle;
   }
   // 3. meta.title이 없고, 커뮤니티 카테고리 라우트라면 categoryLabelMap 활용
-  if (route.name === 'CommunityCategory') {
-    return categoryLabelMap[route.params.category] ?? '커뮤니티';
+  if (route.name === "CommunityCategory") {
+    return categoryLabelMap[route.params.category] ?? "커뮤니티";
   }
-  return '';
+  return "";
 });
 
-const defaultProfile = '/otd/image/main/default-profile.png';
+const defaultProfile = "/otd/image/main/default-profile.png";
 // pic이 있으면 그걸 쓰고, 없으면 기본 이미지
 const profileImage = computed(() => {
   return userInfo.value?.pic ? userInfo.value.pic : defaultProfile;
@@ -68,16 +68,16 @@ const handleClick = async () => {
   try {
     await n.load();
   } catch (err) {
-    console.error('알림 불러오기 실패:', err);
+    console.error("알림 불러오기 실패:", err);
   }
 
   // 알림 페이지로 이동
-  router.push({ name: 'NotificationsView' });
+  router.push({ name: "NotificationsView" });
 };
 
 // 포인트 포맷팅
 const formatPoint = (point) => {
-  return point?.toLocaleString() || '0';
+  return point?.toLocaleString() || "0";
 };
 onMounted(() => {});
 </script>
@@ -104,9 +104,9 @@ onMounted(() => {});
     </div>
   </div>
 
-  <div class="user" v-if="route.name === 'Home'">
-    <!-- 일반 유저 -->
-    <template v-if="myRole !== 'ADMIN'">
+  <!-- <div class="user" v-if="route.name === 'Home'"> -->
+  <!-- 일반 유저 -->
+  <!-- <template v-if="['USER_1', 'USER_2'].includes(myRole)">
       <div class="user-profile">
         <img class="avatar otd-shadow" :src="profileImage" alt="프로필" />
         <div class="info">
@@ -126,24 +126,27 @@ onMounted(() => {});
           </div>
         </router-link>
       </div>
-    </template>
+    </template> -->
 
-    <!-- 관리자 -->
-    <template v-else>
-      <div class="admin-panel">
-        <router-link to="/admin" class="admin-btn">
-          관리자 페이지로 이동
-        </router-link>
+  <!-- ADMIN & MANAGER -->
+  <!-- <template v-else>
+      <div class="admin-profile">
+        <span class="otd-title">관리자 님</span>
+        <div class="admin-panel">
+          <router-link to="/admin" class="admin-btn">
+            관리자 페이지로 이동
+          </router-link>
+        </div>
       </div>
     </template>
-  </div>
+  </div> -->
 </template>
-<style scoped>
+<style lang="scss" scoped>
 .admin-btn {
   display: inline-block;
   padding: 10px 16px;
-  background: #ff595e;
-  color: #fff;
+  background: #ffe864;
+  color: #000;
   font-weight: 700;
   border-radius: 10px;
   text-decoration: none;
@@ -229,13 +232,19 @@ onMounted(() => {});
   display: flex;
   flex-direction: row;
 }
-
-.user {
-  margin: 20px;
+.admin-profile {
   display: flex;
   align-items: center;
-
+  // gap: 40px;
   justify-content: space-between;
+}
+.user {
+  margin: 20px auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 350px;
+  width: 100%;
 }
 .point {
   display: flex;

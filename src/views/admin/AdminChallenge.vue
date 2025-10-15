@@ -48,17 +48,17 @@ const goal = computed({
 });
 
 const headers = [
-  { title: 'ID', key: 'cdId' },
-  { title: '이름', key: 'cdName' },
-  { title: '타입', key: 'cdType' },
-  { title: '목표', key: 'cdGoal' },
-  { title: '단위', key: 'cdUnit' },
-  { title: '보상(P)', key: 'cdReward' },
-  { title: '경험치(XP)', key: 'xp' },
-  { title: '티어', key: 'tier' },
-  { title: '이미지 경로', key: 'cdImage' },
-  { title: '더보기', key: 'progress'},
-  { title: '관리', key: 'setting' },
+  { title: 'ID', key: 'cdId', align: 'center' },
+  { title: '이름', key: 'cdName', align: 'center' },
+  { title: '타입', key: 'cdType', align: 'center' },
+  { title: '목표', key: 'cdGoal', align: 'center' },
+  { title: '단위', key: 'cdUnit', align: 'center' },
+  { title: '보상(P)', key: 'cdReward', align: 'center' },
+  { title: '경험치(XP)', key: 'xp', align: 'center' },
+  { title: '티어', key: 'tier', align: 'center' },
+  { title: '이미지 경로', key: 'cdImage', align: 'center' },
+  { title: '더보기', key: 'progress', align: 'center' },
+  { title: '관리', key: 'setting', align: 'center' },
 ];
 
 const typeOptions = [
@@ -354,14 +354,10 @@ const remove = async () => {
 
         <v-divider class="my-2" />
 
-        <v-card-actions class="justify-end btn-area">
-          <v-btn class="btn-no"@click="cancelDialog = true">
-            취소
-          </v-btn>
-          <v-btn class="btn-yes" @click="submit()">
-            저장
-          </v-btn>
-        </v-card-actions>
+        <div class="justify-end btn-area">
+          <v-btn class="btn-gray" @click="cancelDialog = true"> 취소 </v-btn>
+          <v-btn class="btn-blue" @click="submit()"> 저장 </v-btn>
+        </div>
       </v-card>
     </v-dialog>
 
@@ -369,16 +365,14 @@ const remove = async () => {
     <v-dialog v-model="cancelDialog" max-width="380" min-height="100">
       <v-card class="admin-dialog pa-6">
         <v-card-text>
-          취소하고 돌아가시겠습니까? 
-          <br></br>
+          취소하고 돌아가시겠습니까?
+          <br />
           해당 내용은 저장되지 않습니다.
         </v-card-text>
-        <v-card-actions class="btn-area">
-          <v-btn class="btn-yes" @click="cancel()">네</v-btn>
-          <v-btn class="btn-no" @click="cancelDialog = false"
-            >아니오</v-btn
-          >
-        </v-card-actions>
+        <div class="btn-area">
+          <v-btn class="btn-blue" @click="cancel()">네</v-btn>
+          <v-btn class="btn-gray" @click="cancelDialog = false">아니오</v-btn>
+        </div>
       </v-card>
     </v-dialog>
 
@@ -386,31 +380,27 @@ const remove = async () => {
     <v-dialog v-model="successDialog" max-width="380" min-height="100">
       <v-card class="admin-dialog pa-6">
         <v-card-text> 성공적으로 완료되었습니다. </v-card-text>
-        <v-card-actions>
-          <v-btn
-            class="btn-yes"
-            text
-            @click="successDialog = false"
+        <div>
+          <v-btn class="btn-blue" @click="successDialog = false"
             >확인</v-btn
           >
-        </v-card-actions>
+        </div>
       </v-card>
     </v-dialog>
 
     <!-- 삭제 모달 -->
     <v-dialog v-model="deleteDialog" max-width="380" min-height="100">
       <v-card class="admin-dialog pa-6">
-        <v-card-text> 정말 <strong>{{ deleteTarget.cdName }}</strong> 챌린지를 삭제하시겠습니까? </v-card-text>
-        <v-card-actions class="btn-area">
-          <v-btn class="btn-yes" @click="remove()"> 네 </v-btn>
-          <v-btn
-            class="btn-no"
-            variant="flat"
-            @click="deleteDialog = false"
-          >
+        <v-card-text>
+          정말 <strong>{{ deleteTarget.cdName }}</strong> 챌린지를
+          삭제하시겠습니까?
+        </v-card-text>
+        <div class="btn-area">
+          <v-btn class="btn-blue" @click="remove()"> 네 </v-btn>
+          <v-btn class="btn-gray" @click="deleteDialog = false">
             아니오
           </v-btn>
-        </v-card-actions>
+        </div>
       </v-card>
     </v-dialog>
 
@@ -444,16 +434,16 @@ const remove = async () => {
             variant="outlined"
             style="max-width: 450px"
           />
-          <v-btn class="btn" @click="toForm()">➕ 챌린지 추가</v-btn>
+          <v-btn class="btn-blue" @click="toForm()">챌린지 추가하기</v-btn>
         </div>
       </v-card-title>
 
       <v-data-table
         :headers="headers"
         :items="filteredChallenges"
-        style="max-height: calc(100vh - 200px)"
         fixed-header
-        :items-per-page="10"
+        :items-per-page="12"
+        height="700"
         class="styled-table"
       >
         <!-- 타입 변환 -->
@@ -501,14 +491,18 @@ const remove = async () => {
         </template>
 
         <!-- 챌린지 현황 -->
-        <template #item.progress="{item}">
-          <v-bt @click="progress(item.cdId)">챌린지 현황</v-bt>
+        <template #item.progress="{ item }">
+          <v-btn class="btn-blue-outline" @click="progress(item.cdId)"
+            >챌린지 현황</v-btn
+          >
         </template>
 
         <!-- 관리 -->
         <template #item.setting="{ item }">
-          <v-btn @click="toForm(item)">수정</v-btn>
-          <v-btn @click="openDelete(item)">삭제</v-btn>
+          <div class="btn-area-main">
+            <v-btn class="btn-gray-outline" @click="toForm(item)">수정</v-btn>
+            <v-btn class="btn-red-outline" @click="openDelete(item)">삭제</v-btn>
+          </div>
         </template>
       </v-data-table>
     </v-card>
@@ -519,10 +513,10 @@ const remove = async () => {
 .admin-challenge {
   padding: 10px;
 
-  .data-card{
-  background: #fff;
-  border-radius: 15px; 
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  .data-card {
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
   }
 
   .title {
@@ -534,6 +528,7 @@ const remove = async () => {
 }
 .search {
   width: 50%;
+  justify-content: end;
 }
 .btn {
   min-width: 150px;
@@ -559,6 +554,18 @@ const remove = async () => {
   }
 }
 
+/* 정렬 아이콘 항상 보이게 */
+.styled-table :deep(.v-data-table__th .v-icon) {
+  opacity: 1 !important; /* 항상 표시 */
+  color: #bbb !important; /* 기본은 연한 회색으로 */
+  transition: color 0.2s ease;
+}
+
+/* 활성 정렬 컬럼 아이콘 강조 */
+.styled-table :deep(.v-data-table__th--sorted .v-icon) {
+  color: #5ee6eb !important; /* 활성 정렬 컬럼만 민트 */
+}
+
 // 카드
 .admin-dialog {
   border-radius: 15px !important;
@@ -573,14 +580,12 @@ const remove = async () => {
   text-align: center;
 }
 
-
 .field-label {
   font-weight: 600;
   color: #555;
   font-size: 0.9rem;
   margin-bottom: 6px;
 }
-
 
 .field-input :deep(.v-field) {
   border: 1px solid #d7d7d7 !important;
@@ -617,6 +622,14 @@ const remove = async () => {
   display: flex !important;
 }
 
+.btn-area-main {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 4px 4px 0 !important;
+  margin-top: 4px !important;
+}
+
 // 모달 버튼
 .btn-area {
   display: flex;
@@ -627,8 +640,9 @@ const remove = async () => {
 }
 
 // 버튼 공통
-.btn-no,
-.btn-yes {
+.btn-gray,
+.btn-blue,
+.btn-red {
   min-width: 72px;
   height: 38px;
   border-radius: 10px;
@@ -644,25 +658,51 @@ const remove = async () => {
 }
 
 // 취소 버튼
-.btn-no {
+.btn-gray {
   background-color: #e0e0e0 !important;
   color: #333 !important;
   border-radius: 10px;
 }
-.btn-no:hover {
-  background-color: #d6d6d6 !important;
-  transform: scale(1.03);
-}
-
 // 저장 버튼
-.btn-yes {
+.btn-blue {
   background-color: #5ee6eb !important;
   color: #fff !important;
   border-radius: 10px;
 }
-.btn-yes:hover {
-  background-color: #3dd4da !important;
-  box-shadow: 0 3px 10px rgba(61, 212, 218, 0.35);
-  transform: scale(1.03);
+
+// 삭제 버튼
+.btn-red {
+  background-color: #f28b82 !important;
+  color: #fff !important;
+  border-radius: 10px;
+}
+
+// 화면버튼
+.btn-blue-outline {
+  background-color: transparent !important;
+  border: 1.5px solid #5ee6eb !important;
+  color: #009ca0 !important;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.25s ease;
+}
+
+
+.btn-gray-outline {
+  background-color: transparent !important;
+  border: 1.5px solid  #cccccc  !important;
+  color: #555 !important;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.25s ease;
+}
+
+.btn-red-outline {
+  background-color: transparent !important;
+  border: 1.5px solid #f28b82 !important;
+  color: #e25b4b !important;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.25s ease;
 }
 </style>

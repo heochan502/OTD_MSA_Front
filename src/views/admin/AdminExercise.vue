@@ -14,18 +14,19 @@ const deleteDialog = ref(false);
 const isEdit = ref(false);
 const successDialog = ref(false);
 const cancelDialog = ref(false);
+const deleteTarget = ref({});
 
-// const exercise = ref([]);
-// const search = ref('');
+const editExercise = ref({});
+const search = ref('');
 
 // 테이블 헤더
 const headers = [
-  { title: 'ID', key: 'exerciseId' },
-  { title: '운동명', key: 'exerciseName' },
-  { title: 'MET', key: 'exerciseMet' },
-  { title: '거리 기반', key: 'hasDistance' },
-  { title: '반복 기반', key: 'hasReps' },
-  { title: '관리', key: 'setting', sortable: false },
+  { title: 'ID', key: 'exerciseId', align: 'center' },
+  { title: '운동명', key: 'exerciseName', align: 'center' },
+  { title: 'MET', key: 'exerciseMet', align: 'center' },
+  { title: '거리 기반', key: 'hasDistance', align: 'center' },
+  { title: '반복 기반', key: 'hasReps', align: 'center' },
+  { title: '관리', key: 'setting', sortable: false, align: 'center' },
 ];
 
 // 운동 목록 불러오기
@@ -44,6 +45,7 @@ const loadExercises = async () => {
 
 // 검색 필터링
 const filteredExercises = computed(() => {
+  if (!Array.isArray(exercises.value)) return [];
   if (!keyword.value) return exercises.value;
   return exercises.value.filter((e) =>
     e.exerciseName.toLowerCase().includes(keyword.value.toLowerCase())
@@ -118,15 +120,14 @@ const removeExercise = async () => {
 const cancel = () => {
   cancelDialog.value = false;
   formDialog.value = false;
-}
+};
 onMounted(() => {
   loadExercises();
 });
-
 </script>
 
 <template>
-    <div class="admin-exercise">
+  <div class="admin-exercise">
     <v-card class="data-card pa-2">
       <!-- 상단 툴바 -->
       <v-card-title class="d-flex justify-space-between align-center">
@@ -142,7 +143,7 @@ onMounted(() => {
             variant="outlined"
             style="max-width: 450px"
           />
-          <v-btn class="btn" @click="openForm()">➕ 운동 추가</v-btn>
+          <v-btn class="btn-blue" @click="openForm()">운동 추가하기</v-btn>
         </div>
       </v-card-title>
 
@@ -150,9 +151,11 @@ onMounted(() => {
       <v-data-table
         :headers="headers"
         :items="filteredExercises"
-        :items-per-page="10"
+        :items-per-page="12"
+        height="700"
         class="styled-table"
         fixed-header
+        :search="search"
       >
         <!-- 거리 기반 -->
         <template #item.hasDistance="{ item }">
@@ -170,8 +173,12 @@ onMounted(() => {
 
         <!-- 관리 버튼 -->
         <template #item.setting="{ item }">
-          <v-btn @click="openForm(item)">수정</v-btn>
-          <v-btn @click="openDelete(item)">삭제</v-btn>
+          <div class="btn-area-main">
+            <v-btn class="btn-gray-outline" @click="openForm(item)">수정</v-btn>
+            <v-btn class="btn-red-outline" @click="openDelete(item)"
+              >삭제</v-btn
+            ></div
+          >
         </template>
       </v-data-table>
     </v-card>
@@ -234,10 +241,10 @@ onMounted(() => {
         </v-container>
 
         <v-divider class="my-2" />
-        <v-card-actions class="justify-end btn-area">
-          <v-btn class="btn-no" @click="cancelDialog = true">취소</v-btn>
-          <v-btn class="btn-yes" @click="saveExercise">저장</v-btn>
-        </v-card-actions>
+        <div class="justify-end btn-area">
+          <v-btn class="btn-gray" @click="cancelDialog = true">취소</v-btn>
+          <v-btn class="btn-blue" @click="saveExercise">저장</v-btn>
+        </div>
       </v-card>
     </v-dialog>
 
@@ -248,10 +255,10 @@ onMounted(() => {
           정말 <strong>{{ deleteTarget?.exerciseName }}</strong> 운동을
           삭제하시겠습니까?
         </v-card-text>
-        <v-card-actions class="justify-end btn-area">
-          <v-btn class="btn-yes" @click="removeExercise">네</v-btn>
-          <v-btn class="btn-no" @click="deleteDialog = false">아니오</v-btn>
-        </v-card-actions>
+        <div class="justify-end btn-area">
+          <v-btn class="btn-blue" @click="removeExercise">네</v-btn>
+          <v-btn class="btn-gray" @click="deleteDialog = false">아니오</v-btn>
+        </div>
       </v-card>
     </v-dialog>
 
@@ -259,108 +266,29 @@ onMounted(() => {
     <v-dialog v-model="successDialog" max-width="380" min-height="100">
       <v-card class="admin-dialog pa-6">
         <v-card-text> 성공적으로 완료되었습니다. </v-card-text>
-        <v-card-actions>
+        <div>
           <v-spacer />
-          <v-btn class="btn-yes" text @click="successDialog = false"
+          <v-btn class="btn-blue" text @click="successDialog = false"
             >확인</v-btn
           >
-        </v-card-actions>
+        </div>
       </v-card>
     </v-dialog>
 
-        <!-- 취소 모달 -->
+    <!-- 취소 모달 -->
     <v-dialog v-model="cancelDialog" max-width="380" min-height="100">
       <v-card class="admin-dialog pa-6">
         <v-card-text>
-          취소하고 돌아가시겠습니까? 
-          <br></br>
+          취소하고 돌아가시겠습니까?
+          <br />
           해당 내용은 저장되지 않습니다.
         </v-card-text>
-        <v-card-actions class="btn-area">
-          <v-btn class="btn-yes" @click="cancel()">네</v-btn>
-          <v-btn class="btn-no" @click="cancelDialog = false"
-            >아니오</v-btn
-          >
-        </v-card-actions>
+        <div class="btn-area">
+          <v-btn class="btn-blue" @click="cancel()">네</v-btn>
+          <v-btn class="btn-gray" @click="cancelDialog = false">아니오</v-btn>
+        </div>
       </v-card>
     </v-dialog>
-
-    <!-- <v-card>
-      <v-card-title class="d-flex justify-space-between align-center">
-        <span class="title">운동 종목 관리</span>
-        <v-text-field
-          v-model="search"
-          label="검색"
-          prepend-inner-icon="mdi-magnify"
-          density="compact"
-          hide-details
-          single-line
-          variant="outlined"
-          style="max-width: 250px"
-        />
-        <v-btn >챌린지 추가하기</v-btn>
-      </v-card-title>
-
-      <v-data-table
-        :headers="headers"
-        :items="exercise"
-        style="max-height: calc(100vh - 200px)"
-        :search="search"
-        fixed-header
-        :items-per-page="10"
-        class="styled-table"
-      >
-        <!-- 타입 변환 -->
-        <!-- <template #item.cdType="{ item }">
-          <v-chip
-            :color="
-              item.cdType === 'daily'
-                ? 'blue'
-                : item.cdType === 'weekly'
-                ? 'green'
-                : item.cdType === 'competition'
-                ? 'red'
-                : 'purple'
-            "
-            text-color="white"
-            small
-          >
-            {{ formatType(item.cdType) }}
-          </v-chip>
-        </template> -->
-
-        <!-- 목표 -->
-        <!-- <template #item.cdGoal="{ item }">
-          {{ Number(item.cdGoal).toLocaleString() }}
-        </template> -->
-
-        <!-- 챌린지 등급 -->
-        <!-- <template #item.tier="{ item }">
-          <v-chip
-            :color="
-              item.tier === '브론즈'
-                ? '#ce7430'
-                : item.tier === '실버'
-                ? '#7a7a7a'
-                : item.tier === '골드'
-                ? '#ffba57'
-                : item.tier === '다이아'
-                ? '#00c6ff'
-                : '#ff8a80' // 그 외
-            "
-            small
-          >
-            {{ item.tier }}
-          </v-chip>
-        </template> -->
-
-        <!-- 관리 -->
-        <!-- <template #item.setting="{ item }">
-          <v-btn @click="toForm(item)">수정</v-btn>
-          <v-btn @click="openDelete(item.cdId)">삭제</v-btn>
-        </template> -->
-      <!-- </v-data-table>
-    </v-card> -->
   </div>
 </template>
 
@@ -387,9 +315,21 @@ onMounted(() => {
 }
 .search {
   width: 50%;
+  justify-content: end;
 }
 .btn {
   min-width: 150px;
+}
+/* 정렬 아이콘 항상 보이게 */
+.styled-table :deep(.v-data-table__th .v-icon) {
+  opacity: 1 !important; /* 항상 표시 */
+  color: #bbb !important; /* 기본은 연한 회색으로 */
+  transition: color 0.2s ease;
+}
+
+/* 활성 정렬 컬럼 아이콘 강조 */
+.styled-table :deep(.v-data-table__th--sorted .v-icon) {
+  color: #5ee6eb !important; /* 활성 정렬 컬럼만 민트 */
 }
 
 .admin-dialog {
@@ -455,10 +395,17 @@ onMounted(() => {
   padding: 0 4px 4px 0 !important;
   margin-top: 4px !important;
 }
+.btn-area-main {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 4px 4px 0 !important;
+  margin-top: 4px !important;
+}
 
-// 버튼 공통
-.btn-no,
-.btn-yes {
+.btn-gray,
+.btn-blue,
+.btn-red {
   min-width: 72px;
   height: 38px;
   border-radius: 10px;
@@ -474,25 +421,56 @@ onMounted(() => {
 }
 
 // 취소 버튼
-.btn-no {
+.btn-gray {
   background-color: #e0e0e0 !important;
   color: #333 !important;
   border-radius: 10px;
 }
-.btn-no:hover {
+.btn-gray:hover {
   background-color: #d6d6d6 !important;
+  box-shadow: 0 3px 10px rgba(61, 212, 218, 0.35);
   transform: scale(1.03);
 }
 
 // 저장 버튼
-.btn-yes {
+.btn-blue {
   background-color: #5ee6eb !important;
   color: #fff !important;
   border-radius: 10px;
 }
-.btn-yes:hover {
+.btn-blue:hover {
   background-color: #3dd4da !important;
   box-shadow: 0 3px 10px rgba(61, 212, 218, 0.35);
   transform: scale(1.03);
+}
+
+// 삭제 버튼
+.btn-red {
+  background-color: #f28b82 !important;
+  color: #fff !important;
+  border-radius: 10px;
+}
+.btn-red:hover {
+  background-color: #ef5350 !important;
+  box-shadow: 0 3px 10px rgba(61, 212, 218, 0.35);
+  transform: scale(1.03);
+}
+
+.btn-gray-outline {
+  background-color: transparent !important;
+  border: 1.5px solid  #cccccc  !important;
+  color: #555 !important;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.25s ease;
+}
+
+.btn-red-outline {
+  background-color: transparent !important;
+  border: 1.5px solid #f28b82 !important;
+  color: #e25b4b !important;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.25s ease;
 }
 </style>

@@ -67,7 +67,7 @@ const submit = async () => {
       console.log('업데이트 후 store 상태:', authentication.state.signedUser);
 
       if (result.userRole === 'ADMIN' || result.userRole === 'MANAGER') {
-        await router.push('/admin');
+        await router.push('/role/select');
       } else {
         await router.push('/');
       }
