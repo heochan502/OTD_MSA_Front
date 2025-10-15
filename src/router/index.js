@@ -21,7 +21,6 @@ import ChallengeDay from "@/views/challenge/ChallengeDay.vue";
 import Login from "@/views/user/Login.vue";
 import Join from "@/views/user/Join.vue";
 import Profile from "@/views/user/Profile.vue";
-import Signal from "@/views/user/Signal.vue";
 import Inquiry from "@/views/user/Inquiry.vue";
 import NickName from "@/views/user/Nickname.vue";
 import Email from "@/views/user/Email.vue";
@@ -211,11 +210,6 @@ const router = createRouter({
       path: "/user/profile",
       name: "profile",
       component: Profile,
-    },
-    {
-      path: "/user/signal",
-      name: "signal",
-      component: Signal,
     },
     {
       path: "/user/email/inquiry",

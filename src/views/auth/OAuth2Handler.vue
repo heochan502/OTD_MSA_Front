@@ -11,8 +11,8 @@ onMounted(async () => {
   const error = route.query.error;
   const userId = route.query.user_id;
 
-  console.log('error:', error);
-  console.log('userId:', userId);
+  // console.log('error:', error);
+  // console.log('userId:', userId);
 
   if (error || !userId) {
     if (error) {
@@ -42,7 +42,7 @@ onMounted(async () => {
     userRole               
   };
 
-  console.log('signedUser:', signedUser);
+  //console.log('signedUser:', signedUser);
 
 
   authentication.setSignedUser(signedUser);

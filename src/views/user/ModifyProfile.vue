@@ -29,6 +29,9 @@ const showModal = (title, message, type = 'info', onConfirm = null, onCancel = n
   };
 };
 
+const goBack = () => {
+  router.back();
+};
 const closeModal = () => {
   modalState.value.show = false;
 };
@@ -117,6 +120,12 @@ const remove = async () => {
           <div class="arrow">›</div>
         </button>
       </div>
+      <div class="top-buttons">
+      <button @click="goBack" class="back-btn">
+        ← 뒤로가기
+      </button>
+     
+    </div>
     </div>
 
     <!-- Alert 모달 컴포넌트 -->
@@ -276,4 +285,25 @@ const remove = async () => {
 .btn-submit:hover {
   background: #2563eb;
 }
+.top-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  justify-content: flex-end;
+}
+.back-btn {
+  padding: 10px 20px;
+  background-color: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.back-btn:hover {
+  background-color: #4b5563;
+}
+
 </style>
