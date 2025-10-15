@@ -19,8 +19,7 @@ const loadInquiryDetail = async () => {
   try {
     const data = await getInquiryDetail(props.inquiryId);
     inquiry.value = data.data || data;
-    console.log('문의 상세:', inquiry.value); // 디버깅용
-    console.log('상태 값:', inquiry.value?.status); // 디버깅용
+
   } catch (error) {
     console.error('문의 상세 조회 실패:', error);
     alert('문의 상세 정보를 불러오는데 실패했습니다.');

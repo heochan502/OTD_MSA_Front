@@ -321,13 +321,10 @@ const loadTermsContent = (type) => {
     modalContent.value.title = term.title || '약관';
     modalContent.value.content = term.content || '내용을 불러올 수 없습니다.';
     
-    console.log('modalContent 설정 완료:', modalContent.value);
     
     showTermsModal.value = true;
-    console.log('showTermsModal:', showTermsModal.value);
   } else {
     console.error('약관을 찾을 수 없습니다. type:', type);
-    console.log('사용 가능한 types:', termsData.value.map(t => t.type));
     showAlert('오류', '약관을 찾을 수 없습니다.', 'error');
   }
 };

@@ -489,7 +489,7 @@ const fetchLastestBodyComposition = async () => {
   }
 }
 .top-wrap {
-  margin: 10px 0px;
+  margin: 10px  20px 0 20px;
 }
 .wrap_content {
   display: flex;

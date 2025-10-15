@@ -16,9 +16,7 @@ const loadInquiries = async () => {
   try {
     const data = await getMyInquiries();
     inquiries.value = data;
-    console.log('문의 내역:', data);
     if (data.length > 0) {
-      console.log('첫 번째 문의의 상태:', data[0].status);
     }
   } catch (error) {
     console.error('문의 내역 로딩 오류:', error);

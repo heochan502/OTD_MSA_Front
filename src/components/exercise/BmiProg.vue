@@ -1,10 +1,10 @@
 <script setup>
-import { computed, reactive, ref, onMounted, watch } from 'vue';
-import { useBodyCompositionStore } from '@/stores/body_composition/bodyCompositionStore';
-import { useAuthenticationStore } from '@/stores/user/authentication';
-import { saveUserBasicBodyInfo } from '@/services/body_composition/bodyCompositionService';
-import { getUserBasicBodyInfo } from '@/services/body_composition/bodyCompositionService';
-import Modal from '../user/Modal.vue';
+import { computed, reactive, ref, onMounted, watch } from "vue";
+import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
+import { useAuthenticationStore } from "@/stores/user/authentication";
+import { saveUserBasicBodyInfo } from "@/services/body_composition/bodyCompositionService";
+import { getUserBasicBodyInfo } from "@/services/body_composition/bodyCompositionService";
+import Modal from "../user/Modal.vue";
 
 const bodyCompositionStore = useBodyCompositionStore();
 const authenticationStore = useAuthenticationStore();
@@ -26,8 +26,8 @@ const hasRecord = computed(() => {
 onMounted(async () => {
   if (
     //관리자 계정이면 신체정보입력 X
-    authenticationStore.state.signedUser.userRole === 'ADMIN' ||
-    authenticationStore.state.signedUser.userRole === 'MANAGER'
+    authenticationStore.state.signedUser.userRole === "ADMIN" ||
+    authenticationStore.state.signedUser.userRole === "MANAGER"
   ) {
     return;
   } else if (hasRecord.value) {
@@ -91,12 +91,12 @@ const bmi = computed(() => {
 
 const bmiStatus = computed(() => {
   const userBmi = bmi.value;
-  if (userBmi === 0) return '기록없음';
-  else if (userBmi < 18.5) return '저체중';
-  else if (userBmi < 25) return '정상체중';
-  else if (userBmi < 30) return '과체중';
-  else if (userBmi < 35) return '비만';
-  else return '고도비만';
+  if (userBmi === 0) return "기록없음";
+  else if (userBmi < 18.5) return "저체중";
+  else if (userBmi < 25) return "정상체중";
+  else if (userBmi < 30) return "과체중";
+  else if (userBmi < 35) return "비만";
+  else return "고도비만";
 });
 
 // 기초대사량 bmr
@@ -111,16 +111,16 @@ function calculateBmr(height, weight, age, gender) {
   const h = Number(height);
   const w = Number(weight);
   const a = Number(age);
-  const g = (gender ?? '').toUpperCase();
+  const g = (gender ?? "").toUpperCase();
 
   // 숫자 검증
   if (!Number.isFinite(h) || h <= 0) return 0;
   if (!Number.isFinite(w) || w <= 0) return 0;
   if (!Number.isFinite(a) || a <= 0) return 0;
-  if (g !== 'M' && g !== 'F') return 0;
+  if (g !== "M" && g !== "F") return 0;
 
   let bmr;
-  if (g === 'M') bmr = 66.47 + 13.75 * w + 5 * h - 6.76 * a;
+  if (g === "M") bmr = 66.47 + 13.75 * w + 5 * h - 6.76 * a;
   else bmr = 655.1 + 9.56 * w + 1.85 * h - 4.68 * a;
 
   return Math.round(bmr);
@@ -147,7 +147,7 @@ const saveFormData = async () => {
 
   const res = await saveUserBasicBodyInfo(state.form);
   if (res === undefined || res.status !== 200) {
-    alert('에러발생');
+    alert("에러발생");
     return;
   }
   bodyCompositionStore.setBasicInfo(state.form);
@@ -281,7 +281,7 @@ watch(showDialog, (isOpen) => {
 <style lang="scss" scoped>
 .content_bmi {
   width: 100%;
-  max-width: 350px;
+  // max-width: 350px;
 
   .chip_bmi {
     display: flex;
@@ -302,7 +302,7 @@ watch(showDialog, (isOpen) => {
     top: 50%;
     transform: translateY(-50%);
     height: 8px;
-    max-width: 315px;
+    // max-width: 315px;
     border-radius: 6px;
     background: linear-gradient(
       to right,
@@ -320,7 +320,7 @@ watch(showDialog, (isOpen) => {
   justify-content: space-between;
   //   color: #ececec;
   font-size: 9px;
-  max-width: 315px;
+  // max-width: 315px;
 }
 
 .bmi-card {

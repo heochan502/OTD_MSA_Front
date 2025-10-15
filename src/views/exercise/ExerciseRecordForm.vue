@@ -98,13 +98,26 @@ watch(exerciseDuration, (val) => {
   state.form.duration = Math.ceil(val);
 });
 
+const formatDateAt = (datetimeStr) => {
+  const date = new Date(datetimeStr);
+  const yy = date.getFullYear().toString();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+
+  return `${yy}-${mm}-${dd}T${hours}:${minutes}`;
+};
+
 // @click
 // 기록 저장
 const confirmYes = async () => {
+  const startAt = formatDateAt(state.form.startAt);
+  const endAt = formatDateAt(state.form.endAt);
   const jsonBody = {
     exerciseId: state.form.exerciseId,
-    startAt: state.form.startAt,
-    endAt: state.form.endAt,
+    startAt: startAt,
+    endAt: endAt,
     duration: state.form.duration,
     activityKcal: state.form.activityKcal,
     effortLevel: state.form.effortLevel,
@@ -330,13 +343,13 @@ const goToMain = () => {
   justify-content: center;
   gap: 10px;
 
-  width: 310px;
+  // width: 310px;
   margin-bottom: 15px;
 }
 .input_box {
   display: flex;
   align-items: center;
-  width: 310px;
+  // width: 310px;
   height: 50px;
   padding: 20px 20px;
 
@@ -360,7 +373,7 @@ const goToMain = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  max-width: 350px;
+  // max-width: 350px;
   height: 50px;
   margin-top: 15px;
 

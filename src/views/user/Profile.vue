@@ -10,6 +10,7 @@ import { getSelectedAll } from '@/services/user/userService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { ref, computed, onMounted } from 'vue';
 import { putLifeUserProfile } from '@/services/community/postService';
+import AlertModal from '@/components/user/Modal.vue';
 
 const router = useRouter();
 const authStore = useAuthenticationStore();
@@ -19,6 +20,7 @@ const loadingHistory = ref(true);
 const showPhotoModal = ref(false);
 const selectedFile = ref(null);
 const previewUrl = ref(null);
+const showLogoutModal = ref(false);
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const defaultProfile = '/otd/image/main/default-profile.png';
@@ -39,6 +41,23 @@ const userInfo = computed(() => {
     userId: authStore.state.signedUser?.userId,
   };
 });
+
+const openLogoutModal = () => {
+  showLogoutModal.value = true;
+};
+
+// 모달 confirm → 실제 로그아웃 처리
+const handleLogoutConfirm = async () => {
+  showLogoutModal.value = false;
+  isLoggingOut.value = true;
+  const res = await logout();
+  isLoggingOut.value = false;
+  if (!res || res.status !== 200) return;
+  authStore.logout();
+  router.push('/user/login');
+};
+
+
 
 // 프로필 사진 클릭 시 모달 열기
 const openPhotoModal = (e) => {
@@ -80,11 +99,11 @@ const saveProfilePhoto = async () => {
     const formData = new FormData();
     formData.append('pic', selectedFile.value);
 
-    console.log('프로필 사진 업로드 시작...');
+
 
     const response = await patchUserProfilePic(formData);
 
-    console.log('업로드 응답:', response);
+
 
     if (response.data && response.data.result) {
       const fileName = response.data.result;
@@ -109,16 +128,16 @@ const deleteProfilePhoto = async () => {
   if (!confirm('프로필 사진을 삭제하시겠습니까?')) return;
 
   try {
-    console.log('프로필 사진 삭제 시작...');
+    //console.log('프로필 사진 삭제 시작...');
 
     const response = await deleteUserProfilePic();
 
-    console.log('삭제 응답:', response);
+    //console.log('삭제 응답:', response);
 
     if (response.status === 200) {
       authStore.state.signedUser.pic = null;
 
-      console.log('프로필 사진이 삭제되었습니다.');
+      //console.log('프로필 사진이 삭제되었습니다.');
 
       alert('프로필 사진이 삭제되었습니다.');
       closePhotoModal();
@@ -366,12 +385,23 @@ onMounted(() => {
         >약관 및 보안</router-link
       >
       <button
-        class="logout-btn"
-        @click="logoutAccount"
-        :disabled="isLoggingOut"
-      >
-        {{ isLoggingOut ? '로그아웃 중...' : '로그아웃' }}
-      </button>
+    class="logout-btn"
+    @click="openLogoutModal"
+    :disabled="isLoggingOut"
+  >
+    {{ isLoggingOut ? '로그아웃 중...' : '로그아웃' }}
+  </button>
+
+  <AlertModal
+    v-model:show="showLogoutModal"
+    type="confirm"
+    title="로그아웃"
+    message="정말 로그아웃 하시겠습니까?"
+    confirmText="로그아웃"
+    cancelText="취소"
+    @confirm="handleLogoutConfirm"
+    @cancel="showLogoutModal = false"
+  />
     </div>
 
     <!-- 프로필 사진 수정 모달 -->

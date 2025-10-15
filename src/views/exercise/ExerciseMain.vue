@@ -123,7 +123,7 @@ const onDateClick = async (date) => {
 .content_wrap {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  // align-items: center;
   margin-bottom: 15px;
 }
 .subtitle {
@@ -131,7 +131,6 @@ const onDateClick = async (date) => {
   align-content: center;
   justify-content: space-between;
   margin-top: 15px;
-  max-width: 350px;
 }
 
 .btn_add {

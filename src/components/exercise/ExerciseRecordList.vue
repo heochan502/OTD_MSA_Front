@@ -118,7 +118,7 @@ const goDetail = (exerciseRecordId) => {
   justify-content: space-between;
 
   min-width: 320px;
-  max-width: 350px;
+  // max-width: 350px;
   width: 100%;
   height: 75px;
   padding: 17px;
