@@ -184,7 +184,7 @@ onMounted(() => {
 
 .refresh-btn {
   padding: 10px 20px;
-  background-color: #10b981;
+  background-color: #6b7280;
   color: white;
   border: none;
   border-radius: 6px;
@@ -194,7 +194,7 @@ onMounted(() => {
 }
 
 .refresh-btn:hover {
-  background-color: #059669;
+  background-color: #6b7280;
 }
 
 .header {
@@ -229,7 +229,7 @@ onMounted(() => {
 
 .create-btn {
   padding: 12px 30px;
-  background-color: #3b82f6;
+  background-color: #393E46;
   color: white;
   border: none;
   border-radius: 6px;
@@ -239,7 +239,7 @@ onMounted(() => {
 }
 
 .create-btn:hover {
-  background-color: #2563eb;
+  background-color: #303030;
 }
 
 .inquiry-list {
@@ -259,7 +259,7 @@ onMounted(() => {
 
 .inquiry-item:hover {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  border-color: #3b82f6;
+  border-color: #303030;
 }
 
 .inquiry-header {
