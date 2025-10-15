@@ -83,6 +83,7 @@ onMounted(async () => {
    */
 .wrap {
   margin-top: 30px;
+  justify-self: center;
 }
 
 /* // 화면이 391px 이상일 때만 max-width + 중앙정렬 적용 */

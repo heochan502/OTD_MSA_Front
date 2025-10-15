@@ -14,7 +14,10 @@ const deleteDialog = ref(false);
 const isEdit = ref(false);
 const successDialog = ref(false);
 const cancelDialog = ref(false);
+const errorDialog = ref(false);
+const validationDialog = ref(false);
 const deleteTarget = ref({});
+const saveDialog = ref(false);
 
 const editExercise = ref({});
 const search = ref('');
@@ -70,17 +73,30 @@ const openForm = (exercise = null) => {
   formDialog.value = true;
 };
 
+const validation = () => {
+  if (
+    !editExercise.value.exerciseName ||
+    editExercise.value.exerciseName.trim() === ''
+  ) {
+    validationDialog.value = true;
+    return;
+  }
+  if (editExercise.value.exerciseMet <= 0) {
+    validationDialog.value = true;
+    return;
+  } else saveDialog.value = true;
+};
 // 저장 (추가 or 수정)
 const saveExercise = async () => {
   if (
     !editExercise.value.exerciseName ||
     editExercise.value.exerciseName.trim() === ''
   ) {
-    alert('운동명을 입력해주세요.');
+    validationDialog.value = true;
     return;
   }
   if (editExercise.value.exerciseMet <= 0) {
-    alert('MET 값을 입력해주세요.');
+    validationDialog.value = true;
     return;
   }
 
@@ -92,8 +108,12 @@ const saveExercise = async () => {
     }
     successDialog.value = true;
     formDialog.value = false;
+    saveDialog.value = false;
     loadExercises();
   } catch (e) {
+    saveDialog.value = false;
+    deleteDialog.value = false;
+    errorDialog.value = true;
     console.error('저장 실패:', e);
   }
 };
@@ -112,6 +132,8 @@ const removeExercise = async () => {
     deleteDialog.value = false;
     loadExercises();
   } catch (e) {
+    deleteDialog.value = false;
+    errorDialog.value = true;
     console.error('삭제 실패:', e);
   }
 };
@@ -177,8 +199,8 @@ onMounted(() => {
             <v-btn class="btn-gray-outline" @click="openForm(item)">수정</v-btn>
             <v-btn class="btn-red-outline" @click="openDelete(item)"
               >삭제</v-btn
-            ></div
-          >
+            >
+          </div>
         </template>
       </v-data-table>
     </v-card>
@@ -243,7 +265,28 @@ onMounted(() => {
         <v-divider class="my-2" />
         <div class="justify-end btn-area">
           <v-btn class="btn-gray" @click="cancelDialog = true">취소</v-btn>
-          <v-btn class="btn-blue" @click="saveExercise">저장</v-btn>
+          <v-btn class="btn-blue" @click="validation()">저장</v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+
+    <!-- 밸리데이션 모달 -->
+    <v-dialog v-model="validationDialog" max-width="380" min-height="100">
+      <v-card class="admin-dialog pa-6">
+        <v-card-text> 모든 항목을 입력해주세요. </v-card-text>
+        <div class="btn-area">
+          <v-btn class="btn-blue" @click="validationDialog = false">확인</v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+
+    <!-- 저장 -->
+    <v-dialog v-model="saveDialog" max-width="380" min-height="100">
+      <v-card class="admin-dialog pa-6">
+        <v-card-text> 저장하시겠습니까? </v-card-text>
+        <div class="btn-area">
+          <v-btn class="btn-blue" @click="saveExercise">네</v-btn>
+          <v-btn class="btn-gray" @click="saveDialog = false">아니오</v-btn>
         </div>
       </v-card>
     </v-dialog>
@@ -266,11 +309,8 @@ onMounted(() => {
     <v-dialog v-model="successDialog" max-width="380" min-height="100">
       <v-card class="admin-dialog pa-6">
         <v-card-text> 성공적으로 완료되었습니다. </v-card-text>
-        <div>
-          <v-spacer />
-          <v-btn class="btn-blue" text @click="successDialog = false"
-            >확인</v-btn
-          >
+        <div class="btn-area">
+          <v-btn class="btn-blue" @click="successDialog = false">확인</v-btn>
         </div>
       </v-card>
     </v-dialog>
@@ -286,6 +326,26 @@ onMounted(() => {
         <div class="btn-area">
           <v-btn class="btn-blue" @click="cancel()">네</v-btn>
           <v-btn class="btn-gray" @click="cancelDialog = false">아니오</v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+
+    <!-- 밸리데이션 모달 -->
+    <v-dialog v-model="validationDialog" max-width="380" min-height="100">
+      <v-card class="admin-dialog pa-6">
+        <v-card-text> 모든 항목을 입력해주세요. </v-card-text>
+        <div class="btn-area">
+          <v-btn class="btn-blue" @click="validationDialog = false">확인</v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+
+    <!-- 저장 실패 모달 -->
+    <v-dialog v-model="errorDialog" max-width="380" min-height="100">
+      <v-card class="admin-dialog pa-6">
+        <v-card-text> 실패하였습니다. </v-card-text>
+        <div class="btn-area">
+          <v-btn class="btn-blue" @click="errorDialog = false">확인</v-btn>
         </div>
       </v-card>
     </v-dialog>
@@ -458,7 +518,7 @@ onMounted(() => {
 
 .btn-gray-outline {
   background-color: transparent !important;
-  border: 1.5px solid  #cccccc  !important;
+  border: 1.5px solid #cccccc !important;
   color: #555 !important;
   border-radius: 10px;
   font-weight: 600;
