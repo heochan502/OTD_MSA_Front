@@ -126,8 +126,8 @@ const hasData = computed(() => {
 <template>
   <div v-if="!hasData" class="no-data">
     <v-card class="chart otd-border otd-shadow otd-box-style">
-      <span class="text-h4">☹️</span>
-      <span class="otd-subtitle-2"> 체성분 측정 데이터가 없어요 </span>
+      <span class="text-h4">🤸🏻</span>
+      <span class="otd-subtitle-2"> InBody 데이터가 없어요. </span>
     </v-card>
   </div>
   <!-- selectedMetric 유무에 따라 표시할 metric 다르게 -->
@@ -153,6 +153,7 @@ const hasData = computed(() => {
   flex-direction: column;
   justify-content: center;
   text-align: center;
+  max-width: 350px;
   height: 250px;
   padding: 20px 10px;
   margin: 0 0 15px 0;
