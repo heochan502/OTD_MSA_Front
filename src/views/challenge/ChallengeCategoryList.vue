@@ -247,6 +247,7 @@ onMounted(async () => {
 :deep(.swiper) {
   width: 100%;
   overflow: hidden;
+  min-width: 360px;
 }
 
 :deep(.swiper-wrapper) {

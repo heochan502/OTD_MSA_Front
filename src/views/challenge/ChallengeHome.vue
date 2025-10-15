@@ -493,10 +493,6 @@ const settlementButton = async () => {
   .challenge-card {
     grid-template-columns: repeat(2, 150px); // 카드 폭 줄임
   }
-  .empty-card {
-    width: 150px;
-    height: 110px;
-  }
 }
 
 /* 320px 이하에서는 1열로 변경 */

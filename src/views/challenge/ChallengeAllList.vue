@@ -32,7 +32,7 @@ onMounted(async () => {
       <Swiper
         :modules="[Autoplay]"
         :slides-per-view="2"
-        :space-between="14"
+        :space-between="15"
         loop
         :autoplay="{ delay: 3000, disableOnInteraction: false }"
       >
@@ -65,7 +65,7 @@ onMounted(async () => {
         <Swiper
           :modules="[Autoplay]"
           :slides-per-view="2"
-          :space-between="14"
+          :space-between="15"
           loop
           :autoplay="{ delay: 5000, disableOnInteraction: false }"
         >
@@ -90,7 +90,7 @@ onMounted(async () => {
         <Swiper
           :modules="[Autoplay]"
           :slides-per-view="2"
-          :space-between="14"
+          :space-between="15"
           loop
           :autoplay="{ delay: 5000, disableOnInteraction: false }"
         >
