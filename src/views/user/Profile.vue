@@ -57,7 +57,6 @@ const handleLogoutConfirm = async () => {
   router.push('/user/login');
 };
 
-
 const modal = ref({
   show: false,
   type: 'info',
@@ -97,9 +96,6 @@ const closePhotoModal = () => {
   previewUrl.value = null;
 };
 
-
-
-
 const triggerFileInput = () => {
   document.getElementById('photoInput').click();
 };
@@ -118,7 +114,6 @@ const handleFileSelect = (e) => {
     });
   }
 };
-
 
 // 저장
 const saveProfilePhoto = async () => {
@@ -148,7 +143,7 @@ const saveProfilePhoto = async () => {
         type: 'success',
         title: '저장 완료',
         message: '프로필 사진이 변경되었습니다.',
-        onConfirm: () => showPhotoModal.value = false,
+        onConfirm: () => (showPhotoModal.value = false),
       });
     }
   } catch (err) {
@@ -179,7 +174,7 @@ const deleteProfilePhoto = () => {
             type: 'success',
             title: '삭제 완료',
             message: '프로필 사진이 삭제되었습니다.',
-            onConfirm: () => showPhotoModal.value = false,
+            onConfirm: () => (showPhotoModal.value = false),
           });
         }
       } catch (err) {
@@ -309,7 +304,7 @@ const formatDate = (dateString) => {
     .replace(/\.$/, '');
 };
 
-const logoutAccount = async  () => {
+const logoutAccount = async () => {
   if (!confirm('로그아웃 하시겠습니까?')) return;
   const res = await logout();
   if (res === undefined || res.status !== 200) return;
@@ -430,23 +425,23 @@ onMounted(() => {
         >약관 및 보안</router-link
       > -->
       <button
-    class="logout-btn"
-    @click="openLogoutModal"
-    :disabled="isLoggingOut"
-  >
-    {{ isLoggingOut ? '로그아웃 중...' : '로그아웃' }}
-  </button>
+        class="logout-btn"
+        @click="openLogoutModal"
+        :disabled="isLoggingOut"
+      >
+        {{ isLoggingOut ? '로그아웃 중...' : '로그아웃' }}
+      </button>
 
-  <AlertModal
-    v-model:show="showLogoutModal"
-    type="confirm"
-    title="로그아웃"
-    message="정말 로그아웃 하시겠습니까?"
-    confirmText="로그아웃"
-    cancelText="취소"
-    @confirm="handleLogoutConfirm"
-    @cancel="showLogoutModal = false"
-  />
+      <AlertModal
+        v-model:show="showLogoutModal"
+        type="confirm"
+        title="로그아웃"
+        message="정말 로그아웃 하시겠습니까?"
+        confirmText="로그아웃"
+        cancelText="취소"
+        @confirm="handleLogoutConfirm"
+        @cancel="showLogoutModal = false"
+      />
     </div>
 
     <!-- 프로필 사진 수정 모달 -->
