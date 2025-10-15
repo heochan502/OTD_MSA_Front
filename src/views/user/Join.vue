@@ -948,7 +948,7 @@ const loadTermsContent = (type) => {
   }
 };
 
-// 약관 모달 닫기
+
 
 
 // 약관 모달 닫기
@@ -1082,7 +1082,7 @@ const closeTermsModal = () => {
 
         <div class="form-group">
           <div class="form-group">
-            <label for="uid">아이디 *</label>
+            <label for="uid">아이디</label>
             <div class="input-wrapper">
               <input
                 type="text"
@@ -1127,7 +1127,7 @@ const closeTermsModal = () => {
           </div>
 
           <div class="form-group">
-            <label for="upw">비밀번호 *</label>
+            <label for="upw">비밀번호</label>
             <div class="input-wrapper">
               <input
                 :type="showPassword ? 'text' : 'password'"
@@ -1201,7 +1201,7 @@ const closeTermsModal = () => {
           </div>
 
           <div class="form-group">
-            <label for="confirmPassword">비밀번호 확인 *</label>
+            <label for="confirmPassword">비밀번호 확인</label>
             <div class="input-wrapper">
               <input
                 :type="showConfirmPassword ? 'text' : 'password'"
@@ -1341,7 +1341,7 @@ const closeTermsModal = () => {
           </select>
 
           <div class="form-group">
-            <label for="nickname">닉네임 *</label>
+            <label for="nickname">닉네임</label>
             <div class="input-wrapper">
               <input
                 type="text"
