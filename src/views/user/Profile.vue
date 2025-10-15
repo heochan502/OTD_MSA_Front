@@ -1009,7 +1009,6 @@ onMounted(() => {
 
       .activity-icon {
         margin-bottom: 0;
-        margin-right: 12px;
       }
     }
   }
