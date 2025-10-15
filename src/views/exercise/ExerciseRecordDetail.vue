@@ -67,7 +67,11 @@ onMounted(() => {
 
 // 운동 불러오기
 const getData = async (recordId) => {
-  if (!recordId) return;
+  // console.log("기록 불러올게요");
+  if (!recordId) {
+    // console.log("기록을 못 찾았어요");
+    return;
+  }
 
   const res = await getExerciseRecordDetail(recordId);
 
@@ -85,7 +89,7 @@ const onDateClick = async (date) => {
   exerciseRecordStore.clearRecords();
   selectedDate.value = date;
   // date 는 JS Date 객체 (컴포넌트에서 toDate()로 emit)
-
+  // console.log("선택날짜", selectedDate.value);
   const params = {
     page: 1,
     row_per_page: 2,
@@ -100,11 +104,16 @@ const onDateClick = async (date) => {
   }
   exerciseRecordStore.records = res.data;
 
+  console.log("기록 몇 개인가요?");
   if (exerciseRecordStore.records.length === 0) {
+    console.log("0개");
     noticeDialog.value = true;
   } else if (exerciseRecordStore.records.length === 1) {
-    getData(exerciseRecordStore.records.exerciseRecordId);
+    console.log("1개");
+    console.log("[데이터]", exerciseRecordStore.records[0].exerciseRecordId);
+    getData(exerciseRecordStore.records[0].exerciseRecordId);
   } else {
+    console.log("기록이 여러개입니다.");
     selectionItems.value = exerciseRecordStore.records;
     selectionDialog.value = true;
   }

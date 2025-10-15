@@ -69,16 +69,6 @@ const onDidMove = async (pages) => {
   const res = await getExerciseRecordList(params);
   exerciseRecordStore.monthlyRecords = res.data;
 };
-
-// 점 찍을 때 해당 일자에 데이터 있는지 확인하기 위함
-// const recordSet = computed(
-//   () =>
-//     new Set(
-//       exerciseRecordStore.monthlyRecords.map((r) =>
-//         formatDateISO(new Date(r.startAt))
-//       )
-//     )
-// );
 </script>
 
 <template>

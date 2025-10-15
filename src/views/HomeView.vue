@@ -1,34 +1,34 @@
 <script setup>
-import { ref, onMounted, computed, reactive, watch } from "vue";
-import Progress from "@/components/challenge/Progress.vue";
-import ProgressJs from "@/components/challenge/ProgressJs.vue";
+import { ref, onMounted, computed, reactive, watch } from 'vue';
+import Progress from '@/components/challenge/Progress.vue';
+import ProgressJs from '@/components/challenge/ProgressJs.vue';
 
-import StaticChart from "@/components/exercise/StaticChart.vue";
+import StaticChart from '@/components/exercise/StaticChart.vue';
 
-import MealCard from "@/components/meal/MealDayCards.vue";
-import { useMealSelectedStore } from "@/stores/meal/mealStore.js";
+import MealCard from '@/components/meal/MealDayCards.vue';
+import { useMealSelectedStore } from '@/stores/meal/mealStore.js';
 
-import BmiProg from "@/components/exercise/BmiProg.vue";
-import { getMyChallenge } from "@/services/challenge/challengeService";
-import { useRouter, useRoute } from "vue-router";
+import BmiProg from '@/components/exercise/BmiProg.vue';
+import { getMyChallenge } from '@/services/challenge/challengeService';
+import { useRouter, useRoute } from 'vue-router';
 
-import { getChallengeSettlementLog } from "@/services/challenge/challengeService";
-import ChallengeSettlementCard from "@/components/challenge/ChallengeSettlementCard.vue";
-import { useChallengeStore } from "@/stores/challenge/challengeStore";
+import { getChallengeSettlementLog } from '@/services/challenge/challengeService';
+import ChallengeSettlementCard from '@/components/challenge/ChallengeSettlementCard.vue';
+import { useChallengeStore } from '@/stores/challenge/challengeStore';
 
-import weather from "@/components/weather/weather.vue";
-import { useAuthenticationStore } from "@/stores/user/authentication";
+import weather from '@/components/weather/weather.vue';
+import { useAuthenticationStore } from '@/stores/user/authentication';
 
-import dayjs from "dayjs";
-import "dayjs/locale/ko";
+import dayjs from 'dayjs';
+import 'dayjs/locale/ko';
 
 const selectedDay = useMealSelectedStore();
 
-import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
+import { useBodyCompositionStore } from '@/stores/body_composition/bodyCompositionStore';
 import {
   getSeries,
   getLastestBodyComposition,
-} from "@/services/body_composition/bodyCompositionService";
+} from '@/services/body_composition/bodyCompositionService';
 
 const state = reactive({
   monthlySettlementLog: [],
@@ -46,38 +46,38 @@ const userInfo = computed(() => ({
   pic: authentication.state.signedUser.pic,
   xp: authentication.state.signedUser.xp,
 }));
-const defaultProfile = "/otd/image/main/default-profile.png";
+const defaultProfile = '/otd/image/main/default-profile.png';
 // pic이 있으면 그걸 쓰고, 없으면 기본 이미지
 const profileImage = computed(() => {
   return userInfo.value?.pic ? userInfo.value.pic : defaultProfile;
 });
-const myRole = computed(() => authentication.state.signedUser?.userRole || "");
+const myRole = computed(() => authentication.state.signedUser?.userRole || '');
 
 // 포인트 포맷팅
 const formatPoint = (point) => {
-  return point?.toLocaleString() || "0";
+  return point?.toLocaleString() || '0';
 };
 
 const healthInfo = ref([
-  { text: "체중(kg)", value: 70.5, check: true },
-  { text: "체지방률(%)", value: 15.3, check: false },
-  { text: "골격근량(kg)", value: 30.2, check: false },
+  { text: '체중(kg)', value: 70.5, check: true },
+  { text: '체지방률(%)', value: 15.3, check: false },
+  { text: '골격근량(kg)', value: 30.2, check: false },
 ]);
 
 const fields = [
-  { key: "weight", label: "체중", unit: "kg" },
-  { key: "BFP", label: "체지방률", unit: "%" },
-  { key: "SMM", label: "골격근량", unit: "kg" },
+  { key: 'weight', label: '체중', unit: 'kg' },
+  { key: 'BFP', label: '체지방률', unit: '%' },
+  { key: 'SMM', label: '골격근량', unit: 'kg' },
 ];
 
 const inbodyData = ref([
-  { dataTime: "2025-09-22", weight: "62.4", BFP: "20", SMM: "23" },
-  { dataTime: "2025-09-23", weight: "62.1", BFP: "20.2", SMM: "22.9" },
-  { dataTime: "2025-09-24", weight: "60.9", BFP: "20.1", SMM: "23.1" },
-  { dataTime: "2025-09-25", weight: "62.5", BFP: "20.5", SMM: "22.8" },
-  { dataTime: "2025-09-26", weight: "62.2", BFP: "20.3", SMM: "22.9" },
-  { dataTime: "2025-09-27", weight: "61.8", BFP: "19.9", SMM: "23.2" },
-  { dataTime: "2025-09-28", weight: "60", BFP: "20.0", SMM: "23.0" },
+  { dataTime: '2025-09-22', weight: '62.4', BFP: '20', SMM: '23' },
+  { dataTime: '2025-09-23', weight: '62.1', BFP: '20.2', SMM: '22.9' },
+  { dataTime: '2025-09-24', weight: '60.9', BFP: '20.1', SMM: '23.1' },
+  { dataTime: '2025-09-25', weight: '62.5', BFP: '20.5', SMM: '22.8' },
+  { dataTime: '2025-09-26', weight: '62.2', BFP: '20.3', SMM: '22.9' },
+  { dataTime: '2025-09-27', weight: '61.8', BFP: '19.9', SMM: '23.2' },
+  { dataTime: '2025-09-28', weight: '60', BFP: '20.0', SMM: '23.0' },
 ]);
 
 const today = new Date().toISOString().slice(0, 10);
@@ -95,7 +95,7 @@ const healthToggle = (index) => {
   }
 };
 
-const formatNumber = (n) => String(n).padStart(2, "0");
+const formatNumber = (n) => String(n).padStart(2, '0');
 const formatDate = (date) => {
   const y = date.getFullYear();
   const m = formatNumber(date.getMonth() + 1);
@@ -118,15 +118,15 @@ const selectedField = ref(
 );
 
 onMounted(async () => {
-  console.log("여기");
+  console.log('여기');
   bodyCompositionStore.resetStore();
   await fetchMonthlySettlement(todayDate);
   await fetchWeeklySettlement(todayDate);
-  console.log("state", state.monthlySettlementLog, state.weeklySettlementLog);
+  console.log('state', state.monthlySettlementLog, state.weeklySettlementLog);
   const challenge = await getMyChallenge();
-  console.log("챌린지 : ", challenge);
+  console.log('챌린지 : ', challenge);
   challengeInfo.value = challenge?.data || null;
-  console.log("homechallenge", challengeInfo.value);
+  console.log('homechallenge', challengeInfo.value);
 
   if (state.monthlySettlementLog.length > 0) {
     monthlySettlementDialog.value = true;
@@ -134,34 +134,34 @@ onMounted(async () => {
     weeklySettlementDialog.value = true;
   }
 
-  console.log("homechallenge", challengeInfo.value);
-  selectedDay.selectedDay.setDay = dayjs().format("YYYY-MM-DD");
+  console.log('homechallenge', challengeInfo.value);
+  selectedDay.selectedDay.setDay = dayjs().format('YYYY-MM-DD');
   await bodyCompositionStore.fetchBodyCompositionMetrics();
   fetchBodyCompositionSeries();
   fetchLastestBodyComposition();
 });
 
 const challengeHome = () => {
-  router.push("/challenge");
+  router.push('/challenge');
 };
 
 // 월간 정산 api호출
 const fetchMonthlySettlement = async (date) => {
   const monthlyKey = formatDate(date).slice(0, 7);
-  console.log("monthlykey", monthlyKey);
+  console.log('monthlykey', monthlyKey);
   console.log(
-    "challengeStore.state.lastMonthCheck",
+    'challengeStore.state.lastMonthCheck',
     challengeStore.state.lastMonthCheck
   );
   if (challengeStore.state.lastMonthCheck === monthlyKey) {
     return;
   } else {
     const params = {
-      type: "monthly",
+      type: 'monthly',
       settlementDate: formatDate(new Date(year, month - 1, 1)),
     };
     const res = await getChallengeSettlementLog(params);
-    console.log("res :", res);
+    console.log('res :', res);
     state.monthlySettlementLog = res?.data || null;
     challengeStore.state.lastMonthCheck = monthlyKey;
   }
@@ -170,16 +170,16 @@ const fetchMonthlySettlement = async (date) => {
 // 주간 정산 api호출
 const fetchWeeklySettlement = async (date) => {
   const weeklyKey = setWeeklyKey(date);
-  console.log("weeklykey", weeklyKey);
+  console.log('weeklykey', weeklyKey);
   console.log(
-    "challengeStore.state.lastWeekCheck",
+    'challengeStore.state.lastWeekCheck',
     challengeStore.state.lastWeekCheck
   );
   if (challengeStore.state.lastWeekCheck === weeklyKey) {
     return;
   } else {
     const params = {
-      type: "weekly",
+      type: 'weekly',
       settlementDate: formatDate(getMonday(date)),
     };
     const res = await getChallengeSettlementLog(params);
@@ -388,7 +388,7 @@ const fetchLastestBodyComposition = async () => {
                     </span>
                   </div>
                   <span class="otd-subtitle-1 text-center">
-                    {{ bodyCompositionStore.lastest[field.metricCode] || "-" }}
+                    {{ bodyCompositionStore.lastest[field.metricCode] || '-' }}
                   </span>
                 </v-card>
               </v-item>
@@ -512,7 +512,7 @@ const fetchLastestBodyComposition = async () => {
 
 .meal {
   display: flex;
-  margin: 0 0px;
+  margin: 0 20px;
   justify-content: center;
 }
 
