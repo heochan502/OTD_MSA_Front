@@ -1,10 +1,10 @@
 <script setup>
-import { computed, reactive, ref, onMounted, watch } from "vue";
-import { useBodyCompositionStore } from "@/stores/body_composition/bodyCompositionStore";
-import { useAuthenticationStore } from "@/stores/user/authentication";
-import { saveUserBasicBodyInfo } from "@/services/body_composition/bodyCompositionService";
-import { getUserBasicBodyInfo } from "@/services/body_composition/bodyCompositionService";
-import Modal from "../user/Modal.vue";
+import { computed, reactive, ref, onMounted, watch } from 'vue';
+import { useBodyCompositionStore } from '@/stores/body_composition/bodyCompositionStore';
+import { useAuthenticationStore } from '@/stores/user/authentication';
+import { saveUserBasicBodyInfo } from '@/services/body_composition/bodyCompositionService';
+import { getUserBasicBodyInfo } from '@/services/body_composition/bodyCompositionService';
+import Modal from '../user/Modal.vue';
 
 const bodyCompositionStore = useBodyCompositionStore();
 const authenticationStore = useAuthenticationStore();
@@ -26,13 +26,16 @@ const hasRecord = computed(() => {
 onMounted(async () => {
   if (
     //관리자 계정이면 신체정보입력 X
-    authenticationStore.userRole === "ADMIN" ||
-    authenticationStore.userRole === "MANAGER"
+    authenticationStore.state.signedUser.userRole === 'ADMIN' ||
+    authenticationStore.state.signedUser.userRole === 'MANAGER'
   ) {
+    return;
+  } else if (hasRecord.value) {
     return;
   } else {
     const res = await getUserBasicBodyInfo();
-
+    // console.log("getUserBasicBodyInfo res : ", res.data);
+    // console.log(" authenticationStore.state : ", authenticationStore.state);
     if (res === undefined || res.status !== 200) {
       if (hasRecord.value) {
         //인바디 기록이 있으면 X
@@ -88,36 +91,38 @@ const bmi = computed(() => {
 
 const bmiStatus = computed(() => {
   const userBmi = bmi.value;
-  if (userBmi === 0) return "기록없음";
-  else if (userBmi < 18.5) return "저체중";
-  else if (userBmi < 25) return "정상체중";
-  else if (userBmi < 30) return "과체중";
-  else if (userBmi < 35) return "비만";
-  else return "고도비만";
+  if (userBmi === 0) return '기록없음';
+  else if (userBmi < 18.5) return '저체중';
+  else if (userBmi < 25) return '정상체중';
+  else if (userBmi < 30) return '과체중';
+  else if (userBmi < 35) return '비만';
+  else return '고도비만';
 });
 
 // 기초대사량 bmr
-const userGender = computed(() => authenticationStore.state.signedUser.gender);
-const userAge = computed(() => authenticationStore.state.signedUser.age);
+const userGender = computed(
+  () => authenticationStore.state.signedUser?.gender || null
+);
+const userAge = computed(
+  () => authenticationStore.state.signedUser?.age || null
+);
 
 function calculateBmr(height, weight, age, gender) {
-  if (!height || !weight || !age || !gender) return 0;
+  const h = Number(height);
+  const w = Number(weight);
+  const a = Number(age);
+  const g = (gender ?? '').toUpperCase();
+
+  // 숫자 검증
+  if (!Number.isFinite(h) || h <= 0) return 0;
+  if (!Number.isFinite(w) || w <= 0) return 0;
+  if (!Number.isFinite(a) || a <= 0) return 0;
+  if (g !== 'M' && g !== 'F') return 0;
 
   let bmr;
+  if (g === 'M') bmr = 66.47 + 13.75 * w + 5 * h - 6.76 * a;
+  else bmr = 655.1 + 9.56 * w + 1.85 * h - 4.68 * a;
 
-  // 남성 BMR 공식: 66.47 + (13.75 * W) + (5 * H) - (6.76 * A)
-  if (gender === "M") {
-    bmr = 66.47 + 13.75 * weight + 5 * height - 6.76 * age;
-  }
-  // 여성 BMR 공식: 655.1 + (9.56 * W) + (1.85 * H) - (4.68 * A)
-  else if (gender === "F") {
-    bmr = 655.1 + 9.56 * weight + 1.85 * height - 4.68 * age;
-  } else {
-    // 성별 정보가 없는 경우 0 반환
-    return 0;
-  }
-
-  // 소수점 첫째 자리에서 반올림하여 정수로 반환
   return Math.round(bmr);
 }
 
@@ -142,28 +147,30 @@ const saveFormData = async () => {
 
   const res = await saveUserBasicBodyInfo(state.form);
   if (res === undefined || res.status !== 200) {
-    alert("에러발생");
+    alert('에러발생');
     return;
   }
   bodyCompositionStore.setBasicInfo(state.form);
-  bodyCompositionStore.setRecentBodyInfo();
+  bodyCompositionStore.recentBodyInfo = { ...state.form };
 
   // 모달창 닫기
   showDialog.value = false;
 };
-
-// watch(showDialog, (isModalOpen) => {
-//   if (isModalOpen) {
-//     state.form.height = bodyCompositionStore.recentBodyInfo.height;
-//     state.form.weight = bodyCompositionStore.recentBodyInfo.weight;
-//   } else {
-//     // 모달이 닫힐 때는 임시 폼 데이터를 초기화
-//     state.form.height = null;
-//     state.form.weight = null;
-//     state.form.bmi = null;
-//     state.form.bmr = null;
-//   }
-// });
+watch(showDialog, (isOpen) => {
+  if (isOpen) {
+    // 열릴 때 최근 값으로 프리필
+    state.form.height = bodyCompositionStore.recentBodyInfo?.height ?? null;
+    state.form.weight = bodyCompositionStore.recentBodyInfo?.weight ?? null;
+    state.form.bmi = null;
+    state.form.bmr = null;
+  } else {
+    // 닫힐 때만 초기화하고 싶다면 여기에서
+    // state.form.height = null;
+    // state.form.weight = null;
+    // state.form.bmi = null;
+    // state.form.bmr = null;
+  }
+});
 </script>
 
 <template>
@@ -239,13 +246,13 @@ const saveFormData = async () => {
       <v-card-title class="text-h6">BMI 계산기</v-card-title>
       <v-card-text>
         <v-text-field
-          v-model="state.form.height"
+          v-model.number="state.form.height"
           label="신장 (cm)"
           type="number"
           variant="outlined"
         />
         <v-text-field
-          v-model="state.form.weight"
+          v-model.number="state.form.weight"
           label="체중 (kg)"
           type="number"
           variant="outlined"

@@ -1,6 +1,7 @@
-import { reactive, computed } from "vue";
-import { defineStore } from "pinia";
-import router from "@/router";
+import { reactive, computed } from 'vue';
+import { defineStore } from 'pinia';
+import router from '@/router';
+import axios from '@/services/httpRequester';
 
 const DEFAULT_PROFILE = "/otd/image/main/default-profile.png";
 const FILE_URL = import.meta.env.VITE_BASE_URL;
@@ -20,7 +21,7 @@ export const useAuthenticationStore = defineStore(
         challengeRole: '',
         userRole: '',
         providerType: null,         
-        onboardingCompleted: false,
+        onboardingCompleted: 0,  // 0 또는 1로 변경
       },
       isSigned: false,
     });
@@ -30,7 +31,15 @@ export const useAuthenticationStore = defineStore(
       state.signedUser = {
         ...signedUser,
         pic: formattedUserPic(signedUser),
+        // onboardingCompleted를 명시적으로 숫자로 변환
+        //onboardingCompleted: signedUser.onboardingCompleted === 1 || signedUser.onboardingCompleted === true ? 1 : 0,
       };
+      
+      console.log('✅ setSignedUser 호출됨:', {
+        userId: state.signedUser.userId,
+        providerType: state.signedUser.providerType,
+        onboardingCompleted: state.signedUser.onboardingCompleted
+      });
     };
 
     const formattedUserPic = (user) => {
@@ -54,41 +63,50 @@ export const useAuthenticationStore = defineStore(
     const setNickname = (nickname) => {
       state.signedUser.nickName = nickname;
     };
-        // ⭐ 추가: 온보딩 완료 처리
+    
+    // 온보딩 완료
     const completeOnboarding = async (surveyScore, agreedTermsIds) => {
       try {
-        const response = await axios.post(
-          '/OTD/onboarding/complete',
-          {
-            surveyScore: surveyScore,
-            agreedTermsIds: agreedTermsIds
-          },
-          {
-            params: { userId: state.signedUser.userId }
-          }
-        );
-
+        const agreedTermsIdsNumber = agreedTermsIds.map(id => Number(id));
+    
+        const response = await axios.post('/onboarding/complete', {
+          surveyScore,
+          agreedTermsIds: agreedTermsIdsNumber
+        });
+    
         if (response.data.success) {
-          // 온보딩 완료 상태 업데이트
-          state.signedUser.onboardingCompleted = true;
+          // 온보딩 완료 상태를 1로 설정
+          state.signedUser.onboardingCompleted = 1;
+          console.log('✅ 온보딩 완료 - onboardingCompleted:', state.signedUser.onboardingCompleted);
         }
-
+    
         return response.data;
       } catch (error) {
         console.error('온보딩 완료 실패:', error);
         throw error;
       }
     };
-
-    // ⭐ 추가: 온보딩 필요 여부 확인
+  
     const needsOnboarding = () => {
-      return state.signedUser.providerType && 
-             !state.signedUser.onboardingCompleted;
+      const needs = state.signedUser.providerType && state.signedUser.onboardingCompleted === 0;
+      
+      console.log('🔍 needsOnboarding 체크:', {
+        providerType: state.signedUser.providerType,
+        onboardingCompleted: state.signedUser.onboardingCompleted,
+        needs: needs
+      });
+      
+      return needs;
     };
 
     const logout = async () => {
-      console.log("logout 처리");
-      state.signedUser = { userId: 0, nickName: "", pic: DEFAULT_PROFILE };
+      console.log('logout 처리');
+      state.signedUser = { 
+        userId: 0, 
+        nickName: '', 
+        pic: DEFAULT_PROFILE,
+        onboardingCompleted: 0  // 로그아웃 시에도 0으로 초기화
+      };
       state.isSigned = false;
     };
 

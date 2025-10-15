@@ -63,7 +63,6 @@ export const useBodyCompositionStore = defineStore("bodyComposition", {
       this.basicInfo = data;
     },
     resetStore() {
-      console.log("비우기");
       this.basicInfo = [];
       this.recentBodyInfo = {};
     },
