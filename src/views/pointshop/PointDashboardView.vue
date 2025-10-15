@@ -28,7 +28,7 @@ onMounted(async () => {
   <div class="point-dashboard">
     <!-- 포인트 상태 -->
     <section class="point-status">
-      <h2>💰 내 포인트</h2>
+      <h2>내 포인트</h2>
       <p class="balance">
         {{ (userPoints || 0).toLocaleString() }}
         <span class="unit">P</span>
@@ -38,7 +38,7 @@ onMounted(async () => {
 
     <!-- 아이템 목록 -->
     <section class="item-list">
-      <h2>🛍️ 포인트 아이템 목록</h2>
+      <h2>포인트 아이템 목록</h2>
 
       <div v-if="!allItems?.length" class="empty">등록된 아이템이 없습니다.</div>
 
@@ -68,7 +68,7 @@ onMounted(async () => {
 
     <!-- 구매 내역 -->
     <section class="history">
-      <h2>📜 구매 내역</h2>
+      <h2>구매 내역</h2>
       <div v-if="!pointHistory?.length" class="empty">내역이 없습니다.</div>
       <ul v-else>
         <li v-for="(h, idx) in pointHistory" :key="idx" class="history-item">
