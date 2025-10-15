@@ -26,6 +26,9 @@ import 'bootstrap';
 // ✅ 기본 아바타 이미지(프로젝트 경로에 맞게 조정)
 import fallbackAvatar from '@/assets/img/community/default-profile.png';
 
+window.addEventListener('load', () => {
+  localStorage.removeItem('authentication');
+});
 // 모든 <img> 에러를 전역에서 잡아 기본 아바타로 교체
 window.addEventListener(
   'error',
