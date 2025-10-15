@@ -85,6 +85,7 @@ onMounted(async () => {
   setMissionState();
   console.log('로그 데이터', state);
   authentication.setPoint(state.user.point);
+  authentication.setXp(state.user.xp);
   authentication.setChallengeRole(res.data.user?.challengeRole);
 });
 
@@ -128,11 +129,19 @@ const completeMission = async () => {
   } else {
     mission.done = true;
     await postMissionRecord(mission.cdId);
-    authentication.setPoint(
-      authentication.state.signedUser.point + mission.cdReward
-    );
-    state.user.point = authentication.state.signedUser.point;
-    // window.location.reload();
+    // authentication.setPoint(
+    //   authentication.state.signedUser.point + mission.cdReward
+    // );
+    // authentication.setXp(authentication.state.signedUser.xp + mission.xp);
+    // state.user.point = authentication.state.signedUser.point;
+    // 발표용
+    const res = await getSelectedAll();
+    authentication.setPoint(res.data.user.point);
+    authentication.setChallengeRole(res.data.user.challengeRole);
+    authentication.setXp(res.data.user.xp);
+    state.user.xp = res.data.user.xp;
+    state.user.point = res.data.user.point;
+    window.location.reload();
     successDialog.value = true;
   }
 };

@@ -3,25 +3,25 @@ import { defineStore } from 'pinia';
 import router from '@/router';
 import axios from '@/services/httpRequester';
 
-const DEFAULT_PROFILE = "/otd/image/main/default-profile.png";
+const DEFAULT_PROFILE = '/otd/image/main/default-profile.png';
 const FILE_URL = import.meta.env.VITE_BASE_URL;
 export const useAuthenticationStore = defineStore(
-  "authentication",
+  'authentication',
   () => {
     const state = reactive({
       signedUser: {
         userId: 0,
-        nickName: "",
-        email: "",
+        nickName: '',
+        email: '',
         pic: DEFAULT_PROFILE,
-        gender: "",
-        age: "",
+        gender: '',
+        age: '',
         point: 0,
         xp: 0,
         challengeRole: '',
         userRole: '',
-        providerType: null,         
-        onboardingCompleted: 0,  // 0 또는 1로 변경
+        providerType: null,
+        onboardingCompleted: 0, // 0 또는 1로 변경
       },
       isSigned: false,
     });
@@ -34,16 +34,16 @@ export const useAuthenticationStore = defineStore(
         // onboardingCompleted를 명시적으로 숫자로 변환
         //onboardingCompleted: signedUser.onboardingCompleted === 1 || signedUser.onboardingCompleted === true ? 1 : 0,
       };
-      
+
       console.log('✅ setSignedUser 호출됨:', {
         userId: state.signedUser.userId,
         providerType: state.signedUser.providerType,
-        onboardingCompleted: state.signedUser.onboardingCompleted
+        onboardingCompleted: state.signedUser.onboardingCompleted,
       });
     };
 
     const formattedUserPic = (user) => {
-      return user.pic && user.pic.trim() !== ""
+      return user.pic && user.pic.trim() !== ''
         ? `${FILE_URL}/profile/${user.userId}/${user.pic}`
         : DEFAULT_PROFILE;
     };
@@ -55,7 +55,9 @@ export const useAuthenticationStore = defineStore(
     const setPoint = (point) => {
       state.signedUser.point = point;
     };
-
+    const setXp = (xp) => {
+      state.signedUser.xp = xp;
+    };
     const setChallengeRole = (challengeRole) => {
       state.signedUser.challengeRole = challengeRole;
     };
@@ -63,49 +65,54 @@ export const useAuthenticationStore = defineStore(
     const setNickname = (nickname) => {
       state.signedUser.nickName = nickname;
     };
-    
+
     // 온보딩 완료
     const completeOnboarding = async (surveyScore, agreedTermsIds) => {
       try {
-        const agreedTermsIdsNumber = agreedTermsIds.map(id => Number(id));
-    
+        const agreedTermsIdsNumber = agreedTermsIds.map((id) => Number(id));
+
         const response = await axios.post('/onboarding/complete', {
           surveyScore,
-          agreedTermsIds: agreedTermsIdsNumber
+          agreedTermsIds: agreedTermsIdsNumber,
         });
-    
+
         if (response.data.success) {
           // 온보딩 완료 상태를 1로 설정
           state.signedUser.onboardingCompleted = 1;
-          console.log('✅ 온보딩 완료 - onboardingCompleted:', state.signedUser.onboardingCompleted);
+          console.log(
+            '✅ 온보딩 완료 - onboardingCompleted:',
+            state.signedUser.onboardingCompleted
+          );
         }
-    
+
         return response.data;
       } catch (error) {
         console.error('온보딩 완료 실패:', error);
         throw error;
       }
     };
-  
+
     const needsOnboarding = () => {
-      const needs = state.signedUser.providerType && state.signedUser.onboardingCompleted === 0;
-      
+      const needs =
+        state.signedUser.providerType &&
+        state.signedUser.onboardingCompleted === 0;
+
       // console.log('🔍 needsOnboarding 체크:', {
       //   providerType: state.signedUser.providerType,
       //   onboardingCompleted: state.signedUser.onboardingCompleted,
       //   needs: needs
       // });
-      
+
       return needs;
     };
 
     const logout = async () => {
       console.log('logout 처리');
-      state.signedUser = { 
-        userId: 0, 
-        nickName: '', 
+      state.signedUser = {
+        userId: 0,
+        nickName: '',
         pic: DEFAULT_PROFILE,
-        onboardingCompleted: 0 
+        onboardingCompleted: 0,
       };
       state.isSigned = false;
       useAuthenticationStore().$reset();
@@ -117,11 +124,12 @@ export const useAuthenticationStore = defineStore(
       setSignedUserPic,
       logout,
       setPoint,
+      setXp,
       setChallengeRole,
       formattedUserPic,
       setNickname,
-      completeOnboarding,   
-      needsOnboarding, 
+      completeOnboarding,
+      needsOnboarding,
     };
   },
   { persist: true }

@@ -966,7 +966,7 @@ onMounted(() => {
   }
 
   .logout-btn {
-    background: #393E46;
+    background: #f28b82;
     color: white;
     border: none;
     padding: 12px 24px;
@@ -977,7 +977,7 @@ onMounted(() => {
     transition: all 0.2s ease;
 
     &:hover:not(:disabled) {
-      background: #303030;
+      background: #ef5350;
       transform: translateY(-1px);
     }
 
@@ -986,6 +986,14 @@ onMounted(() => {
       cursor: not-allowed;
       transform: none;
     }
+  }
+  :deep(.modal-container .btn-confirm) {
+    background-color: #f28b82 !important;
+    color: white !important;
+  }
+
+  :deep(.modal-container .btn-confirm:hover) {
+    background-color: #ef5350 !important;
   }
 }
 

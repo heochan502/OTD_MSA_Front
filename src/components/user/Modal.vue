@@ -254,12 +254,13 @@ const handleOverlayClick = () => {
 }
 
 .btn-confirm {
-  background: #393e46;
+  background: #00d5df;
   color: white;
 }
 
 .btn-confirm:hover {
-  background: #2a2e35;
+  background: #00c3ce;
+  color: white;
 }
 
 .modal-enter-active,
