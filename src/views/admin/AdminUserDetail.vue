@@ -31,7 +31,8 @@ const putProfileDialog = ref(false);
 const successDialog = ref(false);
 const deleteUserDialog = ref(false);
 const mealDetailDialog = ref(false);
-
+const errorDialog = ref(false);
+const banUser = ref(false);
 const selectedMeal = ref([]);
 
 const state = reactive({
@@ -66,37 +67,37 @@ onMounted(async () => {
 });
 
 const pointHeaders = [
-  { title: 'ID', key: 'chId', align: 'center'  },
-  { title: '사유', key: 'reason', align: 'center'  },
-  { title: '지급 포인트', key: 'point' , align: 'center' },
-  { title: '지급일', key: 'createdAt' , align: 'center' },
+  { title: 'ID', key: 'chId', align: 'center' },
+  { title: '사유', key: 'reason', align: 'center' },
+  { title: '지급 포인트', key: 'point', align: 'center' },
+  { title: '지급일', key: 'createdAt', align: 'center' },
 ];
 
 const challengeHeaders = [
-  { title: 'ID', key: 'cpId', align: 'center'  },
-  { title: '챌린지', key: 'name' , align: 'center' },
-  { title: '포인트', key: 'point' , align: 'center' },
-  { title: '시작일', key: 'startDate' , align: 'center' },
-  { title: '종료일', key: 'endDate' , align: 'center' },
-  { title: '성공여부', key: 'success' , align: 'center' },
+  { title: 'ID', key: 'cpId', align: 'center' },
+  { title: '챌린지', key: 'name', align: 'center' },
+  { title: '포인트', key: 'point', align: 'center' },
+  { title: '시작일', key: 'startDate', align: 'center' },
+  { title: '종료일', key: 'endDate', align: 'center' },
+  { title: '성공여부', key: 'success', align: 'center' },
 ];
 
 const exerciseHeaders = [
-  { title: '운동 종목', key: 'exerciseName', align: 'center'  },
-  { title: '시작 시간', key: 'startAt' , align: 'center' },
-  { title: '종료 시간', key: 'endAt' , align: 'center' },
-  { title: '소비 칼로리', key: 'activityKcal' , align: 'center' },
+  { title: '운동 종목', key: 'exerciseName', align: 'center' },
+  { title: '시작 시간', key: 'startAt', align: 'center' },
+  { title: '종료 시간', key: 'endAt', align: 'center' },
+  { title: '소비 칼로리', key: 'activityKcal', align: 'center' },
 ];
 
 const mealHeaders = [
-  { title: '기록일', key: 'mealDay' , align: 'center' },
-  { title: '기록시간', key: 'mealTime' , align: 'center' },
-  { title: '총 탄수화물 섭취량', key: 'totalCarbohydrate', align: 'center'  },
-  { title: '총 단백질 섭취량', key: 'totalProtein' , align: 'center' },
-  { title: '총 지방 섭취량', key: 'totalFat' , align: 'center' },
-  { title: '총 나트륨 섭취량', key: 'totalNatrium', align: 'center'  },
-  { title: '총 당 섭취량', key: 'totalSugar' , align: 'center' },
-  { title: '총 칼로리', key: 'totalKcal' , align: 'center' },
+  { title: '기록일', key: 'mealDay', align: 'center' },
+  { title: '기록시간', key: 'mealTime', align: 'center' },
+  { title: '총 탄수화물 섭취량', key: 'totalCarbohydrate', align: 'center' },
+  { title: '총 단백질 섭취량', key: 'totalProtein', align: 'center' },
+  { title: '총 지방 섭취량', key: 'totalFat', align: 'center' },
+  { title: '총 나트륨 섭취량', key: 'totalNatrium', align: 'center' },
+  { title: '총 당 섭취량', key: 'totalSugar', align: 'center' },
+  { title: '총 칼로리', key: 'totalKcal', align: 'center' },
 ];
 
 const formatNumber = (n) => String(n).padStart(2, '0');
@@ -171,7 +172,8 @@ const submit = async () => {
     putProfileDialog.value = false;
     successDialog.value = true;
   } else {
-    alert('저장에 실패했습니다. 다시 시도해주세요.');
+    putProfileDialog.value = false;
+    errorDialog.value = true;
   }
 };
 
@@ -181,14 +183,22 @@ const deleteUserProfile = async () => {
     // 성공하면 저장 완료 모달 열기
     deleteUserDialog.value = false;
     successDialog.value = true;
-    router.push('/admin/user');
+    banUser.value = true;
   } else {
-    alert('차단에 실패했습니다. 다시 시도해주세요.');
+    deleteUserDialog.value = false;
+    errorDialog.value = true;
   }
 };
 
+const toUser = () => {
+  if (banUser.value) {
+    router.push('/admin/user');
+  }
+  successDialog.value = false;
+};
 const deletePic = () => {
   deletePicDialog.value = false;
+  successDialog.value = true;
   picUrl.value = authenticationStore.formattedUserPic('');
   state.userInfo.pic = null;
 };
@@ -243,10 +253,8 @@ const openMealDialog = async (meal) => {
       <v-card class="admin-dialog pa-6">
         <v-card-text> 내용을 저장하시겠습니까? </v-card-text>
         <div class="modal-btn-area">
-          <v-btn class="btn-yes" text @click="submit()">네</v-btn>
-          <v-btn class="btn-no" text @click="putProfileDialog = false"
-            >아니오</v-btn
-          >
+          <v-btn class="btn-yes" @click="submit()">네</v-btn>
+          <v-btn class="btn-no" @click="putProfileDialog = false">아니오</v-btn>
         </div>
       </v-card>
     </v-dialog>
@@ -255,11 +263,18 @@ const openMealDialog = async (meal) => {
     <v-dialog v-model="successDialog" max-width="380" min-height="100">
       <v-card class="admin-dialog pa-6">
         <v-card-text> 성공적으로 완료되었습니다. </v-card-text>
-        <div>
-          <v-spacer />
-          <v-btn class="btn-yes" text @click="successDialog = false"
-            >확인</v-btn
-          >
+        <div class="modal-btn-area">
+          <v-btn class="btn-yes" text @click="toUser()">확인</v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+
+    <!-- 저장 실패 모달 -->
+    <v-dialog v-model="errorDialog" max-width="380" min-height="100">
+      <v-card class="admin-dialog pa-6">
+        <v-card-text> 실패했습니다. </v-card-text>
+        <div class="modal-btn-area">
+          <v-btn class="btn-yes" @click="errorDialog = false">확인</v-btn>
         </div>
       </v-card>
     </v-dialog>
@@ -810,7 +825,6 @@ const openMealDialog = async (meal) => {
   color: #555 !important;
   border-radius: 10px;
 }
-
 
 // 저장 버튼
 .btn-yes {

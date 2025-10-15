@@ -17,6 +17,9 @@ const size = 10;
 
 const successDialog = ref(false);
 const cancelDialog = ref(false);
+const errorDialog = ref(false);
+const validationDialog = ref(false);
+const saveDialog = ref(false);
 
 // 추가/수정 모달 상태
 const editDialog = ref(false);
@@ -112,6 +115,32 @@ const openForm = (meal = null) => {
   editDialog.value = true;
 };
 
+const validation = () => {
+  const fields = [
+    'foodName',
+    'flag',
+    'kcal',
+    'protein',
+    'carbohydrate',
+    'fat',
+    'sugar',
+    'natrium',
+    'foodCapacity',
+  ];
+
+  // 0은 허용, null/''만 막기
+  const isEmpty = fields.some(
+    (key) =>
+      editMeal.value[key] === null ||
+      editMeal.value[key] === '' ||
+      editMeal.value[key] === 0
+  );
+  if (isEmpty) {
+    validationDialog.value = true;
+    saveDialog.value = false;
+    return;
+  } else saveDialog.value = true;
+};
 // 저장 (추가 or 수정)
 const saveMeal = async () => {
   try {
@@ -122,10 +151,13 @@ const saveMeal = async () => {
     }
     successDialog.value = true;
     editDialog.value = false;
+    saveDialog.value = false;
     loadMeals(currentPage.value);
   } catch (e) {
     console.error('저장 실패:', e);
-    alert('저장 중 오류 발생');
+    saveDialog.value = false;
+    errorDialog.value = true;
+    editDialog.value = false;
   }
 };
 
@@ -146,10 +178,12 @@ const removeMeal = async () => {
     }
     successDialog.value = true;
     deleteDialog.value = false;
+
     loadMeals(currentPage.value);
   } catch (e) {
     console.error('삭제 실패:', e);
-    alert('삭제 중 오류 발생');
+    errorDialog.value = true;
+    deleteDialog.value = false;
   }
 };
 
@@ -234,8 +268,10 @@ onMounted(() => {
         </template>
         <template class="btn-area" #item.setting="{ item }">
           <div class="btn-area">
-            <v-btn class="btn-gray" @click="openForm(item)">수정</v-btn>
-            <v-btn class="btn-red" @click="openDelete(item, 'db')">삭제</v-btn>
+            <v-btn class="btn-gray-outline" @click="openForm(item)">수정</v-btn>
+            <v-btn class="btn-red-outline" @click="openDelete(item, 'db')"
+              >삭제</v-btn
+            >
           </div>
         </template>
       </v-data-table>
@@ -327,7 +363,7 @@ onMounted(() => {
         </template>
         <template #item.setting="{ item }">
           <div class="single-btn">
-            <v-btn class="btn-red" @click="openDelete(item, 'make')"
+            <v-btn class="btn-red-outline" @click="openDelete(item, 'make')"
               >삭제</v-btn
             >
           </div>
@@ -440,7 +476,17 @@ onMounted(() => {
         <v-divider class="my-2" />
         <div class="justify-end btn-area">
           <v-btn class="btn-gray" @click="cancelDialog = true">취소</v-btn>
-          <v-btn class="btn-blue" @click="saveMeal">저장</v-btn>
+          <v-btn class="btn-blue" @click="validation()">저장</v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+
+    <!-- 저장 실패 모달 -->
+    <v-dialog v-model="errorDialog" max-width="380" min-height="100">
+      <v-card class="admin-dialog pa-6">
+        <v-card-text> 실패했습니다. </v-card-text>
+        <div class="btn-area">
+          <v-btn class="btn-blue" @click="errorDialog = false">확인</v-btn>
         </div>
       </v-card>
     </v-dialog>
@@ -463,8 +509,7 @@ onMounted(() => {
     <v-dialog v-model="successDialog" max-width="380" min-height="100">
       <v-card class="admin-dialog pa-6">
         <v-card-text> 성공적으로 완료되었습니다. </v-card-text>
-        <div>
-          <v-spacer />
+        <div class="btn-area">
           <v-btn class="btn-blue" text @click="successDialog = false"
             >확인</v-btn
           >
@@ -483,6 +528,27 @@ onMounted(() => {
         <div class="btn-area">
           <v-btn class="btn-blue" @click="cancel()">네</v-btn>
           <v-btn class="btn-gray" @click="cancelDialog = false">아니오</v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+
+    <!-- 밸리데이션 모달 -->
+    <v-dialog v-model="validationDialog" max-width="380" min-height="100">
+      <v-card class="admin-dialog pa-6">
+        <v-card-text> 모든 항목을 입력해주세요. </v-card-text>
+        <div class="btn-area">
+          <v-btn class="btn-blue" @click="validationDialog = false">확인</v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+
+    <!-- 저장 -->
+    <v-dialog v-model="saveDialog" max-width="380" min-height="100">
+      <v-card class="admin-dialog pa-6">
+        <v-card-text> 저장하시겠습니까? </v-card-text>
+        <div class="btn-area">
+          <v-btn class="btn-blue" @click="saveMeal">네</v-btn>
+          <v-btn class="btn-gray" @click="saveDialog = false">아니오</v-btn>
         </div>
       </v-card>
     </v-dialog>
@@ -722,9 +788,21 @@ onMounted(() => {
 }
 
 // 삭제 버튼
-.btn-red {
-  background-color: #f28b82 !important;
-  color: #fff !important;
+.btn-gray-outline {
+  background-color: transparent !important;
+  border: 1.5px solid #cccccc !important;
+  color: #555 !important;
   border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.25s ease;
+}
+
+.btn-red-outline {
+  background-color: transparent !important;
+  border: 1.5px solid #f28b82 !important;
+  color: #e25b4b !important;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.25s ease;
 }
 </style>

@@ -52,6 +52,17 @@ onMounted(async () => {
   state.communityData = communityRes.data;
   state.exerciseData = exerciseRes.data;
   state.mealData = mealRes.data;
+
+  console.log(
+    'in',
+    state.userData,
+    state.challengeData,
+    state.pointData,
+    state.inquiryData,
+    state.communityData,
+    state.exerciseData,
+    state.mealData
+  );
 });
 
 const formatDate = (dateStr) => {
@@ -70,7 +81,7 @@ const formatDate = (dateStr) => {
 
 <template>
   <div class="admin-dashboard">
-    <v-card class="data-card pa-2">
+    <v-card v-if="myRole === 'ADMIN'" class="data-card pa-2">
       <v-card-title
         class="d-flex justify-space-between align-center mb-4 card-title"
       >
@@ -101,7 +112,7 @@ const formatDate = (dateStr) => {
               </v-col>
               <v-col cols="6">
                 <v-sheet class="info-box">
-                  <div class="label">오늘 로그인</div>
+                  <div class="label">오늘 로그인 회원 수</div>
                   <div class="value">
                     {{ state.userData.todayLoginUserCount }}명
                   </div>
@@ -115,7 +126,7 @@ const formatDate = (dateStr) => {
                       v-for="(u, i) in state.userData.recentJoinUser"
                       :key="i"
                     >
-                      {{ u.nickName }} {{ formatDate(u.createdAt) }}
+                      {{ u.nickName }} ({{ formatDate(u.createdAt) }})
                     </li>
                   </ul>
                 </v-sheet>
@@ -154,7 +165,7 @@ const formatDate = (dateStr) => {
                   </div>
                 </v-sheet>
               </v-col>
-              <v-col cols="12">
+              <v-col cols="6">
                 <v-sheet class="info-box">
                   <div class="label">참여자 수 TOP5</div>
                   <ul>
@@ -168,41 +179,15 @@ const formatDate = (dateStr) => {
                   </ul>
                 </v-sheet>
               </v-col>
-            </v-row>
-          </v-card>
-        </v-col>
-
-        <!-- 포인트 통계 -->
-        <v-col cols="12" md="6">
-          <v-card class="section-card pa-4">
-            <div class="section-header">
-              <h2 class="section-title">포인트 통계</h2>
-              <v-btn
-                size="small"
-                variant="text"
-                color="primary"
-                @click="router.push('/admin/point')"
-                >더보기</v-btn
-              >
-            </div>
-            <v-row>
               <v-col cols="6">
                 <v-sheet class="info-box">
-                  <div class="label">총 포인트</div>
-                  <div class="value">
-                    {{ state.pointData.totalPoint?.toLocaleString() || 0 }}
-                  </div>
-                </v-sheet>
-              </v-col>
-              <v-col cols="6">
-                <v-sheet class="info-box">
-                  <div class="label">Top5 사용자</div>
+                  <div class="label">실패율 TOP5</div>
                   <ul>
                     <li
-                      v-for="(p, i) in state.pointData.pointTop5User"
+                      v-for="(ch, i) in state.challengeData.failTop3Challenge"
                       :key="i"
                     >
-                      {{ p.nickName }} — {{ p.point.toLocaleString() }}P
+                      {{ ch.cdName }} ({{ ch.cdType }})
                     </li>
                   </ul>
                 </v-sheet>
@@ -212,7 +197,7 @@ const formatDate = (dateStr) => {
         </v-col>
 
         <!-- 커뮤니티 통계 -->
-        <v-col cols="12" md="6">
+        <v-col cols="12" md="9">
           <v-card class="section-card pa-4">
             <div class="section-header">
               <h2 class="section-title">커뮤니티 통계</h2>
@@ -225,31 +210,96 @@ const formatDate = (dateStr) => {
               >
             </div>
             <v-row>
-              <v-col cols="6">
+              <v-col cols="4">
                 <v-sheet class="info-box">
-                  <div class="label">총 게시글</div>
+                  <div class="label">총 게시글 수</div>
                   <div class="value">
                     {{ state.communityData.totalPostCount }}개
                   </div>
                 </v-sheet>
               </v-col>
-              <v-col cols="6">
+              <v-col cols="4">
                 <v-sheet class="info-box">
-                  <div class="label">이번 주 신규</div>
+                  <div class="label">이번 주 신규 게시글 수</div>
                   <div class="value">
                     {{ state.communityData.weeklyNewPostCount }}개
                   </div>
                 </v-sheet>
               </v-col>
-              <v-col cols="12">
+              <v-col cols="4">
                 <v-sheet class="info-box">
-                  <div class="label">카테고리별 게시글</div>
+                  <div class="label">카테고리별 게시글 수</div>
                   <ul>
                     <li
                       v-for="(c, i) in state.communityData.categoryPostCount"
                       :key="i"
                     >
-                      {{ c.categoryName }} — {{ c.count }}
+                      {{ c.categoryName }} : {{ c.count }}
+                    </li>
+                  </ul>
+                </v-sheet>
+              </v-col>
+              <v-col cols="6">
+                <v-sheet class="info-box">
+                  <div class="label">좋아요 수 Top5 게시글</div>
+                  <ul>
+                    <li
+                      v-for="(c, i) in state.communityData.topCommentPost"
+                      :key="i"
+                    >
+                      [{{ c.categoryName }}] : {{ c.title }}
+                    </li>
+                  </ul>
+                </v-sheet>
+              </v-col>
+              <v-col cols="6">
+                <v-sheet class="info-box">
+                  <div class="label">댓글 수 Top5 게시글</div>
+                  <ul>
+                    <li
+                      v-for="(c, i) in state.communityData.topLikePost"
+                      :key="i"
+                    >
+                      [{{ c.categoryName }}] : {{ c.title }}
+                    </li>
+                  </ul>
+                </v-sheet>
+              </v-col>
+            </v-row>
+          </v-card>
+        </v-col>
+
+        <!-- 포인트 통계 -->
+        <v-col cols="12" md="3">
+          <v-card class="section-card pa-4">
+            <div class="section-header">
+              <h2 class="section-title">포인트 통계</h2>
+              <v-btn
+                size="small"
+                variant="text"
+                color="primary"
+                @click="router.push('/admin/point')"
+                >더보기</v-btn
+              >
+            </div>
+            <v-row>
+              <v-col cols="12">
+                <v-sheet class="info-box">
+                  <div class="label">누적 지급 포인트</div>
+                  <div class="value">
+                    {{ state.pointData.totalPoint?.toLocaleString() || 0 }}P
+                  </div>
+                </v-sheet>
+              </v-col>
+              <v-col cols="12">
+                <v-sheet class="info-box">
+                  <div class="label">Top5 사용자</div>
+                  <ul>
+                    <li
+                      v-for="(p, i) in state.pointData.pointTop5User"
+                      :key="i"
+                    >
+                      {{ p.nickName }} : {{ p.point.toLocaleString() }}P
                     </li>
                   </ul>
                 </v-sheet>
@@ -274,7 +324,7 @@ const formatDate = (dateStr) => {
             <v-row>
               <v-col cols="4">
                 <v-sheet class="info-box">
-                  <div class="label">총 기록</div>
+                  <div class="label">누적 운동기록</div>
                   <div class="value">
                     {{ state.exerciseData.totalRecordCount }}개
                   </div>
@@ -282,7 +332,7 @@ const formatDate = (dateStr) => {
               </v-col>
               <v-col cols="4">
                 <v-sheet class="info-box">
-                  <div class="label">기록 유저</div>
+                  <div class="label">이번 주 기록 회원</div>
                   <div class="value">
                     {{ state.exerciseData.weeklyRecordUserCount }}명
                   </div>
@@ -290,7 +340,7 @@ const formatDate = (dateStr) => {
               </v-col>
               <v-col cols="4">
                 <v-sheet class="info-box">
-                  <div class="label">평균 시간</div>
+                  <div class="label">일일 평균 운동시간</div>
                   <div class="value">
                     {{ state.exerciseData.dailyExerciseAverage }}분
                   </div>
@@ -304,18 +354,14 @@ const formatDate = (dateStr) => {
           <v-card class="section-card pa-4">
             <div class="section-header">
               <h2 class="section-title">식단 통계</h2>
-              <v-btn
-                size="small"
-                variant="text"
-                color="primary"
-                @click="router.push('/admin/meal')"
+              <v-btn variant="text" @click="router.push('/admin/meal')"
                 >더보기</v-btn
               >
             </div>
             <v-row>
               <v-col cols="4">
                 <v-sheet class="info-box">
-                  <div class="label">총 기록</div>
+                  <div class="label">누적 식단기록</div>
                   <div class="value">
                     {{ state.mealData.totalRecordCount }}개
                   </div>
@@ -323,7 +369,7 @@ const formatDate = (dateStr) => {
               </v-col>
               <v-col cols="4">
                 <v-sheet class="info-box">
-                  <div class="label">기록 유저</div>
+                  <div class="label">이번 주 식단기록 회원</div>
                   <div class="value">
                     {{ state.mealData.weeklyRecordUserCount }}명
                   </div>
@@ -331,7 +377,7 @@ const formatDate = (dateStr) => {
               </v-col>
               <v-col cols="4">
                 <v-sheet class="info-box">
-                  <div class="label">평균 칼로리</div>
+                  <div class="label">일일 평균 칼로리 섭취량</div>
                   <div class="value">
                     {{ state.mealData.calorieAverage }}kcal
                   </div>
@@ -342,7 +388,7 @@ const formatDate = (dateStr) => {
         </v-col>
 
         <!-- 문의 -->
-        <v-col cols="12" md="6">
+        <v-col cols="12" md="12">
           <v-card class="section-card pa-4">
             <div class="section-header">
               <h2 class="section-title">문의 통계</h2>
@@ -355,25 +401,39 @@ const formatDate = (dateStr) => {
               >
             </div>
             <v-row>
-              <v-col cols="6">
+              <v-col cols="3">
                 <v-sheet class="info-box">
-                  <div class="label">총 문의</div>
+                  <div class="label">총 문의 건</div>
                   <div class="value">
                     {{ state.inquiryData.totalInquiryCount }}건
                   </div>
                 </v-sheet>
               </v-col>
-              <v-col cols="6">
+              <v-col cols="3">
                 <v-sheet class="info-box">
-                  <div class="label">미답변</div>
+                  <div class="label">미답변 건</div>
                   <div class="value">
                     {{ state.inquiryData.unansweredInquiryCount }}건
                   </div>
                 </v-sheet>
               </v-col>
+              <v-col cols="3">
+                <v-sheet class="info-box">
+                  <div class="label">문의 답변율</div>
+                  <div class="value">{{ state.inquiryData.responseRate }}%</div>
+                </v-sheet>
+              </v-col>
+              <v-col cols="3">
+                <v-sheet class="info-box">
+                  <div class="label">평균 답변 시간</div>
+                  <div class="value">
+                    {{ state.inquiryData.avgRepliedTime }}%
+                  </div>
+                </v-sheet>
+              </v-col>
               <v-col cols="12">
                 <v-sheet class="info-box">
-                  <div class="label">최근 문의 TOP5</div>
+                  <div class="label">최근 문의 건</div>
                   <ul>
                     <li
                       v-for="(inq, i) in state.inquiryData.recentInquiryList"
@@ -382,6 +442,291 @@ const formatDate = (dateStr) => {
                       [{{ inq.senderName }}] {{ inq.subject }}
                     </li>
                   </ul>
+                </v-sheet>
+              </v-col>
+            </v-row>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-card>
+
+    <v-card v-else class="data-card pa-2">
+      <v-card-title
+        class="d-flex justify-space-between align-center mb-4 card-title"
+      >
+        <span class="title">매니저 대시보드</span>
+      </v-card-title>
+
+      <!-- 2열 구조 -->
+      <v-row dense>
+        <!-- 문의 -->
+        <v-col cols="12" md="12">
+          <v-card class="section-card pa-4">
+            <div class="section-header">
+              <h2 class="section-title">문의 통계</h2>
+              <v-btn
+                size="small"
+                variant="text"
+                color="primary"
+                @click="router.push('/admin/qna')"
+                >더보기</v-btn
+              >
+            </div>
+            <v-row>
+              <v-col cols="3">
+                <v-sheet class="info-box">
+                  <div class="label">총 문의 건</div>
+                  <div class="value">
+                    {{ state.inquiryData.totalInquiryCount }}건
+                  </div>
+                </v-sheet>
+              </v-col>
+              <v-col cols="3">
+                <v-sheet class="info-box">
+                  <div class="label">미답변 건</div>
+                  <div class="value">
+                    {{ state.inquiryData.unansweredInquiryCount }}건
+                  </div>
+                </v-sheet>
+              </v-col>
+              <v-col cols="3">
+                <v-sheet class="info-box">
+                  <div class="label">문의 답변율</div>
+                  <div class="value">{{ state.inquiryData.responseRate }}%</div>
+                </v-sheet>
+              </v-col>
+              <v-col cols="3">
+                <v-sheet class="info-box">
+                  <div class="label">평균 답변 시간</div>
+                  <div class="value">
+                    {{ state.inquiryData.avgRepliedTime }}%
+                  </div>
+                </v-sheet>
+              </v-col>
+              <v-col cols="12">
+                <v-sheet class="info-box">
+                  <div class="label">최근 문의 건</div>
+                  <ul>
+                    <li
+                      v-for="(inq, i) in state.inquiryData.recentInquiryList"
+                      :key="i"
+                    >
+                      [{{ inq.senderName }}] {{ inq.subject }}
+                    </li>
+                  </ul>
+                </v-sheet>
+              </v-col>
+            </v-row>
+          </v-card>
+        </v-col>
+
+        <!-- 커뮤니티 통계 -->
+        <v-col cols="12" md="9">
+          <v-card class="section-card pa-4">
+            <div class="section-header">
+              <h2 class="section-title">커뮤니티 통계</h2>
+              <v-btn
+                size="small"
+                variant="text"
+                color="primary"
+                @click="router.push('/admin/community')"
+                >더보기</v-btn
+              >
+            </div>
+            <v-row>
+              <v-col cols="4">
+                <v-sheet class="info-box">
+                  <div class="label">총 게시글 수</div>
+                  <div class="value">
+                    {{ state.communityData.totalPostCount }}개
+                  </div>
+                </v-sheet>
+              </v-col>
+              <v-col cols="4">
+                <v-sheet class="info-box">
+                  <div class="label">이번 주 신규 게시글 수</div>
+                  <div class="value">
+                    {{ state.communityData.weeklyNewPostCount }}개
+                  </div>
+                </v-sheet>
+              </v-col>
+              <v-col cols="4">
+                <v-sheet class="info-box">
+                  <div class="label">카테고리별 게시글 수</div>
+                  <ul>
+                    <li
+                      v-for="(c, i) in state.communityData.categoryPostCount"
+                      :key="i"
+                    >
+                      {{ c.categoryName }} : {{ c.count }}
+                    </li>
+                  </ul>
+                </v-sheet>
+              </v-col>
+              <v-col cols="6">
+                <v-sheet class="info-box">
+                  <div class="label">좋아요 수 Top5 게시글</div>
+                  <ul>
+                    <li
+                      v-for="(c, i) in state.communityData.topCommentPost"
+                      :key="i"
+                    >
+                      [{{ c.categoryName }}] : {{ c.title }}
+                    </li>
+                  </ul>
+                </v-sheet>
+              </v-col>
+              <v-col cols="6">
+                <v-sheet class="info-box">
+                  <div class="label">댓글 수 Top5 게시글</div>
+                  <ul>
+                    <li
+                      v-for="(c, i) in state.communityData.topLikePost"
+                      :key="i"
+                    >
+                      [{{ c.categoryName }}] : {{ c.title }}
+                    </li>
+                  </ul>
+                </v-sheet>
+              </v-col>
+            </v-row>
+          </v-card>
+        </v-col>
+
+        <!-- 챌린지 통계 -->
+        <v-col cols="12" md="6">
+          <v-card class="section-card pa-4">
+            <div class="section-header">
+              <h2 class="section-title">챌린지 통계</h2>
+              <v-btn
+                size="small"
+                variant="text"
+                color="primary"
+                @click="router.push('/admin/challenge')"
+                >더보기</v-btn
+              >
+            </div>
+            <v-row>
+              <v-col cols="6">
+                <v-sheet class="info-box">
+                  <div class="label">총 챌린지 수</div>
+                  <div class="value">
+                    {{ state.challengeData.totalChallengeCount }}개
+                  </div>
+                </v-sheet>
+              </v-col>
+              <v-col cols="6">
+                <v-sheet class="info-box">
+                  <div class="label">평균 성공률</div>
+                  <div class="value">
+                    {{ state.challengeData.successRate }}%
+                  </div>
+                </v-sheet>
+              </v-col>
+              <v-col cols="6">
+                <v-sheet class="info-box">
+                  <div class="label">참여자 수 TOP5</div>
+                  <ul>
+                    <li
+                      v-for="(ch, i) in state.challengeData
+                        .participantTop5Challenge"
+                      :key="i"
+                    >
+                      {{ ch.cdName }} ({{ ch.cdType }})
+                    </li>
+                  </ul>
+                </v-sheet>
+              </v-col>
+              <v-col cols="6">
+                <v-sheet class="info-box">
+                  <div class="label">실패율 TOP5</div>
+                  <ul>
+                    <li
+                      v-for="(ch, i) in state.challengeData.failTop3Challenge"
+                      :key="i"
+                    >
+                      {{ ch.cdName }} ({{ ch.cdType }})
+                    </li>
+                  </ul>
+                </v-sheet>
+              </v-col>
+            </v-row>
+          </v-card>
+        </v-col>
+
+        <!-- 운동 / 식단 -->
+        <v-col cols="12" md="6">
+          <v-card class="section-card pa-4">
+            <div class="section-header">
+              <h2 class="section-title">운동 통계</h2>
+              <v-btn
+                size="small"
+                variant="text"
+                color="primary"
+                @click="router.push('/admin/exercise')"
+                >더보기</v-btn
+              >
+            </div>
+            <v-row>
+              <v-col cols="4">
+                <v-sheet class="info-box">
+                  <div class="label">누적 운동기록</div>
+                  <div class="value">
+                    {{ state.exerciseData.totalRecordCount }}개
+                  </div>
+                </v-sheet>
+              </v-col>
+              <v-col cols="4">
+                <v-sheet class="info-box">
+                  <div class="label">이번 주 기록 회원</div>
+                  <div class="value">
+                    {{ state.exerciseData.weeklyRecordUserCount }}명
+                  </div>
+                </v-sheet>
+              </v-col>
+              <v-col cols="4">
+                <v-sheet class="info-box">
+                  <div class="label">일일 평균 운동시간</div>
+                  <div class="value">
+                    {{ state.exerciseData.dailyExerciseAverage }}분
+                  </div>
+                </v-sheet>
+              </v-col>
+            </v-row>
+          </v-card>
+        </v-col>
+
+        <v-col cols="12" md="6">
+          <v-card class="section-card pa-4">
+            <div class="section-header">
+              <h2 class="section-title">식단 통계</h2>
+              <v-btn variant="text" @click="router.push('/admin/meal')"
+                >더보기</v-btn
+              >
+            </div>
+            <v-row>
+              <v-col cols="4">
+                <v-sheet class="info-box">
+                  <div class="label">누적 식단기록</div>
+                  <div class="value">
+                    {{ state.mealData.totalRecordCount }}개
+                  </div>
+                </v-sheet>
+              </v-col>
+              <v-col cols="4">
+                <v-sheet class="info-box">
+                  <div class="label">이번 주 식단기록 회원</div>
+                  <div class="value">
+                    {{ state.mealData.weeklyRecordUserCount }}명
+                  </div>
+                </v-sheet>
+              </v-col>
+              <v-col cols="4">
+                <v-sheet class="info-box">
+                  <div class="label">일일 평균 칼로리 섭취량</div>
+                  <div class="value">
+                    {{ state.mealData.calorieAverage }}kcal
+                  </div>
                 </v-sheet>
               </v-col>
             </v-row>
@@ -424,7 +769,6 @@ const formatDate = (dateStr) => {
   flex-direction: column;
   justify-content: space-between;
   &:hover {
-    transform: scale(1.01);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
   }
 }
@@ -447,7 +791,7 @@ const formatDate = (dateStr) => {
       position: absolute;
       bottom: -5px;
       left: 0;
-      width: 36px;
+      width: 100%;
       height: 3px;
       border-radius: 2px;
       background-color: #5ee6eb;
@@ -458,7 +802,7 @@ const formatDate = (dateStr) => {
     color: #5ee6eb !important;
     font-weight: 600 !important;
     text-transform: none !important;
-    font-size: 0.85rem !important;
+    font-size: 1rem !important;
   }
 }
 
@@ -499,7 +843,7 @@ const formatDate = (dateStr) => {
       position: relative;
       padding-left: 6px;
       &::before {
-        content: '•';
+        content: '-';
         position: absolute;
         left: -10px;
         color: #5ee6eb;
