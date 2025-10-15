@@ -15,6 +15,8 @@ const basePath = import.meta.env.VITE_BASE_URL;
 const currentStep = ref(1);
 const isLoading = ref(false);
 
+
+
 const termsData = ref([]);
 const termsMap = ref(new Map());
 
@@ -208,10 +210,10 @@ function toggleAll() {
 }
 
 onMounted(async () => { 
-  console.log('=== 약관 데이터 로드 시작 ===');
+
   try { 
     const response = await termsService.getActiveTerms(); 
-    console.log('약관 API 전체 응답:', JSON.stringify(response, null, 2));
+
     
     // 다양한 응답 구조 처리
     let termsArray = [];
@@ -226,25 +228,15 @@ onMounted(async () => {
       termsArray = response;
     }
     
-    console.log('처리된 약관 배열:', termsArray);
     
     if (Array.isArray(termsArray) && termsArray.length > 0) {
       termsData.value = termsArray; 
-      console.log('로드된 약관 데이터:', termsData.value);
-      console.log('약관 개수:', termsData.value.length);
+
       
       termsData.value.forEach(term => { 
-        console.log(`약관 추가:`, {
-          termsId: term.termsId,
-          type: term.type,
-          title: term.title,
-          isRequired: term.isRequired
-        });
         termsMap.value.set(term.type, term); 
       }); 
-      
-      console.log('termsMap 크기:', termsMap.value.size);
-      console.log('=== 약관 데이터 로드 완료 ===');
+
     } else {
       console.error('약관 데이터가 배열이 아니거나 비어있습니다:', termsArray);
       showAlert('오류', '약관 데이터 형식이 올바르지 않습니다.', 'error'); 
@@ -285,8 +277,6 @@ onMounted(async () => {
       termsData.value.forEach(term => { 
         termsMap.value.set(term.type, term); 
       });
-      
-      console.log('목 데이터 로드 완료:', termsData.value.length, '개');
     } else {
       showAlert('오류', '약관을 불러오는데 실패했습니다.', 'error'); 
     }
@@ -632,7 +622,7 @@ watch(
   }
 );
 
-// 약관 정렬: 필수 약관을 먼저, 선택 약관을 나중에 표시
+
 const sortedTermsData = computed(() => {
   return [...termsData.value].sort((a, b) => {
     if (a.isRequired && !b.isRequired) return -1;
@@ -912,11 +902,7 @@ const submitJoin = async () => {
 
 // 약관 내용 로드 및 모달 표시
 const loadTermsContent = (type) => {
-  console.log('=== loadTermsContent 호출 ===');
-  console.log('요청된 type:', type);
-  console.log('termsData.value:', termsData.value);
-  console.log('termsData 길이:', termsData.value.length);
-  
+
   if (!termsData.value || termsData.value.length === 0) {
     console.error('약관 데이터가 없습니다.');
     showAlert('오류', '약관 데이터를 불러오는 중입니다. 잠시 후 다시 시도해주세요.', 'error');
@@ -924,36 +910,25 @@ const loadTermsContent = (type) => {
   }
   
   const term = termsData.value.find(t => {
-    console.log('비교 중:', t.type, '===', type, '?', t.type === type);
     return t.type === type;
   });
   
-  console.log('찾은 약관:', term);
-  
+
   if (term) {
-    console.log('약관 제목:', term.title);
-    console.log('약관 내용 길이:', term.content?.length);
+
     
     modalContent.value.title = term.title || '약관';
     modalContent.value.content = term.content || '내용을 불러올 수 없습니다.';
-    
-    console.log('modalContent 설정 완료:', modalContent.value);
-    
     showTermsModal.value = true;
-    console.log('showTermsModal:', showTermsModal.value);
+
   } else {
     console.error('약관을 찾을 수 없습니다. type:', type);
-    console.log('사용 가능한 types:', termsData.value.map(t => t.type));
     showAlert('오류', '약관을 찾을 수 없습니다.', 'error');
   }
 };
 
 
-
-
-// 약관 모달 닫기
 const closeTermsModal = () => {
-  console.log('약관 모달 닫기');
   showTermsModal.value = false;
 };
 </script>
@@ -1006,20 +981,20 @@ const closeTermsModal = () => {
               v-model="verificationCode"
               maxlength="6"
               class="input-field"
+              :disabled="isEmailVerified"
             />
-
+         
             <button
               @click="verifyEmailCode"
-              :disabled="verificationCode.length !== 6 || isLoading"
+              :disabled="verificationCode.length !== 6 || isLoading || isEmailVerified"
               class="btn btn-secondary"
             >
-              {{ isLoading ? '확인 중...' : '인증번호 확인' }}
+              {{ isEmailVerified ? '인증 완료' : isLoading ? '확인 중...' : '인증번호 확인' }}
             </button>
-
-            <div v-if="isEmailVerified" class="success-message">
+          </div>
+          <div v-if="isEmailVerified" class="success-message">
               ✓ 이메일 인증이 완료되었습니다
             </div>
-          </div>
         </div>
       </div>
 
@@ -1341,7 +1316,7 @@ const closeTermsModal = () => {
           </select>
 
           <div class="form-group">
-            <label for="nickname">닉네임</label>
+            <label for="nickname"></label>
             <div class="input-wrapper">
               <input
                 type="text"
@@ -1701,6 +1676,10 @@ const closeTermsModal = () => {
   color: white;
 }
 
+.verification-section .btn {
+  margin-top: 0.5rem; 
+}
+
 .btn-secondary:hover:not(:disabled) {
   background-color: #303030;
 }
@@ -1766,6 +1745,7 @@ const closeTermsModal = () => {
   color: #10b981;
   text-align: center;
   font-weight: 500;
+  padding-top: 20px;
 }
 
 .error-message {
@@ -2142,6 +2122,10 @@ const closeTermsModal = () => {
   display: flex;
   gap: 0.5rem;
   justify-content: center;
+}
+
+.gap {
+  gap: 0.5rem;
 }
 
 /* 모달 애니메이션 */

@@ -90,11 +90,11 @@ export const useAuthenticationStore = defineStore(
     const needsOnboarding = () => {
       const needs = state.signedUser.providerType && state.signedUser.onboardingCompleted === 0;
       
-      console.log('🔍 needsOnboarding 체크:', {
-        providerType: state.signedUser.providerType,
-        onboardingCompleted: state.signedUser.onboardingCompleted,
-        needs: needs
-      });
+      // console.log('🔍 needsOnboarding 체크:', {
+      //   providerType: state.signedUser.providerType,
+      //   onboardingCompleted: state.signedUser.onboardingCompleted,
+      //   needs: needs
+      // });
       
       return needs;
     };
@@ -105,7 +105,7 @@ export const useAuthenticationStore = defineStore(
         userId: 0, 
         nickName: '', 
         pic: DEFAULT_PROFILE,
-        onboardingCompleted: 0  // 로그아웃 시에도 0으로 초기화
+        onboardingCompleted: 0 
       };
       state.isSigned = false;
     };
