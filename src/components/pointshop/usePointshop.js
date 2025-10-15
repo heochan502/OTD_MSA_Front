@@ -3,7 +3,7 @@ import PointShopService from '@/services/pointshop/PointShopService';
 import PointPurchaseService from '@/services/pointshop/PointPurchaseService';
 import PointRechargeService from '@/services/pointshop/PointRechargeService';
 
-export function usePointShop() {
+export function usePointshop() {
   // 🔹 상태
   const userPoints = ref(0); // 사용자 포인트 잔액
   const allItems = ref([]); // 전체 포인트 아이템 목록
