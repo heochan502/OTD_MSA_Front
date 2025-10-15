@@ -86,10 +86,10 @@ const loadPosts = async (postId) => {
         <v-card-text v-if="deleteTarget === 'comment'"
           >해당 댓글을 삭제하시겠습니까?</v-card-text
         >
-        <v-card-actions class="modal-btn-area">
+        <div class="modal-btn-area">
           <v-btn class="btn-yes" @click="confirmDelete">네</v-btn>
           <v-btn class="btn-no" @click="deleteDialog = false">아니오</v-btn>
-        </v-card-actions>
+        </div>
       </v-card>
     </v-dialog>
 
@@ -97,12 +97,12 @@ const loadPosts = async (postId) => {
     <v-dialog v-model="successDialog" max-width="380" min-height="100">
       <v-card class="admin-dialog pa-6">
         <v-card-text> 성공적으로 완료되었습니다. </v-card-text>
-        <v-card-actions>
+        <div>
           <v-spacer />
           <v-btn class="btn-yes" text @click="successDialog = false"
             >확인</v-btn
           >
-        </v-card-actions>
+        </div>
       </v-card>
     </v-dialog>
 
@@ -438,10 +438,6 @@ const loadPosts = async (postId) => {
   color: #555 !important;
   border-radius: 10px;
 }
-.btn-no:hover {
-  background-color: #dcdcdc !important;
-  transform: scale(1.03);
-}
 
 // 저장 버튼
 .btn-yes {
@@ -449,9 +445,5 @@ const loadPosts = async (postId) => {
   color: #fff !important;
   border-radius: 10px;
 }
-.btn-yes:hover {
-  background-color: #3dd4da !important;
-  box-shadow: 0 3px 10px rgba(61, 212, 218, 0.35);
-  transform: scale(1.03);
-}
+
 </style>

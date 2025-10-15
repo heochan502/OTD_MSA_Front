@@ -80,7 +80,6 @@ const toCommunityDetail = (postId) => {
             v-for="cat in categories"
             :key="cat"
             :class="['btn', { active: selectedCategory === cat }]"
-            variant="outlined"
             density="comfortable"
             @click="
               () => {
@@ -103,7 +102,11 @@ const toCommunityDetail = (postId) => {
             cols="12"
             class="post-col"
           >
-            <v-card class="post-card" elevation="2">
+            <v-card
+              class="post-card"
+              elevation="2"
+              @click="toCommunityDetail()"
+            >
               <v-card-title class="card-header">
                 <span class="post-category">[{{ post.category }}]</span>
               </v-card-title>
@@ -123,12 +126,6 @@ const toCommunityDetail = (postId) => {
                   <span>작성자 : {{ post.nickName ?? post.userId }}</span>
                   <span>작성일 : {{ formatDate(post.createdAt) }}</span>
                 </v-card-text>
-
-                <v-card-actions class="justify-end btn-area">
-                  <v-btn class="btn" @click="toCommunityDetail(post.postId)"
-                    >상세</v-btn
-                  >
-                </v-card-actions>
               </div>
             </v-card>
           </v-col>
@@ -140,7 +137,6 @@ const toCommunityDetail = (postId) => {
         <v-btn
           class="page-btn"
           :disabled="page === 1"
-          variant="tonal"
           prepend-icon="mdi-page-first"
           @click="page = 1"
         >
@@ -148,7 +144,6 @@ const toCommunityDetail = (postId) => {
         <v-btn
           class="page-btn"
           :disabled="page === 1"
-          variant="tonal"
           prepend-icon="mdi-chevron-left"
           @click="page--"
         >
@@ -163,7 +158,6 @@ const toCommunityDetail = (postId) => {
         <v-btn
           class="page-btn"
           :disabled="page >= pageCount"
-          variant="tonal"
           append-icon="mdi-chevron-right"
           @click="page++"
         >
@@ -171,7 +165,6 @@ const toCommunityDetail = (postId) => {
         <v-btn
           class="page-btn"
           :disabled="page >= pageCount"
-          variant="tonal"
           append-icon="mdi-page-last"
           @click="page = pageCount"
         >
@@ -238,10 +231,6 @@ const toCommunityDetail = (postId) => {
   }
 }
 
-.btn:hover {
-  background-color: #dcdcdc !important;
-  transform: scale(1.03);
-}
 /* 🔹 카드 레이아웃 (이전 그대로 유지 가능) */
 .post-grid {
   display: flex;
@@ -268,8 +257,7 @@ const toCommunityDetail = (postId) => {
   padding: 12px 18px;
 
   &:hover {
-    transform: translateY(3px);
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+    transform: scale(1.01);
   }
 }
 
@@ -419,6 +407,10 @@ const toCommunityDetail = (postId) => {
   margin-top: 5px;
   padding: 12px 0;
 
+  .btn,
+  .page-btn {
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
   .page-btn :deep(.v-btn__content) {
     padding: 0 !important;
   }
@@ -439,17 +431,31 @@ const toCommunityDetail = (postId) => {
     color: #555 !important;
     transition: all 0.25s ease;
 
-    &:hover {
-      background-color: #dcdcdc !important;
-      transform: scale(1.03);
+    &:disabled {
+      background-color: #fcfcfc !important; // 평상시보다 더 연한 회색으로
+      color: #aaa !important;
+      opacity: 1 !important; // Vuetify의 disabled opacity 무시
+      box-shadow: none !important;
+      transform: none !important;
+      transition: none !important;
+    }
+    // 🧩 Vuetify overlay 완전 제거
+    :deep(.v-btn__overlay),
+    :deep(.v-btn__underlay) {
+      transition: none !important; // overlay에 있는 opacity 전환 제거
+      background: transparent !important;
+      opacity: 0 !important;
     }
 
-    &:disabled {
-      background-color: #f0f0f0 !important;
-      color: #999 !important;
-      box-shadow: none;
-      transform: none;
+    // 🧩 disabled일 때 overlay가 다시 생기지 않도록 완전 차단
+    &:disabled :deep(.v-btn__overlay),
+    &:disabled :deep(.v-btn__underlay) {
+      display: none !important;
     }
+  }
+  .btn:disabled :deep(.v-btn__overlay),
+  .page-btn:disabled :deep(.v-btn__overlay) {
+    background: transparent !important; // 반투명 오버레이 제거
   }
 
   .page-info {

@@ -85,11 +85,11 @@ const toQna = () => {
         <v-card-text>
           취소하고 돌아가시겠습니까? 해당 내용은 저장되지 않습니다.
         </v-card-text>
-        <v-card-actions class="modal-btn-area">
+        <div class="modal-btn-area">
           <v-spacer />
           <v-btn class="btn-yes" @click="cancel()">네</v-btn>
           <v-btn class="btn-no" @click="cancelDialog = false">아니오</v-btn>
-        </v-card-actions>
+        </div>
       </v-card>
     </v-dialog>
 
@@ -97,10 +97,10 @@ const toQna = () => {
     <v-dialog v-model="successDialog" max-width="380" min-height="100">
       <v-card class="admin-dialog pa-6">
         <v-card-text> 성공적으로 완료되었습니다. </v-card-text>
-        <v-card-actions class="modal-btn-area">
+        <div class="modal-btn-area">
           <v-spacer />
           <v-btn class="btn-yes" @click="toQna()">확인</v-btn>
-        </v-card-actions>
+        </div>
       </v-card>
     </v-dialog>
 
@@ -108,10 +108,10 @@ const toQna = () => {
     <v-dialog v-model="saveDialog" max-width="380" min-height="100">
       <v-card class="admin-dialog pa-6">
         <v-card-text> 답변을 저장하시겠습니까? </v-card-text>
-        <v-card-actions class="modal-btn-area">
+        <div class="modal-btn-area">
           <v-btn class="btn-yes" @click="submit()">네</v-btn>
           <v-btn class="btn-no" @click="saveDialog = false">아니오</v-btn>
-        </v-card-actions>
+        </div>
       </v-card>
     </v-dialog>
 
@@ -365,10 +365,6 @@ const toQna = () => {
   color: #555 !important;
   border-radius: 10px;
 }
-.btn-no:hover {
-  background-color: #dcdcdc !important;
-  transform: scale(1.03);
-}
 
 // 저장 버튼
 .btn-yes {
@@ -376,11 +372,7 @@ const toQna = () => {
   color: #fff !important;
   border-radius: 10px;
 }
-.btn-yes:hover {
-  background-color: #3dd4da !important;
-  box-shadow: 0 3px 10px rgba(61, 212, 218, 0.35);
-  transform: scale(1.03);
-}
+
 
 // 화면 버튼
 .btn-area {
@@ -399,9 +391,7 @@ const toQna = () => {
   border-radius: 10px;
   font-weight: 600;
 }
-.btn-save:hover {
-  background-color: #3dd4da !important;
-}
+
 
 .btn-cancel {
   height: 40px;
@@ -410,7 +400,5 @@ const toQna = () => {
   border-radius: 10px;
   font-weight: 600;
 }
-.btn-cancel:hover {
-  background-color: #ef5350 !important;
-}
+
 </style>

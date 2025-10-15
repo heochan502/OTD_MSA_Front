@@ -21,12 +21,12 @@ const search = ref('');
 
 // 테이블 헤더
 const headers = [
-  { title: 'ID', key: 'exerciseId' },
-  { title: '운동명', key: 'exerciseName' },
-  { title: 'MET', key: 'exerciseMet' },
-  { title: '거리 기반', key: 'hasDistance' },
-  { title: '반복 기반', key: 'hasReps' },
-  { title: '관리', key: 'setting', sortable: false },
+  { title: 'ID', key: 'exerciseId', align: 'center' },
+  { title: '운동명', key: 'exerciseName', align: 'center' },
+  { title: 'MET', key: 'exerciseMet', align: 'center' },
+  { title: '거리 기반', key: 'hasDistance', align: 'center' },
+  { title: '반복 기반', key: 'hasReps', align: 'center' },
+  { title: '관리', key: 'setting', sortable: false, align: 'center' },
 ];
 
 // 운동 목록 불러오기
@@ -143,7 +143,7 @@ onMounted(() => {
             variant="outlined"
             style="max-width: 450px"
           />
-          <v-btn class="btn" @click="openForm()">➕ 운동 추가</v-btn>
+          <v-btn class="btn-blue" @click="openForm()">운동 추가하기</v-btn>
         </div>
       </v-card-title>
 
@@ -173,8 +173,12 @@ onMounted(() => {
 
         <!-- 관리 버튼 -->
         <template #item.setting="{ item }">
-          <v-btn @click="openForm(item)">수정</v-btn>
-          <v-btn @click="openDelete(item)">삭제</v-btn>
+          <div class="btn-area-main">
+            <v-btn class="btn-gray-outline" @click="openForm(item)">수정</v-btn>
+            <v-btn class="btn-red-outline" @click="openDelete(item)"
+              >삭제</v-btn
+            ></div
+          >
         </template>
       </v-data-table>
     </v-card>
@@ -237,10 +241,10 @@ onMounted(() => {
         </v-container>
 
         <v-divider class="my-2" />
-        <v-card-actions class="justify-end btn-area">
-          <v-btn class="btn-no" @click="cancelDialog = true">취소</v-btn>
-          <v-btn class="btn-yes" @click="saveExercise">저장</v-btn>
-        </v-card-actions>
+        <div class="justify-end btn-area">
+          <v-btn class="btn-gray" @click="cancelDialog = true">취소</v-btn>
+          <v-btn class="btn-blue" @click="saveExercise">저장</v-btn>
+        </div>
       </v-card>
     </v-dialog>
 
@@ -251,10 +255,10 @@ onMounted(() => {
           정말 <strong>{{ deleteTarget?.exerciseName }}</strong> 운동을
           삭제하시겠습니까?
         </v-card-text>
-        <v-card-actions class="justify-end btn-area">
-          <v-btn class="btn-yes" @click="removeExercise">네</v-btn>
-          <v-btn class="btn-no" @click="deleteDialog = false">아니오</v-btn>
-        </v-card-actions>
+        <div class="justify-end btn-area">
+          <v-btn class="btn-blue" @click="removeExercise">네</v-btn>
+          <v-btn class="btn-gray" @click="deleteDialog = false">아니오</v-btn>
+        </div>
       </v-card>
     </v-dialog>
 
@@ -262,12 +266,12 @@ onMounted(() => {
     <v-dialog v-model="successDialog" max-width="380" min-height="100">
       <v-card class="admin-dialog pa-6">
         <v-card-text> 성공적으로 완료되었습니다. </v-card-text>
-        <v-card-actions>
+        <div>
           <v-spacer />
-          <v-btn class="btn-yes" text @click="successDialog = false"
+          <v-btn class="btn-blue" text @click="successDialog = false"
             >확인</v-btn
           >
-        </v-card-actions>
+        </div>
       </v-card>
     </v-dialog>
 
@@ -279,10 +283,10 @@ onMounted(() => {
           <br />
           해당 내용은 저장되지 않습니다.
         </v-card-text>
-        <v-card-actions class="btn-area">
-          <v-btn class="btn-yes" @click="cancel()">네</v-btn>
-          <v-btn class="btn-no" @click="cancelDialog = false">아니오</v-btn>
-        </v-card-actions>
+        <div class="btn-area">
+          <v-btn class="btn-blue" @click="cancel()">네</v-btn>
+          <v-btn class="btn-gray" @click="cancelDialog = false">아니오</v-btn>
+        </div>
       </v-card>
     </v-dialog>
   </div>
@@ -311,9 +315,21 @@ onMounted(() => {
 }
 .search {
   width: 50%;
+  justify-content: end;
 }
 .btn {
   min-width: 150px;
+}
+/* 정렬 아이콘 항상 보이게 */
+.styled-table :deep(.v-data-table__th .v-icon) {
+  opacity: 1 !important; /* 항상 표시 */
+  color: #bbb !important; /* 기본은 연한 회색으로 */
+  transition: color 0.2s ease;
+}
+
+/* 활성 정렬 컬럼 아이콘 강조 */
+.styled-table :deep(.v-data-table__th--sorted .v-icon) {
+  color: #5ee6eb !important; /* 활성 정렬 컬럼만 민트 */
 }
 
 .admin-dialog {
@@ -379,10 +395,17 @@ onMounted(() => {
   padding: 0 4px 4px 0 !important;
   margin-top: 4px !important;
 }
+.btn-area-main {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 4px 4px 0 !important;
+  margin-top: 4px !important;
+}
 
-// 버튼 공통
-.btn-no,
-.btn-yes {
+.btn-gray,
+.btn-blue,
+.btn-red {
   min-width: 72px;
   height: 38px;
   border-radius: 10px;
@@ -398,25 +421,56 @@ onMounted(() => {
 }
 
 // 취소 버튼
-.btn-no {
+.btn-gray {
   background-color: #e0e0e0 !important;
   color: #333 !important;
   border-radius: 10px;
 }
-.btn-no:hover {
+.btn-gray:hover {
   background-color: #d6d6d6 !important;
+  box-shadow: 0 3px 10px rgba(61, 212, 218, 0.35);
   transform: scale(1.03);
 }
 
 // 저장 버튼
-.btn-yes {
+.btn-blue {
   background-color: #5ee6eb !important;
   color: #fff !important;
   border-radius: 10px;
 }
-.btn-yes:hover {
+.btn-blue:hover {
   background-color: #3dd4da !important;
   box-shadow: 0 3px 10px rgba(61, 212, 218, 0.35);
   transform: scale(1.03);
+}
+
+// 삭제 버튼
+.btn-red {
+  background-color: #f28b82 !important;
+  color: #fff !important;
+  border-radius: 10px;
+}
+.btn-red:hover {
+  background-color: #ef5350 !important;
+  box-shadow: 0 3px 10px rgba(61, 212, 218, 0.35);
+  transform: scale(1.03);
+}
+
+.btn-gray-outline {
+  background-color: transparent !important;
+  border: 1.5px solid  #cccccc  !important;
+  color: #555 !important;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.25s ease;
+}
+
+.btn-red-outline {
+  background-color: transparent !important;
+  border: 1.5px solid #f28b82 !important;
+  color: #e25b4b !important;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.25s ease;
 }
 </style>
