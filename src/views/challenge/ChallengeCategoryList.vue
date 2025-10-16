@@ -136,7 +136,7 @@ onMounted(async () => {
     </div>
   </div>
 
-  <div v-if="challengeType === 'competition'" class="wrap">
+  <div v-if="challengeType === 'competition'" class="swiper-wrap">
     <div
       class="swiper-warp"
       v-for="(list, category) in state.challengeList"
@@ -228,10 +228,17 @@ onMounted(async () => {
   align-items: center;
 }
 
+/* competition 전체 wrapper */
+.swiper-wrap {
+  display: flex;
+  flex-direction: column;
+  margin-top: 30px;
+}
+
 /* 중앙정렬 및 폭 제한 */
 .swiper-warp {
   width: 100%;
-  max-width: 391px; /* 모바일 레이아웃 기준 */
+  max-width: 391px; /* 모바일 기준 최대 폭 */
   margin: 0 auto 20px auto; /* 중앙정렬 + 아래 여백 */
   box-sizing: border-box;
 
@@ -247,7 +254,6 @@ onMounted(async () => {
 :deep(.swiper) {
   width: 100%;
   overflow: hidden;
-  min-width: 360px;
 }
 
 :deep(.swiper-wrapper) {
@@ -255,14 +261,16 @@ onMounted(async () => {
   cursor: grab;
 }
 
-/* 핵심 수정 부분 */
+/* ✅ 두 개씩 균등 정렬 */
 :deep(.swiper-slide) {
   display: flex;
   justify-content: center;
   flex-shrink: 0;
-  width: calc(50% - 8px) !important; /* 2개씩 균등 */
+  width: calc(50% - 8px) !important; /* 두 개씩 나란히 */
   box-sizing: border-box;
 }
+
+/* weekly/personal grid 구조 */
 .card-grid {
   display: grid;
   grid-template-columns: repeat(2, 168px);
@@ -273,7 +281,8 @@ onMounted(async () => {
   justify-content: center;
   max-width: 100%;
 }
-/* 카드 고정폭 제거 */
+
+/* 카드 고정폭 */
 .challenge-card {
   width: 100%;
   max-width: 168px;
@@ -297,14 +306,12 @@ onMounted(async () => {
   border-radius: 10px;
   pointer-events: none;
 }
-
 .overlay-2 {
   position: absolute;
   align-items: center;
   justify-content: center;
   inset: 0;
 }
-
 .lock {
   width: 100%;
   border-radius: 10px;
