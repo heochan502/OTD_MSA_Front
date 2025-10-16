@@ -459,7 +459,7 @@ const frameEl = ref(null); // 모달을 붙일 프레임
 
         <!-- 액션 버튼 -->
         <div class="actions">
-          <v-btn variant="outlined" class="btn-outline" @click="sheetOpen = false">음식 상세</v-btn>
+          <v-btn variant="outlined" class="btn-outline" @click="sheetOpen = false">취 소</v-btn>
           <v-btn class="btn-primary" @click="addToList">목록에 담기</v-btn>
         </div>
 
