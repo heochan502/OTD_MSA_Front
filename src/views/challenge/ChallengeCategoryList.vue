@@ -227,7 +227,6 @@ onMounted(async () => {
   flex-direction: column;
   align-items: center;
 }
-
 /* competition 전체 wrapper */
 .swiper-wrap {
   display: flex;

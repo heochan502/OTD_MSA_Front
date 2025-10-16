@@ -61,10 +61,11 @@ onMounted(async () => {
   <MealDateStrip v-model="selectedDate" :before="365" :after="365" />
   <div class="wrap wrap-top d-flex flex-column justify-center">
     <!-- 나의 하루 -->
-    <MealSummaryCard @more="goDetail" />
-
+    <div class="otd-box-shadow">
+      <MealSummaryCard @more="goDetail" />
+    </div>
     <!-- 식단 -->
-    <div class="section-panel otd-top-margin">
+    <div class="section-panel otd-top-margin otd-box-shadow">
       <span class="otd-subtitle-1 section-span">식단</span>
       <div class="panel-tight mt-2">
         <MealDayCards />
@@ -72,7 +73,7 @@ onMounted(async () => {
     </div>
 
     <!-- 물 섭취 카드는 그대로 -->
-    <div class="otd-top-margin">
+    <div class="otd-top-margin water">
       <WaterCard :todayAmount="todayWater" />
     </div>
   </div>
@@ -85,7 +86,9 @@ onMounted(async () => {
   margin-top: 30px;
   justify-self: center;
 }
-
+.water {
+  margin-bottom: 20px;
+}
 /* // 화면이 391px 이상일 때만 max-width + 중앙정렬 적용 */
 @media (min-width: 391px) {
   .wrap {
@@ -104,7 +107,7 @@ onMounted(async () => {
   /* 둥글게 */
   padding: 10px;
   /* 안쪽 여백 */
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  /* box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); */
   /* 아주 은은한 그림자 */
   margin-top: 12px;
   /* 섹션 간 간격 */
