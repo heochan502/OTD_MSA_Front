@@ -175,6 +175,8 @@ const submit = async () => {
 
 .login{
   /* align-items: center; */
+  width: 100%;
+  padding: 0px 20px;
   justify-self: center;
 }
 
