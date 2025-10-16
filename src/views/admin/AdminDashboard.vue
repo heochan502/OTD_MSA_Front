@@ -427,7 +427,7 @@ const formatDate = (dateStr) => {
                 <v-sheet class="info-box">
                   <div class="label">평균 답변 시간</div>
                   <div class="value">
-                    {{ state.inquiryData.avgRepliedTime }}%
+                    {{ state.inquiryData.avgRepliedTime }}분
                   </div>
                 </v-sheet>
               </v-col>
