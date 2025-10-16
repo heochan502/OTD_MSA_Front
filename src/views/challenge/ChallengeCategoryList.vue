@@ -270,6 +270,8 @@ onMounted(async () => {
   max-width: 391px;
   box-sizing: border-box;
   padding-bottom: 30px;
+  justify-content: center;
+  max-width: 100%;
 }
 /* 카드 고정폭 제거 */
 .challenge-card {

@@ -73,7 +73,10 @@ onMounted(() => {
           <div class="profile">
             <img class="profile-image" :src="profileImage" alt="프로필이미지" />
 
-            <div class="nick-name otd-body-2">
+            <div
+              class="nick-name otd-body-2"
+              :title="props.rankingDetail.nickName"
+            >
               {{ props.rankingDetail.nickName }}
             </div>
           </div>
@@ -145,7 +148,14 @@ onMounted(() => {
     }
   }
 }
+.nick-name {
+  max-width: 120px; // 카드 레이아웃에 맞는 적절한 최대폭
+  overflow: hidden; // 넘치는 글자 숨김
+  white-space: nowrap; // 줄바꿈 방지
+  text-overflow: ellipsis; // … 처리
+}
 .record {
+  max-width: 50px;
   flex: 0 0 80px; // 오른쪽 값 고정폭
   text-align: right;
 }
