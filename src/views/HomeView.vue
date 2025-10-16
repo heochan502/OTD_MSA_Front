@@ -238,24 +238,29 @@ const fetchLastestBodyComposition = async () => {
   <div>
     <v-dialog
       v-model="monthlySettlementDialog"
-      max-width="300"
+      max-width="330"
       min-height="100"
+      class="modal-box"
     >
-      <v-card>
+      <v-card class="modal-card">
         <v-card-title class="text-h8">월간 정산이 완료되었어요!</v-card-title>
         <v-card-text v-for="data in state.monthlySettlementLog">
           <ChallengeSettlementCard
             :settlement-data="data"
           ></ChallengeSettlementCard>
         </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn color="dark" text @click="setModal()">확인</v-btn>
-        </v-card-actions>
+        <div class="btn-box">
+          <v-btn class="btn-confirm" text @click="setModal()">확인</v-btn>
+        </div>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="weeklySettlementDialog" max-width="300" min-height="100">
-      <v-card>
+    <v-dialog
+      v-model="weeklySettlementDialog"
+      max-width="330"
+      min-height="100"
+      class="modal-box"
+    >
+      <v-card class="modal-card">
         <v-card-title class="text-h8"
           >지난 주 정산이 완료되었어요!</v-card-title
         >
@@ -264,12 +269,14 @@ const fetchLastestBodyComposition = async () => {
             :settlement-data="data"
           ></ChallengeSettlementCard>
         </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn color="dark" text @click="weeklySettlementDialog = false"
+        <div class="btn-box">
+          <v-btn
+            class="btn-confirm"
+            text
+            @click="weeklySettlementDialog = false"
             >확인</v-btn
           >
-        </v-card-actions>
+        </div>
       </v-card>
     </v-dialog>
   </div>
@@ -521,6 +528,18 @@ const fetchLastestBodyComposition = async () => {
   // min-width: 160px;
 }
 
+.btn-box {
+  padding-top: 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-confirm {
+  background: #5ee6eb;
+  color: white;
+  border-radius: 15px;
+}
+
 /*
 .meal-cards {
   width: 350px;
@@ -571,6 +590,21 @@ const fetchLastestBodyComposition = async () => {
     height: 17px;
   }
 } */
+
+.modal-box {
+  border-radius: 15px;
+}
+.modal-card {
+  padding: 10px;
+  border-radius: 15px;
+}
+.text-h8 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+  align-self: center;
+}
 .challenge-progress-container {
   margin-bottom: 4px;
   cursor: pointer;
