@@ -78,7 +78,7 @@ onMounted(async () => {
   </div>
 </template>
 
-<style setup>
+<style scoped>
 /* 이 뷰는 공통 유틸(main.css) + 각 카드 내부 스타일을 사용
    */
 .wrap {
