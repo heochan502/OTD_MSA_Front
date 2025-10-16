@@ -56,6 +56,7 @@ onMounted(async () => {
   state.userInfo = adminStore.state.selectedUser;
   const userId = Number(state.userInfo.userId);
   const resUser = await getUserDetail(userId);
+  console.log('res.user', resUser.data);
   const resExercise = await getUserExerciseRecord(userId);
   const resMeal = await getUserMealRecord(userId);
   state.challengeHistory = resUser.data.challengeProgress;
