@@ -323,7 +323,7 @@ const settlementButton = async () => {
     </div>
     <!-- 주간 챌린지 -->
     <div>
-      <div>
+      <div class="weekly-wrap">
         <div class="title">진행중인 주간 챌린지</div>
         <div class="weekly card-wrap">
           <!-- <div class="route-list" @click="toChallengeList">
@@ -526,6 +526,9 @@ const settlementButton = async () => {
     flex-direction: column;
     gap: 5px;
   }
+}
+.weekly-wrap {
+  margin-bottom: 20px;
 }
 @media (max-width: 360px) {
   .challenge-card {
