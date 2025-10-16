@@ -1,31 +1,31 @@
 <script setup>
-import { ref, watch, onMounted } from "vue";
-import { useRouter, useRoute } from "vue-router";
-import MealSummaryCard from "@/components/meal/MealSummaryCard.vue";
-import MealDayCards from "@/components/meal/MealDayCards.vue";
-import WaterCard from "@/components/meal/WaterCard.vue";
-import MealDateStrip from "@/components/meal/MealDateStrip.vue";
+import { ref, watch, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import MealSummaryCard from '@/components/meal/MealSummaryCard.vue';
+import MealDayCards from '@/components/meal/MealDayCards.vue';
+import WaterCard from '@/components/meal/WaterCard.vue';
+import MealDateStrip from '@/components/meal/MealDateStrip.vue';
 
 import {
   getWaterIntake,
   postWaterIntake,
-} from "@/services/meal/waterIntake.js";
+} from '@/services/meal/waterIntake.js';
 
-import { useMealSelectedStore } from "@/stores/meal/mealStore.js";
+import { useMealSelectedStore } from '@/stores/meal/mealStore.js';
 
 const selectedDay = useMealSelectedStore();
 
 const router = useRouter();
 const route = useRoute();
 const goDetail = () =>
-  router.push({ name: "MealDetailView", query: { range: "day" } });
+  router.push({ name: 'MealDetailView', query: { range: 'day' } });
 
 // 오늘 물 섭취량 (L). 실제 연동 시 API 값으로 바인딩하세요.
 const todayWater = ref(0.0);
 
 const getTodayWater = async () => {
   todayWater.value = await getWaterIntake(selectedDay.selectedDay.setDay); // 0~2L 사이 랜덤 값
-  console.log("오늘물", todayWater.value);
+  console.log('오늘물', todayWater.value);
 };
 
 // 쿼리(meal)로 초기화 (예: /meal-food-search?meal=2025-09-26)
@@ -35,10 +35,10 @@ const selectedDate = ref(new Date());
 // 날짜 바뀔 때 라우터 쿼리 싱크 (선택)
 watch(selectedDate, async (day) => {
   const yyyy = day.getFullYear();
-  const mm = String(day.getMonth() + 1).padStart(2, "0");
-  const dd = String(day.getDate()).padStart(2, "0");
+  const mm = String(day.getMonth() + 1).padStart(2, '0');
+  const dd = String(day.getDate()).padStart(2, '0');
   selectedDay.selectedDay.setDay = `${yyyy}-${mm}-${dd}`;
-  console.log("선택날", selectedDay.selectedDay.setDay);
+  console.log('선택날', selectedDay.selectedDay.setDay);
   router.replace({ query: { ...route.query }, day: `${yyyy}-${mm}-${dd}` });
   getTodayWater();
 });
@@ -47,11 +47,11 @@ onMounted(async () => {
   if (!selectedDay.selectedDay.setDay ?? true) {
     const day = new Date();
     const yyyy = day.getFullYear();
-    const mm = String(day.getMonth() + 1).padStart(2, "0");
-    const dd = String(day.getDate()).padStart(2, "0");
+    const mm = String(day.getMonth() + 1).padStart(2, '0');
+    const dd = String(day.getDate()).padStart(2, '0');
     selectedDay.selectedDay.setDay = `${yyyy}-${mm}-${dd}`;
   }
-  console.log("선택날", selectedDay.selectedDay.setDay);
+  console.log('선택날', selectedDay.selectedDay.setDay);
 
   getTodayWater();
 });
@@ -78,7 +78,7 @@ onMounted(async () => {
   </div>
 </template>
 
-<style scoped>
+<style setup scoped>
 /* 이 뷰는 공통 유틸(main.css) + 각 카드 내부 스타일을 사용
    */
 .wrap {
@@ -124,7 +124,7 @@ onMounted(async () => {
   box-sizing: border-box;
 }
 /* 혹시 카드 안에 고정폭이 있다면 해제 */
-.panel-tight :deep(.meal-cards[style*="width"]) {
+.panel-tight :deep(.meal-cards[style*='width']) {
   width: 100% !important;
 }
 /* 페이지 전체 여백 유지 */
