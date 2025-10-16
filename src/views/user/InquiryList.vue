@@ -43,32 +43,14 @@ const goToInquiry = () => {
   router.push('/user/email/inquiry');
 };
 
-const getStatusClass = (status) => {
-  if (!status) return 'pending';
-
-  const upperStatus = status.toString().toUpperCase();
-  const statusMap = {
-    PENDING: 'pending',
-    RESOLVED: 'resolved',
-    '00': 'pending',
-    '01': 'resolved',
-    대기중: 'pending',
-    '대기 중': 'pending',
-    완료: 'resolved',
-  };
-  return statusMap[upperStatus] || statusMap[status] || 'pending';
-};
-
 const getStatusText = (status) => {
   if (!status) return '대기중';
 
-  if (status === '대기 중' || status === '대기중') {
-    return '대기중';
-  }
-  if (status === '완료') {
-    return '완료';
-  }
+  // 이미 한글인 경우
+  if (status === '대기 중' || status === '대기중') return '대기중';
+  if (status === '답변 완료' || status === '완료') return '완료';
 
+  // 영문 또는 코드로 변환
   const upperStatus = status.toString().toUpperCase();
   const statusTextMap = {
     PENDING: '대기중',
@@ -78,6 +60,23 @@ const getStatusText = (status) => {
   };
 
   return statusTextMap[upperStatus] || statusTextMap[status] || '대기중';
+};
+
+const getStatusClass = (status) => {
+  if (!status) return 'pending';
+
+  const upperStatus = status.toString().toUpperCase();
+  const statusMap = {
+    PENDING: 'pending',
+    RESOLVED: 'completed',
+    '00': 'pending',
+    '01': 'completed',
+    대기중: 'pending',
+    '대기 중': 'pending',
+    완료: 'completed',
+    '답변 완료': 'completed',
+  };
+  return statusMap[upperStatus] || statusMap[status] || 'pending';
 };
 
 const formatDate = (dateString) => {
@@ -225,7 +224,7 @@ onMounted(() => {
 
 .create-btn {
   padding: 12px 30px;
-  background-color: #393E46;
+  background-color: #393e46;
   color: white;
   border: none;
   border-radius: 6px;
@@ -289,7 +288,7 @@ onMounted(() => {
   color: #92400e;
 }
 
-.status.resolved {
+.status.completed {
   background-color: #d1fae5;
   color: #065f46;
 }
