@@ -360,7 +360,7 @@ const openMealDialog = async (meal) => {
         </v-container>
 
         <v-divider class="my-2" />
-        <div>
+        <div class="btn-area">
           <v-btn class="btn-save" @click="mealDetailDialog = false">확인</v-btn>
         </div>
       </v-card>
