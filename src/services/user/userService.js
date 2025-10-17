@@ -54,20 +54,3 @@ export const completeOnboardingAPI = async ({ userId, agreedTermsIds, surveyScor
     surveyScore
   });
 };
-
-export const loginUser = (credentials) => async () => {
-  try {
-    const res = await axios.post('/user/login', credentials);
-
-    // 응답 헤더나 바디에서 accessToken 추출
-    const token = res.data?.result?.accessToken || res.headers['authorization'];
-    if (token) {
-      localStorage.setItem('accessToken', token.replace('Bearer ', ''));
-    }
-
-    return res.data;
-  } catch (e) {
-    console.error('[userService] 로그인 실패:', e);
-    return e?.response || null;
-  }
-}

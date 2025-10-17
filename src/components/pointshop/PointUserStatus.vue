@@ -6,13 +6,8 @@ const props = defineProps({
   purchasedItemIds: { type: Array, default: () => [] },
 });
 
-// 구매한 아이템 수 계산
 const purchasedItemCount = computed(() => props.purchasedItemIds.length);
-
-// 포인트 단위 변환
-const formattedPoints = computed(() =>
-  props.userPoints?.toLocaleString?.() || '0'
-);
+const formattedPoints = computed(() => props.userPoints.toLocaleString() || '0');
 </script>
 
 <template>
@@ -23,7 +18,7 @@ const formattedPoints = computed(() =>
       <span class="unit">P</span>
     </div>
 
-    <div class="status-divider"></div>
+    <div class="divider"></div>
 
     <div class="status-item">
       <span class="label">구매한 아이템</span>
@@ -36,49 +31,39 @@ const formattedPoints = computed(() =>
 <style scoped>
 .point-user-status {
   display: flex;
-  justify-content: center;
   align-items: center;
-  background-color: #ffffff;
-  padding: 14px 22px;
+  justify-content: center;
+  background: #fff;
   border-radius: 12px;
-  margin: 16px auto;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+  padding: 14px 20px;
   max-width: 420px;
+  margin: 0 auto 20px;
   gap: 24px;
-  flex-wrap: wrap;
 }
-
 .status-item {
   display: flex;
   align-items: baseline;
-  gap: 4px;
-  font-size: 15px;
-  color: #333;
+  gap: 5px;
 }
-
 .label {
-  font-weight: 500;
   color: #555;
+  font-size: 14px;
 }
-
 .value {
   font-weight: 700;
   font-size: 1.1rem;
-  color: #000;
 }
-
 .value.primary {
   color: var(--color-primary, #0078ff);
 }
-
 .unit {
   font-size: 0.9rem;
   color: #777;
 }
-
-.status-divider {
+.divider {
   width: 1px;
   height: 22px;
-  background-color: #ddd;
+  background: #ddd;
 }
 </style>
