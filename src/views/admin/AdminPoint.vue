@@ -1,10 +1,13 @@
 <script setup>
-import { getPointHistory } from '@/services/admin/adminService';
+import {
+  getPointHistory,
+  getPurchaseList,
+} from '@/services/admin/adminService';
 import { onMounted, ref, computed } from 'vue';
 
 const pointHistory = ref([]);
+const purchaseList = ref([]);
 const search = ref('');
-
 const headers = [
   { title: 'ID', key: 'chId', align: 'center' },
   { title: '닉네임(이름)', key: 'userText', align: 'center' },
@@ -13,11 +16,24 @@ const headers = [
   { title: '사유', key: 'reason', align: 'center' },
   { title: '획득일', key: 'createdAt', align: 'center' },
 ];
+const purchaseHeaders = [
+  { title: '구매 ID', key: 'purchaseId', align: 'center' },
+  { title: '유저 ID', key: 'userId', align: 'center' },
+  { title: '닉네임(이름)', key: 'userText', align: 'center' },
+  { title: '이메일', key: 'email', align: 'center' },
+  { title: '상품명', key: 'itemContent', align: 'center' },
+  { title: '사용 포인트', key: 'pointScore', align: 'center' },
+  { title: '구매일', key: 'purchaseAt', align: 'center' },
+];
 
 onMounted(async () => {
   const res = await getPointHistory();
   pointHistory.value = res.data || [];
-  console.log('raw:', pointHistory.value);
+  const res2 = await getPurchaseList();
+  console.log('res2', res2);
+  purchaseList.value = res2.data || [];
+
+  console.log('raw:', pointHistory.value.slice(0, 3));
 });
 
 const formatNumber = (n) => String(n).padStart(2, '0');
@@ -49,6 +65,21 @@ const tableSet = computed(() => {
   // 최신순 (createdAt DESC)
   rows.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   return rows;
+});
+const purchaseTable = computed(() => {
+  if (!Array.isArray(purchaseList.value)) return [];
+
+  return purchaseList.value
+    .map((item, i) => ({
+      purchaseId: item.purchaseId ?? i,
+      userId: item.userId,
+      userText: `${item.nickName ?? ''}${item.name ? ` (${item.name})` : ''}`,
+      email: item.email ?? '',
+      itemContent: item.itemContent ?? '',
+      pointScore: item.pointScore ?? 0,
+      purchaseAt: item.purchaseAt,
+    }))
+    .sort((a, b) => new Date(b.purchaseAt) - new Date(a.purchaseAt));
 });
 </script>
 
@@ -96,6 +127,45 @@ const tableSet = computed(() => {
         <!-- 획득일 -->
         <template #item.createdAt="{ item }">
           {{ formatDate(new Date(item.createdAt)) }}
+        </template>
+      </v-data-table>
+    </v-card>
+    <br />
+    <v-card class="data-card pa-2">
+      <v-card-title class="d-flex justify-space-between align-center">
+        <span class="title">포인트 구매 내역</span>
+        <v-text-field
+          v-model="search"
+          label="검색"
+          prepend-inner-icon="mdi-magnify"
+          density="compact"
+          hide-details
+          single-line
+          variant="outlined"
+          style="max-width: 250px"
+        />
+      </v-card-title>
+
+      <v-data-table
+        :headers="purchaseHeaders"
+        :items="purchaseTable"
+        :search="search"
+        :items-per-page="12"
+        height="400"
+        fixed-header
+        class="styled-table"
+      >
+        <template #item.userText="{ item }">
+          {{ item.userText }}
+        </template>
+        <template #item.pointScore="{ item }">
+          <strong style="color: #f28b82"
+            >-{{ item.pointScore.toLocaleString() }}P</strong
+          >
+        </template>
+
+        <template #item.purchaseAt="{ item }">
+          {{ formatDate(new Date(item.purchaseAt)) }}
         </template>
       </v-data-table>
     </v-card>
