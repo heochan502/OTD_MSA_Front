@@ -68,6 +68,10 @@ export const getPointHistory = () => {
   return axios.get(`${BASE_URL}/point`).catch((e) => e.response);
 };
 
+export const getPurchaseList = () => {
+  return axios.get(`${BASE_URL}/purchase`).catch((e) => e.response);
+};
+
 // 통계페이지
 export const getUserStatistics = () => {
   return axios.get(`${BASE_URL}/statistics/user`).catch((e) => e.response);
@@ -113,7 +117,6 @@ export const getQnaDetail = (inquiryId) => {
 export const putQna = (params) => {
   return axios.put(`${BASE_URL}/qna/modify`, params).catch((e) => e.response);
 };
-
 
 // life 서버
 // 유저 디테일 식단 기록
