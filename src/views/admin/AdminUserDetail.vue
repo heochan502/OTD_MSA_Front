@@ -60,6 +60,8 @@ onMounted(async () => {
   console.log('res.user', resUser.data);
   const resExercise = await getUserExerciseRecord(userId);
   const resMeal = await getUserMealRecord(userId);
+  console.log('meal', resMeal.data);
+  console.log('exercise', resExercise.data);
   state.challengeHistory = resUser.data.challengeProgress;
   state.pointHistory = resUser.data.challengePointHistory;
   state.exerciseHistory = resExercise.data;
@@ -226,6 +228,7 @@ const openMealDialog = async (meal) => {
   };
   const res = await getUserMealDetail(params);
   selectedMeal.value = res?.data || [];
+  console.log('detail', res.data);
   mealDetailDialog.value = true;
 };
 </script>
@@ -370,7 +373,7 @@ const openMealDialog = async (meal) => {
         </v-container>
 
         <v-divider class="my-2" />
-        <div>
+        <div class="btn-area">
           <v-btn class="btn-save" @click="mealDetailDialog = false">확인</v-btn>
         </div>
       </v-card>
