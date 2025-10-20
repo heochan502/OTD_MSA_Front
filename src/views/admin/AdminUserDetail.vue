@@ -41,6 +41,7 @@ const state = reactive({
   pointHistory: [],
   exerciseHistory: [],
   mealHistory: [],
+  purchaseHistory: [],
 });
 
 const formatBirthDate = (birthDate) => {
@@ -56,12 +57,16 @@ onMounted(async () => {
   state.userInfo = adminStore.state.selectedUser;
   const userId = Number(state.userInfo.userId);
   const resUser = await getUserDetail(userId);
+  console.log('res.user', resUser.data);
   const resExercise = await getUserExerciseRecord(userId);
   const resMeal = await getUserMealRecord(userId);
+  console.log('meal', resMeal.data);
+  console.log('exercise', resExercise.data);
   state.challengeHistory = resUser.data.challengeProgress;
   state.pointHistory = resUser.data.challengePointHistory;
   state.exerciseHistory = resExercise.data;
   state.mealHistory = resMeal.data;
+  state.purchaseHistory = resUser.data.pointPurchases;
 
   picUrl.value = authenticationStore.formattedUserPic(state.userInfo);
 });
@@ -98,6 +103,13 @@ const mealHeaders = [
   { title: '총 나트륨 섭취량', key: 'totalNatrium', align: 'center' },
   { title: '총 당 섭취량', key: 'totalSugar', align: 'center' },
   { title: '총 칼로리', key: 'totalKcal', align: 'center' },
+];
+
+const purchaseHeaders = [
+  { title: '구매 ID', key: 'purchaseId', align: 'center' },
+  { title: '상품명', key: 'itemContent', align: 'center' },
+  { title: '소모 포인트', key: 'pointScore', align: 'center' },
+  { title: '구매일시', key: 'purchaseAt', align: 'center' },
 ];
 
 const formatNumber = (n) => String(n).padStart(2, '0');
@@ -216,6 +228,7 @@ const openMealDialog = async (meal) => {
   };
   const res = await getUserMealDetail(params);
   selectedMeal.value = res?.data || [];
+  console.log('detail', res.data);
   mealDetailDialog.value = true;
 };
 </script>
@@ -360,7 +373,7 @@ const openMealDialog = async (meal) => {
         </v-container>
 
         <v-divider class="my-2" />
-        <div>
+        <div class="btn-area">
           <v-btn class="btn-save" @click="mealDetailDialog = false">확인</v-btn>
         </div>
       </v-card>
@@ -552,6 +565,45 @@ const openMealDialog = async (meal) => {
               <!-- 지급일 -->
               <template #item.createdAt="{ item }">
                 {{ formatDate(new Date(item.createdAt)) }}
+              </template>
+            </v-data-table>
+          </v-card>
+        </v-col>
+      </v-row>
+
+      <!-- 구매 내역 -->
+      <v-row dense>
+        <v-col cols="12">
+          <v-card class="data-card pa-2">
+            <v-card-title class="d-flex justify-space-between align-center">
+              <span class="title">구매 내역</span>
+              <v-text-field
+                v-model="searchPurchase"
+                label="검색"
+                prepend-inner-icon="mdi-magnify"
+                density="compact"
+                hide-details
+                single-line
+                variant="outlined"
+                style="max-width: 250px"
+              />
+            </v-card-title>
+
+            <v-data-table
+              :headers="purchaseHeaders"
+              :items="state.purchaseHistory"
+              :search="searchPurchase"
+              :items-per-page="8"
+              class="styled-table"
+            >
+              <!-- 포인트 단위 -->
+              <template #item.pointScore="{ item }">
+                -{{ Number(item.pointScore).toLocaleString() }}P
+              </template>
+
+              <!-- 구매일시 포맷 -->
+              <template #item.purchaseAt="{ item }">
+                {{ new Date(item.purchaseAt).toLocaleString('ko-KR') }}
               </template>
             </v-data-table>
           </v-card>

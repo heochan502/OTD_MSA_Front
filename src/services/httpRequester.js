@@ -60,7 +60,7 @@ axios.interceptors.response.use(
       }
 
       // 기존 분기 유지 +  무한루프 방지 (_retry)
-      if ((status === 403 || status === 401 ) && authenticationStore.state.isSigned) {
+      if ((status === 403 || status === 401 || status=== 500 ) && authenticationStore.state.isSigned) {
         // ADD 3) 한 번만 재발급/재요청
         if (err.config._retry) {
           return Promise.reject(err);

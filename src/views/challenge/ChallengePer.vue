@@ -140,10 +140,18 @@ onMounted(async () => {
       </div>
       <div class="box otd-border otd-box-style">
         <div class="button otd-body-3">
-          <button class="otd-border otd-box-style" @click="aroundRankingList">
+          <button
+            :class="{ active: state.activeTab === 'around' }"
+            class="otd-border otd-box-style"
+            @click="aroundRankingList"
+          >
             내 순위 보기
           </button>
-          <button class="otd-border otd-box-style" @click="topRankingList">
+          <button
+            :class="{ active: state.activeTab === 'top' }"
+            class="otd-border otd-box-style"
+            @click="topRankingList"
+          >
             Top5 보기
           </button>
         </div>
@@ -237,6 +245,12 @@ onMounted(async () => {
     height: 25px;
     background-color: #e6e6e6;
     color: #303030;
+    transition: all 0.2s ease; /* 부드럽게 색상 전환 */
+  }
+  .otd-border.active {
+    background-color: #00d5df;
+    color: white;
+    font-weight: 700;
   }
 }
 .info {

@@ -184,7 +184,7 @@ onMounted(() => {
                   inputmode="decimal"
                   v-model.number="form.natrium"
                 />
-                <span class="suffix">{{ unitLabel }}</span>
+                <span class="suffix">mg</span>
               </div>
             </div>
           </div>
