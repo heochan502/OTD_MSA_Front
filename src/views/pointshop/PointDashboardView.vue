@@ -1,6 +1,9 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { usePointshop } from '@/components/pointshop/usePointshop.js';
+
+const router = useRouter();
 
 const {
   userPoints,
@@ -12,6 +15,10 @@ const {
   purchaseItem,
   isPurchased,
 } = usePointshop();
+
+const goToProfile = () => {
+  router.push('/user/profile');
+};
 
 // 검색 / 정렬 / 가격대 / 카테고리 필터 상태
 const searchKeyword = ref(localStorage.getItem('searchKeyword') || '');
@@ -91,10 +98,10 @@ const filteredItems = computed(() => {
       list.sort((a, b) => a.pointItemName.localeCompare(b.pointItemName));
       break;
     case 'popular':
-      const counts = {};
-      purchasedItems.value.forEach((p) => {
-        counts[p.pointItemName] = (counts[p.pointItemName] || 0) + 1;
-      });
+      const counts = purchasedItems.value.reduce((acc, p) => {
+      acc[p.pointItemName] = (acc[p.pointItemName] || 0) + 1;
+      return acc;
+    }, {});
       list.sort((a, b) => (counts[b.pointItemName] || 0) - (counts[a.pointItemName] || 0));
       break;
   }
@@ -105,24 +112,32 @@ const filteredItems = computed(() => {
 // 구매 처리
 const handlePurchase = async (item) => {
   if (!item?.pointId) return alert('유효하지 않은 아이템입니다.');
-  if (item.stock === 0) return alert('품절된 상품입니다.');
-  if (!isAffordable(item.pointScore)) return alert('포인트가 부족합니다.');
 
-  const confirmBuy = confirm(
+  // 이미 구매한 상품은 클릭해도 아무 반응 없음
+  if (isPurchased(item.pointId)) return;
+
+  // 품절 안내
+  if (item.stock === 0) return alert('품절된 상품입니다.');
+
+  // 포인트 부족 안내
+  if ((userPoints.value || 0) < (item.pointScore || 0)) {
+    const goToChallenge = confirm('포인트가 부족합니다. 챌린지로 이동하시겠습니까?');
+    if (goToChallenge) router.push('/challenge'); // 챌린지 페이지로 이동
+    return;
+  }
+
+  const ok = confirm(
     `${item.pointItemName} (${Number(item.pointScore).toLocaleString()}P)를 구매하시겠습니까?`
   );
-  if (!confirmBuy) return;
+  if (!ok) return;
 
-  await purchaseItem(item);
-
-  // 즉시 반영
-  userPoints.value = Math.max((userPoints.value || 0) - (item.pointScore || 0), 0);
-  purchasedItems.value.unshift({
-    pointItemName: item.pointItemName,
-    pointScore: item.pointScore,
-    purchaseAt: new Date().toISOString(),
-  });
-  item.stock = Math.max((item.stock || 1) - 1, 0);
+  try {
+    await purchaseItem(item);
+    // alert('구매가 완료되었습니다!');
+  } catch (err) {
+    console.error('[handlePurchase] 구매 실패:', err);
+    alert('구매 처리 중 오류가 발생했습니다.');
+  }
 };
 
 // 초기 로드
@@ -135,15 +150,15 @@ onMounted(async () => {
   <div class="point-dashboard">
     <!-- 상단 포인트 -->
     <header class="point-header">
-      <div class="point-mini">
-        <img src="/image/main/point.png" alt="포인트 아이콘" class="point-icon" />
-        <div class="point-text">
-          <span class="label"></span>
-          <span class="value">{{ (userPoints || 0).toLocaleString() }}</span>
-          <span class="unit">P</span>
-        </div>
-      </div>
-    </header>
+  <div class="point-mini" @click="goToProfile" style="cursor: pointer;">
+    <img src="/image/main/point.png" alt="포인트 아이콘" class="point-icon" />
+    <div class="point-text">
+      <span class="label"></span>
+      <span class="value">{{ (userPoints || 0).toLocaleString() }}</span>
+      <span class="unit">P</span>
+    </div>
+  </div>
+</header>
 
     <p class="notice">포인트는 아이템 구매에만 사용됩니다.</p>
 
@@ -182,7 +197,7 @@ onMounted(async () => {
         <li v-for="item in filteredItems" :key="item.pointId" class="item">
           <img
             v-if="item.imageUrl || item.pointItemImage"
-            :src="item.imageUrl || ('/api/OTD/pointshop/image/' + item.pointItemImage)"
+            :src="item.imageUrl || ('/pointshop/image/' + item.pointItemImage)"
             alt="item"
             class="item-image"
             @error="(e) => (e.target.src = '/image/pointshop/default.png')"
@@ -197,19 +212,18 @@ onMounted(async () => {
             </p> -->
 
             <button
-              :disabled="isPurchased(item.pointId) || !isAffordable(item.pointScore) || item.stock === 0"
-              @click="handlePurchase(item)"
-              :class="{
-                purchased: isPurchased(item.pointId),
-                insufficient: !isAffordable(item.pointScore) && !isPurchased(item.pointId),
-                out: item.stock === 0,
-              }"
-            >
-              <template v-if="item.stock === 0">품절</template>
-              <template v-else-if="isPurchased(item.pointId)">구매 완료</template>
-              <template v-else-if="!isAffordable(item.pointScore)">포인트 부족</template>
-              <template v-else>구매하기</template>
-            </button>
+            @click="handlePurchase(item)"
+            :class="{
+              purchased: isPurchased(item.pointId),
+              insufficient: !isAffordable(item.pointScore) && !isPurchased(item.pointId),
+              out: item.stock === 0,
+            }"
+          >
+            <template v-if="item.stock === 0">품절</template>
+            <template v-else-if="isPurchased(item.pointId)">구매 완료</template>
+            <template v-else-if="!isAffordable(item.pointScore)">포인트 부족</template>
+            <template v-else>구매하기</template>
+          </button>
           </div>
         </li>
       </ul>
@@ -224,7 +238,14 @@ onMounted(async () => {
         <li v-for="(h, idx) in purchasedItems" :key="idx" class="history-item">
           <span class="item-name">{{ h.pointItemName }}</span>
           <span class="amount">-{{ Number(h.pointScore || 0).toLocaleString() }}P</span>
-          <span class="date">{{ new Date(h.purchaseAt).toLocaleDateString('ko-KR') }}</span>
+          <span class="date">
+          {{
+            (() => {
+              const d = new Date(h.purchaseAt);
+              return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+            })()
+          }}
+        </span>
         </li>
       </ul>
     </section>
@@ -366,20 +387,32 @@ button {
   transition: background 0.2s;
 }
 button:hover:not(:disabled) {
-  background: #285db5;
+  background: #666;
 }
 button:disabled {
   background: #bbb;
   cursor: not-allowed;
 }
 button.purchased {
-  background: #666;
+  background: #777;
+  cursor: default;
+  pointer-events: none; /* 클릭 방지 */
+  opacity: 0.8;
 }
 button.insufficient {
   background: #c0392b;
+  cursor: pointer;
+  opacity: 1;
+}
+button.insufficient:hover {
+  opacity: 0.9;
 }
 button.out {
   background: #999;
+  cursor: pointer;
+}
+button.out:hover {
+  opacity: 0.9;
 }
 
 /* 구매 내역 */
@@ -387,13 +420,35 @@ button.out {
   margin-top: 40px;
 }
 .history-item {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 100px; /* 이름 / 포인트 / 날짜 */
+  align-items: center;
+  text-align: center; /* 중앙 정렬 */
   padding: 10px 14px;
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
   font-size: 0.85rem;
+}
+
+.history-item .item-name {
+  text-align: left; /* 이름은 왼쪽 */
+}
+
+.history-item .amount {
+  text-align: center; /* 포인트는 중앙 */
+  color: #c0392b;
+  font-weight: 600;
+  margin-right: 30px;
+}
+
+.history-item .date {
+  text-align: right; /* 날짜는 오른쪽 */
+  color: #555;
+  white-space: nowrap;
+}
+.history-item + .history-item {
+  margin-top: 10px;
 }
 .amount {
   color: #c0392b;
@@ -404,5 +459,23 @@ button.out {
   color: #999;
   font-size: 0.85rem;
   padding: 14px 0;
+}
+
+.point-mini {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  padding: 6px 12px;
+  border-radius: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+  cursor: pointer;
+}
+
+.point-mini:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  background: #f7fbff;
 }
 </style>

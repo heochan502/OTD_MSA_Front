@@ -40,16 +40,29 @@ const router = useRouter();
 const route = useRoute();
 const authentication = useAuthenticationStore();
 
-const userInfo = computed(() => ({
-  nickName: authentication.state.signedUser.nickName,
-  userPoint: authentication.state.signedUser.point,
-  pic: authentication.state.signedUser.pic,
-  xp: authentication.state.signedUser.xp,
-}));
+const userInfo = reactive({
+  nickName: '',
+  userPoint: 0,
+  pic: '',
+  xp: 0,
+});
+
+watch(() => authentication.state.signedUser,
+  (user) => {
+    if (user) {
+      userInfo.nickName = user.nickName;
+      userInfo.userPoint = user.point;
+      userInfo.pic = user.pic;
+      userInfo.xp = user.xp;
+    }
+  },
+  { deep: true, immediate: true }
+);
+
 const defaultProfile = '/otd/image/main/default-profile.png';
 // pic이 있으면 그걸 쓰고, 없으면 기본 이미지
 const profileImage = computed(() => {
-  return userInfo.value?.pic ? userInfo.value.pic : defaultProfile;
+  return userInfo.pic ? userInfo.pic : defaultProfile;
 });
 const myRole = computed(() => authentication.state.signedUser?.userRole || '');
 

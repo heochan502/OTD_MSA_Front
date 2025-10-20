@@ -1,4 +1,4 @@
-import { reactive, computed } from 'vue';
+import { reactive, computed, ref } from 'vue';
 import { defineStore } from 'pinia';
 import router from '@/router';
 import axios from '@/services/httpRequester';
@@ -53,7 +53,7 @@ export const useAuthenticationStore = defineStore(
     };
 
     const setPoint = (point) => {
-      state.signedUser.point = point;
+      state.signedUser.point = Number(point) || 0;
     };
     const setXp = (xp) => {
       state.signedUser.xp = xp;
@@ -64,6 +64,21 @@ export const useAuthenticationStore = defineStore(
 
     const setNickname = (nickname) => {
       state.signedUser.nickName = nickname;
+    };
+
+    // 서버에서 최신 포인트 불러오기 (홈/프로필 자동 동기화용)
+    const refreshPoint = async () => {
+      try {
+        const res = await PointRechargeService.getMyBalance();
+        const balance =
+          typeof res?.data === 'number'
+            ? res.data
+            : Number(res?.data ?? state.signedUser.point);
+        state.signedUser.point = balance;
+        console.log('[auth.refreshPoint] 최신 포인트 반영:', balance);
+      } catch (err) {
+        console.error('[auth.refreshPoint] 포인트 불러오기 실패', err);
+      }
     };
 
     // 온보딩 완료
@@ -130,6 +145,7 @@ export const useAuthenticationStore = defineStore(
       setNickname,
       completeOnboarding,
       needsOnboarding,
+      refreshPoint,
     };
   },
   { persist: true }

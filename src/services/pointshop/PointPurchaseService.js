@@ -55,10 +55,10 @@ const PointPurchaseService = {
       return {
         success: false,
         message: err.response?.data?.message || '구매 이력 불러오기 실패',
-        data: [],
+        data: null, // null 반환: 기존 리스트 유지용
       };
     }
-  },
+  }
 };
 
 export default PointPurchaseService;

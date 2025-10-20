@@ -72,8 +72,8 @@ const PointRechargeService = {
       const res = await axios.get('/pointshop/recharge/balance');
       return {
         success: true,
-        message: '포인트 잔액 조회 성공',
-        data: res.data?.data ?? res.data ?? 0,
+        message: res.data?.message || '포인트 잔액 조회 성공',
+        data: res.data?.data ?? 0,
       };
     } catch (err) {
       console.error('[PointRechargeService] 포인트 잔액 조회 실패:', err);

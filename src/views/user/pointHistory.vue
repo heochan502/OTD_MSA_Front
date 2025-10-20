@@ -4,6 +4,7 @@ import { getPointHistory } from '@/services/user/userService';
 import { getSelectedAll } from '@/services/user/userService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { useRouter } from 'vue-router';
+import PointPurchaseService from '@/services/pointshop/PointPurchaseService';
 
 const authStore = useAuthenticationStore();
 const pointHistory = ref([]);
@@ -44,12 +45,25 @@ const fetchData = async () => {
       dailyMission.value = result.dailyMission || [];
     
     } else if (missionResponse.data.missionComplete) {
- 
+
       missionComplete.value = missionResponse.data.missionComplete || [];
       dailyMission.value = missionResponse.data.dailyMission || [];
-      
     }
-  
+
+    // 포인트샵 구매 내역 추가
+    const purchaseResponse = await PointPurchaseService.getUserPurchaseHistory();
+    if (purchaseResponse?.success) {
+      const purchaseData = purchaseResponse.data || [];
+      purchaseData.forEach((p) => {
+        pointHistory.value.push({
+          type: 'purchase',
+          reason: `🛒 포인트샵 구매: ${p.pointItemName}`,
+          point: -Math.abs(p.pointScore || 0), // 마이너스 처리
+          createdAt: p.purchaseAt || new Date(),
+          id: `purchase-${p.pointId}-${p.purchaseAt}`,
+        });
+      });
+    }
     
     // 실제 데이터 내용 확인
     if (missionComplete.value.length > 0) {
@@ -81,11 +95,11 @@ const allHistory = computed(() => {
   // 포인트 히스토리 추가 (전체)
   pointHistory.value.forEach(item => {
     combined.push({
-      type: 'point',
+      type: item.type || 'point',
       reason: item.reason,
       point: item.point,
       createdAt: item.createdAt,
-      id: `point-${item.chId}`
+      id: item.id || `point-${item.chId}`,
     });
   });
   
@@ -276,7 +290,7 @@ const goBack = () => {
             class="point" 
             :class="item.point > 0 ? 'positive' : 'negative'"
           >
-            {{ item.point > 0 ? '+' : '' }}{{ item.point }}P
+            {{ item.point > 0 ? '+' : '' }}{{ item.point.toLocaleString('ko-KR') }}P
           </span>
         </li>
       </ul>

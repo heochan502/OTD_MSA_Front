@@ -33,15 +33,8 @@ const buttonLabel = computed(() => {
 });
 
 // 클릭 시 구매 또는 포인트 부족 처리
-const handleClick = () => {
-  const itemPrice = getItemPrice(props.item.pointScore);
-  if (props.userPoints < itemPrice) {
-    if (confirm('포인트가 부족합니다. 챌린지 페이지로 이동할까요?')) {
-      router.push('/challenge');
-    }
-    return;
-  }
-  props.onPurchase(props.item);
+const handleClick = async () => {
+  await props.onPurchase(props.item);
 };
 
 // 이미지 경로
@@ -72,9 +65,10 @@ const imageSrc = computed(() => {
       </p>
 
       <button
+        type="button"
         class="b-button"
         :disabled="isDisabled"
-        @click="handleClick"
+        @click.stop="handleClick"
         :class="{
           insufficient:
             userPoints < getItemPrice(item.pointScore) && !isPurchased(item.pointId),

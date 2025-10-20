@@ -245,6 +245,20 @@ const fetchRecentHistory = async () => {
       }
     });
 
+    // 포인트 구매 이력
+    const { default: PointPurchaseService } = await import('@/services/pointshop/PointPurchaseService');
+    const purchaseRes = await PointPurchaseService.getUserPurchaseHistory();
+    const purchaseList = purchaseRes?.data ?? [];
+    purchaseList.forEach((p) => {
+      combined.push({
+        type: 'purchase',
+        reason: `🛒 ${p.pointItemName}`,
+        point: -Math.abs(p.pointScore), // 음수 처리
+        createdAt: p.purchaseAt,
+        id: `purchase-${p.purchaseId}`,
+      });
+    });
+
     // 최신순 정렬 후 최근 2개만
     recentHistory.value = combined
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -313,7 +327,8 @@ const logoutAccount = async () => {
 };
 
 const formatPoint = (point) => {
-  return point?.toLocaleString() || '0';
+  const num = Number(point) || 0; // ← 문자열 → 숫자 변환
+  return num.toLocaleString('ko-KR');
 };
 
 onMounted(() => {
@@ -386,7 +401,7 @@ onMounted(() => {
                 class="history-points"
                 :class="item.point > 0 ? 'positive' : 'negative'"
               >
-                {{ item.point > 0 ? '+' : '' }}{{ item.point }}P
+                  {{ item.point > 0 ? '+' : '' }}{{ item.point.toLocaleString('ko-KR') }}P
               </div>
               <div class="history-date">{{ formatDate(item.createdAt) }}</div>
             </div>
