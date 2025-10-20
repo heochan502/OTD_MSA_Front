@@ -115,6 +115,7 @@ const formatType = (type) => {
 
 onMounted(async () => {
   const res = await getChallenge();
+  console.log('challengeres', res.data);
   setIdType(res.data);
   console.log('challenge', challenges.value);
   setChallengeUnit(res.data);

@@ -59,6 +59,8 @@ onMounted(async () => {
   console.log('res.user', resUser.data);
   const resExercise = await getUserExerciseRecord(userId);
   const resMeal = await getUserMealRecord(userId);
+  console.log('meal', resMeal.data);
+  console.log('exercise', resExercise.data);
   state.challengeHistory = resUser.data.challengeProgress;
   state.pointHistory = resUser.data.challengePointHistory;
   state.exerciseHistory = resExercise.data;
@@ -217,6 +219,7 @@ const openMealDialog = async (meal) => {
   };
   const res = await getUserMealDetail(params);
   selectedMeal.value = res?.data || [];
+  console.log('detail', res.data);
   mealDetailDialog.value = true;
 };
 </script>

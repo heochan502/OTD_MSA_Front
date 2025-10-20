@@ -12,14 +12,13 @@ const qna = ref([]);
 
 const search = ref('');
 
-
 const headers = [
-  { title: 'ID', key: 'id' , align: 'center' },
-  { title: '제목', key: 'subject' , align: 'center' },
-  { title: '작성자', key: 'senderName' , align: 'center' },
-  { title: '이메일', key: 'senderEmail' , align: 'center' },
-  { title: '작성일', key: 'createdAt', align: 'center'  },
-  { title: '상태', key: 'status' , align: 'center' },
+  { title: 'ID', key: 'id', align: 'center' },
+  { title: '제목', key: 'subject', align: 'center' },
+  { title: '작성자', key: 'senderName', align: 'center' },
+  { title: '이메일', key: 'senderEmail', align: 'center' },
+  { title: '작성일', key: 'createdAt', align: 'center' },
+  { title: '상태', key: 'status', align: 'center' },
 ];
 
 const rowProps = ({ item }) => ({
@@ -34,7 +33,6 @@ const toQnaDetail = (item) => {
   router.push({ path: '/admin/qna/detail' });
 };
 
-
 onMounted(async () => {
   const res = await getQna();
   console.log('qna', res.data);
@@ -44,7 +42,6 @@ onMounted(async () => {
 const reversedQna = computed(() => {
   return [...qna.value].reverse();
 });
-
 
 const formatDate = (dateStr) => {
   const d = new Date(dateStr);
@@ -144,4 +141,15 @@ const formatDate = (dateStr) => {
   }
 }
 
+/* 정렬 아이콘 항상 보이게 */
+.styled-table :deep(.v-data-table__th .v-icon) {
+  opacity: 1 !important; /* 항상 표시 */
+  color: #bbb !important; /* 기본은 연한 회색으로 */
+  transition: color 0.2s ease;
+}
+
+/* 활성 정렬 컬럼 아이콘 강조 */
+.styled-table :deep(.v-data-table__th--sorted .v-icon) {
+  color: #5ee6eb !important; /* 활성 정렬 컬럼만 민트 */
+}
 </style>

@@ -17,7 +17,7 @@ const headers = [
 onMounted(async () => {
   const res = await getPointHistory();
   pointHistory.value = res.data || [];
-  console.log('raw:', pointHistory.value.slice(0, 3));
+  console.log('raw:', pointHistory.value);
 });
 
 const formatNumber = (n) => String(n).padStart(2, '0');
