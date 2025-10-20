@@ -32,8 +32,6 @@ onMounted(async () => {
   const res2 = await getPurchaseList();
   console.log('res2', res2);
   purchaseList.value = res2.data || [];
-
-  console.log('raw:', pointHistory.value.slice(0, 3));
 });
 
 const formatNumber = (n) => String(n).padStart(2, '0');

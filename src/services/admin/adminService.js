@@ -107,15 +107,15 @@ export const getSignInCount = () => {
 
 // 문의 관리 페이지
 export const getQna = () => {
-  return axios.get(`${BASE_URL}/qna`).catch((e) => e.response);
+  return axios.get(`${BASE_URL}/inquiry`).catch((e) => e.response);
 };
 
 export const getQnaDetail = (inquiryId) => {
-  return axios.get(`${BASE_URL}/qna/${inquiryId}`).catch((e) => e.response);
+  return axios.get(`${BASE_URL}/inquiry/${inquiryId}`).catch((e) => e.response);
 };
 
 export const putQna = (params) => {
-  return axios.put(`${BASE_URL}/qna/modify`, params).catch((e) => e.response);
+  return axios.put(`${BASE_URL}/inquiry/modify`, params).catch((e) => e.response);
 };
 
 // life 서버

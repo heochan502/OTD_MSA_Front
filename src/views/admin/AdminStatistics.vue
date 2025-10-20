@@ -143,6 +143,7 @@ const makeLineOption = (unit = '') => ({
 // 데이터 로드 함수
 const getUser = async () => {
   const res = await getUserStatistics();
+  console.log('user', res.data)
   const genderData = res.data.genderCount || [];
   const male = Number(genderData.find((g) => g.gender === 'M')?.count ?? 0);
   const female = Number(genderData.find((g) => g.gender === 'F')?.count ?? 0);
@@ -186,6 +187,7 @@ const getUser = async () => {
 
 const getChallenge = async () => {
   const res = await getChallengeStatistics();
+  console.log('challenge', res.data)
   const tierData = res.data.tierCount || [];
   state.tierChartData = {
     labels: tierData.map((d) => d.tier),
@@ -228,6 +230,7 @@ const getChallenge = async () => {
 
 const getCommunity = async () => {
   const res = await getCommunityStatistics();
+  console.log('community', res.data)
   const postData = res.data.postCount || [];
   state.postChartData = {
     labels: postData.map((d) => d.month),
@@ -255,6 +258,7 @@ const getCommunity = async () => {
 
 const getExercise = async () => {
   const res = await getExerciseStatistics();
+  console.log('exercise', res.data)
   const monthData = res.data.exerciseRecordCountResList || [];
   state.exerciseRecordChartData = {
     labels: monthData.map((d) => d.month),
@@ -293,6 +297,7 @@ const getExercise = async () => {
 
 const getMeal = async () => {
   const res = await getMealStatistics();
+  console.log('meal', res.data)
   const mealTrend = res.data.mealRecordCount || [];
   state.mealRecordChartData = {
     labels: mealTrend.map((d) => d.month),
@@ -324,6 +329,7 @@ const getMeal = async () => {
 
 const getInquiry = async () => {
   const res = await getInquiryStatistics();
+  console.log('inquiry', res.data)
   const inquiryCount = res.data.inquiryCount || [];
   state.inquiryCountData = {
     labels: inquiryCount.map((d) => d.month),
