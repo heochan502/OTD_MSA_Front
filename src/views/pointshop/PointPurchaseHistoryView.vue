@@ -1,39 +1,35 @@
 <script setup>
-import { onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { usePointshop } from '@/components/pointshop/usePointshop.js';
+import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { usePointshop } from '@/components/pointshop/usePointshop.js'
 
-const router = useRouter();
-
+const router = useRouter()
 const {
   userPoints,
   purchasedItems,
   isLoading,
   fetchUserPoints,
   fetchPurchasedItems,
-} = usePointshop();
+} = usePointshop()
 
-// 날짜 포맷 변환
+// 날짜 포맷 공통 함수
 const formatDate = (dateStr) => {
-  if (!dateStr) return '-';
-  const date = new Date(dateStr);
-  return date.toLocaleString('ko-KR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
+  if (!dateStr) return '-'
+  const d = new Date(dateStr)
+  const pad = (n) => n.toString().padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(
+    d.getHours()
+  )}:${pad(d.getMinutes())}`
+}
 
 onMounted(async () => {
-  await Promise.all([fetchUserPoints(), fetchPurchasedItems()]);
-});
+  await Promise.allSettled([fetchUserPoints(), fetchPurchasedItems()])
+})
 </script>
 
 <template>
-  <div class="purchase-history-container">
-    <h2 class="page-title">구매 내역</h2>
+  <div class="history-container">
+    <h2 class="page-title">🛒 구매 내역</h2>
 
     <!-- 현재 포인트 표시 -->
     <div class="user-balance">
@@ -41,73 +37,71 @@ onMounted(async () => {
       <strong>{{ userPoints.toLocaleString() }} P</strong>
     </div>
 
-    <!-- 로딩 상태 -->
+    <!-- 로딩 -->
     <div v-if="isLoading" class="loading">로딩 중...</div>
 
-    <!-- 구매 내역 리스트 -->
-    <div v-else>
-      <table v-if="purchasedItems.length > 0" class="history-table">
-        <thead>
-          <tr>
-            <th>상품명</th>
-            <th>가격</th>
-            <th>구매일시</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(item, i) in purchasedItems" :key="i">
-            <td class="item-name">
-            <img v-if="item.imageUrl" :src="item.imageUrl" alt="상품 이미지" class="item-image" />
+    <!-- 구매 내역 -->
+    <table v-else-if="purchasedItems.length > 0" class="history-table">
+      <thead>
+        <tr>
+          <th>상품명</th>
+          <th>가격</th>
+          <th>구매일시</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="item in purchasedItems" :key="item.pointId">
+          <td class="item-name">
+            <img
+              v-if="item.imageUrl"
+              :src="item.imageUrl"
+              alt="상품 이미지"
+              class="item-image"
+            />
             {{ item.name || item.pointItemName }}
           </td>
           <td>{{ (item.price || item.pointPrice || 0).toLocaleString() }} P</td>
           <td>{{ formatDate(item.purchaseAt || item.createdAt) }}</td>
-          </tr>
-        </tbody>
-      </table>
+        </tr>
+      </tbody>
+    </table>
 
-      <div v-else class="empty">
-        <p>아직 구매한 상품이 없습니다.</p>
-        <button class="go-shop-btn" @click="router.push('/pointshop')">
-          포인트샵으로 이동 →
-        </button>
-      </div>
+    <!-- 비어 있을 때 -->
+    <div v-else class="empty">
+      <p>아직 구매한 상품이 없습니다.</p>
+      <button class="go-shop-btn" @click="router.push('/pointshop')">
+        포인트샵으로 이동 →
+      </button>
     </div>
   </div>
 </template>
 
-<script>
-function formatDate(dateString) {
-  if (!dateString) return '-';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('ko-KR', {
-    year: 'numeric', month: 'short', day: 'numeric',
-    hour: '2-digit', minute: '2-digit'
-  });
-}
-</script>
-
 <style scoped>
-.purchase-history-container {
+.history-container {
   max-width: 900px;
   margin: 0 auto;
   padding: 24px;
+  background: #fafafa;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 .page-title {
   text-align: center;
   font-size: 1.8rem;
   font-weight: bold;
   margin-bottom: 24px;
+  color: #222;
 }
 .user-balance {
   text-align: right;
   margin-bottom: 16px;
   font-size: 1.1rem;
+  color: #333;
 }
 .loading {
   text-align: center;
   padding: 40px;
-  color: #555;
+  color: #777;
 }
 .history-table {
   width: 100%;
@@ -115,21 +109,21 @@ function formatDate(dateString) {
   background: #fff;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
-.history-table th {
+th {
   background-color: var(--color-primary, #0078ff);
   color: #fff;
   padding: 12px;
   text-align: left;
   font-size: 0.95rem;
 }
-.history-table td {
+td {
   padding: 10px 12px;
   border-bottom: 1px solid #eee;
   font-size: 0.9rem;
 }
-.history-table tr:hover td {
+tr:hover td {
   background: #f9f9f9;
 }
 .item-name {

@@ -272,6 +272,58 @@ const fetchRecentHistory = async () => {
   }
 };
 
+// 내가 구매한 아이템 목록
+    const purchasedItems = ref([]);
+    const loadingPurchased = ref(true);
+
+    const fetchPurchasedItems = async () => {
+      try {
+        loadingPurchased.value = true;
+        const { default: PointPurchaseService } = await import('@/services/pointshop/PointPurchaseService');
+        const res = await PointPurchaseService.getUserPurchaseHistory();
+        purchasedItems.value = res?.data ?? [];
+      } catch (e) {
+        console.error('[ProfileView] 구매 내역 조회 실패:', e);
+        purchasedItems.value = [];
+      } finally {
+        loadingPurchased.value = false;
+      }
+    };
+
+  // 프론트의 모든 pointshop 이미지를 한 번에 import
+const localImages = import.meta.glob('@/assets/img/pointshop/*.{png,jpg,jpeg}', {
+  eager: true,
+  import: 'default'
+});
+
+// 서버 + 로컬 + 기본 이미지 순으로 처리
+const getItemImage = (name) => {
+  if (!name) {
+    return localImages['/src/assets/img/pointshop/default.png'] ||
+           localImages['/assets/img/pointshop/default.png'];
+  }
+  if (name.startsWith('http') || name.startsWith('/')) {
+    return name;
+  }
+  return `http://localhost:8080/api/OTD/pointshop/image/${name}`;
+};
+
+// 에러 발생 시 fallback
+const handleImageError = (e, name) => {
+  const candidates = [
+    `/src/assets/img/pointshop/${name}`,
+    `/assets/img/pointshop/${name}`,
+    `/src/assets/img/pointshop/default.png`,
+    `/assets/img/pointshop/default.png`
+  ];
+  for (const path of candidates) {
+    if (localImages[path]) {
+      e.target.src = localImages[path];
+      return;
+    }
+  }
+};
+
 const formatPointReason = (reason) => {
   if (!reason) return '';
 
@@ -333,6 +385,7 @@ const formatPoint = (point) => {
 
 onMounted(() => {
   fetchRecentHistory();
+  fetchPurchasedItems();
 });
 </script>
 
@@ -416,6 +469,48 @@ onMounted(() => {
         </router-link>
       </div>
     </div>
+
+    <!-- 내가 구매한 아이템 섹션 -->
+<div class="purchased-section">
+  <h3 class="section-title">내가 구매한 아이템</h3>
+
+  <!-- 로딩 중 -->
+  <div v-if="loadingPurchased" class="loading-message">로딩 중...</div>
+
+  <!-- 아이템 목록 -->
+  <div v-else-if="purchasedItems.length > 0" class="purchased-list">
+    <div
+      v-for="item in purchasedItems.slice(0, 4)"
+      :key="item.purchaseId"
+      class="purchased-item"
+    >
+      <img
+        :src="getItemImage(item.imageUrl || item.images?.[0]?.imageUrl)"
+        @error="(e) => handleImageError(e, item.imageUrl || item.images?.[0]?.imageUrl)"
+        alt="item"
+        class="purchased-img"
+      />
+
+      <div class="purchased-info">
+        <h4 class="purchased-name">{{ item.pointItemName }}</h4>
+        <p class="purchased-point">-{{ item.pointScore.toLocaleString() }}P</p>
+        <p class="purchased-date">{{ formatDate(item.purchaseAt) }}</p>
+      </div>
+    </div>
+
+    <!-- 더보기 버튼 -->
+    <router-link
+      v-if="purchasedItems.length > 4"
+      to="/purchase-history"
+      class="view-all-link"
+    >
+      모든 구매 내역 보기 →
+    </router-link>
+  </div>
+
+  <!-- 아이템이 없을 때 -->
+  <div v-else class="no-history">아직 구매한 아이템이 없습니다.</div>
+</div>
 
     <!-- 고객센터 섹션 -->
     <div class="support-section">
@@ -911,6 +1006,75 @@ onMounted(() => {
         text-decoration: underline;
       }
     }
+  }
+}
+
+// 내가 구매한 아이템 목록
+.purchased-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 16px;
+  border: 1px solid #eee;
+
+  .purchased-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .purchased-item {
+    flex: 1 1 45%;
+    display: flex;
+    align-items: center;
+    background: white;
+    border-radius: 12px;
+    padding: 12px;
+    gap: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: translateY(-3px);
+    }
+
+    .purchased-img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #eee;
+    }
+
+    .purchased-info {
+      flex: 1;
+
+      .purchased-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 4px;
+      }
+
+      .purchased-point {
+        color: #d32f2f;
+        font-weight: 600;
+        margin-bottom: 2px;
+      }
+
+      .purchased-date {
+        font-size: 12px;
+        color: #888;
+      }
+    }
+  }
+
+  .loading-message,
+  .no-history {
+    text-align: center;
+    padding: 20px;
+    color: #999;
+    font-size: 14px;
   }
 }
 

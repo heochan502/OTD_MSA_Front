@@ -45,6 +45,7 @@ import PointRechargeHistoryView from '@/views/pointshop/PointRechargeHistoryView
 import PointDashboardView from '@/views/pointshop/PointDashboardView.vue';
 import AdminPointDashboardView from '@/views/pointshop/AdminPointDashboardView.vue';
 import AdminPointChargeView from '@/views/pointshop/AdminPointChargeView.vue';
+import AdminPointCategoryView from '@/views/pointshop/AdminPointCategoryView.vue';
 
 //식단
 import MealMainView from '@/views/meal/MealMainView.vue';
@@ -316,13 +317,19 @@ const router = createRouter({
       path: '/admin/pointshop/dashboard',
       name: 'AdminPointDashboard',
       component: () => import('@/views/pointshop/AdminPointDashboardView.vue'),
-      meta: { headerType: 'title', title: '포인트샵 통계 대시보드',  requiresAdmin: true },
+      meta: { requiresAuth: true, requiresAdmin: true },
     },
     {
       path: '/admin/pointshop/charge',
       name: 'AdminPointCharge',
       component: () => import('@/views/pointshop/AdminPointChargeView.vue'),
       meta: { headerType: 'title', title: '포인트 충전 (관리자)', requiresAdmin: true},
+    },
+    {
+      path: '/admin/pointshop/category',
+      name: 'AdminPointCategory',
+      component: () => import('@/views/pointshop/AdminPointCategoryView.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true },
     },
     {
       path: '/meal',
