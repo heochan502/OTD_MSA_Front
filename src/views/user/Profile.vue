@@ -290,39 +290,40 @@ const fetchRecentHistory = async () => {
       }
     };
 
-  // 프론트의 모든 pointshop 이미지를 한 번에 import
-const localImages = import.meta.glob('@/assets/img/pointshop/*.{png,jpg,jpeg}', {
+// 프론트의 모든 pointshop 이미지를 한 번에 import
+const localImages = import.meta.glob('/src/assets/img/pointshop/*.{png,jpg,jpeg}', {
   eager: true,
   import: 'default'
 });
 
 // 서버 + 로컬 + 기본 이미지 순으로 처리
 const getItemImage = (name) => {
-  if (!name) {
-    return localImages['/src/assets/img/pointshop/default.png'] ||
-           localImages['/assets/img/pointshop/default.png'];
-  }
-  if (name.startsWith('http') || name.startsWith('/')) {
-    return name;
-  }
-  return `http://localhost:8080/api/OTD/pointshop/image/${name}`;
+  if (!name) return localImages['/src/assets/img/pointshop/default.png'];
+
+  // 외부(서버) URL인 경우 그대로 반환
+  if (name.startsWith('http')) return name;
+
+  // 파일명만 전달될 경우 (예: "item_01_starbucks_4700.png")
+  const cleanName = name.split('/').pop()?.trim();
+
+  // 로컬 매칭 시도
+  const localMatch = localImages[`/src/assets/img/pointshop/${cleanName}`];
+  if (localMatch) return localMatch;
+
+  // 서버 이미지 시도
+  return `${BASE_URL}/api/OTD/pointshop/image/${cleanName}`;
 };
 
-// 에러 발생 시 fallback
+// 이미지 로드 실패 시 대체 처리
 const handleImageError = (e, name) => {
-  const candidates = [
-    `/src/assets/img/pointshop/${name}`,
-    `/assets/img/pointshop/${name}`,
-    `/src/assets/img/pointshop/default.png`,
-    `/assets/img/pointshop/default.png`
-  ];
-  for (const path of candidates) {
-    if (localImages[path]) {
-      e.target.src = localImages[path];
-      return;
-    }
-  }
+  const cleanName = name?.split('/').pop()?.trim();
+  e.target.src =
+    localImages[`/src/assets/img/pointshop/${cleanName}`] ||
+    localImages['/src/assets/img/pointshop/default.png'];
 };
+
+// 디버깅용 로그
+console.log('로컬 이미지 목록:', Object.keys(localImages));
 
 const formatPointReason = (reason) => {
   if (!reason) return '';
@@ -470,7 +471,7 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- 내가 구매한 아이템 섹션 -->
+<!-- 내가 구매한 아이템 섹션 -->
 <div class="purchased-section">
   <h3 class="section-title">내가 구매한 아이템</h3>
 
@@ -490,23 +491,21 @@ onMounted(() => {
         alt="item"
         class="purchased-img"
       />
-
       <div class="purchased-info">
         <h4 class="purchased-name">{{ item.pointItemName }}</h4>
         <p class="purchased-point">-{{ item.pointScore.toLocaleString() }}P</p>
         <p class="purchased-date">{{ formatDate(item.purchaseAt) }}</p>
       </div>
     </div>
-
-    <!-- 더보기 버튼 -->
-    <router-link
-      v-if="purchasedItems.length > 4"
-      to="/purchase-history"
-      class="view-all-link"
-    >
-      모든 구매 내역 보기 →
-    </router-link>
   </div>
+
+  <!-- 더보기 버튼 -->
+  <router-link
+    v-if="purchasedItems.length > 4"
+    to="/pointshop/purchase-history"
+    class="view-all-link">
+    모든 구매 내역 보기 →
+  </router-link>
 
   <!-- 아이템이 없을 때 -->
   <div v-else class="no-history">아직 구매한 아이템이 없습니다.</div>
@@ -1068,6 +1067,21 @@ onMounted(() => {
       }
     }
   }
+
+  .view-all-link {
+      display: block;
+      text-align: center;
+      width: 100%;
+      margin-top: 16px;
+      color: #f57c00;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s ease;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
 
   .loading-message,
   .no-history {

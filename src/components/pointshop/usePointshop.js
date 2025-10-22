@@ -20,7 +20,17 @@ export function usePointshop() {
   const refreshUserPoint = async () => {
     try {
       const res = await PointRechargeService.getMyBalance();
-      const balance = res?.data?.point ?? res?.data ?? 0;
+      
+       // 다양한 백엔드 응답 형식 대응
+      const balance =
+      typeof res?.data === 'number'
+        ? res.data
+        : typeof res?.data?.data === 'number'
+        ? res.data.data
+        : typeof res?.data?.data?.point === 'number'
+        ? res.data.data.point
+        : res?.data?.point ?? 0;
+
       userPoints.value = Number(balance);
       auth.setPoint(Number(balance));
     } catch (err) {
@@ -65,11 +75,20 @@ export function usePointshop() {
     setLoading(true);
     try {
       const res = await PointPurchaseService.getUserPurchaseHistory();
-      if (res?.success && Array.isArray(res.data)) {
-        purchasedItems.value = res.data.sort(
-          (a, b) => new Date(b.purchaseAt) - new Date(a.purchaseAt)
-        );
-      }
+      const data =
+        Array.isArray(res?.data?.data)
+          ? res.data.data
+          : Array.isArray(res?.data)
+          ? res.data
+          : Array.isArray(res)
+          ? res
+          : [];
+
+      purchasedItems.value = data.sort((a, b) => {
+        const dateA = new Date(a.purchaseAt || a.createdAt || a.purchaseTime);
+        const dateB = new Date(b.purchaseAt || b.createdAt || b.purchaseTime);
+        return dateB - dateA;
+      });
     } catch (err) {
       console.error('[usePointshop] 구매 내역 조회 실패:', err);
     } finally {
@@ -140,8 +159,18 @@ export function usePointshop() {
     ]);
   };
 
-  // 중복 호출 제거
-  initialize();
+  // 구매 내역 초기화 (포인트 > 구매내역 순서)
+  const initializePurchaseHistory = async () => {
+  setLoading(true);
+  try {
+    await fetchUserPoints();
+    await fetchPurchasedItems();
+  } catch (err) {
+    console.error('[usePointshop] 구매내역 초기화 실패:', err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return {
     // 상태
@@ -159,5 +188,6 @@ export function usePointshop() {
     isPurchased,
     refreshUserPoint,
     initialize,
+    initializePurchaseHistory
   };
 }

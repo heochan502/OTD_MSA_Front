@@ -15,6 +15,7 @@ const {
   fetchPurchasedItems,
   purchaseItem,
   isPurchased,
+  initialize,
 } = usePointshop();
 
 // 프로필 이동
@@ -53,8 +54,8 @@ const categoryOptions = ref([{ value: 'all', label: '전체' }]);
 
 // 초기 로딩
 onMounted(async () => {
-  await Promise.all([fetchUserPoints(), fetchAllItems(), fetchPurchasedItems()]);
-  await loadCategories();
+  await initialize();  // 포인트, 아이템, 구매내역을 한 번에 불러옴
+  await loadCategories(); // 카테고리만 별도 로드
 });
 
 // 카테고리 로드
@@ -168,6 +169,7 @@ const handlePurchase = async (item) => {
 
   try {
     await purchaseItem(item);
+    await fetchUserPoints();
   } catch (err) {
     console.error('[handlePurchase] 구매 실패:', err);
     alert('구매 처리 중 오류가 발생했습니다.');

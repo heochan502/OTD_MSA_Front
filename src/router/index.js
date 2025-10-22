@@ -303,13 +303,13 @@ const router = createRouter({
     },
     {
       path: '/pointshop/purchase-history',
-      name: 'PointPurchaseHistory',
+      name: 'PurchaseHistory',
       component: PointPurchaseHistoryView,
       meta: { headerType: 'title', title: '구매 내역', showUserPanel: false },
     },
     {
       path: '/pointshop/recharge-history',
-      name: 'PointRechargeHistory',
+      name: 'RechargeHistory',
       component: PointRechargeHistoryView,
       meta: { headerType: 'title', title: '충전 내역', showUserPanel: false },
     },
