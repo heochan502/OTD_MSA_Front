@@ -32,7 +32,10 @@ watch(userPoints, (newVal, oldVal) => {
 const currentPage = ref(1)
 const itemsPerPage = 10
 
-const totalPages = computed(() => Math.ceil(purchasedItems.value.length / itemsPerPage))
+const totalPages = computed(() =>
+  Math.ceil(purchasedItems.value.length / itemsPerPage)
+)
+
 const paginatedItems = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage
   const end = start + itemsPerPage
@@ -51,7 +54,8 @@ const pageNumbers = computed(() => {
   const current = currentPage.value
   if (total <= 5) return Array.from({ length: total }, (_, i) => i + 1)
   if (current <= 3) return [1, 2, 3, 4, 5]
-  if (current >= total - 2) return [total - 4, total - 3, total - 2, total - 1, total]
+  if (current >= total - 2)
+    return [total - 4, total - 3, total - 2, total - 1, total]
   return [current - 2, current - 1, current, current + 1, current + 2]
 })
 
@@ -60,11 +64,17 @@ const formatDate = (dateStr) => {
   if (!dateStr) return '-'
   const d = new Date(dateStr)
   const pad = (n) => n.toString().padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(
-    d.getHours()
-  )}:${pad(d.getMinutes())}`
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
+    d.getDate()
+  )} ${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
+// 아이템 클릭 시 상세페이지 이동
+const goToDetail = (item) => {
+  router.push(`/pointshop/purchase-history/detail/${item.purchaseId}`)
+}
+
+// 초기화
 onMounted(async () => {
   await initializePurchaseHistory()
 })
@@ -72,7 +82,7 @@ onMounted(async () => {
 
 <template>
   <div class="history-container">
-    <h2 class="page-title">🛒 포인트샵 구매 내역</h2>
+    <h2 class="page-title">포인트샵 구매 내역</h2>
 
     <!-- 현재 포인트 -->
     <div class="user-balance" :class="{ loading: isLoading }">
@@ -94,7 +104,12 @@ onMounted(async () => {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="item in paginatedItems" :key="item.pointId">
+        <tr
+          v-for="item in paginatedItems"
+          :key="item.pointId"
+          class="clickable-row"
+          @click="goToDetail(item)"
+        >
           <td class="item-name">
             <img
               v-if="item.imageUrl"
@@ -113,7 +128,8 @@ onMounted(async () => {
                 item.point?.pointScore ||
                 0
               ).toLocaleString()
-            }} P
+            }}
+            P
           </td>
           <td>{{ formatDate(item.purchaseAt || item.createdAt) }}</td>
         </tr>
@@ -242,6 +258,13 @@ tr:hover td {
   height: 40px;
   object-fit: cover;
   border-radius: 6px;
+}
+.clickable-row {
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.clickable-row:hover {
+  background: #f0f8ff;
 }
 .pagination {
   display: flex;

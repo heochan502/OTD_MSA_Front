@@ -325,6 +325,11 @@ const handleImageError = (e, name) => {
 // 디버깅용 로그
 console.log('로컬 이미지 목록:', Object.keys(localImages));
 
+// 구매 상세 페이지 이동
+const goToPurchaseDetail = (purchaseId) => {
+  router.push(`/pointshop/purchase-history/detail/${purchaseId}`);
+};
+
 const formatPointReason = (reason) => {
   if (!reason) return '';
 
@@ -446,8 +451,9 @@ onMounted(() => {
         <div v-else-if="recentHistory.length > 0">
           <div
             v-for="item in recentHistory"
-            :key="item.id"
-            class="history-item"
+              :key="item.id"
+              class="history-item"
+              @click="item.type === 'purchase' && goToPurchaseDetail(item.id.split('-')[1])"
           >
             <div class="history-description">{{ item.reason }}</div>
             <div class="history-right">
@@ -484,10 +490,11 @@ onMounted(() => {
       v-for="item in purchasedItems.slice(0, 4)"
       :key="item.purchaseId"
       class="purchased-item"
+      @click="goToPurchaseDetail(item.purchaseId)"
     >
       <img
-        :src="getItemImage(item.imageUrl || item.images?.[0]?.imageUrl)"
-        @error="(e) => handleImageError(e, item.imageUrl || item.images?.[0]?.imageUrl)"
+        :src="getItemImage(item.pointItemImage)"
+        @error="(e) => handleImageError(e, item.pointItemImage)"
         alt="item"
         class="purchased-img"
       />
@@ -1032,9 +1039,12 @@ onMounted(() => {
     gap: 12px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
     transition: transform 0.2s ease;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 
     &:hover {
       transform: translateY(-3px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
     }
 
     .purchased-img {

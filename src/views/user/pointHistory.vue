@@ -36,73 +36,73 @@ const fetchData = async () => {
     
     // 일일 미션 완료 내역 조회
     const missionResponse = await getSelectedAll();
-    
     const result = missionResponse.data.result;
     
-    // 여러 가능성 체크
     if (result) {
       missionComplete.value = result.missionComplete || [];
       dailyMission.value = result.dailyMission || [];
-    
     } else if (missionResponse.data.missionComplete) {
-
       missionComplete.value = missionResponse.data.missionComplete || [];
       dailyMission.value = missionResponse.data.dailyMission || [];
     }
 
     // 포인트샵 구매 내역 추가
     const purchaseResponse = await PointPurchaseService.getUserPurchaseHistory();
-    if (purchaseResponse?.success) {
+    if (purchaseResponse?.success || purchaseResponse?.data) {
       const purchaseData = purchaseResponse.data || [];
       purchaseData.forEach((p) => {
         pointHistory.value.push({
           type: 'purchase',
           reason: `🛒 포인트샵 구매: ${p.pointItemName}`,
-          point: -Math.abs(p.pointScore || 0), // 마이너스 처리
+          point: -Math.abs(p.pointScore || 0),
           createdAt: p.purchaseAt || new Date(),
-          id: `purchase-${p.pointId}-${p.purchaseAt}`,
+          id: `purchase-${p.purchaseId}`,
+          purchaseId: p.purchaseId,
         });
       });
     }
-    
-    // 실제 데이터 내용 확인
-    if (missionComplete.value.length > 0) {
 
-    }
-    if (pointHistory.value.length > 0) {
-
-    }
-
-    
   } catch (err) {
     console.error('에러 발생:', err);
     console.error('에러 응답:', err.response?.data);
-    
-    if (err.response?.status === 401) {
-      error.value = '로그인이 필요합니다.';
-    } else {
-      error.value = '데이터를 불러오는데 실패했습니다.';
-    }
+    error.value =
+      err.response?.status === 401
+        ? '로그인이 필요합니다.'
+        : '데이터를 불러오는데 실패했습니다.';
   } finally {
     loading.value = false;
   }
 };
+
 // 모든 내역을 합쳐서 최신순 정렬 (전체 데이터)
 const allHistory = computed(() => {
   const combined = [];
 
-  
-  // 포인트 히스토리 추가 (전체)
-  pointHistory.value.forEach(item => {
+  // 포인트 히스토리 추가
+  pointHistory.value.forEach((item) => {
     combined.push({
       type: item.type || 'point',
       reason: item.reason,
       point: item.point,
       createdAt: item.createdAt,
       id: item.id || `point-${item.chId}`,
+      purchaseId: item.purchaseId || null,
     });
   });
-  
+
+  // 일일 미션 완료 내역 추가 (전체)
+  missionComplete.value.forEach((mission, index) => {
+    const missionDetail = dailyMission.value.find(m => String(m.cdId) === String(mission.cdId));
+    if (missionDetail) {
+      combined.push({
+        type: 'mission',
+        reason: missionDetail.cdName,
+        point: missionDetail.cdReward,
+        createdAt: mission.successDate,
+        id: `mission-${mission.cdId}-${mission.successDate}`
+      });
+    }
+  });
   
   // 일일 미션 완료 내역 추가 (전체)
   missionComplete.value.forEach((mission, index) => {
@@ -176,6 +176,13 @@ const pageNumbers = computed(() => {
   
   return pages;
 });
+
+// 
+const handleItemClick = (item) => {
+  if (item.type === 'purchase' && item.purchaseId) {
+    router.push(`/pointshop/purchase-history/detail/${item.purchaseId}`);
+  }
+};
 
 const formatDate = (dateString) => {
   if (!dateString) return '';
@@ -279,8 +286,10 @@ const goBack = () => {
             'mission-item': getReasonType(item) === 'mission',
             'rank-item': getReasonType(item).startsWith('rank'),
             'perfect-item': getReasonType(item) === 'perfect',
-            'attendance-item': getReasonType(item) === 'attendance'
+            'attendance-item': getReasonType(item) === 'attendance',
+            'clickable': item.type === 'purchase' && item.purchaseId
           }"
+          @click="handleItemClick(item)"
         >
           <div class="item-info">
             <span class="reason">{{ formatReason(item) }}</span>
@@ -337,7 +346,6 @@ const goBack = () => {
 </template>
 
 <style scoped>
-/* 기존 스타일 그대로 유지 */
 .challenge-point-container {
   max-width: 600px;
   margin: 0 auto;
@@ -551,4 +559,14 @@ const goBack = () => {
   background-color: #4b5563;
 }
 
+/* 포인트 클릭 가능한 항목 강조 */
+.history-item.clickable {
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.history-item.clickable:hover {
+  background-color: #eef6ff;
+  transform: translateY(-1px);
+}
 </style>

@@ -23,6 +23,11 @@ const goToProfile = () => {
   router.push('/user/profile');
 };
 
+// 상품 상세페이지 이동
+const goToPurchaseDetail = (purchaseId) => {
+  router.push(`/pointshop/purchase-history/detail/${purchaseId}`);
+};
+
 // 이미지 경로 변환 함수 (Vite 빌드 호환)
 const getItemImage = (name) => {
   if (!name) {
@@ -267,7 +272,12 @@ const handlePurchase = async (item) => {
       <p v-if="!purchasedItems?.length" class="empty">구매 내역이 없습니다.</p>
 
       <ul v-else class="history-list">
-        <li v-for="(h, idx) in purchasedItems" :key="idx" class="history-item">
+        <li
+          v-for="(h, idx) in purchasedItems"
+          :key="idx"
+          class="history-item clickable"
+          @click="goToPurchaseDetail(h.purchaseId)"
+        >
           <span class="item-name">{{ h.pointItemName }}</span>
           <span class="amount">-{{ Number(h.pointScore || 0).toLocaleString() }}P</span>
           <span class="date">
@@ -276,7 +286,7 @@ const handlePurchase = async (item) => {
                 const d = new Date(h.purchaseAt);
                 return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(
                   d.getDate()
-                ).padStart(2, '0')}\n${String(d.getHours()).padStart(2, '0')}:${String(
+                ).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(
                   d.getMinutes()
                 ).padStart(2, '0')}`;
               })()
@@ -286,6 +296,23 @@ const handlePurchase = async (item) => {
       </ul>
     </section>
   </div>
+
+  <ul class="purchase-list">
+  <li
+    v-for="purchase in purchases"
+    :key="purchase.purchaseId"
+    class="purchase-item clickable"
+    @click="goToPurchaseDetail(purchase.purchaseId)"
+  >
+    <div class="item-info">
+      <span class="item-name">{{ purchase.pointItemName }}</span>
+      <span class="item-date">{{ formatDate(purchase.purchaseAt) }}</span>
+    </div>
+    <div class="item-point">
+      <span class="negative">{{ '-' + purchase.pointScore.toLocaleString() }}P</span>
+    </div>
+  </li>
+</ul>
 </template>
 
 <style scoped>
@@ -477,5 +504,23 @@ button.out {
   color: #999;
   font-size: 0.85rem;
   padding: 14px 0;
+}
+
+/* 상세페이지 클릭 시 */
+.purchase-item.clickable {
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+.purchase-item.clickable:hover {
+  background-color: #eef6ff;
+  transform: translateY(-1px);
+}
+.history-item.clickable {
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+.history-item.clickable:hover {
+  background-color: #eef6ff;
+  transform: translateY(-1px);
 }
 </style>

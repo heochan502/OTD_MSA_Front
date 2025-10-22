@@ -308,6 +308,12 @@ const router = createRouter({
       meta: { headerType: 'title', title: '구매 내역', showUserPanel: false },
     },
     {
+      path: '/pointshop/purchase-history/detail/:id',
+      name: 'PointPurchaseDetail',
+      component: () => import('@/views/pointshop/PointPurchaseDetailView.vue'),
+      props: true
+    },
+    {
       path: '/pointshop/recharge-history',
       name: 'RechargeHistory',
       component: PointRechargeHistoryView,
