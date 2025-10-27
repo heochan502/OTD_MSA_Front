@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { ref, nextTick } from 'vue';
 import PointShopService from '@/services/pointshop/PointShopService';
 import PointPurchaseService from '@/services/pointshop/PointPurchaseService';
 import PointRechargeService from '@/services/pointshop/PointRechargeService';
@@ -15,6 +15,24 @@ export function usePointshop() {
 
   // 내부 로딩 컨트롤
   const setLoading = (state) => { isLoading.value = state; };
+
+    // 이미지 사전 로드 (Vite 정적 import로 안정화)
+  const imageModules = import.meta.glob('@/assets/img/pointshop/*', {
+    eager: true,
+    import: 'default',
+  });
+
+  const resolveImage = (fileName) => {
+    if (!fileName) return imageModules['/src/assets/img/pointshop/default.png'];
+
+    const exact = `/src/assets/img/pointshop/${fileName}`;
+    if (imageModules[exact]) return imageModules[exact];
+
+    const found = Object.entries(imageModules).find(([path]) =>
+      path.includes(fileName.replace(/\.[^/.]+$/, ''))
+    );
+    return found ? found[1] : imageModules['/src/assets/img/pointshop/default.png'];
+  };
 
   // 포인트 동기화
   const refreshUserPoint = async () => {
@@ -37,34 +55,52 @@ export function usePointshop() {
     }
   };
 
+  // [GET] 전체 포인트 아이템 목록 조회
+  const fetchAllItems = async () => {
+  setLoading(true);
+  try {
+    const list = await PointShopService.getAllItems();
+
+    allItems.value = Array.isArray(list) && list.length
+      ? list.map((item) => {
+          let category = item.category || '기타';
+          const name = item.pointItemName?.toLowerCase() || '';
+
+          // 이름 기반 카테고리 자동 분류
+          if (name.match(/커피|음료|아메리카노|스타벅스|몬스터/)) {
+            category = '커피/음료';
+          } else if (name.match(/맥도날드|맘스터치|버거/)) {
+            category = '패스트푸드';
+          } else if (name.match(/상품권|기프트|이마트|다이소/)) {
+            category = '상품권';
+          } else if (name.match(/파리바게뜨|베이커리|크리스피|도넛|배스킨/)) {
+            category = '디저트';
+          }
+
+          return {
+            ...item,
+            category,
+            imageUrl: resolveImage(
+              item.images?.[0]?.imageUrl ||
+              item.pointItemImage ||
+              'default.png'
+            ),
+          };
+        })
+      : getLocalDummyItems();
+  } catch (e) {
+    console.error('[usePointshop] 아이템 목록 조회 오류:', e);
+    allItems.value = getLocalDummyItems();
+  } finally {
+    setLoading(false);
+  }
+};
+
   // [GET] 내 포인트 조회
   const fetchUserPoints = async () => {
     setLoading(true);
     await refreshUserPoint();
     setLoading(false);
-  };
-
-  // [GET] 전체 포인트 아이템 목록 조회
-  const fetchAllItems = async () => {
-    setLoading(true);
-    try {
-      const list = await PointShopService.getAllItems();
-      allItems.value = Array.isArray(list) && list.length
-        ? list.map((item) => ({
-            ...item,
-            imageUrl: item.images?.length
-              ? new URL(`@/assets/img/pointshop/${item.images[0].imageUrl}`, import.meta.url).href
-              : item.pointItemImage
-              ? new URL(`@/assets/img/pointshop/${item.pointItemImage}`, import.meta.url).href
-              : new URL(`@/assets/img/pointshop/default.png`, import.meta.url).href,
-          }))
-        : getLocalDummyItems();
-    } catch (e) {
-      console.error('[usePointshop] 아이템 목록 조회 오류:', e);
-      allItems.value = getLocalDummyItems();
-    } finally {
-      setLoading(false);
-    }
   };
 
   // [GET] 구매 내역 조회
@@ -81,18 +117,12 @@ export function usePointshop() {
           ? res
           : [];
 
-      // ✅ 필드명 보정 및 정렬
       purchasedItems.value = data
         .map((p) => ({
           purchaseId: p.purchaseId ?? p.id ?? p.purchase_id ?? null,
           pointId: p.pointId ?? p.point_id ?? p.point?.pointId ?? null,
           pointItemName: p.pointItemName ?? p.point?.pointItemName ?? '상품명 없음',
-          pointItemImage:
-            p.pointItemImage ??
-            p.point?.pointItemImage ??
-            p.imageUrl ??
-            p.images?.[0]?.imageUrl ??
-            null,
+          pointItemImage: p.pointItemImage ?? p.point?.pointItemImage ?? p.imageUrl ?? p.images?.[0]?.imageUrl ?? null,
           purchaseAt: p.purchaseAt ?? p.purchaseTime ?? p.createdAt ?? new Date().toISOString(),
           pointScore: p.pointScore ?? p.point?.pointScore ?? 0,
         }))
@@ -131,35 +161,26 @@ export function usePointshop() {
     }
   };
 
-  // [CHECK] 구매 여부 확인
-  const isPurchased = (id) => purchasedItems.value.some((p) => p.pointId === id);
+  // [CHECK] 구매 여부 확인 — 항상 false (중복 구매 허용)
+  const isPurchased = () => false;
 
   // 로컬 더미 아이템
   const getLocalDummyItems = () => [
-    { pointId: 2, pointItemName: '스타벅스 아메리카노', pointScore: 4700,
-      imageUrl: new URL('../../assets/img/pointshop/item_01_starbucks_4700.png', import.meta.url).href },
-    { pointId: 3, pointItemName: '신세계 상품권', pointScore: 5000,
-      imageUrl: new URL('../../assets/img/pointshop/item_02_shinsegae_5000.png', import.meta.url).href },
-    { pointId: 4, pointItemName: '맥도날드 빅맥 세트', pointScore: 7400,
-      imageUrl: new URL('../../assets/img/pointshop/item_03_mcdonaldBickmac_7400.png', import.meta.url).href },
-    { pointId: 5, pointItemName: '몬스터 울트라 캔', pointScore: 2300,
-      imageUrl: new URL('../../assets/img/pointshop/item_04_monsterUltraCan_2300.png', import.meta.url).href },
-    { pointId: 6, pointItemName: '맘스터치 싸이순살세트', pointScore: 9900,
-      imageUrl: new URL('../../assets/img/pointshop/item_05_momstouchChicken_9900.png', import.meta.url).href },
-    { pointId: 7, pointItemName: '다이소 상품권', pointScore: 5000,
-      imageUrl: new URL('../../assets/img/pointshop/item_06_daiso_5000.png', import.meta.url).href },
-    { pointId: 8, pointItemName: '파리바게뜨 에그샐러드', pointScore: 7100,
-      imageUrl: new URL('../../assets/img/pointshop/item_07_parisChickenEggSalad_7100.png', import.meta.url).href },
-    { pointId: 9, pointItemName: '배스킨라빈스 아이스크림', pointScore: 7300,
-      imageUrl: new URL('../../assets/img/pointshop/item_08_baskinIcecream_7300.png', import.meta.url).href },
-    { pointId: 10, pointItemName: '크리스피도넛 오리지널', pointScore: 6200,
-      imageUrl: new URL('../../assets/img/pointshop/item_09_crispydonut_6200.png', import.meta.url).href },
-    { pointId: 11, pointItemName: '샌드위치 세트', pointScore: 7500,
-      imageUrl: new URL('../../assets/img/pointshop/item_10_sandwitch_7500.png', import.meta.url).href },
+    { pointId: 2, pointItemName: '스타벅스 아메리카노', pointScore: 4700, imageUrl: resolveImage('item_01_starbucks_4700.png') },
+    { pointId: 3, pointItemName: '신세계 상품권', pointScore: 5000, imageUrl: resolveImage('item_02_shinsegae_5000.png') },
+    { pointId: 4, pointItemName: '맥도날드 빅맥 세트', pointScore: 7400, imageUrl: resolveImage('item_03_mcdonaldBickmac_7400.png') },
+    { pointId: 5, pointItemName: '몬스터 울트라 캔', pointScore: 2300, imageUrl: resolveImage('item_04_monsterUltraCan_2300.png') },
+    { pointId: 6, pointItemName: '맘스터치 싸이순살세트', pointScore: 9900, imageUrl: resolveImage('item_05_momstouchChicken_9900.png') },
+    { pointId: 7, pointItemName: '다이소 상품권', pointScore: 5000, imageUrl: resolveImage('item_06_daiso_5000.png') },
+    { pointId: 8, pointItemName: '파리바게뜨 에그샐러드', pointScore: 7100, imageUrl: resolveImage('item_07_parisChickenEggSalad_7100.png') },
+    { pointId: 9, pointItemName: '배스킨라빈스 아이스크림', pointScore: 7300, imageUrl: resolveImage('item_08_baskinIcecream_7300.png') },
+    { pointId: 10, pointItemName: '크리스피도넛 오리지널', pointScore: 6200, imageUrl: resolveImage('item_09_crispydonut_6200.png') },
+    { pointId: 11, pointItemName: '샌드위치 세트', pointScore: 7500, imageUrl: resolveImage('item_10_sandwitch_7500.png') },
   ];
 
   // 초기 동기화
   const initialize = async () => {
+    await nextTick();
     await Promise.allSettled([
       fetchUserPoints(),
       fetchAllItems(),
@@ -194,15 +215,12 @@ export function usePointshop() {
     }
   };
 
-  return {
-    // 상태
+   return {
     userPoints,
     allItems,
     purchasedItems,
     isLoading,
     errorMessage,
-
-    // 메서드
     fetchUserPoints,
     fetchAllItems,
     fetchPurchasedItems,

@@ -8,59 +8,72 @@ const editMode = ref(false)
 const selectedCategory = ref(null)
 const loading = ref(false)
 
+// 카테고리 목록 불러오기
 const fetchCategories = async () => {
   loading.value = true
   try {
-    categories.value = await AdminPointCategoryService.getAllCategories()
-  } catch {
+    const list = await AdminPointCategoryService.getAllCategories()
+    categories.value = Array.isArray(list)
+      ? list.filter((c) => c.categoryName && c.categoryName !== '기타')
+      : []
+  } catch (e) {
+    console.error('[AdminPointCategoryView] 카테고리 목록 조회 실패:', e)
     alert('카테고리 목록 조회 실패')
   } finally {
     loading.value = false
   }
 }
 
+// 카테고리 등록
 const addCategory = async () => {
   if (!newCategoryName.value.trim()) return alert('카테고리명을 입력하세요.')
   try {
-    await AdminPointCategoryService.addCategory(newCategoryName.value)
+    await AdminPointCategoryService.addCategory(newCategoryName.value.trim())
     newCategoryName.value = ''
     await fetchCategories()
-  } catch {
+  } catch (e) {
+    console.error('[AdminPointCategoryView] 등록 실패:', e)
     alert('등록 실패')
   }
 }
 
+// 수정 시작
 const startEdit = (cat) => {
   editMode.value = true
   selectedCategory.value = { ...cat }
   newCategoryName.value = cat.categoryName
 }
 
+// 수정 완료
 const saveEdit = async () => {
   try {
     await AdminPointCategoryService.editCategory(
       selectedCategory.value.categoryId,
-      newCategoryName.value
+      newCategoryName.value.trim()
     )
     cancelEdit()
     await fetchCategories()
-  } catch {
+  } catch (e) {
+    console.error('[AdminPointCategoryView] 수정 실패:', e)
     alert('수정 실패')
   }
 }
 
+// 수정 취소
 const cancelEdit = () => {
   editMode.value = false
   selectedCategory.value = null
   newCategoryName.value = ''
 }
 
+// 삭제
 const deleteCategory = async (id) => {
   if (!confirm('정말 삭제하시겠습니까?')) return
   try {
     await AdminPointCategoryService.deleteCategory(id)
     await fetchCategories()
-  } catch {
+  } catch (e) {
+    console.error('[AdminPointCategoryView] 삭제 실패:', e)
     alert('삭제 실패')
   }
 }

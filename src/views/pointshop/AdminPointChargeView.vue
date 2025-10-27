@@ -1,38 +1,42 @@
 <script setup>
-import { ref } from 'vue';
-import PointRechargeService from '@/services/pointshop/PointRechargeService';
+import { ref } from 'vue'
+import PointRechargeService from '@/services/pointshop/PointRechargeService'
 
-const userId = ref('');
-const amount = ref(0);
-const isProcessing = ref(false);
+const userId = ref('')
+const amount = ref(0)
+const isProcessing = ref(false)
 
+// 포인트 충전
 const submitCharge = async () => {
   if (!userId.value || amount.value <= 0) {
-    alert('회원 ID와 충전 금액을 입력하세요.');
-    return;
+    alert('회원 ID와 충전 금액을 입력하세요.')
+    return
   }
 
-  isProcessing.value = true;
+  isProcessing.value = true
   try {
     const res = await PointRechargeService.chargePoints({
       userId: Number(userId.value),
       amount: Number(amount.value),
-    });
+    })
 
     if (res.success) {
-      alert(res.message || '포인트 충전 완료');
-      userId.value = '';
-      amount.value = 0;
+      alert(res.message || '포인트 충전 완료')
+      localStorage.removeItem('statsCache')
+      // 대시보드 즉시 갱신 이벤트 트리거
+      window.dispatchEvent(new Event('updatePointStats'))
+      userId.value = ''
+      amount.value = 0
     } else {
-      alert(res.message || '충전 실패');
+      alert(res.message || '충전 실패')
     }
   } catch (err) {
-    console.error('[AdminPointChargeView] 충전 실패:', err);
-    alert('서버 오류로 충전 실패');
+    console.error('[AdminPointChargeView] 충전 실패:', err)
+    alert('서버 오류로 충전 실패')
   } finally {
-    isProcessing.value = false;
+    isProcessing.value = false
   }
-};
+}
 </script>
 
 <template>

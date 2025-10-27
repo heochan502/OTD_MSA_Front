@@ -1,10 +1,11 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
-import { useRouter } from 'vue-router';
-import { usePointshop } from '@/components/pointshop/usePointshop.js';
-import PointCategoryService from '@/services/pointshop/AdminPointCategoryService';
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { usePointshop } from '@/components/pointshop/usePointshop.js'
+import PointCategoryService from '@/services/pointshop/AdminPointCategoryService'
+import PointShopService from '@/services/pointshop/PointShopService' 
 
-const router = useRouter();
+const router = useRouter()
 
 const {
   userPoints,
@@ -16,175 +17,222 @@ const {
   purchaseItem,
   isPurchased,
   initialize,
-} = usePointshop();
+} = usePointshop()
 
 // 프로필 이동
 const goToProfile = () => {
-  router.push('/user/profile');
-};
+  router.push('/user/profile')
+}
 
-// 상품 상세페이지 이동
+// 구매 내역 상세 페이지 이동
 const goToPurchaseDetail = (purchaseId) => {
-  router.push(`/pointshop/purchase-history/detail/${purchaseId}`);
-};
+  router.push(`/pointshop/purchase-history/detail/${purchaseId}`)
+}
 
-// 이미지 경로 변환 함수 (Vite 빌드 호환)
+// src/assets/img/pointshop/* 내부 모든 파일을 정적으로 import (Vite 빌드 시 자동 포함)
+const images = import.meta.glob('@/assets/img/pointshop/*', {
+  eager: true,
+  import: 'default',
+})
+
+// 이미지 경로 처리
 const getItemImage = (name) => {
-  if (!name) {
-    return new URL('@/assets/img/pointshop/default.png', import.meta.url).href;
+  const defaultPath = '/src/assets/img/pointshop/default.png'
+
+  // 값이 없으면 기본 이미지
+  if (!name) return images[defaultPath]
+
+  // 외부 URL 또는 절대 경로면 그대로 반환
+  if (name.startsWith('http') || name.startsWith('/')) return name
+
+  // src/assets/img/pointshop 내에서 탐색
+  const fullPath = `/src/assets/img/pointshop/${name}`
+
+  // 존재하는 파일이면 반환
+  if (images[fullPath]) {
+    return images[fullPath]
   }
 
-  // 외부 URL이거나 절대 경로일 경우 그대로 반환
-  if (name.startsWith('http') || name.startsWith('/')) {
-    return name;
-  }
+  // 확장자 보정 (혹시 DB에 jpg인데 실제 png일 때 등)
+  const altMatch = Object.keys(images).find((key) =>
+    key.includes(name.split('.')[0])
+  )
+  if (altMatch) return images[altMatch]
 
-  try {
-    // 내부 리소스 경로 변환
-    return new URL(`@/assets/img/pointshop/${name}`, import.meta.url).href;
-  } catch (e) {
-    console.warn('[getItemImage] 로드 실패:', name);
-    return new URL('@/assets/img/pointshop/default.png', import.meta.url).href;
-  }
-};
+  // 기본 이미지 반환
+  console.warn('[getItemImage] 로드 실패:', name)
+  return images[defaultPath]
+}
 
-// 필터 상태
-const searchKeyword = ref(localStorage.getItem('searchKeyword') || '');
-const sortOption = ref(localStorage.getItem('sortOption') || 'default');
-const priceRange = ref(localStorage.getItem('priceRange') || 'all');
-const categoryFilter = ref(localStorage.getItem('categoryFilter') || 'all');
+// 필터 상태 관리
+const searchKeyword = ref(localStorage.getItem('searchKeyword') || '')
+const sortOption = ref(localStorage.getItem('sortOption') || 'default')
+const priceRange = ref(localStorage.getItem('priceRange') || 'all')
+const categoryFilter = ref(localStorage.getItem('categoryFilter') || 'all')
 
 // 카테고리 옵션
-const categoryOptions = ref([{ value: 'all', label: '전체' }]);
+const categoryOptions = ref([{ value: 'all', label: '전체' }])
 
 // 초기 로딩
 onMounted(async () => {
-  await initialize();  // 포인트, 아이템, 구매내역을 한 번에 불러옴
-  await loadCategories(); // 카테고리만 별도 로드
-});
+  await initialize() // 포인트, 아이템, 구매내역 로드
+  await loadCategories() // 카테고리 로드
+})
 
-// 카테고리 로드
+// 카테고리 목록 로드
 const loadCategories = async () => {
   try {
-    const categories = await PointCategoryService.getAllCategories();
+    const categories = await PointShopService.getAllCategories()
     categoryOptions.value = [
       { value: 'all', label: '전체' },
-      ...categories.map((c) => ({
-        value: c.categoryId,
-        label: c.categoryName,
-      })),
-    ];
+      ...categories
+        .filter((c) => c.categoryName !== '기타') // '기타' 카테고리 제외
+        .map((c) => ({
+          value: c.pointCategoryId,
+          label: c.categoryName,
+        })),
+    ]
   } catch (e) {
-    console.error('[카테고리 불러오기 실패]', e);
+    console.error('[카테고리 불러오기 실패]', e)
   }
-};
+}
 
-// 로컬스토리지 동기화
+// 카테고리 변경 시 아이템 필터링
+const handleCategoryChange = async () => {
+  try {
+    const list = await PointShopService.getAllItems(categoryFilter.value)
+    allItems.value = Array.isArray(list) ? list : []
+  } catch (e) {
+    console.error('[카테고리 변경 실패]', e)
+    allItems.value = []
+  }
+}
+
+// 아이템 객체에서 카테고리 ID 안전 추출
+const extractCategoryId = (i) =>
+  i?.categoryId ??
+  i?.pointCategoryId ??
+  i?.pointCategory?.pointCategoryId ??
+  i?.point_category_id ??
+  null
+
+// 로컬 스토리지 동기화
 watch(
   [searchKeyword, sortOption, priceRange, categoryFilter],
   () => {
-    localStorage.setItem('searchKeyword', searchKeyword.value);
-    localStorage.setItem('sortOption', sortOption.value);
-    localStorage.setItem('priceRange', priceRange.value);
-    localStorage.setItem('categoryFilter', categoryFilter.value);
+    localStorage.setItem('searchKeyword', searchKeyword.value)
+    localStorage.setItem('sortOption', sortOption.value)
+    localStorage.setItem('priceRange', priceRange.value)
+    localStorage.setItem('categoryFilter', categoryFilter.value)
   },
   { flush: 'post' }
-);
+)
 
-// 필터 리셋
-const resetFilters = () => {
-  searchKeyword.value = '';
-  sortOption.value = 'default';
-  priceRange.value = 'all';
-  categoryFilter.value = 'all';
-  localStorage.removeItem('searchKeyword');
-  localStorage.removeItem('sortOption');
-  localStorage.removeItem('priceRange');
-  localStorage.removeItem('categoryFilter');
-};
+// 필터 초기화
+const resetFilters = async () => {
+  searchKeyword.value = ''
+  sortOption.value = 'default'
+  priceRange.value = 'all'
+  categoryFilter.value = 'all'
+  localStorage.removeItem('searchKeyword')
+  localStorage.removeItem('sortOption')
+  localStorage.removeItem('priceRange')
+  localStorage.removeItem('categoryFilter')
+  await fetchAllItems()
+}
 
 // 포인트 충분 여부
-const isAffordable = (price) => (userPoints.value || 0) >= (price || 0);
+const isAffordable = (price) => (userPoints.value || 0) >= (price || 0)
 
 // 필터 + 정렬 + 검색
 const filteredItems = computed(() => {
-  let list = [...(allItems.value || [])];
+  let list = Array.isArray(allItems.value) ? [...allItems.value] : []
 
+  list = list.filter((i) => i.pointId) // pointId 없는 항목 제거
+  list = list.filter((i) => i.categoryName !== '기타') // '기타' 카테고리 제거
+
+  // 카테고리 필터
   if (categoryFilter.value !== 'all') {
-    list = list.filter((i) => i.categoryId === Number(categoryFilter.value));
+    const want = Number(categoryFilter.value)
+    list = list.filter((i) => {
+      const cid = extractCategoryId(i)
+      return cid == null ? true : Number(cid) === want
+    })
   }
 
+  // 검색 필터
   if (searchKeyword.value.trim()) {
-    const kw = searchKeyword.value.trim().toLowerCase();
-    list = list.filter((i) => i.pointItemName?.toLowerCase().includes(kw));
+    const kw = searchKeyword.value.trim().toLowerCase()
+    list = list.filter((i) => i.pointItemName?.toLowerCase().includes(kw))
   }
 
+  // 가격대 필터
   switch (priceRange.value) {
     case '0-5000':
-      list = list.filter((i) => i.pointScore <= 5000);
-      break;
+      list = list.filter((i) => i.pointScore <= 5000)
+      break
     case '5001-10000':
-      list = list.filter((i) => i.pointScore > 5000 && i.pointScore <= 10000);
-      break;
+      list = list.filter((i) => i.pointScore > 5000 && i.pointScore <= 10000)
+      break
     case '10001+':
-      list = list.filter((i) => i.pointScore > 10000);
-      break;
+      list = list.filter((i) => i.pointScore > 10000)
+      break
   }
 
+  // 정렬 옵션
   switch (sortOption.value) {
     case 'priceAsc':
-      list.sort((a, b) => (a.pointScore || 0) - (b.pointScore || 0));
-      break;
+      list.sort((a, b) => (a.pointScore || 0) - (b.pointScore || 0))
+      break
     case 'priceDesc':
-      list.sort((a, b) => (b.pointScore || 0) - (a.pointScore || 0));
-      break;
+      list.sort((a, b) => (b.pointScore || 0) - (a.pointScore || 0))
+      break
     case 'nameAsc':
-      list.sort((a, b) => a.pointItemName.localeCompare(b.pointItemName));
-      break;
+      list.sort((a, b) => a.pointItemName.localeCompare(b.pointItemName))
+      break
     case 'popular':
       const counts = purchasedItems.value.reduce((acc, p) => {
-        acc[p.pointItemName] = (acc[p.pointItemName] || 0) + 1;
-        return acc;
-      }, {});
+        acc[p.pointItemName] = (acc[p.pointItemName] || 0) + 1
+        return acc
+      }, {})
       list.sort(
         (a, b) => (counts[b.pointItemName] || 0) - (counts[a.pointItemName] || 0)
-      );
-      break;
+      )
+      break
   }
 
-  return list;
-});
+  return list
+})
 
 // 구매 처리
 const handlePurchase = async (item) => {
-  if (!item?.pointId) return alert('유효하지 않은 아이템입니다.');
-  if (isPurchased(item.pointId)) return;
-  if (item.stock === 0) return alert('품절된 상품입니다.');
+  if (!item?.pointId) return alert('유효하지 않은 아이템입니다.')
+  if (isPurchased(item.pointId)) return
+  if (item.stock === 0) return alert('품절된 상품입니다.')
 
   if (!isAffordable(item.pointScore)) {
-    const goToChallenge = confirm('포인트가 부족합니다. 챌린지로 이동하시겠습니까?');
-    if (goToChallenge) router.push('/challenge');
-    return;
+    const goToChallenge = confirm('포인트가 부족합니다. 챌린지로 이동하시겠습니까?')
+    if (goToChallenge) router.push('/challenge')
+    return
   }
 
   const ok = confirm(
     `${item.pointItemName} (${Number(item.pointScore).toLocaleString()}P)를 구매하시겠습니까?`
-  );
-  if (!ok) return;
+  )
+  if (!ok) return
 
   try {
-    await purchaseItem(item);
-    await fetchUserPoints();
+    await purchaseItem(item)
+    await fetchUserPoints()
   } catch (err) {
-    console.error('[handlePurchase] 구매 실패:', err);
-    alert('구매 처리 중 오류가 발생했습니다.');
+    console.error('[handlePurchase] 구매 실패:', err)
+    alert('구매 처리 중 오류가 발생했습니다.')
   }
-};
+}
 </script>
 
 <template>
   <div class="point-dashboard">
-    <!-- 상단 포인트 -->
     <header class="point-header">
       <div class="point-mini" @click="goToProfile">
         <img src="/image/main/point.png" alt="포인트 아이콘" class="point-icon" />
@@ -197,40 +245,42 @@ const handlePurchase = async (item) => {
 
     <p class="notice">포인트는 아이템 구매에만 사용됩니다.</p>
 
-    <!-- 필터 바 -->
     <div class="filter-bar">
-      <input
-        v-model="searchKeyword"
-        type="text"
-        placeholder="아이템 이름 검색"
-        class="search-input"
-      />
+  <select v-model="priceRange" class="filter-select">
+    <option value="all">전체 가격대</option>
+    <option value="0-5000">~5,000P</option>
+    <option value="5001-10000">5,001~10,000P</option>
+    <option value="10001+">10,001P 이상</option>
+  </select>
 
-      <select v-model="categoryFilter" class="filter-select">
-        <option v-for="opt in categoryOptions" :key="opt.value" :value="opt.value">
-          {{ opt.label }}
-        </option>
-      </select>
+  <select
+    v-model="categoryFilter"
+    class="filter-select"
+    @change="handleCategoryChange"
+  >
+    <option v-for="opt in categoryOptions" :key="opt.value" :value="opt.value">
+      {{ opt.label }}
+    </option>
+  </select>
 
-      <select v-model="sortOption" class="sort-select">
-        <option value="default">정렬 선택</option>
-        <option value="priceAsc">가격 낮은순</option>
-        <option value="priceDesc">가격 높은순</option>
-        <option value="nameAsc">이름순</option>
-        <option value="popular">인기순</option>
-      </select>
+  <select v-model="sortOption" class="sort-select">
+    <option value="default">정렬 선택</option>
+    <option value="priceAsc">가격 낮은순</option>
+    <option value="priceDesc">가격 높은순</option>
+    <option value="nameAsc">이름순</option>
+    <option value="popular">인기순</option>
+  </select>
 
-      <select v-model="priceRange" class="filter-select">
-        <option value="all">전체 가격대</option>
-        <option value="0-5000">~5,000P</option>
-        <option value="5001-10000">5,001~10,000P</option>
-        <option value="10001+">10,001P 이상</option>
-      </select>
+  <input
+    v-model="searchKeyword"
+    type="text"
+    placeholder="아이템 이름 검색"
+    class="search-input"
+  />
 
-      <button class="reset-btn" @click="resetFilters">초기화</button>
-    </div>
+  <button class="reset-btn" @click="resetFilters">초기화</button>
+</div>
 
-    <!-- 아이템 목록 -->
     <section class="item-list">
       <h3>포인트 아이템 목록</h3>
       <p v-if="!filteredItems?.length" class="empty">조건에 맞는 아이템이 없습니다.</p>
@@ -238,16 +288,35 @@ const handlePurchase = async (item) => {
       <ul v-else class="items">
         <li v-for="item in filteredItems" :key="item.pointId" class="item">
           <img
-            :src="getItemImage(item.imageUrl || item.images?.[0]?.imageUrl)"
+            :src="getItemImage(item.pointItemImage || item.imageUrl || item.images?.[0]?.imageUrl)"
             alt="item"
             class="item-image"
           />
-
           <div class="info">
             <h4>{{ item.pointItemName }}</h4>
             <p class="price">{{ Number(item.pointScore || 0).toLocaleString() }}P</p>
-            <p class="category">{{ item.categoryName || '기타' }}</p>
-
+            <p v-if="
+              (item.categoryName ||
+                item.pointItemName?.match(/커피|음료|아메리카노|스타벅스|몬스터|맥도날드|맘스터치|버거|상품권|기프트|이마트|다이소|파리바게뜨|베이커리|크리스피|도넛|배스킨/))
+                && (item.categoryName !== '기타')
+            "
+            class="category"
+          >
+            {{
+              item.categoryName ||
+              (
+                item.pointItemName?.match(/커피|음료|아메리카노|스타벅스|몬스터/)
+                  ? '커피/음료'
+                  : item.pointItemName?.match(/맥도날드|맘스터치|버거/)
+                  ? '패스트푸드'
+                  : item.pointItemName?.match(/상품권|기프트|이마트|다이소/)
+                  ? '상품권'
+                  : item.pointItemName?.match(/파리바게뜨|베이커리|크리스피|도넛|배스킨/)
+                  ? '디저트'
+                  : ''
+              )
+            }}
+          </p>
             <button
               @click="handlePurchase(item)"
               :class="{
@@ -266,7 +335,6 @@ const handlePurchase = async (item) => {
       </ul>
     </section>
 
-    <!-- 구매 내역 -->
     <section class="history">
       <h3>구매 내역</h3>
       <p v-if="!purchasedItems?.length" class="empty">구매 내역이 없습니다.</p>
@@ -283,12 +351,12 @@ const handlePurchase = async (item) => {
           <span class="date">
             {{
               (() => {
-                const d = new Date(h.purchaseAt);
+                const d = new Date(h.purchaseAt)
                 return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(
                   d.getDate()
                 ).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(
                   d.getMinutes()
-                ).padStart(2, '0')}`;
+                ).padStart(2, '0')}`
               })()
             }}
           </span>
@@ -296,23 +364,6 @@ const handlePurchase = async (item) => {
       </ul>
     </section>
   </div>
-
-  <ul class="purchase-list">
-  <li
-    v-for="purchase in purchases"
-    :key="purchase.purchaseId"
-    class="purchase-item clickable"
-    @click="goToPurchaseDetail(purchase.purchaseId)"
-  >
-    <div class="item-info">
-      <span class="item-name">{{ purchase.pointItemName }}</span>
-      <span class="item-date">{{ formatDate(purchase.purchaseAt) }}</span>
-    </div>
-    <div class="item-point">
-      <span class="negative">{{ '-' + purchase.pointScore.toLocaleString() }}P</span>
-    </div>
-  </li>
-</ul>
 </template>
 
 <style scoped>

@@ -98,8 +98,9 @@ const fetchTopUsers = async () => {
 const fetchCategoryStats = async () => {
   isCategoryLoading.value = true
   try {
-    categoryStats.value = await AdminPointStatsService.getCategoryTotals()
-    updateCategoryChart()
+    categoryStats.value = (await AdminPointStatsService.getCategoryTotals())
+  .filter((c) => c.categoryName && c.categoryName !== '기타')
+updateCategoryChart()
   } catch {
     console.error('카테고리 통계 조회 실패')
   } finally {
@@ -109,6 +110,9 @@ const fetchCategoryStats = async () => {
 
 onMounted(async () => {
   await Promise.all([fetchStats(), fetchTopUsers(), fetchCategoryStats()])
+  window.addEventListener('updatePointStats', async () => {
+  await Promise.all([fetchStats(), fetchCategoryStats()])
+  })
 })
 
 // 차트 업데이트
