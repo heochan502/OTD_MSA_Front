@@ -1,14 +1,14 @@
 <script setup>
 const props = defineProps({
-  totalKcal: { type: Number, default: 757 },
+  totalKcal: { type: Number, default: 0 },  //  숫자
   rows: {
     type: Array,
     default: () => [
-      { label: '탄수화물', value: '39.9g' },
-      { label: '단백질', value: '16.8g' },
-      { label: '지방', value: '24.9g' },
-      { label: '당류', value: '50g' },
-      { label: '나트륨', value: '523mg' },
+      { label: '탄수화물', value: '0' },
+      { label: '단백질', value: '0' },
+      { label: '지방', value: '0' },
+      { label: '당류', value: '0' },
+      { label: '나트륨', value: '0' },
     ],
   },
 });
@@ -19,13 +19,14 @@ const props = defineProps({
     <div class="head">
       <div class="title">영양정보</div>
       <div class="kcal">
-        <span>총 열량</span><b>{{ totalKcal }} kcal</b>
+        <span>총 열량</span><b>{{ totalKcal.toLocaleString() }} kcal</b>
       </div>
     </div>
     <ul class="table">
       <li class="row" v-for="r in rows" :key="r.label">
         <span class="label">{{ r.label }}</span>
-        <span class="value">{{ r.value }}</span>
+        <span v-if="r.label==='나트륨'" class="value">{{ (Number(r.value)).toLocaleString() }} mg</span>
+        <span v-else class="value">{{ r.value }} g/ml</span>
       </li>
     </ul>
   </div>

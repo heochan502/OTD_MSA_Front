@@ -46,10 +46,19 @@ const gap = () => {
   );
   const myTotalRecord = Number(state.aroundRanking[myIdx].totalRecord);
 
-  // 앞뒤 값 안전하게 가져오기
-  const beforeMe = state.aroundRanking[myIdx - 1]?.totalRecord
-    ? Number(state.aroundRanking[myIdx - 1].totalRecord)
-    : null;
+  // 기본 앞사람
+  let beforeMe =
+    state.aroundRanking[myIdx - 1]?.totalRecord != null
+      ? Number(state.aroundRanking[myIdx - 1].totalRecord)
+      : null;
+
+  // 만약 앞사람과 내가 같다면 → 2단계 위 사람을 비교 대상으로 설정
+  if (beforeMe !== null && beforeMe === myTotalRecord) {
+    beforeMe =
+      state.aroundRanking[myIdx - 2]?.totalRecord != null
+        ? Number(state.aroundRanking[myIdx - 2].totalRecord)
+        : null;
+  }
   const afterMe = state.aroundRanking[myIdx + 1]?.totalRecord
     ? Number(state.aroundRanking[myIdx + 1].totalRecord)
     : null;
@@ -61,16 +70,29 @@ const gap = () => {
       return Math.round(value);
     }
   };
+
+  // 멘트용 포맷 함수
+  const formatGapMent = (value) => {
+    switch (state.progress.unit) {
+      case 'km':
+        return `${value}km`;
+      case '개':
+        return `${value}개`;
+      case '분':
+        return formatMinutesToHourMinute(value); // 기존 함수 활용
+      default:
+        return value.toString();
+    }
+  };
+
   if (myRank === 1 && afterMe !== null) {
     // 1등일 때 → 아래사람과 비교
     recordGap.value = formatGap(myTotalRecord - afterMe);
-    const formatHourTime = formatMinutesToHourMinute(recordGap.value);
-    ment.value = `2위와 ${formatHourTime} 차이!`;
+    ment.value = `2위와 ${formatGapMent(recordGap.value)} 차이!`;
   } else if (beforeMe !== null) {
     // 위사람과 비교
     recordGap.value = formatGap(beforeMe - myTotalRecord);
-    const formatHourTime = formatMinutesToHourMinute(recordGap.value);
-    ment.value = `${formatHourTime}만 더 하면 ${myRank - 1}위!`;
+    ment.value = `${formatGapMent(recordGap.value)}만 더 하면 ${myRank - 1}위!`;
   } else {
     ment.value = `아직 비교할 상대가 없어요 😅`;
   }
@@ -118,10 +140,18 @@ onMounted(async () => {
       </div>
       <div class="box otd-border otd-box-style">
         <div class="button otd-body-3">
-          <button class="otd-border otd-box-style" @click="aroundRankingList">
+          <button
+            :class="{ active: state.activeTab === 'around' }"
+            class="otd-border otd-box-style"
+            @click="aroundRankingList"
+          >
             내 순위 보기
           </button>
-          <button class="otd-border otd-box-style" @click="topRankingList">
+          <button
+            :class="{ active: state.activeTab === 'top' }"
+            class="otd-border otd-box-style"
+            @click="topRankingList"
+          >
             Top5 보기
           </button>
         </div>
@@ -153,7 +183,7 @@ onMounted(async () => {
               {{ ment }}
             </template>
             <template v-else>
-              나는 현재 {{ state.progress.myRank }}위에 있어요!
+              저는 현재 {{ state.progress.myRank }}위에 있어요!
             </template>
           </div>
         </div>
@@ -163,6 +193,17 @@ onMounted(async () => {
 </template>
 
 <style lang="scss" scoped>
+.wrap {
+  margin-top: 30px;
+}
+// 화면이 391px 이상일 때만 max-width + 중앙정렬 적용
+@media (min-width: 391px) {
+  .wrap {
+    max-width: 391px;
+    margin: 0 auto;
+    margin-top: 30px;
+  }
+}
 .title-wrap {
   display: flex;
   justify-content: space-between;
@@ -204,6 +245,12 @@ onMounted(async () => {
     height: 25px;
     background-color: #e6e6e6;
     color: #303030;
+    transition: all 0.2s ease; /* 부드럽게 색상 전환 */
+  }
+  .otd-border.active {
+    background-color: #00d5df;
+    color: white;
+    font-weight: 700;
   }
 }
 .info {

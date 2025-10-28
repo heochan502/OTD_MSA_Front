@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { reactive } from "vue";
+import { computed } from "vue";
 import {
   getExercise,
   getExerciseRecordList,
@@ -12,6 +12,7 @@ export const useExerciseRecordStore = defineStore("exerciseRecord", {
     exerciseList: [],
     loaded: false,
     dailyRecords: [], // 오늘 기록
+    today: [],
     yesterday: [], // 어제 기록
     recordList: [], // 페이징처리한 리스트
     records: [],
@@ -35,8 +36,8 @@ export const useExerciseRecordStore = defineStore("exerciseRecord", {
     addCalendarDate(list) {
       this.calendarDate.push(...list);
     },
-    clearCalendarDate() {
-      this.calendarDate = [];
+    clearMonthlyRecords() {
+      this.monthlyRecords = [];
     },
     addRecordList(list) {
       this.recordList.push(...list);
@@ -56,7 +57,15 @@ export const useExerciseRecordStore = defineStore("exerciseRecord", {
       this.addToday(todayRecords);
       this.addYesterDay(yesterdayRecords);
     },
-
+    addToday(list) {
+      const newLogs = list.filter(
+        (record) =>
+          !this.today.some(
+            (t) => t.exerciseRecordId === record.exerciseRecordId
+          )
+      );
+      this.today.push(...newLogs);
+    },
     addYesterDay(list) {
       const newRecords = list.filter(
         (record) =>

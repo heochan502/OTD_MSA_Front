@@ -1,6 +1,8 @@
 <script setup>
-import { defineProps, computed } from 'vue';
+import { defineProps, computed, onMounted } from 'vue';
+import { useAuthenticationStore } from '@/stores/user/authentication';
 
+const auth = useAuthenticationStore();
 const props = defineProps({
   rankingDetail: {
     type: Object,
@@ -11,12 +13,18 @@ const props = defineProps({
   },
 });
 const defaultProfile = '/otd/image/main/default-profile.png';
-const BASE_URL = `home/green/download/profile/${props.isMe.userId}`;
+const FILE_URL = import.meta.env.VITE_BASE_URL;
+const BASE_URL = `/home/green/download/profile/${props.rankingDetail}/`;
 
 // pic이 있으면 그걸 쓰고, 없으면 기본 이미지
 const profileImage = computed(() => {
+  if (props.isMe) {
+    // 내 프로필은 authStore 기준
+    return auth.state.signedUser.pic || defaultProfile;
+  }
+  // 다른 사람 프로필은 rankingDetail.pic 기준
   return props.rankingDetail?.pic
-    ? BASE_URL + props.rankingDetail.pic
+    ? `${FILE_URL}/profile/${props.rankingDetail.userId}/${props.rankingDetail.pic}`
     : defaultProfile;
 });
 
@@ -26,6 +34,9 @@ const getBorderColor = (rank) => {
   if (rank === 3) return '#ce7430';
   return '#fafafa';
 };
+onMounted(() => {
+  console.log('BASEURL', BASE_URL);
+});
 </script>
 
 <template>
@@ -62,12 +73,15 @@ const getBorderColor = (rank) => {
           <div class="profile">
             <img class="profile-image" :src="profileImage" alt="프로필이미지" />
 
-            <div class="nick-name otd-body-2">
+            <div
+              class="nick-name otd-body-2"
+              :title="props.rankingDetail.nickName"
+            >
               {{ props.rankingDetail.nickName }}
             </div>
           </div>
         </div>
-        <div class="value otd-body-3">
+        <div class="record otd-body-3">
           {{ props.rankingDetail.formattedTotalRecord }}
         </div>
         <img
@@ -134,7 +148,14 @@ const getBorderColor = (rank) => {
     }
   }
 }
-.value {
+.nick-name {
+  max-width: 120px; // 카드 레이아웃에 맞는 적절한 최대폭
+  overflow: hidden; // 넘치는 글자 숨김
+  white-space: nowrap; // 줄바꿈 방지
+  text-overflow: ellipsis; // … 처리
+}
+.record {
+  max-width: 50px;
   flex: 0 0 80px; // 오른쪽 값 고정폭
   text-align: right;
 }

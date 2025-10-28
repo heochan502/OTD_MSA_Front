@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, defineExpose } from 'vue';
+import { ref, onMounted, defineExpose, watch } from 'vue';
 import { useRoute } from 'vue-router';
 const route = useRoute();
 
@@ -24,6 +24,7 @@ onMounted(() => {
     targetValue.value = props.indataProgress;
     animateProgress(targetValue.value);
   }, 50); // DOM 렌더링 직후 약간의 지연을 줘야 transition이 발동
+  console.log(targetValue.value);
 });
 
 const animateProgress = (target) => {
@@ -47,12 +48,20 @@ const animateProgress = (target) => {
       displayValue.value = current.toFixed(1);
     }
   }, stepTime);
-
 };
 
 defineExpose({
   animateProgress,
 });
+
+watch(
+  () => props.indataProgress,
+  (data) => {
+    targetValue.value = data;
+    animateProgress(data);
+  },
+  { immediate: true }
+);
 </script>
 
 <template>

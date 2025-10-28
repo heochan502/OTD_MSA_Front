@@ -1,17 +1,16 @@
 <script setup>
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { login } from '@/services/user/userService';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 import { checkValidation } from '@/utils/validation';
+import AlertModal from '@/components/user/Modal.vue';
 
 const router = useRouter();
-
 const authentication = useAuthenticationStore();
 const beBaseUrl = import.meta.env.VITE_BASE_URL;
-
 const feBaseUrl = window.location.origin;
-const redirectUrl = `${feBaseUrl}/fe/redirect`;
+const redirectUrl = `${feBaseUrl}/otd/fe/redirect`;
 
 const state = reactive({
   form: {
@@ -20,37 +19,65 @@ const state = reactive({
   },
 });
 
+// 모달 상태
+const modalState = ref({
+  show: false,
+  title: '',
+  message: '',
+  type: 'info',
+  onConfirm: null,
+});
+
+const showModal = (title, message, type = 'info', onConfirm = null) => {
+  modalState.value = {
+    show: true,
+    title,
+    message,
+    type,
+    onConfirm,
+  };
+};
+
+const closeModal = () => {
+  modalState.value.show = false;
+};
+
+const handleModalConfirm = () => {
+  if (modalState.value.onConfirm) {
+    modalState.value.onConfirm();
+  }
+  closeModal();
+};
+
 const submit = async () => {
   if (checkValidation()) {
     return;
   }
 
   try {
-    console.log('전송할 데이터:', state.form);
     const res = await login(state.form);
-    console.log('Login.vue - submit() - res: ', res);
-
-    console.log('응답 데이터:', JSON.stringify(res.data.result, null, 2));
 
     if (res.status === 200) {
       const result = res.data.result;
 
-      console.log('result 전체:', result);
-
-      console.log('구조화된 userData:', result);
-
       // store 업데이트
       authentication.setSignedUser(result);
 
-      // store 상태 확인
-      console.log('업데이트 후 store 상태:', authentication.state.signedUser);
 
-      await router.push('/');
+      if (result.userRole === 'ADMIN' || result.userRole === 'MANAGER') {
+        await router.push('/role/select');
+      } else {
+        await router.push('/');
+      }
     }
   } catch (error) {
     console.error('로그인 오류:', error);
     console.error('오류 상세:', error.response?.data);
-    alert('로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.');
+    showModal(
+      '로그인 실패',
+      '로그인에 실패했습니다.\n아이디와 비밀번호를 확인해주세요.',
+      'error'
+    );
   }
 };
 </script>
@@ -82,6 +109,7 @@ const submit = async () => {
             id="upw"
             placeholder="비밀번호"
             v-model="state.form.upw"
+            @keyup.enter="submit"
             autocomplete="off"
             not-null-message="비밀번호는 필수로 입력하셔야 합니다."
             regexp="^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':\&quot;\\|,.<>\/?])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':\&quot;\\|,.<>\/?]{10,}$"
@@ -95,35 +123,63 @@ const submit = async () => {
         <router-link class="buttonjoin" to="/user/join">회원가입</router-link>
       </div>
       <!-- API 로그인 -->
-
-         
       <div class="API">
-        <span class="naver"
-          ><a
-            :href="`${beBaseUrl}/oauth2/authorization/naver?redirect_uri=${redirectUrl}`"
-            >네이버</a
-          >
-        </span>
-        <span class="kakao"
-          ><a
-            :href="`${beBaseUrl}/oauth2/authorization/kakao?redirect_uri=${redirectUrl}`"
-            >카카오</a
-          ></span
+        <a
+          :href="`${beBaseUrl}/oauth2/authorization/naver?redirect_uri=${redirectUrl}`"
+          class="oauth-button naver"
         >
-      </div>
- </div>
-      <div class="additional-links">
-        <div class="link-row">
-          <a href="#" class="link">아이디 찾기</a>
-          <span class="link-separator">|</span>
-          <a href="#" class="link">비밀번호 찾기</a>
-        </div>
+          <svg class="oauth-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M16.273 12.845L7.376 0H0v24h7.726V11.156L16.624 24H24V0h-7.727v12.845z"
+            />
+          </svg>
+          <span>네이버로 로그인</span>
+        </a>
+
+        <a
+          :href="`${beBaseUrl}/oauth2/authorization/kakao?redirect_uri=${redirectUrl}`"
+          class="oauth-button kakao"
+        >
+          <svg class="oauth-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M12 3C6.477 3 2 6.477 2 10.786c0 2.823 1.886 5.298 4.713 6.682l-1.227 4.505c-.095.349.277.634.589.451l5.083-2.948c.341.032.687.048 1.037.048 5.523 0 10-3.477 10-7.786C22 6.477 17.523 3 12 3z"
+            />
+          </svg>
+          <span>카카오로 로그인</span>
+        </a>
       </div>
     </div>
-  
+    <div class="additional-links">
+      <div class="link-row">
+        <router-link to="/user/findid" class="link">아이디 찾기</router-link>
+        <span class="link-separator">|</span>
+        <router-link to="/user/password" class="link"
+          >비밀번호 재설정</router-link
+        >
+      </div>
+    </div>
+
+    <!-- Alert 모달 컴포넌트 -->
+    <AlertModal
+      :show="modalState.show"
+      :title="modalState.title"
+      :message="modalState.message"
+      :type="modalState.type"
+      @close="closeModal"
+      @confirm="handleModalConfirm"
+    />
+  </div>
 </template>
 
 <style scoped>
+
+.login{
+  /* align-items: center; */
+  width: 100%;
+  padding: 0px 20px;
+  justify-self: center;
+}
+
 .container {
   max-width: 576px;
   padding: 0px;
@@ -220,6 +276,83 @@ const submit = async () => {
 }
 .API {
   padding-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.oauth-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.oauth-button svg.oauth-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* 네이버 버튼 */
+.oauth-button.naver {
+  background-color: #03c75a;
+  color: white;
+}
+
+.oauth-button.naver:hover {
+  background-color: #02b350;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(3, 199, 90, 0.3);
+}
+
+/* 카카오 버튼 */
+.oauth-button.kakao {
+  background-color: #fee500;
+  color: #000000;
+}
+
+.oauth-button.kakao:hover {
+  background-color: #f5dc00;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(254, 229, 0, 0.3);
+}
+
+/* 추가 링크 */
+.additional-links {
   text-align: center;
+  margin-top: 20px;
+}
+
+.link-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.link {
+  color: #393e46;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.link:hover {
+  color: #000;
+  text-decoration: underline;
+}
+
+.link-separator {
+  color: #d1d5db;
 }
 </style>

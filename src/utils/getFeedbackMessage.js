@@ -1,4 +1,4 @@
-import feedbackMessages from "@/assets/feedbackMessages.json";
+import feedbackMessageForExercise from "@/assets/feedbackMessageForExercise";
 
 export function getFeedbackMessage({
   todayDuration,
@@ -44,6 +44,6 @@ export function getFeedbackMessage({
 
 // id에 해당하는 메시지 반환
 function find(id) {
-  const item = feedbackMessages.find((msg) => msg.id === id);
+  const item = feedbackMessageForExercise.find((msg) => msg.id === id);
   return item?.message || "잘하고 있어요!";
 }

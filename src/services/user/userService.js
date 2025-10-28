@@ -9,7 +9,8 @@ export const login = (data) => axios.post(`${path}/login`, data);
 
 export const logout = () => axios.post(`${path}/logout`);
 
-export const reissue = (data) => axios.post(`${path}/reissue`, data);
+export const reissue = () =>
+  axios.post(`/user/reissue`, null, { withCredentials: true });
 
 // 프로필 관련
 export const getUserProfile = () => axios.get(`${path}/profile`);
@@ -28,7 +29,28 @@ export const checkNicknameDuplicate = (nickname) =>
 export const checkDuplicateUser = (data) =>
   axios.post(`${path}/check-duplicate`, data);
 
+// 업데이트 관련
+export const updateNickname = (nickname) => 
+  axios.patch(`${path}/nickname`, { nickname });
+
 
 // 비밀번호 관련
 export const changePassword = (data) => axios.patch(`${path}/password`, data);
 
+export const getPointHistory = (userId) => axios.get(`${path}/pointhistory/${userId}`);
+
+export const deleteUser = (userId) => {
+  return axios
+    .delete(`${path}/account`, { userId })
+    .catch((e) => e.response);
+};
+
+export const getSelectedAll = () => axios.get(`${path}/missions/complete`);
+
+export const completeOnboardingAPI = async ({ userId, agreedTermsIds, surveyScore }) => {
+  return axios.post('/api/user/onboarding/complete', {
+    userId,
+    agreedTermsIds,
+    surveyScore
+  });
+};

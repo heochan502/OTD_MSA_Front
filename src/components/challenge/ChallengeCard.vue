@@ -14,9 +14,9 @@ const FILE_URL = import.meta.env.VITE_BASE_URL;
 </script>
 
 <template>
-  <div class="challenge-card">
+  <div class="challenge-card otd-box-shadow">
     <img
-      :src="`${FILE_URL}${props.image}`"
+      :src="`${FILE_URL}/${props.image}`"
       :alt="`${props.name}`"
       class="challenge-img"
     />
@@ -29,17 +29,16 @@ const FILE_URL = import.meta.env.VITE_BASE_URL;
 
 <style lang="scss" scoped>
 .challenge-card {
-  position: relative;
+  position: relative; /* ← point-box 기준 */
   width: 168px;
   height: 121px;
   border-radius: 10px;
-  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  margin-bottom: 15px;
+  cursor: pointer;
   .challenge-img {
-    width: 168px;
-    height: 121px;
-    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   .point-box {
@@ -54,6 +53,7 @@ const FILE_URL = import.meta.env.VITE_BASE_URL;
     top: 5px;
     right: 5px;
     gap: 2px;
+
     .point {
       margin-left: 4px;
       width: 14px;

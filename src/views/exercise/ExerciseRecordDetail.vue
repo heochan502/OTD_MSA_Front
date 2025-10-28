@@ -1,48 +1,214 @@
 <script setup>
+import { onMounted, reactive, computed, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import dayjs from "dayjs";
+import isoWeek from "dayjs/plugin/isoWeek";
+
+import {
+  deleteExerciseRecord,
+  getExerciseRecordDetail,
+  getExerciseRecordList,
+  getExerciseRecordWeekly,
+} from "@/services/exercise/exerciseService";
+import { formatTimeKR, formatDateISO } from "@/utils/dateTimeUtils";
+import { calcDuration } from "@/utils/exerciseUtils";
+
+import { useExerciseRecordStore } from "@/stores/exercise/exerciseRecordStore";
+
+import effortLevels from "@/assets/effortLevels.json";
 import WeeklyCalendar from "@/components/exercise/WeeklyCalendar.vue";
+import BarChart from "@/components/exercise/BarChart.vue";
+import Modal from "@/components/user/Modal.vue";
 
-import { ref } from "vue";
+dayjs.extend(isoWeek);
 
-const hasDistance = false;
+const route = useRoute();
+const router = useRouter();
+const exerciseRecordStore = useExerciseRecordStore();
+const selectedDate = ref();
+const selectionItems = ref([]); // 모달에 보여질 운동 기록들
+const selectionDialog = ref(false); // 운동 선택용 모달 열림 여부
+const noticeDialog = ref(false); // 기록 없을 때 모달
+const confirmDialog = ref(false); // 삭제 확인용 모달
+const recordId = route.params.exerciseRecordId;
+
+const state = reactive({
+  record: {},
+  weeklyRecords: [],
+});
+const currentRecordDate = computed(() => {
+  if (!state.record?.startAt) return null;
+  return new Date(state.record.startAt); // JS Date 객체로 변환
+});
+
+// 선택된 운동
+const selectedExercise = computed(() => {
+  if (!state.record.exerciseId) return 0;
+  return exerciseRecordStore.exerciseList.find(
+    (e) => e.exerciseId === state.record.exerciseId
+  );
+});
+// 거리기반운동 여부
+const hasDistance = computed(() => {
+  return selectedExercise.value ? selectedExercise.value.hasDistance : 0; // 1 또는 0 그대로 반환
+});
+// 반복횟수기반운동 여부
+const hasReps = computed(() => {
+  return selectedExercise.value ? selectedExercise.value.hasReps : 0; // 1 또는 0 그대로 반환
+});
+// 운동 소요시간
+const duration = computed(() =>
+  calcDuration(state.record.startAt, state.record.endAt)
+);
+
+onMounted(() => {
+  getData(recordId);
+});
+
+// 운동 불러오기
+const getData = async (recordId) => {
+  // console.log("기록 불러올게요");
+  if (!recordId) {
+    // console.log("기록을 못 찾았어요");
+    return;
+  }
+
+  const res = await getExerciseRecordDetail(recordId);
+
+  if (res === undefined || res.status !== 200) {
+    alert(`에러발생? ${res.status}`);
+    return;
+  }
+
+  state.record = res.data;
+};
+
+const onDateClick = async (date) => {
+  // 날짜를 선택한 날 기록이 2개 이상이면 모달창을 띄우고 선택한 운동기록을 화면에 보여지게 하기
+
+  exerciseRecordStore.clearRecords();
+  selectedDate.value = date;
+  // date 는 JS Date 객체 (컴포넌트에서 toDate()로 emit)
+  // console.log("선택날짜", selectedDate.value);
+  const params = {
+    page: 1,
+    row_per_page: 2,
+    type: "daily",
+    date: date, // YYYY-MM-DD 형태
+  };
+
+  const res = await getExerciseRecordList(params);
+  if (res === undefined || res.status !== 200) {
+    alert(`에러발생? ${res.status}`);
+    return;
+  }
+  exerciseRecordStore.records = res.data;
+
+  console.log("기록 몇 개인가요?");
+  if (exerciseRecordStore.records.length === 0) {
+    console.log("0개");
+    noticeDialog.value = true;
+  } else if (exerciseRecordStore.records.length === 1) {
+    console.log("1개");
+    console.log("[데이터]", exerciseRecordStore.records[0].exerciseRecordId);
+    getData(exerciseRecordStore.records[0].exerciseRecordId);
+  } else {
+    console.log("기록이 여러개입니다.");
+    selectionItems.value = exerciseRecordStore.records;
+    selectionDialog.value = true;
+  }
+};
+
+// 모달에서 선택된 기록
+const selectRecord = (record) => {
+  selectionDialog.value = false;
+  getData(record.exerciseRecordId);
+};
+
+watch(
+  () => state.record.startAt,
+  async (newStartAt) => {
+    if (!newStartAt) return;
+
+    const base = dayjs(newStartAt);
+    const params = {
+      startOfWeek: base.startOf("isoWeek").format("YYYY-MM-DDTHH:mm:ss"),
+      endOfWeek: base.endOf("isoWeek").format("YYYY-MM-DDTHH:mm:ss"),
+    };
+    const res = await getExerciseRecordWeekly(params);
+    if (res.status === 200) {
+      state.weeklyRecords = res.data;
+    }
+  }
+);
+
+// 삭제버튼
+const confirmYes = async () => {
+  const res = await deleteExerciseRecord(recordId);
+  if (res === undefined || res.status !== 200) {
+    alert("에러발생");
+    return;
+  }
+  router.back();
+};
 </script>
 
 <template>
   <div class="wrap otd-body-1">
     <!-- 상단 주간 달력 -->
     <div class="weekly_calendar">
-      <WeeklyCalendar />
+      <WeeklyCalendar
+        :recordDate="formatDateISO(currentRecordDate)"
+        @click-date="onDateClick"
+      />
     </div>
     <!-- 운동 기록 -->
     <div class="content_wrap">
       <div class="subtitle">
-        <span class="otd-subtitle-1">달리기</span>
-        <img src="\image\exercise\btn_trash.png" class="btn_delete" />
+        <span class="otd-subtitle-1">{{ state.record.exerciseName }}</span>
+        <img
+          src="\image\exercise\btn_trash.png"
+          class="btn_delete"
+          @click.prevent="confirmDialog = true"
+        />
       </div>
       <div class="content_main otd-top-margin">
         <div class="content_effort otd-box-style">
           <span>운동 강도</span>
-          <span class="emoji">{{ '😓' }}</span>
-          <span class="otd-subtitle-2">{{ '어려움' }}</span>
+          <span class="emoji">{{
+            effortLevels[state.record.effortLevel - 1]?.emoji
+          }}</span>
+          <span class="otd-body-1">{{
+            effortLevels[state.record.effortLevel - 1]?.label
+          }}</span>
         </div>
         <div class="content_detail otd-box-style">
           <div class="item_wrap mb-3">
             <div class="item">
               <span>시작 시간</span>
-              <span class="otd-subtitle-2">{{ 16 }}시{{ '00' }}분</span>
+              <span class="otd-subtitle-2">{{
+                formatTimeKR(state.record.startAt)
+              }}</span>
             </div>
             <div class="item">
               <span>운동 시간</span>
-              <span class="otd-subtitle-2">{{ 58 }}분</span>
+              <span class="otd-subtitle-2">{{ duration }}분</span>
             </div>
           </div>
           <div class="item_wrap">
             <div class="item">
               <span>킬로칼로리</span>
-              <span class="otd-subtitle-2">{{ '223' }}kcal</span>
+              <span class="otd-subtitle-2"
+                >{{ state.record.activityKcal }}kcal</span
+              >
             </div>
             <div v-if="hasDistance" class="item">
-              <span>{{ 거리 }}</span>
-              <span class="otd-subtitle-2">{{ '16시 00분' }}</span>
+              <span>거리</span>
+              <span class="otd-subtitle-2">{{ state.record.distance }}km</span>
+            </div>
+            <div v-if="hasReps" class="item">
+              <span>반복 횟수</span>
+              <span class="otd-subtitle-2">{{ state.record.reps }}회</span>
             </div>
           </div>
         </div>
@@ -53,14 +219,73 @@ const hasDistance = false;
         <span class="otd-subtitle-1">주간 운동 시간</span>
       </div>
       <div>
-        <!-- <WeeklyChart
-          :selectedDate="2025 - 09 - 17"
-          :logs="0"
-          label="exerciseDuration"
-        /> -->
+        <BarChart
+          :selectedDate="state.record.startAt"
+          :records="state.weeklyRecords"
+          label="duration"
+          class="mt-2"
+        ></BarChart>
       </div>
     </div>
   </div>
+
+  <!-- 모달창 -->
+  <v-dialog v-model="selectionDialog" max-width="350" min-height="100">
+    <div class="modal-container">
+      <v-card-title class="otd-subtitle-1"> 운동 기록 선택 </v-card-title>
+      <v-card-text>
+        <v-list>
+          <v-list-item
+            v-for="item in selectionItems"
+            :key="item.exerciseRecordId"
+          >
+            <div class="d-flex justify-space-between m-1">
+              <div>
+                <div class="otd-subtitle-2">
+                  {{
+                    exerciseRecordStore.exerciseList.find(
+                      (e) => e.exerciseId === String(item.exerciseId)
+                    )?.exerciseName || "운동명 없음"
+                  }}
+                </div>
+                <div class="otd-body-1">{{ duration }}분</div>
+              </div>
+              <v-btn @click="selectRecord(item)" class="otd-shadow btn_select">
+                보기
+              </v-btn>
+            </div>
+          </v-list-item>
+        </v-list>
+      </v-card-text>
+      <div class="d-flex justify-center">
+        <v-btn color="#393e46" @click="selectionDialog = false" class="btn"
+          >닫기</v-btn
+        >
+      </div>
+    </div>
+  </v-dialog>
+
+  <!-- 주간 캘린더에서 기록 없는 날 클릭했을 때 -->
+  <Modal
+    :show="noticeDialog"
+    title="알림"
+    message="운동 기록이 없는 날이에요"
+    type="info"
+    confirmText="닫기"
+    @close="noticeDialog = false"
+  />
+
+  <!-- 삭제 모달 -->
+  <Modal
+    :show="confirmDialog"
+    title="삭제 확인"
+    message="정말 기록을 삭제하겠습니까?"
+    type="warning"
+    confirm-text="삭제하기"
+    cancel-text="취소하기"
+    @confirm="confirmYes"
+    @close="confirmDialog = false"
+  />
 </template>
 
 <style lang="scss" scoped>
@@ -87,7 +312,8 @@ const hasDistance = false;
       flex-direction: column;
       align-items: center;
 
-      width: 130px;
+      // width: 130px;
+      width: 40%;
       height: 150px;
       padding: 20px;
 
@@ -96,7 +322,8 @@ const hasDistance = false;
       }
     }
     .content_detail {
-      width: 210px;
+      // width: 210px;
+      width: 55%;
       height: 150px;
       padding: 20px;
     }
@@ -116,5 +343,31 @@ const hasDistance = false;
 .btn_delete {
   width: 24px;
   height: 24px;
+}
+.btn_select {
+  background-color: #ffe864;
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+.modal-container {
+  background: white;
+  border-radius: 16px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  animation: modalSlideUp 0.3s ease-out;
+  padding: 16px;
+}
+.btn {
+  display: flex;
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 </style>

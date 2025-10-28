@@ -3,44 +3,85 @@ import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthenticationStore } from '@/stores/user/authentication';
 
-const route = useRoute(); //쿼리스트링 받기 위해 사용
-const router = useRouter(); //라우팅 처리를 위해 사용
-
+const route = useRoute();
+const router = useRouter();
 const authentication = useAuthenticationStore();
 
 onMounted(async () => {
+  const error = route.query.error;
+  const userId = route.query.user_id;
 
-    const error = route.query.error;
-    const userId = route.query.user_id;
+  // console.log('error:', error);
+  // console.log('userId:', userId);
 
-    console.log('error:', error);
-    console.log('userId:', userId);
-
-    if(error || !userId) { //error 쿼리스트링이 있거나 userId 쿼리스트링이 없다면
-        if(error) {
-            alert(error);
-        }
-        await router.push('/login'); // sign-in으로 라우팅
+  if (error || !userId) {
+    if (error) {
+      alert(error);
     }
-    //error 쿼리스트링 없었고, userId값 있다면
-    const nickName = route.query.nick_name;
-    const pic = route.query.pic;
+    await router.push('/user/login');
+    return;
+  }
 
-    const signedUser = { userId, nickName, pic }
+  const nickName = route.query.nick_name;
+  const pic = route.query.pic;
+  const email = route.query.email;
+  const providerType = route.query.provider_type;         
+  //const onboardingCompleted = route.query.onboarding_completed === 'true'; 
+  const onboardingCompleted = parseInt(route.query.onboarding_completed); 
+  const challengeRole = route.query.challenge_role;       
+  const userRole = route.query.user_role;                
 
-    console.log('signedUser: ', signedUser);
+  const signedUser = { 
+    userId, 
+    nickName, 
+    pic,
+    email,
+    providerType,          
+    onboardingCompleted,   
+    challengeRole,         
+    userRole               
+  };
 
-    authentication.setSignedUser(signedUser); //로그인 처리 하고
-    await router.push('/'); //루트로 라우팅
-})
+  //console.log('signedUser:', signedUser);
+
+
+  authentication.setSignedUser(signedUser);
+
+
+  if (authentication.needsOnboarding()) {
+    console.log('온보딩 필요 - 온보딩 페이지로 이동');
+    await router.push('/user/onboarding');
+  } else {
+    console.log('온보딩 완료 - 메인 페이지로 이동');
+    await router.push('/');
+  }
+});
 </script>
 
 <template>
-    <div>
-        <h1>소셜 로그인 처리 중...</h1>
-    </div>
+  <div class="oauth-loading">
+    <h1>소셜 로그인 처리 중...</h1>
+    <p>잠시만 기다려주세요.</p>
+  </div>
 </template>
 
 <style scoped>
+.oauth-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  text-align: center;
+}
 
+.oauth-loading h1 {
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+
+.oauth-loading p {
+  font-size: 16px;
+  color: #666;
+}
 </style>

@@ -9,9 +9,10 @@ const props = defineProps({
   reward: Number,
   goal: Number,
   unit: String,
+  note: String,
   exp: Number,
 });
-
+const formatNote = (note) => {};
 const isFlipped = ref(false);
 const toggleFlip = () => {
   isFlipped.value = !isFlipped.value;
@@ -28,9 +29,9 @@ const toggleFlip = () => {
       <!-- 뒷면 -->
       <div class="card-back otd-border otd-shadow">
         <h8>{{ name }}</h8>
-        <span>목표 : {{ goal + unit }}</span>
-        <span>경험치 : {{ exp }}xp</span>
-        <span>보상 : {{ reward }}p</span>
+        <span class="center">보상 : {{ exp }}xp / {{ reward }}p</span>
+        <span class="center">목표 : {{ goal + unit }}</span>
+        <span class="center" v-if="props.note">설명 : {{ note }}</span>
       </div>
     </div>
   </div>
@@ -62,8 +63,35 @@ const toggleFlip = () => {
     transform: rotateY(180deg);
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
+    border: solid 2px #5ee6eb;
+    border-radius: 10px;
+    background-color: #ffffff;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+    padding: 12px 16px;
+    box-sizing: border-box;
+    line-height: 1.5;
+
+    h8 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #222;
+      align-self: center;
+      margin-bottom: 8px;
+    }
+
+    .center {
+      text-align: center;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    /* 기본 span 스타일 */
+    span {
+      font-size: 13px;
+      color: #444;
+      width: 100%;
+    }
   }
 }
 </style>

@@ -1,21 +1,75 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, reactive, watch } from 'vue';
 import Progress from '@/components/challenge/Progress.vue';
 import ProgressJs from '@/components/challenge/ProgressJs.vue';
 
-import LineChart from '@/components/exercise/lineChart.vue';
+import StaticChart from '@/components/exercise/StaticChart.vue';
 
 import MealCard from '@/components/meal/MealDayCards.vue';
+import { useMealSelectedStore } from '@/stores/meal/mealStore.js';
 
 import BmiProg from '@/components/exercise/BmiProg.vue';
+import { getMyChallenge } from '@/services/challenge/challengeService';
+import { useRouter, useRoute } from 'vue-router';
 
-const challengeInfo = ref([
-  { challenge_name: '달리기 30km', progress: 62 },
-  { challenge_name: '운동시간 60시간', progress: 82 },
-  { challenge_name: '팔굽혀 펴기 100개', progress: 22 },
-  { challenge_name: '운동시간 50시간', progress: 72 },
-  { challenge_name: '일간 미션 ', progress: 100 },
-]);
+import { getChallengeSettlementLog } from '@/services/challenge/challengeService';
+import ChallengeSettlementCard from '@/components/challenge/ChallengeSettlementCard.vue';
+import { useChallengeStore } from '@/stores/challenge/challengeStore';
+
+import weather from '@/components/weather/weather.vue';
+import { useAuthenticationStore } from '@/stores/user/authentication';
+
+import dayjs from 'dayjs';
+import 'dayjs/locale/ko';
+
+const selectedDay = useMealSelectedStore();
+
+import { useBodyCompositionStore } from '@/stores/body_composition/bodyCompositionStore';
+import {
+  getSeries,
+  getLastestBodyComposition,
+} from '@/services/body_composition/bodyCompositionService';
+
+const state = reactive({
+  monthlySettlementLog: [],
+  weeklySettlementLog: [],
+});
+
+const challengeInfo = ref([]);
+const router = useRouter();
+const route = useRoute();
+const authentication = useAuthenticationStore();
+
+const userInfo = reactive({
+  nickName: '',
+  userPoint: 0,
+  pic: '',
+  xp: 0,
+});
+
+watch(() => authentication.state.signedUser,
+  (user) => {
+    if (user) {
+      userInfo.nickName = user.nickName;
+      userInfo.userPoint = user.point;
+      userInfo.pic = user.pic;
+      userInfo.xp = user.xp;
+    }
+  },
+  { deep: true, immediate: true }
+);
+
+const defaultProfile = '/otd/image/main/default-profile.png';
+// pic이 있으면 그걸 쓰고, 없으면 기본 이미지
+const profileImage = computed(() => {
+  return userInfo.pic ? userInfo.pic : defaultProfile;
+});
+const myRole = computed(() => authentication.state.signedUser?.userRole || '');
+
+// 포인트 포맷팅
+const formatPoint = (point) => {
+  return point?.toLocaleString() || '0';
+};
 
 const healthInfo = ref([
   { text: '체중(kg)', value: 70.5, check: true },
@@ -28,7 +82,6 @@ const fields = [
   { key: 'BFP', label: '체지방률', unit: '%' },
   { key: 'SMM', label: '골격근량', unit: 'kg' },
 ];
-const selectedField = ref(fields[0].key);
 
 const inbodyData = ref([
   { dataTime: '2025-09-22', weight: '62.4', BFP: '20', SMM: '23' },
@@ -55,62 +108,269 @@ const healthToggle = (index) => {
   }
 };
 
+const formatNumber = (n) => String(n).padStart(2, '0');
+const formatDate = (date) => {
+  const y = date.getFullYear();
+  const m = formatNumber(date.getMonth() + 1);
+  const d = formatNumber(date.getDate());
+  return `${y}-${m}-${d}`;
+};
+
+const todayDate = new Date();
+const year = todayDate.getFullYear();
+const month = todayDate.getMonth() + 1;
+
+const monthlySettlementDialog = ref(false);
+const weeklySettlementDialog = ref(false);
+
+const challengeStore = useChallengeStore();
+const bodyCompositionStore = useBodyCompositionStore();
+
+const selectedField = ref(
+  bodyCompositionStore.selectionMetrics[0]?.metricCode || null
+);
+
 onMounted(async () => {
-  
+  console.log('여기');
+  bodyCompositionStore.resetStore();
+  await fetchMonthlySettlement(todayDate);
+  await fetchWeeklySettlement(todayDate);
+  console.log('state', state.monthlySettlementLog, state.weeklySettlementLog);
+  const challenge = await getMyChallenge();
+  console.log('챌린지 : ', challenge);
+  challengeInfo.value = challenge?.data || null;
+  console.log('homechallenge', challengeInfo.value);
+
+  if (state.monthlySettlementLog.length > 0) {
+    monthlySettlementDialog.value = true;
+  } else if (state.weeklySettlementLog.length > 0) {
+    weeklySettlementDialog.value = true;
+  }
+
+  console.log('homechallenge', challengeInfo.value);
+  selectedDay.selectedDay.setDay = dayjs().format('YYYY-MM-DD');
+  await bodyCompositionStore.fetchBodyCompositionMetrics();
+  fetchBodyCompositionSeries();
+  fetchLastestBodyComposition();
 });
+
+const challengeHome = () => {
+  router.push('/challenge');
+};
+
+// 월간 정산 api호출
+const fetchMonthlySettlement = async (date) => {
+  const monthlyKey = formatDate(date).slice(0, 7);
+  console.log('monthlykey', monthlyKey);
+  console.log(
+    'challengeStore.state.lastMonthCheck',
+    challengeStore.state.lastMonthCheck
+  );
+  if (challengeStore.state.lastMonthCheck === monthlyKey) {
+    return;
+  } else {
+    const params = {
+      type: 'monthly',
+      settlementDate: formatDate(new Date(year, month - 1, 1)),
+    };
+    const res = await getChallengeSettlementLog(params);
+    console.log('res :', res);
+    state.monthlySettlementLog = res?.data || null;
+    challengeStore.state.lastMonthCheck = monthlyKey;
+  }
+};
+
+// 주간 정산 api호출
+const fetchWeeklySettlement = async (date) => {
+  const weeklyKey = setWeeklyKey(date);
+  console.log('weeklykey', weeklyKey);
+  console.log(
+    'challengeStore.state.lastWeekCheck',
+    challengeStore.state.lastWeekCheck
+  );
+  if (challengeStore.state.lastWeekCheck === weeklyKey) {
+    return;
+  } else {
+    const params = {
+      type: 'weekly',
+      settlementDate: formatDate(getMonday(date)),
+    };
+    const res = await getChallengeSettlementLog(params);
+    // console.log("res :",  res?.data || null);
+    state.weeklySettlementLog = res.data;
+    challengeStore.state.lastWeekCheck = weeklyKey;
+  }
+};
+
+// 월요일 날짜 구하기
+const getMonday = (date) => {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  return d;
+};
+
+// n주차 계산
+const setWeeklyKey = (date) => {
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = formatNumber(d.getMonth() + 1);
+  const week = Math.ceil((d.getDate() - d.getDay() + 1) / 7);
+  return `${year}-${month}-W${week}`;
+};
+
+const setModal = () => {
+  monthlySettlementDialog.value = false;
+  if (state.weeklySettlementLog.length > 0) {
+    weeklySettlementDialog.value = true;
+  }
+};
+
+// 체성분 데이터 받기
+const fetchBodyCompositionSeries = async () => {
+  const res = await getSeries();
+  if (res === undefined || res.status !== 200) {
+    alert(`에러발생? ${res.status}`);
+    return;
+  }
+  bodyCompositionStore.series = res.data;
+};
+
+const fetchLastestBodyComposition = async () => {
+  const res = await getLastestBodyComposition();
+  if (res === undefined || res.status !== 200) {
+    alert(`에러발생? ${res.status}`);
+    return;
+  }
+  bodyCompositionStore.lastest = res.data;
+};
 </script>
 
 <template>
   <div>
-    <v-dialog v-model="settlementDialog" max-width="300" min-height="100">
-    <v-card>
-      <v-card-title class="text-h8">정산</v-card-title>
-      <v-card-text>
-        <div class="challenge-info">챌린지는 2개까지만 도전 가능합니다</div>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer />
-        <v-btn color="dark" text @click="stopDialog = false">확인</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+    <v-dialog
+      v-model="monthlySettlementDialog"
+      max-width="330"
+      min-height="100"
+      class="modal-box"
+    >
+      <v-card class="modal-card">
+        <v-card-title class="text-h8">월간 정산이 완료되었어요!</v-card-title>
+        <v-card-text v-for="data in state.monthlySettlementLog">
+          <ChallengeSettlementCard
+            :settlement-data="data"
+          ></ChallengeSettlementCard>
+        </v-card-text>
+        <div class="btn-box">
+          <v-btn class="btn-confirm" text @click="setModal()">확인</v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+    <v-dialog
+      v-model="weeklySettlementDialog"
+      max-width="330"
+      min-height="100"
+      class="modal-box"
+    >
+      <v-card class="modal-card">
+        <v-card-title class="text-h8"
+          >지난 주 정산이 완료되었어요!</v-card-title
+        >
+        <v-card-text v-for="data in state.weeklySettlementLog">
+          <ChallengeSettlementCard
+            :settlement-data="data"
+          ></ChallengeSettlementCard>
+        </v-card-text>
+        <div class="btn-box">
+          <v-btn
+            class="btn-confirm"
+            text
+            @click="weeklySettlementDialog = false"
+            >확인</v-btn
+          >
+        </div>
+      </v-card>
+    </v-dialog>
+  </div>
+  <div class="wrap">
+    <div class="user" v-if="route.name === 'Home'">
+      <!-- 일반 유저 -->
+      <template v-if="['USER_1', 'USER_2'].includes(myRole)">
+        <div class="user-profile">
+          <img class="avatar otd-shadow" :src="profileImage" alt="프로필" />
+          <div class="info">
+            <weather />
+            <span class="otd-title">{{ userInfo.nickName }} 님</span>
+          </div>
+        </div>
+        <div class="point otd-body-1">
+          <router-link
+            to="/pointshop"
+            class="pointShop"
+            :class="{ active: route.path.startsWith('/pointshop') }"
+          >
+            <div class="point-wrap">
+              <img class="point-img" src="/image/main/point.png" alt="포인트" />
+              <span>{{ formatPoint(userInfo.userPoint) }}</span>
+            </div>
+          </router-link>
+        </div>
+      </template>
+
+      <!-- ADMIN & MANAGER -->
+      <template v-else>
+        <div class="admin-profile">
+          <span class="otd-title">관리자 님</span>
+          <div class="admin-panel">
+            <router-link to="/admin" class="admin-btn">
+              관리자 페이지로 이동
+            </router-link>
+          </div>
+        </div>
+      </template>
+    </div>
     <div class="top-wrap">
       <section class="meal">
         <MealCard />
       </section>
     </div>
-    <div class="wrap">
+    <div class="wrap_content">
       <section class="challenge-progress otd-top-margin">
         <span class="otd-subtitle-1">챌린지 달성률</span>
-        <div class="challenge-progress-card otd-top-margin">
-          <div class=" ">
+        <div
+          class="challenge-progress-card otd-top-margin"
+          @click="challengeHome"
+        >
+          <div class=" " v-if="challengeInfo?.length || 0 > 0">
             <div
               v-for="value in challengeInfo"
               class="d-flex justify-content-around align-items-center challenge-progress-container"
             >
               <span class="otd-body-3 space-span-start"
-                >{{ value.challenge_name }}
+                >{{ value.formatedName }}
               </span>
               <!-- 차트에 해당하는 데이터를 불러와서 그값을 뿌림-->
               <Progress
                 :class="{
                   'progress-chart': true,
-                  'progress-chart-high': value.progress > 70,
+                  'progress-chart-high': value.percent > 70,
                   'progress-chart-middle':
-                    value.progress > 30 && value.progress <= 70,
-                  'progress-chart-low': value.progress <= 30,
+                    value.percent > 30 && value.percent <= 70,
+                  'progress-chart-low': value.percent <= 30,
                 }"
-                :indata-progress="value.progress"
+                :indata-progress="value.percent"
               />
               <span class="otd-body-3 space-span-end"
-                >{{ value.progress }}%</span
+                >{{ value.percent }}%</span
               >
             </div>
           </div>
+          <div v-else>아직 진행중인 챌린지가 없어요!</div>
         </div>
       </section>
     </div>
-    <div class="wrap">
+    <div class="wrap wrap_content">
       <section class="health-progress otd-top-margin">
         <span class="otd-subtitle-1">건강</span>
         <div class="health-card">
@@ -124,8 +384,15 @@ onMounted(async () => {
         <!-- 선형 그래프 선택 부분 -->
         <v-item-group v-model="selectedField">
           <div class="otd-top-margin item-group">
-            <div v-for="(field, idx) in fields" :key="idx" class="card-wrapper">
-              <v-item v-slot="{ selectedClass, toggle }" :value="field.key">
+            <div
+              v-for="field in bodyCompositionStore.selectionMetrics"
+              :key="field.metricId"
+              class="card-wrapper"
+            >
+              <v-item
+                v-slot="{ selectedClass, toggle }"
+                :value="field.metricCode"
+              >
                 <v-card
                   :class="[
                     ` health-button d-flex flex-column justify-center align-center text-center`,
@@ -137,34 +404,22 @@ onMounted(async () => {
                 >
                   <div>
                     <span class="otd-body-3">
-                      {{ field.label }}({{ field.unit }})
+                      {{ field.metricName }}({{ field.unit }})
                     </span>
                   </div>
-                  <div class="otd-subtitle-1 text-center">
-                    {{ todayData?.[field.key] }}
-                  </div>
+                  <span class="otd-subtitle-1 text-center">
+                    {{ bodyCompositionStore.lastest[field.metricCode] || '-' }}
+                  </span>
                 </v-card>
               </v-item>
             </div>
           </div>
         </v-item-group>
-
-        <!-- <div class="otd-top-margin d-flex justify-content-between ">
-        <button v-for="(value, index) in healthInfo" :key="index" :class="{ 'health-button': true, 'health-button-active': value.check }" @click="healthToggle(index)">
-
-          <div class="d-flex flex-column align-items-center">
-            <span class="otd-body-3">{{ value.text }}</span>
-            <span class="otd-subtitle-1">{{ value.value }}</span>
-          </div>
-        </button>
-      </div> -->
-
         <div class="otd-top-margin">
-          <LineChart
-            :selected-date="today"
-            :selectedField="selectedField"
-            :fields="fields"
-            :logs="inbodyData"
+          <StaticChart
+            :series="bodyCompositionStore.series"
+            :metrics="bodyCompositionStore.metrics"
+            :selectedMetric="selectedField"
           />
         </div>
       </section>
@@ -172,9 +427,93 @@ onMounted(async () => {
   </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
+.wrap {
+  margin-top: 15px;
+}
+.user {
+  margin: 20px auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 350px;
+  width: 100%;
+}
+.user-profile {
+  display: flex;
+  flex-direction: row;
+}
+.avatar {
+  /* font-size: 32px; */
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+}
+.info {
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  font-size: 12px;
+  row-gap: 5px;
+  margin-left: 15px;
+}
+.point-img {
+  width: 20px;
+  height: 20px;
+}
+.point {
+  display: flex;
+  justify-content: center;
+  align-self: flex-end;
+  gap: 5px;
+  cursor: pointer;
+}
+.pointShop {
+  padding-top: 2px;
+  color: #303030;
+  text-decoration: none;
+  display: flex;
+  align-items: end;
+  span {
+    margin-left: 7px;
+  }
+}
+.point-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.admin-profile {
+  display: flex;
+  align-items: center;
+  // gap: 40px;
+  justify-content: space-between;
+}
+.admin-btn {
+  display: inline-block;
+  padding: 10px 16px;
+  background: #ffe864;
+  color: #000;
+  font-weight: 700;
+  border-radius: 10px;
+  text-decoration: none;
+}
+// 화면이 391px 이상일 때만 max-width + 중앙정렬 적용
+@media (min-width: 391px) {
+  .wrap {
+    max-width: 391px;
+    margin: 0 auto;
+    margin-top: 15px;
+  }
+}
 .top-wrap {
-  margin: 5px 20px;
+  // margin: 10px 20px 0 20px;
+}
+.wrap_content {
+  display: flex;
+  justify-content: center;
 }
 .progress-section {
   display: flex;
@@ -191,7 +530,30 @@ onMounted(async () => {
   color: #303030;
 }
 
-/* 
+.meal {
+  display: flex;
+  margin: 0 20px;
+  justify-content: center;
+}
+
+.meal-card {
+  width: 100%;
+  // min-width: 160px;
+}
+
+.btn-box {
+  padding-top: 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-confirm {
+  background: #5ee6eb;
+  color: white;
+  border-radius: 15px;
+}
+
+/*
 .meal-cards {
   width: 350px;
   height: 265px;
@@ -218,8 +580,6 @@ onMounted(async () => {
   overflow: visible;
 }
 
-
-
 .meal-top-img {
   width: 50px;
   height: 50px;
@@ -243,8 +603,24 @@ onMounted(async () => {
     height: 17px;
   }
 } */
+
+.modal-box {
+  border-radius: 15px;
+}
+.modal-card {
+  padding: 10px;
+  border-radius: 15px;
+}
+.text-h8 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+  align-self: center;
+}
 .challenge-progress-container {
   margin-bottom: 4px;
+  cursor: pointer;
 }
 
 .challenge-progress {
@@ -252,7 +628,6 @@ onMounted(async () => {
 }
 .challenge-progress-card {
   width: 350px;
-  height: 125px;
   padding: 10px;
   background: #fff;
   border-radius: 12px;
@@ -281,20 +656,25 @@ onMounted(async () => {
 
 .space-span-start {
   width: 30%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .space-span-end {
   width: 10%;
 }
 
 .health-card {
-  width: 350px;
-  height: 87px;
+  max-width: 350px;
+
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
 }
 
 .bmi-prog {
+  display: flex;
+  justify-content: center;
   padding: 10px;
 }
 
@@ -302,6 +682,7 @@ onMounted(async () => {
   display: flex;
   flex-wrap: nowrap;
   gap: 10px;
+  width: 350px;
 }
 .health-button {
   width: 110px;

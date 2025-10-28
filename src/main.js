@@ -23,6 +23,26 @@ import 'v-calendar/style.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap';
 
+// ✅ 기본 아바타 이미지(프로젝트 경로에 맞게 조정)
+import fallbackAvatar from '@/assets/img/community/default-profile.png';
+
+// window.addEventListener('load', () => {
+//   // localStorage.removeItem('authentication');
+// });
+// 모든 <img> 에러를 전역에서 잡아 기본 아바타로 교체
+window.addEventListener(
+  'error',
+  (e) => {
+    const el = e.target;
+    if (!el || el.tagName !== 'IMG') return;
+    const img = el; // HTMLImageElement
+    if (img._fallbackApplied) return;
+    img._fallbackApplied = true;
+    img.src = fallbackAvatar;
+  },
+  true
+);
+
 const app = createApp(App);
 const pinia = createPinia();
 const vuetify = createVuetify();

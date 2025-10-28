@@ -1,14 +1,54 @@
 <script setup>
-import { ref, computed, watch, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { join, checkUidDuplicate } from '@/services/user/userService'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import { useRouter } from 'vue-router';
+import {
+  join,
+  checkUidDuplicate,
+  checkNicknameDuplicate,
+} from '@/services/user/userService';
+import { termsService } from '@/services/user/termsService';
 
 const router = useRouter();
 const basePath = import.meta.env.VITE_BASE_URL;
 
-// 현재 단계 (1: 이메일인증, 2: 약관동의, 3: 계정정보, 4: 추가정보, 5: 설문조사, 6: 완료)
+// 현재 단계
 const currentStep = ref(1);
 const isLoading = ref(false);
+
+
+
+const termsData = ref([]);
+const termsMap = ref(new Map());
+
+// 공통 알림 모달
+const alertModal = ref({
+  show: false,
+  title: '',
+  message: '',
+  type: 'info',
+  onConfirm: null,
+});
+
+const showAlert = (title, message, type = 'info', onConfirm = null) => {
+  alertModal.value = {
+    show: true,
+    title,
+    message,
+    type,
+    onConfirm,
+  };
+};
+
+const closeAlert = () => {
+  alertModal.value.show = false;
+};
+
+const handleAlertConfirm = () => {
+  if (alertModal.value.onConfirm) {
+    alertModal.value.onConfirm();
+  }
+  closeAlert();
+};
 
 // 1단계: 이메일 인증 관련
 const email = ref('');
@@ -20,12 +60,10 @@ const emailTimer = ref(0);
 // 2단계: 약관 동의
 const agreements = ref({
   all: false,
-  service: false,
-  privacy: false,
-  marketing: false,
+  agreedTermsIds: [],
 });
 
-// 3단계: 계정 정보 
+// 3단계: 계정 정보
 const accountInfo = ref({
   uid: '',
   upw: '',
@@ -50,8 +88,22 @@ const validation = ref({
     isValid: true,
     message: '',
     touched: false,
-  }
-})
+  },
+  nickname: {
+    isValid: true,
+    message: '',
+    touched: false,
+    checked: false,
+    available: false,
+  },
+});
+
+const passwordCriteria = ref({
+  length: false,
+  letter: false,
+  number: false,
+  specialChar: false,
+});
 
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
@@ -75,8 +127,12 @@ const surveyAnswers = ref({
   fitness: null,
 });
 
-// 모달
-const showModal = ref('');
+// 약관 모달
+const showTermsModal = ref(false);
+const modalContent = ref({
+  title: '',
+  content: ''
+});
 
 // 설문 문항 데이터
 const surveyQuestions = [
@@ -142,6 +198,123 @@ onUnmounted(() => {
   }
 });
 
+// 전체 동의 토글 함수
+function toggleAll() {
+  agreements.value.all = !agreements.value.all;
+  
+  if (agreements.value.all) {
+    agreements.value.agreedTermsIds = termsData.value.map(t => t.termsId);
+  } else {
+    agreements.value.agreedTermsIds = [];
+  }
+}
+
+onMounted(async () => { 
+
+  try { 
+    const response = await termsService.getActiveTerms(); 
+
+    
+    // 다양한 응답 구조 처리
+    let termsArray = [];
+    
+    if (response.success && response.result) {
+      termsArray = response.result;
+    } else if (response.result) {
+      termsArray = response.result;
+    } else if (response.data) {
+      termsArray = response.data;
+    } else if (Array.isArray(response)) {
+      termsArray = response;
+    }
+    
+    
+    if (Array.isArray(termsArray) && termsArray.length > 0) {
+      termsData.value = termsArray; 
+
+      
+      termsData.value.forEach(term => { 
+        termsMap.value.set(term.type, term); 
+      }); 
+
+    } else {
+      console.error('약관 데이터가 배열이 아니거나 비어있습니다:', termsArray);
+      showAlert('오류', '약관 데이터 형식이 올바르지 않습니다.', 'error'); 
+    }
+  } catch (error) { 
+    console.error('약관 불러오기 실패:', error); 
+    console.error('에러 상세:', error.message, error.stack);
+    
+    // 404 에러 시 목 데이터 사용
+    if (error.response && error.response.status === 404) {
+      console.warn('API 엔드포인트를 찾을 수 없어 목 데이터를 사용합니다.');
+      
+      // 임시 목 데이터
+      termsData.value = [
+        {
+          termsId: 1,
+          type: 'SERVICE',
+          title: '서비스 이용약관',
+          content: '서비스 이용약관 내용입니다.\n\n제 1조 (목적)\n이 약관은 회사가 제공하는 서비스의 이용과 관련하여 회사와 회원 간의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.\n\n제 2조 (정의)\n1. "서비스"란 회사가 제공하는 모든 서비스를 의미합니다.\n2. "회원"이란 이 약관에 동의하고 회사와 서비스 이용계약을 체결한 자를 말합니다.',
+          isRequired: true
+        },
+        {
+          termsId: 2,
+          type: 'PRIVACY',
+          title: '개인정보 처리방침',
+          content: '개인정보 처리방침 내용입니다.\n\n제 1조 (개인정보의 처리 목적)\n회사는 다음의 목적을 위하여 개인정보를 처리합니다.\n1. 회원 가입 및 관리\n2. 서비스 제공\n3. 고객 문의 처리\n\n제 2조 (개인정보의 처리 및 보유 기간)\n회사는 법령에 따른 개인정보 보유·이용기간 또는 정보주체로부터 개인정보를 수집 시에 동의받은 개인정보 보유·이용기간 내에서 개인정보를 처리·보유합니다.',
+          isRequired: true
+        },
+        {
+          termsId: 3,
+          type: 'MARKETING',
+          title: '마케팅 정보 수신 동의',
+          content: '마케팅 정보 수신 동의 내용입니다.\n\n회사는 다음과 같은 마케팅 정보를 제공합니다:\n1. 신규 서비스 및 이벤트 안내\n2. 맞춤형 광고 정보\n3. 프로모션 및 혜택 안내\n\n수신 동의를 거부하실 수 있으며, 거부 시에도 서비스 이용에는 제한이 없습니다.',
+          isRequired: false
+        }
+      ];
+      
+      termsData.value.forEach(term => { 
+        termsMap.value.set(term.type, term); 
+      });
+    } else {
+      showAlert('오류', '약관을 불러오는데 실패했습니다.', 'error'); 
+    }
+  } 
+});
+
+// 생년월일 포맷팅 함수
+const formatBirthDate = (event) => {
+  let value = event.target.value.replace(/[^0-9]/g, '');
+
+  if (value.length <= 4) {
+    additionalInfo.value.birthDate = value;
+  } else if (value.length <= 6) {
+    additionalInfo.value.birthDate = `${value.slice(0, 4)}-${value.slice(4)}`;
+  } else {
+    additionalInfo.value.birthDate = `${value.slice(0, 4)}-${value.slice(
+      4,
+      6
+    )}-${value.slice(6, 8)}`;
+  }
+};
+
+// 전화번호 포맷팅 함수
+const formatPhoneNumber = (event) => {
+  let value = event.target.value.replace(/[^0-9]/g, '');
+
+  if (value.length <= 3) {
+    additionalInfo.value.phone = value;
+  } else if (value.length <= 7) {
+    additionalInfo.value.phone = `${value.slice(0, 3)}-${value.slice(3)}`;
+  } else {
+    additionalInfo.value.phone = `${value.slice(0, 3)}-${value.slice(
+      3,
+      7
+    )}-${value.slice(7, 11)}`;
+  }
+};
+
 // 아이디 유효성 검사 함수
 const validateMemberId = (uid) => {
   if (!uid.trim()) {
@@ -163,28 +336,32 @@ const validateMemberId = (uid) => {
       message: '아이디는 영문, 숫자, 언더스코어(_)만 사용 가능합니다.',
     };
   }
-  return { isValid: true, message: '' }
-}
+  return { isValid: true, message: '' };
+};
+
 const validateMemberNick = (nickname) => {
   if (!nickname) {
-    return { isValid: false, message: '닉네임을 입력해주세요.' }
+    return { isValid: false, message: '닉네임을 입력해주세요.' };
   }
   if (nickname.length < 2) {
-    return { isValid: false, message: '닉네임은 2자 이상이어야 합니다.' }
+    return { isValid: false, message: '닉네임은 2자 이상이어야 합니다.' };
   }
   if (nickname.length > 10) {
-    return { isValid: false, message: '닉네임은 최대 10자까지 입력 가능합니다.' }
+    return {
+      isValid: false,
+      message: '닉네임은 최대 10자까지 입력 가능합니다.',
+    };
   }
-  return { isValid: true, message: '' }
-}
+  return { isValid: true, message: '' };
+};
 
 // 비밀번호 유효성 검사 함수
 const validatePassword = (password) => {
   if (!password) {
     return { isValid: false, message: '비밀번호를 입력해주세요.' };
   }
-  if (password.length < 8) {
-    return { isValid: false, message: '비밀번호는 8자 이상이어야 합니다.' }
+  if (password.length < 10) {
+    return { isValid: false, message: '비밀번호는 10자 이상이어야 합니다.' };
   }
   if (password.length > 20) {
     return {
@@ -192,8 +369,34 @@ const validatePassword = (password) => {
       message: '비밀번호는 최대 20자까지 입력 가능합니다.',
     };
   }
-  return { isValid: true, message: '' }
-}
+
+  const hasLetter = /[a-z]/i.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>_\-+=[\]\\\/'`~;]/.test(
+    password
+  );
+
+  if (!hasLetter) {
+    return {
+      isValid: false,
+      message: '비밀번호에는 최소한 하나의 영문자가 포함되어야 합니다.',
+    };
+  }
+  if (!hasNumber) {
+    return {
+      isValid: false,
+      message: '비밀번호에는 최소한 하나의 숫자가 포함되어야 합니다.',
+    };
+  }
+  if (!hasSpecialChar) {
+    return {
+      isValid: false,
+      message: '비밀번호에는 최소한 하나의 특수문자가 포함되어야 합니다.',
+    };
+  }
+
+  return { isValid: true, message: '' };
+};
 
 // 비밀번호 확인 유효성 검사 함수
 const validatePasswordConfirm = (password, passwordConfirm) => {
@@ -306,50 +509,54 @@ const resetIdValidation = () => {
 
 // 닉네임중복검사
 const checkNicknameDuplicateAction = async () => {
-  const nickname = additionalInfo.value.nickname  // accountInfo -> additionalInfo로 수정
-  
+  const nickname = additionalInfo.value.nickname;
+
   if (!nickname) {
-    return
+    return;
   }
-  
-  const validationResult = validateMemberNick(nickname)
+
+  const validationResult = validateMemberNick(nickname);
   if (!validationResult.isValid) {
-    validation.value.nickname.touched = true
-    validation.value.nickname.isValid = false
-    validation.value.nickname.message = validationResult.message
-    return
+    validation.value.nickname.touched = true;
+    validation.value.nickname.isValid = false;
+    validation.value.nickname.message = validationResult.message;
+    return;
   }
-  
+
   try {
-    isLoading.value = true
-    const response = await checkNicknameDuplicate(nickname)  // import된 서비스 함수 호출
-    
-    validation.value.nickname.checked = true
-    validation.value.nickname.available = response.data.result.isAvailable
-    
+    isLoading.value = true;
+    const response = await checkNicknameDuplicate(nickname);
+
+    validation.value.nickname.checked = true;
+    validation.value.nickname.available = response.data.result.isAvailable;
+
     if (response.data.result.isAvailable) {
-      validation.value.nickname.message = '사용 가능한 닉네임입니다.'
-      validation.value.nickname.isValid = true
+      validation.value.nickname.message = '사용 가능한 닉네임입니다.';
+      validation.value.nickname.isValid = true;
     } else {
-      validation.value.nickname.message = '이미 사용중인 닉네임입니다.'
-      validation.value.nickname.isValid = false
+      validation.value.nickname.message = '이미 사용중인 닉네임입니다.';
+      validation.value.nickname.isValid = false;
     }
   } catch (error) {
-    console.error('닉네임 중복 검사 오류:', error)
-    generalError.value = '중복 확인 중 오류가 발생했습니다.'
-    setTimeout(() => (generalError.value = ''), 3000)
+    console.error('닉네임 중복 검사 오류:', error);
+    generalError.value = '중복 확인 중 오류가 발생했습니다.';
+    setTimeout(() => (generalError.value = ''), 3000);
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
+
 // 닉네임 변경 시 중복검사 상태 초기화
 const resetNicknameValidation = () => {
-  validation.value.nickname.checked = false
-  validation.value.nickname.available = false  
-  if (validation.value.nickname.touched && validation.value.nickname.message.includes('사용')) {  // uid -> nickname
-    validation.value.nickname.message = ''
+  validation.value.nickname.checked = false;
+  validation.value.nickname.available = false;
+  if (
+    validation.value.nickname.touched &&
+    validation.value.nickname.message.includes('사용')
+  ) {
+    validation.value.nickname.message = '';
   }
-}
+};
 
 // 워처 설정
 watch(
@@ -362,10 +569,25 @@ watch(
   }
 );
 
-watch(() => accountInfo.value.upw, (newValue) => {
-  if (validation.value.upw.touched) {
-    validateField('upw', newValue)
-  }}
+watch(
+  () => accountInfo.value.upw,
+  (newValue) => {
+    if (validation.value.upw.touched) {
+      validateField('upw', newValue);
+    }
+  }
+);
+
+watch(() => accountInfo.upw, (newValue) => {
+  passwordCriteria.value.length = newValue.length >= 10;
+  passwordCriteria.value.letter = /[a-z]/i.test(newValue);
+  passwordCriteria.value.number = /[0-9]/.test(newValue);
+  passwordCriteria.value.specialChar = /[!@#$%^&*(),.?":{}|<>_\-+=[\]\\\/'`~;]/.test(newValue);
+
+    if (validation.value.upw.touched) {
+      validateField('upw', newValue);
+    }
+  }
 );
 
 watch(
@@ -379,6 +601,35 @@ watch(
     }
   }
 );
+
+watch(
+  () => additionalInfo.value.nickname,
+  (newValue) => {
+    if (validation.value.nickname.touched) {
+      const result = validateMemberNick(newValue);
+      validation.value.nickname.isValid = result.isValid;
+      validation.value.nickname.message = result.message;
+    }
+    resetNicknameValidation();
+  }
+);
+
+// 개별 약관 체크 시 전체 동의 상태 업데이트
+watch(
+  () => agreements.value.agreedTermsIds.length,
+  (newLength) => {
+    agreements.value.all = newLength === termsData.value.length && termsData.value.length > 0;
+  }
+);
+
+
+const sortedTermsData = computed(() => {
+  return [...termsData.value].sort((a, b) => {
+    if (a.isRequired && !b.isRequired) return -1;
+    if (!a.isRequired && b.isRequired) return 1;
+    return 0;
+  });
+});
 
 // 설문 완료 여부
 const isSurveyCompleted = computed(() => {
@@ -416,13 +667,46 @@ const getFitnessRank = computed(() => {
   return { name: '브론즈', color: '#CD7F32' };
 });
 
+// 약관 동의 처리
+const handleAgreementChange = (termsId) => {
+  if (termsId === 'all') {
+    const newValue = !agreements.value.all;
+    agreements.value.all = newValue;
+
+    if (newValue) {
+      agreements.value.agreedTermsIds = termsData.value.map((t) => t.termsId);
+    } else {
+      agreements.value.agreedTermsIds = [];
+    }
+  } else {
+    const index = agreements.value.agreedTermsIds.indexOf(termsId);
+
+    if (index > -1) {
+      agreements.value.agreedTermsIds.splice(index, 1);
+    } else {
+      agreements.value.agreedTermsIds.push(termsId);
+    }
+
+    agreements.value.all =
+      agreements.value.agreedTermsIds.length === termsData.value.length;
+  }
+};
+
+// 약관 체크 여부 확인
+const isTermsChecked = (termsId) => {
+  return agreements.value.agreedTermsIds.includes(termsId);
+};
+
 // 다음 단계 진행 가능 여부
 const canProceedToNext = computed(() => {
   switch (currentStep.value) {
     case 1:
       return isEmailVerified.value;
     case 2:
-      return agreements.value.service && agreements.value.privacy;
+      const requiredTerms = termsData.value.filter((t) => t.isRequired);
+      return requiredTerms.every((term) =>
+        agreements.value.agreedTermsIds.includes(term.termsId)
+      );
     case 3:
       return (
         accountInfo.value.uid &&
@@ -434,16 +718,16 @@ const canProceedToNext = computed(() => {
         passwordMatchStatus.value.isMatch
       );
     case 4:
-  return (
-    additionalInfo.value.name &&
-    additionalInfo.value.birthDate &&
-    additionalInfo.value.phone &&
-    additionalInfo.value.gender &&
-    additionalInfo.value.nickname &&
-    validation.value.nickname.isValid &&     
-    validation.value.nickname.checked &&    
-    validation.value.nickname.available     
-  );
+      return (
+        additionalInfo.value.name &&
+        additionalInfo.value.birthDate &&
+        additionalInfo.value.phone &&
+        additionalInfo.value.gender &&
+        additionalInfo.value.nickname &&
+        validation.value.nickname.isValid &&
+        validation.value.nickname.checked &&
+        validation.value.nickname.available
+      );
     case 5:
       return isSurveyCompleted.value;
     default:
@@ -475,14 +759,18 @@ const sendVerificationEmail = async () => {
 
     if (response.ok) {
       isEmailSent.value = true;
-      emailTimer.value = 300; // 5분
-      alert('인증코드가 발송되었습니다.');
+      emailTimer.value = 300;
+      showAlert('전송 완료', '인증코드가 발송되었습니다.', 'success');
     } else {
       const error = await response.json();
-      alert(error.message || '이메일 발송에 실패했습니다.');
+      showAlert(
+        '전송 실패',
+        error.message || '이메일 발송에 실패했습니다.',
+        'error'
+      );
     }
   } catch (error) {
-    alert('네트워크 오류가 발생했습니다.');
+    showAlert('네트워크 오류', '네트워크 오류가 발생했습니다.', 'error');
   }
   isLoading.value = false;
 };
@@ -506,32 +794,18 @@ const verifyEmailCode = async () => {
 
     if (response.ok && result.result?.verified === true) {
       isEmailVerified.value = true;
-      alert('이메일 인증이 완료되었습니다.');
+      showAlert('인증 완료', '이메일 인증이 완료되었습니다.', 'success');
     } else {
-      alert(result.message || '인증코드가 일치하지 않습니다.');
+      showAlert(
+        '인증 실패',
+        result.message || '인증코드가 일치하지 않습니다.',
+        'error'
+      );
     }
   } catch (error) {
-    alert('네트워크 오류가 발생했습니다.');
+    showAlert('네트워크 오류', '네트워크 오류가 발생했습니다.', 'error');
   }
   isLoading.value = false;
-};
-
-// 약관 동의 처리
-const handleAgreementChange = (type) => {
-  if (type === 'all') {
-    const newValue = !agreements.value.all;
-    agreements.value.all = newValue;
-    agreements.value.service = newValue;
-    agreements.value.privacy = newValue;
-    agreements.value.marketing = newValue;
-  } else {
-    agreements.value[type] = !agreements.value[type];
-    const allSelected =
-      agreements.value.service &&
-      agreements.value.privacy &&
-      agreements.value.marketing;
-    agreements.value.all = allSelected;
-  }
 };
 
 // 프로필 이미지 업로드 처리
@@ -579,7 +853,7 @@ const handlePrevious = () => {
 // 회원가입 처리
 const submitJoin = async () => {
   isLoading.value = true;
-
+  const formData = new FormData();
   try {
     const joinData = {
       uid: accountInfo.value.uid,
@@ -590,94 +864,89 @@ const submitJoin = async () => {
       phone: additionalInfo.value.phone,
       gender: additionalInfo.value.gender,
       nickname: additionalInfo.value.nickname,
-      roles: ['유저'],
+      roles: ['USER_1'],
       surveyAnswers: calculateSurveyScore.value,
-    }
-    
-    // JSON 데이터 추가
+      agreedTermsIds: agreements.value.agreedTermsIds,
+    };
+
     formData.append(
       'req',
       new Blob([JSON.stringify(joinData)], {
         type: 'application/json',
-      })
+      }),
+      'req.json'
     );
 
-    // 프로필 이미지 추가
-    if (additionalInfo.value.pic) {
-      formData.append('pic', additionalInfo.value.pic);
-    }
-
-    console.log('FormData entries:');
-    for (let pair of formData.entries()) {
-      console.log(pair[0], pair[1]);
+    if (
+      additionalInfo.value.pic instanceof File ||
+      additionalInfo.value.pic instanceof Blob
+    ) {
+      formData.append(
+        'pic',
+        additionalInfo.value.pic,
+        additionalInfo.value.pic.name ?? 'pic'
+      );
     }
 
     await join(formData);
-
-    alert('회원가입이 완료되었습니다!');
-    router.push('/user/login');
+    showAlert('가입 완료', '회원가입이 완료되었습니다!', 'success', () =>
+      router.push('/user/login')
+    );
   } catch (error) {
-    console.error('회원가입 상세 오류:', error);
-    console.error('오류 응답:', error.response);
-    console.error('오류 요청:', error.request);
-    console.error('오류 메시지:', error.message);
-
-    let errorMessage = '회원가입에 실패했습니다.';
-    
-    if (error.response) {
-      // 서버에서 응답을 받았지만 오류 상태
-      const serverMessage = error.response.data?.message || error.response.data?.error;
-      errorMessage = serverMessage || `서버 오류 (${error.response.status}): ${error.response.statusText}`;
-      console.error('서버 응답 데이터:', error.response.data);
-    } else if (error.request) {
-      // 요청을 보냈지만 응답을 받지 못함
-      errorMessage = '서버와 통신할 수 없습니다. 네트워크 연결을 확인해주세요.';
-      console.error('요청 정보:', error.request);
-    } else {
-      // 요청 설정 중에 오류 발생
-      errorMessage = `요청 처리 중 오류: ${error.message}`;
-    }
-    
-    alert(errorMessage);
+    console.error('회원가입 오류:', error);
+    showAlert('가입 실패', '회원가입에 실패했습니다.', 'error');
   } finally {
     isLoading.value = false;
   }
 };
 
-// 약관 모달 내용
-const modalContent = {
-  service: {
-    title: '서비스 이용약관',
-    content: '서비스 이용약관 내용이 여기에 표시됩니다.',
-  },
-  privacy: {
-    title: '개인정보 처리방침',
-    content: '개인정보 처리방침 내용이 여기에 표시됩니다.',
-  },
-  marketing: {
-    title: '마케팅 정보 수신 동의',
-    content: '마케팅 정보 수신 동의 내용이 여기에 표시됩니다.',
-  },
+// 약관 내용 로드 및 모달 표시
+const loadTermsContent = (type) => {
+
+  if (!termsData.value || termsData.value.length === 0) {
+    console.error('약관 데이터가 없습니다.');
+    showAlert('오류', '약관 데이터를 불러오는 중입니다. 잠시 후 다시 시도해주세요.', 'error');
+    return;
+  }
+  
+  const term = termsData.value.find(t => {
+    return t.type === type;
+  });
+  
+
+  if (term) {
+
+    
+    modalContent.value.title = term.title || '약관';
+    modalContent.value.content = term.content || '내용을 불러올 수 없습니다.';
+    showTermsModal.value = true;
+
+  } else {
+    console.error('약관을 찾을 수 없습니다. type:', type);
+    showAlert('오류', '약관을 찾을 수 없습니다.', 'error');
+  }
+};
+
+
+const closeTermsModal = () => {
+  showTermsModal.value = false;
 };
 </script>
 
 <template>
   <div class="signup-container">
-    <!-- Header -->
     <div class="header"></div>
 
-    <!-- Progress Indicator -->
     <div v-if="currentStep <= 5" class="progress-container">
       <div class="progress-dots">
         <div
           v-for="step in 5"
           :key="step"
           :class="['progress-dot', { active: step <= currentStep }]"
-        />
+        ></div>
       </div>
     </div>
 
-    <!-- Content -->
     <div class="content">
       <!-- Step 1: 이메일 인증 -->
       <div v-if="currentStep === 1" class="step-container">
@@ -689,6 +958,7 @@ const modalContent = {
             placeholder="이메일"
             v-model="email"
             class="input-field"
+            @keyup.enter="sendVerificationEmail"
           />
 
           <button
@@ -712,20 +982,21 @@ const modalContent = {
               v-model="verificationCode"
               maxlength="6"
               class="input-field"
+              :disabled="isEmailVerified"
+              @keyup.enter="verifyEmailCode"
             />
-
+         
             <button
               @click="verifyEmailCode"
-              :disabled="verificationCode.length !== 6 || isLoading"
+              :disabled="verificationCode.length !== 6 || isLoading || isEmailVerified"
               class="btn btn-secondary"
             >
-              {{ isLoading ? '확인 중...' : '인증번호 확인' }}
+              {{ isEmailVerified ? '인증 완료' : isLoading ? '확인 중...' : '인증번호 확인' }}
             </button>
-
-            <div v-if="isEmailVerified" class="success-message">
+          </div>
+          <div v-if="isEmailVerified" class="success-message">
               ✓ 이메일 인증이 완료되었습니다
             </div>
-          </div>
         </div>
       </div>
 
@@ -734,69 +1005,39 @@ const modalContent = {
         <h2 class="step-title">서비스 이용동의</h2>
 
         <div class="form-group">
+          <!-- 전체동의 -->
           <div class="agreement-all">
             <label class="checkbox-container">
               <input
                 type="checkbox"
                 :checked="agreements.all"
-                @change="handleAgreementChange('all')"
+                @change="toggleAll"
                 class="checkbox"
               />
               <span class="checkbox-text font-medium">약관 전체동의</span>
             </label>
           </div>
 
+          <!-- 개별 약관 -->
           <div class="agreement-list">
-            <div class="agreement-item">
+            <div
+              v-for="term in sortedTermsData"
+              :key="term.termsId"
+              class="agreement-item"
+            >
               <label class="checkbox-container">
                 <input
                   type="checkbox"
-                  :checked="agreements.service"
-                  @change="handleAgreementChange('service')"
+                  :value="term.termsId"
+                  v-model="agreements.agreedTermsIds"
                   class="checkbox"
                 />
-                <span>(필수) 서비스 이용약관</span>
+                <span>
+                  {{ term.isRequired ? '(필수)' : '(선택)' }} {{ term.title }}
+                </span>
               </label>
               <button
-                @click="showModal = 'service'"
-                class="view-button"
-                type="button"
-              >
-                보기
-              </button>
-            </div>
-
-            <div class="agreement-item">
-              <label class="checkbox-container">
-                <input
-                  type="checkbox"
-                  :checked="agreements.privacy"
-                  @change="handleAgreementChange('privacy')"
-                  class="checkbox"
-                />
-                <span>(필수) 개인정보 처리방침</span>
-              </label>
-              <button
-                @click="showModal = 'privacy'"
-                class="view-button"
-                type="button"
-              >
-                보기
-              </button>
-            </div>
-
-            <div class="agreement-item">
-              <label class="checkbox-container">
-                <input
-                  type="checkbox"
-                  :checked="agreements.marketing"
-                  @change="handleAgreementChange('marketing')"
-                  class="checkbox"
-                />
-                <span>(선택) 마케팅 정보 수신 동의</span>
-              </label>
-              <button
-                @click="showModal = 'marketing'"
+                @click="loadTermsContent(term.type)"
                 class="view-button"
                 type="button"
               >
@@ -807,20 +1048,18 @@ const modalContent = {
         </div>
       </div>
 
-      <!-- Step 3: 계정 정보 (개선된 검증 시스템) -->
+      <!-- Step 3: 계정 정보 -->
       <div v-if="currentStep === 3" class="step-container">
         <h2 class="step-title">아이디 비밀번호 입력</h2>
 
-        <!-- 일반 에러 메시지 -->
         <div v-if="generalError" class="error-message">
           <div class="message-icon">⚠</div>
           <div>{{ generalError }}</div>
         </div>
 
         <div class="form-group">
-          <!-- 아이디 입력 및 중복검사 -->
           <div class="form-group">
-            <label for="uid">아이디 *</label>
+            <label for="uid">아이디</label>
             <div class="input-wrapper">
               <input
                 type="text"
@@ -864,9 +1103,8 @@ const modalContent = {
             </div>
           </div>
 
-          <!-- 비밀번호 입력 -->
           <div class="form-group">
-            <label for="upw"></label>
+            <label for="upw">비밀번호</label>
             <div class="input-wrapper">
               <input
                 :type="showPassword ? 'text' : 'password'"
@@ -937,12 +1175,10 @@ const modalContent = {
             >
               {{ validation.upw.message }}
             </div>
-            <p>비밀번호는 영문자, 숫자, 특수기호로 구성되며 10자 이상이어야 합니다.</p>
           </div>
 
-          <!-- 비밀번호 확인 -->
           <div class="form-group">
-            <label for="confirmPassword"></label>
+            <label for="confirmPassword">비밀번호 확인</label>
             <div class="input-wrapper">
               <input
                 :type="showConfirmPassword ? 'text' : 'password'"
@@ -1030,7 +1266,6 @@ const modalContent = {
         <h2 class="step-title">추가정보를 입력해주세요</h2>
 
         <div class="form-group">
-          <!-- 프로필 이미지 -->
           <div class="profile-image-container">
             <div class="profile-image-wrapper">
               <div class="profile-image">
@@ -1060,15 +1295,19 @@ const modalContent = {
 
           <input
             type="text"
-            placeholder="생년월일"
+            placeholder="생년월일 (YYYY-MM-DD)"
             v-model="additionalInfo.birthDate"
+            @input="formatBirthDate"
+            maxlength="10"
             class="input-field"
           />
 
           <input
             type="tel"
-            placeholder="휴대폰번호"
+            placeholder="휴대폰번호 (010-0000-0000)"
             v-model="additionalInfo.phone"
+            @input="formatPhoneNumber"
+            maxlength="13"
             class="input-field"
           />
 
@@ -1077,45 +1316,49 @@ const modalContent = {
             <option value="M">남성</option>
             <option value="F">여성</option>
           </select>
-
-         <!-- 닉네임 입력 및 중복검사 -->
-<div class="form-group">
-  <label for="nickname"></label>
-  <div class="input-wrapper">
-    <input
-      type="text"
-      id="nickname"
-      placeholder="닉네임을 입력해 주세요 (2~10자)"
-      v-model="additionalInfo.nickname"
-      :class="{
-        'input-field-with-button': true,
-        error: validation.nickname.touched && !validation.nickname.isValid,
-        success: validation.nickname.touched && validation.nickname.isValid && validation.nickname.available,
-      }"
-      @blur="validation.nickname.touched = true"
-      maxlength="10"
-    />
-    <button
-      type="button"
-      class="btn-small"
-      @click="checkNicknameDuplicateAction"
-      :disabled="isLoading"
-    >
-      <span v-if="isLoading">확인중...</span>
-      <span v-else>중복확인</span>
-    </button>
-  </div>
-  <div
-    v-if="validation.nickname.touched && validation.nickname.message"
-    :class="[
-      'field-message',
-      validation.nickname.isValid && validation.nickname.available ? 'field-success' : 'field-error'
-    ]"
-  >
-    {{ validation.nickname.message }}
-  </div>
-</div>
         </div>
+        <div class="form-group">
+            <label for="nickname"></label>
+            <div class="input-wrapper">
+              <input
+                type="text"
+                id="nickname"
+                placeholder="닉네임을 입력해 주세요 (2~10자)"
+                v-model="additionalInfo.nickname"
+                :class="{
+                  'input-field-with-button': true,
+                  error:
+                    validation.nickname.touched && !validation.nickname.isValid,
+                  success:
+                    validation.nickname.touched &&
+                    validation.nickname.isValid &&
+                    validation.nickname.available,
+                }"
+                @blur="validation.nickname.touched = true"
+                maxlength="10"
+              />
+              <button
+                type="button"
+                class="btn-small"
+                @click="checkNicknameDuplicateAction"
+                :disabled="isLoading"
+              >
+                <span v-if="isLoading">확인중...</span>
+                <span v-else>중복확인</span>
+              </button>
+            </div>
+            <div
+              v-if="validation.nickname.touched && validation.nickname.message"
+              :class="[
+                'field-message',
+                validation.nickname.isValid && validation.nickname.available
+                  ? 'field-success'
+                  : 'field-error',
+              ]"
+            >
+              {{ validation.nickname.message }}
+            </div>
+          </div>
       </div>
 
       <!-- Step 5: 설문조사 -->
@@ -1201,15 +1444,56 @@ const modalContent = {
     </div>
 
     <!-- 약관 모달 -->
-    <div v-if="showModal" class="modal-overlay" @click="showModal = ''">
-      <div class="modal" @click.stop>
-        <h3 class="modal-title">{{ modalContent[showModal]?.title }}</h3>
-        <div class="modal-content">
-          <p class="modal-text">{{ modalContent[showModal]?.content }}</p>
+    <transition name="modal-fade">
+      <div
+        v-if="showTermsModal"
+        class="modal-overlay"
+        @click="closeTermsModal"
+      >
+        <div class="modal-container" @click.stop>
+          <div class="modal-header">
+            <h3 class="modal-title">{{ modalContent.title }}</h3>
+            <button @click="closeTermsModal" class="modal-close-btn">
+              <svg class="icon-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p class="modal-text">{{ modalContent.content }}</p>
+          </div>
+          <div class="modal-footer">
+            <button @click="closeTermsModal" class="btn btn-primary">
+              확인
+            </button>
+          </div>
         </div>
-        <button @click="showModal = ''" class="btn btn-primary">확인</button>
       </div>
-    </div>
+    </transition>
+
+    <!-- 공통 알림 모달 -->
+    <transition name="modal-fade">
+      <div
+        v-if="alertModal.show"
+        class="modal-overlay"
+        @click="closeAlert"
+      >
+        <div class="alert-modal" @click.stop>
+          <div class="alert-icon" :class="alertModal.type">
+            <span v-if="alertModal.type === 'success'">✓</span>
+            <span v-else-if="alertModal.type === 'error'">✕</span>
+            <span v-else>ℹ</span>
+          </div>
+          <h3 class="alert-title">{{ alertModal.title }}</h3>
+          <p class="alert-message">{{ alertModal.message }}</p>
+          <div class="alert-buttons">
+            <button @click="handleAlertConfirm" class="btn btn-primary">
+              확인
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -1219,7 +1503,6 @@ const modalContent = {
 }
 
 .signup-container {
-  min-height: 100vh;
   background-color: #ffffff;
 }
 
@@ -1231,38 +1514,9 @@ const modalContent = {
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
-.back-button {
-  margin-right: 0.75rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #374151;
-}
-
-.title-gray {
-  color: #9ca3af;
-}
-
-.icon-xs {
-  width: 1rem;
-  height: 1rem;
-}
 .icon-sm {
   width: 1.25rem;
   height: 1.25rem;
-}
-.icon-md {
-  width: 1.5rem;
-  height: 1.5rem;
-}
-.icon-lg {
-  width: 2rem;
-  height: 2rem;
 }
 
 .progress-container {
@@ -1323,11 +1577,6 @@ const modalContent = {
   outline: none;
   border-color: #10b981;
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
-.input-field:disabled {
-  background-color: #f3f4f6;
-  cursor: not-allowed;
 }
 
 .input-wrapper {
@@ -1425,7 +1674,10 @@ const modalContent = {
 .btn-secondary {
   background-color: #393e46;
   color: white;
-  gap: 3px;
+}
+
+.verification-section .btn {
+  margin-top: 0.5rem; 
 }
 
 .btn-secondary:hover:not(:disabled) {
@@ -1444,11 +1696,6 @@ const modalContent = {
 
 .btn-outline:hover:not(:disabled) {
   background-color: #f9fafb;
-}
-
-.btn-outline:disabled {
-  background-color: #f3f4f6;
-  color: #9ca3af;
 }
 
 .btn-start {
@@ -1498,6 +1745,7 @@ const modalContent = {
   color: #10b981;
   text-align: center;
   font-weight: 500;
+  padding-top: 20px;
 }
 
 .error-message {
@@ -1585,6 +1833,7 @@ const modalContent = {
   background: none;
   border: none;
   cursor: pointer;
+  padding: 0.25rem 0.5rem;
 }
 
 .view-button:hover {
@@ -1618,7 +1867,6 @@ const modalContent = {
   object-fit: cover;
 }
 
-/* 설문조사 스타일 */
 .questions-container {
   margin-bottom: 20px;
 }
@@ -1697,7 +1945,6 @@ const modalContent = {
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
-/* 결과 페이지 스타일 */
 .result-container {
   text-align: center;
   padding: 2rem 1rem;
@@ -1740,6 +1987,11 @@ const modalContent = {
   gap: 0.75rem;
 }
 
+.full-width {
+  width: 100%;
+}
+
+/* 모달 스타일 */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -1747,45 +1999,160 @@ const modalContent = {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 50;
+  z-index: 1000;
+  padding: 1rem;
 }
 
-.modal {
+.modal-container {
   background-color: white;
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-  max-width: 28rem;
+  border-radius: 0.75rem;
   width: 100%;
-  margin: 0 1rem;
-  max-height: 24rem;
+  max-width: 500px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .modal-title {
   font-size: 1.125rem;
   font-weight: 600;
-  margin-bottom: 1rem;
+  margin: 0;
+  color: #111827;
 }
 
-.modal-content {
+.modal-close-btn {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  transition: all 0.2s;
+}
+
+.modal-close-btn:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+.modal-body {
+  flex: 1;
   overflow-y: auto;
-  max-height: 16rem;
-  margin-bottom: 1rem;
+  padding: 1.5rem;
 }
 
 .modal-text {
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
+  color: #374151;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+.modal-footer {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* 알림 모달 스타일 */
+.alert-modal {
+  background-color: white;
+  border-radius: 0.75rem;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.alert-icon {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.alert-icon.success {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.alert-icon.error {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.alert-icon.info {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.alert-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #111827;
+}
+
+.alert-message {
+  font-size: 0.9375rem;
   color: #6b7280;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
 }
 
-.text-gray-400 {
-  color: #9ca3af;
+.alert-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
 }
 
-.text-white {
-  color: white;
+.gap {
+  gap: 0.5rem;
 }
 
-/* 반응형 */
+/* 모달 애니메이션 */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+
+.modal-fade-enter-active .modal-container,
+.modal-fade-enter-active .alert-modal,
+.modal-fade-leave-active .modal-container,
+.modal-fade-leave-active .alert-modal {
+  transition: transform 0.2s ease;
+}
+
+.modal-fade-enter-from .modal-container,
+.modal-fade-enter-from .alert-modal,
+.modal-fade-leave-to .modal-container,
+.modal-fade-leave-to .alert-modal {
+  transform: scale(0.95);
+}
+
 @media (max-width: 600px) {
   .step-container {
     max-width: 100%;
@@ -1818,6 +2185,10 @@ const modalContent = {
 
   .result-title {
     font-size: 1.3rem;
+  }
+
+  .modal-container {
+    max-width: 95%;
   }
 }
 </style>
