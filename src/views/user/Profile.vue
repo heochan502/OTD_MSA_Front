@@ -615,12 +615,23 @@ onMounted(() => {
   />
 </template>
 
+<style lang="scss">
+body,
+#app {
+  display: flex;
+  justify-content: center;
+  background: #FAFAFA;
+}
+</style>
+
 <style scoped lang="scss">
 .profile-container {
-  max-width: 600px;
+  width: 100%;
+  max-width: 390px;
   margin: 0 auto;
-  padding: 20px;
-  background: #fff;
+  background: #FAFAFA;
+  padding: 30px 20px 92px;
+  color: #303030;
   min-height: 100vh;
 }
 
@@ -707,7 +718,6 @@ onMounted(() => {
   }
 }
 
-// 모달 스타일
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -903,6 +913,7 @@ onMounted(() => {
       text-decoration: none;
       color: #333;
       transition: all 0.2s ease;
+      white-space: nowrap;
 
       &:hover {
         background: #e9ecef;
@@ -925,9 +936,9 @@ onMounted(() => {
 .point-section {
   margin-bottom: 30px;
   padding: 20px;
-  background: #fff8e1;
+  background: #FFF3E0;
   border-radius: 16px;
-  border: 1px solid #ffd54f;
+  border: 1px solid #FFE0B2;
 
   .point-header {
     display: flex;
@@ -938,7 +949,7 @@ onMounted(() => {
     .point-value {
       font-size: 24px;
       font-weight: bold;
-      color: #f57c00;
+      color: #FFB74D;
     }
   }
 
@@ -1004,7 +1015,7 @@ onMounted(() => {
       display: block;
       text-align: center;
       margin-top: 16px;
-      color: #f57c00;
+      color: #FFB74D;
       text-decoration: none;
       font-weight: 500;
 
@@ -1015,7 +1026,6 @@ onMounted(() => {
   }
 }
 
-// 내가 구매한 아이템 목록
 .purchased-section {
   margin-bottom: 30px;
   padding: 20px;
@@ -1024,23 +1034,25 @@ onMounted(() => {
   border: 1px solid #eee;
 
   .purchased-list {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 16px;
   }
 
-  .purchased-item {
-    flex: 1 1 45%;
+   .purchased-item {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     background: white;
     border-radius: 12px;
     padding: 12px;
-    gap: 12px;
+    gap: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-    transition: transform 0.2s ease;
-    cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+    box-sizing: border-box;
+    min-height: 90px;
+    overflow: hidden;
 
     &:hover {
       transform: translateY(-3px);
@@ -1048,50 +1060,56 @@ onMounted(() => {
     }
 
     .purchased-img {
-      width: 60px;
-      height: 60px;
+      width: 50px;
+      height: 50px;
       object-fit: cover;
       border-radius: 8px;
       border: 1px solid #eee;
+      flex-shrink: 0;
     }
 
     .purchased-info {
       flex: 1;
+      min-width: 0; // ✅ ellipsis 적용을 위해 필요
 
       .purchased-name {
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 600;
         color: #333;
         margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .purchased-point {
         color: #d32f2f;
         font-weight: 600;
         margin-bottom: 2px;
+        font-size: 13px;
       }
 
       .purchased-date {
-        font-size: 12px;
+        font-size: 11px;
         color: #888;
       }
     }
   }
 
   .view-all-link {
-      display: block;
-      text-align: center;
-      width: 100%;
-      margin-top: 16px;
-      color: #f57c00;
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.2s ease;
+    display: block;
+    text-align: center;
+    width: 100%;
+    margin-top: 16px;
+    color: #FFB74D;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
 
-      &:hover {
-        text-decoration: underline;
-      }
+    &:hover {
+      text-decoration: underline;
     }
+  }
 
   .loading-message,
   .no-history {
@@ -1190,6 +1208,7 @@ onMounted(() => {
       transform: none;
     }
   }
+
   :deep(.modal-container .btn-confirm) {
     background-color: #f28b82 !important;
     color: white !important;
@@ -1200,19 +1219,18 @@ onMounted(() => {
   }
 }
 
-// 반응형 디자인
 @media (max-width: 768px) {
   .profile-container {
     padding: 16px;
   }
-
+  .purchased-list {
+    grid-template-columns: 1fr;
+  }
   .activity-grid {
     grid-template-columns: 1fr;
-
     .activity-item {
       flex-direction: row;
       text-align: left;
-
       .activity-icon {
         margin-bottom: 0;
       }
@@ -1234,6 +1252,7 @@ onMounted(() => {
     width: 95%;
   }
 }
+
 .arrowpic {
   position: absolute;
   right: 20px;
