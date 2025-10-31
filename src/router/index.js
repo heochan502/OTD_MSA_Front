@@ -298,7 +298,7 @@ const router = createRouter({
     {
       path: '/pointshop',
       name: 'PointDashboard',
-      component: () => import('@/views/pointshop/PointDashboardView.vue'),
+      component: () => import('../views/pointshop/PointDashboardView.vue'),
       meta: { headerType: 'title', title: '포인트샵', showUserPanel: false },
     },
     {
@@ -310,7 +310,7 @@ const router = createRouter({
     {
       path: '/pointshop/purchase-history/detail/:id',
       name: 'PointPurchaseDetail',
-      component: () => import('@/views/pointshop/PointPurchaseDetailView.vue'),
+      component: () => import('../views/pointshop/PointPurchaseDetailView.vue'),
       props: true
     },
     {
@@ -322,19 +322,19 @@ const router = createRouter({
     {
       path: '/admin/pointshop/dashboard',
       name: 'AdminPointDashboard',
-      component: () => import('@/views/pointshop/AdminPointDashboardView.vue'),
+      component: () => import('../views/pointshop/AdminPointDashboardView.vue'),
       meta: { requiresAuth: true, requiresAdmin: true },
     },
     {
       path: '/admin/pointshop/charge',
       name: 'AdminPointCharge',
-      component: () => import('@/views/pointshop/AdminPointChargeView.vue'),
-      meta: { headerType: 'title', title: '포인트 충전 (관리자)', requiresAdmin: true},
+      component: () => import('../views/pointshop/AdminPointChargeView.vue'),
+      meta: { headerType: 'title', title: '포인트 충전 (관리자)', requiresAdmin: true },
     },
     {
       path: '/admin/pointshop/category',
       name: 'AdminPointCategory',
-      component: () => import('@/views/pointshop/AdminPointCategoryView.vue'),
+      component: () => import('../views/pointshop/AdminPointCategoryView.vue'),
       meta: { requiresAuth: true, requiresAdmin: true },
     },
     {

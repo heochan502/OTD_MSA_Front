@@ -195,15 +195,12 @@ const fetchRecentHistory = async () => {
     loadingHistory.value = true;
     const userId = authStore.state.signedUser?.userId;
 
-    if (!userId || userId === 0) {
-      return;
-    }
+    if (!userId || userId === 0) return;
 
     const response = await getPointHistory(userId);
     const pointHistory = response.data.result?.pointHistory || [];
 
     const missionResponse = await getSelectedAll();
-
     const result = missionResponse.data.result;
     let missionComplete = [];
     let dailyMission = [];
@@ -218,7 +215,7 @@ const fetchRecentHistory = async () => {
 
     const combined = [];
 
-    // 포인트 히스토리 추가
+    // 포인트 히스토리
     pointHistory.forEach((item) => {
       combined.push({
         type: 'point',
@@ -229,23 +226,31 @@ const fetchRecentHistory = async () => {
       });
     });
 
-    // 미션 완료 내역 추가
+    // 미션 완료 내역
     missionComplete.forEach((mission) => {
       const missionDetail = dailyMission.find(
         (m) => String(m.cdId) === String(mission.cdId)
       );
+
       if (missionDetail) {
+        // successDate가 날짜만 있을 경우 시각을 현재 시간으로 보정
+        const createdAt = mission.successDate.includes('T')
+          ? mission.successDate
+          : `${mission.successDate}T${new Date()
+              .toTimeString()
+              .split(' ')[0]}`;
+
         combined.push({
           type: 'mission',
           reason: '✅ 일일 미션: ' + missionDetail.cdName,
           point: missionDetail.cdReward,
-          createdAt: mission.successDate,
+          createdAt,
           id: `mission-${mission.cdId}-${mission.successDate}`,
         });
       }
     });
 
-    // 포인트 구매 이력
+    // 구매 내역
     const { default: PointPurchaseService } = await import('@/services/pointshop/PointPurchaseService');
     const purchaseRes = await PointPurchaseService.getUserPurchaseHistory();
     const purchaseList = purchaseRes?.data ?? [];
@@ -253,18 +258,23 @@ const fetchRecentHistory = async () => {
       combined.push({
         type: 'purchase',
         reason: `🛒 ${p.pointItemName}`,
-        point: -Math.abs(p.pointScore), // 음수 처리
+        point: -Math.abs(p.pointScore),
         createdAt: p.purchaseAt,
         id: `purchase-${p.purchaseId}`,
       });
     });
 
-    // 최신순 정렬 후 최근 2개만
+    // 최신순 정렬 + 타입 우선순위 보정 (미션 > 포인트 > 구매)
     recentHistory.value = combined
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .sort((a, b) => {
+        const timeDiff = new Date(b.createdAt) - new Date(a.createdAt);
+        if (timeDiff !== 0) return timeDiff;
+        const priority = { mission: 3, point: 2, purchase: 1 };
+        return (priority[b.type] || 0) - (priority[a.type] || 0);
+      })
       .slice(0, 2);
   } catch (err) {
-    console.error('포인트 히스토리 조회 실패 백켰나?쿠키있나?:', err);
+    console.error('포인트 히스토리 조회 실패:', err);
     console.error('에러 응답:', err.response?.data);
     recentHistory.value = [];
   } finally {

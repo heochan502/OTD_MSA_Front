@@ -55,10 +55,29 @@ const PointPurchaseService = {
       return {
         success: false,
         message: err.response?.data?.message || '구매 이력 불러오기 실패',
-        data: null, // null 반환: 기존 리스트 유지용
+        data: null,
       };
     }
-  }
+  },
+
+  // [GET] 단일 구매 상세 조회
+  async getPurchaseDetail(purchaseId) {
+    try {
+      const res = await axios.get(`/pointshop/purchase/${purchaseId}`);
+      return {
+        success: true,
+        message: res.data?.message || '구매 상세 조회 성공',
+        data: res.data?.data ?? null,
+      };
+    } catch (err) {
+      console.error('[PointPurchaseService] 구매 상세 조회 실패:', err);
+      return {
+        success: false,
+        message: err.response?.data?.message || '구매 상세 조회 실패',
+        data: null,
+      };
+    }
+  },
 };
 
 export default PointPurchaseService;

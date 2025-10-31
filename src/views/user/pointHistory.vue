@@ -51,15 +51,17 @@ const fetchData = async () => {
     if (purchaseResponse?.success || purchaseResponse?.data) {
       const purchaseData = purchaseResponse.data || [];
       purchaseData.forEach((p) => {
-        pointHistory.value.push({
-          type: 'purchase',
-          reason: `🛒 포인트샵 구매: ${p.pointItemName}`,
-          point: -Math.abs(p.pointScore || 0),
-          createdAt: p.purchaseAt || new Date(),
-          id: `purchase-${p.purchaseId}`,
-          purchaseId: p.purchaseId,
-        });
+      pointHistory.value.push({
+        type: 'purchase',
+        reason: `🛒 포인트샵 구매: ${p.pointItemName}`,
+        point: -Math.abs(p.pointScore || 0),
+        createdAt: p.purchaseAt || new Date(),
+        id: `purchase-${p.purchaseId}`,
+        purchaseId: p.purchaseId,
+        isUsed: p.isUsed || false,
+        isUsed: p.isUsed ?? p.used ?? p.usedYn === 'Y' ?? false
       });
+    });
     }
 
   } catch (err) {
@@ -87,44 +89,29 @@ const allHistory = computed(() => {
       createdAt: item.createdAt,
       id: item.id || `point-${item.chId}`,
       purchaseId: item.purchaseId || null,
+      isUsed: item.isUsed ?? item.used ?? item.usedYn === 'Y' ?? false,
     });
   });
 
   // 일일 미션 완료 내역 추가 (전체)
-  missionComplete.value.forEach((mission, index) => {
-    const missionDetail = dailyMission.value.find(m => String(m.cdId) === String(mission.cdId));
-    if (missionDetail) {
-      combined.push({
-        type: 'mission',
-        reason: missionDetail.cdName,
-        point: missionDetail.cdReward,
-        createdAt: mission.successDate,
-        id: `mission-${mission.cdId}-${mission.successDate}`
-      });
-    }
-  });
-  
-  // 일일 미션 완료 내역 추가 (전체)
-  missionComplete.value.forEach((mission, index) => {
-    const missionDetail = dailyMission.value.find(m => String(m.cdId) === String(mission.cdId));
-    
-    if (missionDetail) {
-      combined.push({
-        type: 'mission',
-        reason: missionDetail.cdName,
-        point: missionDetail.cdReward,
-        createdAt: mission.successDate,
-        id: `mission-${mission.cdId}-${mission.successDate}`
-      });
-      
-      if (index < 3) {
-        //console.log(`미션 ${index + 1} 추가:`, missionDetail.cdName, mission.successDate);
-      }
-    } else if (index < 3) {
-      //console.log(`미션 ${index + 1} 매칭 실패 - cdId:`, mission.cdId);
-    }
-  });
-  
+  missionComplete.value.forEach((mission) => {
+  const missionDetail = dailyMission.value.find(
+    (m) => String(m.cdId) === String(mission.cdId));
+
+  if (missionDetail) {
+    const date = mission.successDate || new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const time = now.toTimeString().split(' ')[0];
+
+    combined.push({
+      type: 'mission',
+      reason: missionDetail.cdName,
+      point: missionDetail.cdReward,
+      createdAt: new Date(`${date}T${time}`),
+      id: `mission-${mission.cdId}-${date}`,
+    });
+  }
+});
   
   // 최신순 정렬
   return combined.sort((a, b) => {
@@ -133,7 +120,6 @@ const allHistory = computed(() => {
     return dateB - dateA;
   });
 });
-
 
 const paginatedHistory = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
@@ -205,6 +191,7 @@ const getReasonType = (item) => {
   if (reason.includes('3위_reward')) return 'rank3';
   if (reason.includes('개근_reward')) return 'perfect';
   if (reason.includes('일 이상_reward')) return 'attendance';
+  if (item.type === 'purchase') return 'purchase';
   
   return 'normal';
 };
@@ -254,15 +241,32 @@ onMounted(() => {
 const goBack = () => {
   router.push('/user/profile')
 };
+
+const handleClick = (item) => {
+  if (item.isUsed) return;
+  if (item.type === 'purchase' && item.purchaseId) {
+    router.push(`/pointshop/purchase-history/detail/${item.purchaseId}`);
+  }
+};
+
 </script>
 
 <template>
   <div class="challenge-point-container">
     <!-- 총 포인트 -->
-    <div class="total-point">
-      <h2>총 포인트</h2>
-      <p class="point-value">{{ authStore.state.signedUser.point?.toLocaleString() }}P</p>
-    </div>
+      <div class="total-point">
+        <h2>총 포인트</h2>
+        <div class="point-display">
+          <p class="point-value">
+            {{ authStore.state.signedUser.point?.toLocaleString() || '0' }}
+          </p>
+          <img
+            src="/image/main/point.png"
+            alt="포인트 아이콘"
+            class="point-icon"
+          />
+        </div>
+      </div>
 
     <!-- 로딩 상태 -->
     <div v-if="loading" class="loading">로딩 중...</div>
@@ -287,9 +291,10 @@ const goBack = () => {
             'rank-item': getReasonType(item).startsWith('rank'),
             'perfect-item': getReasonType(item) === 'perfect',
             'attendance-item': getReasonType(item) === 'attendance',
-            'clickable': item.type === 'purchase' && item.purchaseId
+            'purchase-item': getReasonType(item) === 'purchase',
+            'used': item.isUsed
           }"
-          @click="handleItemClick(item)"
+          @click="handleClick(item)"
         >
           <div class="item-info">
             <span class="reason">{{ formatReason(item) }}</span>
@@ -347,226 +352,236 @@ const goBack = () => {
 
 <style scoped>
 .challenge-point-container {
-  max-width: 600px;
+  max-width: 390px;
   margin: 0 auto;
-  padding: 20px;
-}
-
-.loading,
-.error,
-.no-data {
+  padding: 20px 16px;
   text-align: center;
-  padding: 40px;
-  font-size: 16px;
-  color: #666;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.error {
-  color: #ef4444;
-}
-
+/* 상단 카드 */
 .total-point {
   background: #393e46;
-  color: white;
-  padding: 30px;
-  border-radius: 15px;
+  color: #ffffff;
+  border-radius: 14px;
+  padding: 16px 20px;
   text-align: center;
-  margin-bottom: 30px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 360px;
 }
-
 .total-point h2 {
-  margin: 0 0 10px 0;
-  font-size: 18px;
-  font-weight: normal;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
   opacity: 0.9;
 }
-
+.point-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
 .point-value {
-  margin: 0;
-  font-size: 48px;
-  font-weight: bold;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+.point-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  transform: translateY(-6px);
 }
 
+/* 포인트 내역 전체 */
 .point-history {
   background: white;
-  border-radius: 15px;
-  padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  width: 100%;
+  max-width: 390px;
+  margin: 0 auto;
+  text-align: left;
 }
 
+/* 헤더 */
 .history-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
+  text-align: left;
 }
-
 .history-header h3 {
+  font-size: 16px;
   margin: 0;
-  font-size: 20px;
-  color: #333;
 }
-
 .total-count {
-  font-size: 14px;
-  color: #666;
+  font-size: 11px;
+  padding: 3px 8px;
   background: #f3f4f6;
-  padding: 5px 12px;
-  border-radius: 20px;
+  border-radius: 12px;
 }
 
+/* 리스트 */
 .history-list {
   list-style: none;
   padding: 0;
-  margin: 0 0 20px 0;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 390px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
 }
 
 .history-item {
+  width: 100%;
+  max-width: 390px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 5px 10px;
+  border: 1px solid #f0f0f0;
+  background: #fafafa;
   transition: background-color 0.2s;
-  background-color: #fafafa;
+  border-radius: 8px;
+  text-align: left;
+  box-sizing: border-box;
 }
 
 .history-item:hover {
   background-color: #f3f4f6;
 }
 
-.history-item:last-child {
-  border-bottom: none;
+.history-item + .history-item {
+  margin-top: 2px;
 }
 
-.mission-item {
-  background: linear-gradient(135deg, #f0fdf4 0%, #f7fef9 100%);
-  border-left: 4px solid #22c55e;
+.history-item.used {
+  position: relative;
+  background: #f0f0f0;
+  filter: grayscale(0.8) brightness(0.9);
+  opacity: 0.9;
+  transition: all 0.3s ease;
+  pointer-events: none;
 }
 
-.rank-item {
-  background: linear-gradient(135deg, #fff9e6 0%, #fffbf0 100%);
-  border-left: 4px solid #fbbf24;
+.history-item.used::after {
+  content: "사용 완료";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.5);
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  pointer-events: none;
 }
 
-.perfect-item {
-  background: linear-gradient(135deg, #f0fdf4 0%, #f7fef9 100%);
-  border-left: 4px solid #10b981;
-}
-
-.attendance-item {
-  background: linear-gradient(135deg, #eff6ff 0%, #f5f9ff 100%);
-  border-left: 4px solid #3b82f6;
-}
-
+/* 텍스트 */
 .item-info {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  align-items: flex-start;
+  gap: 2px;
   flex: 1;
-  min-width: 0;
 }
-
 .reason {
-  font-size: 16px;
+  font-size: 10px;
   font-weight: 500;
   color: #333;
 }
-
 .date {
-  font-size: 14px;
+  font-size: 8px;
   color: #999;
 }
-
 .point {
-  font-size: 18px;
-  font-weight: bold;
-  flex-shrink: 0;
-  margin-left: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  margin-left: 8px;
 }
-
 .point.positive {
   color: #10b981;
 }
-
 .point.negative {
   color: #ef4444;
 }
 
-/* 페이징 스타일 */
+/* 타입별 강조 */
+.mission-item {
+  background: linear-gradient(135deg, #f0fdf4 0%, #f7fef9 100%);
+  border-left: 2px solid #22c55e;
+}
+.rank-item {
+  background: linear-gradient(135deg, #fff9e6 0%, #fffbf0 100%);
+  border-left: 2px solid #fbbf24;
+}
+.perfect-item {
+  border-left: 2px solid #10b981;
+}
+.attendance-item {
+  border-left: 2px solid #3b82f6;
+}
+.purchase-item {
+  background: linear-gradient(135deg, #fff5f5 0%, #fff0f0 100%);
+  border-left: 2px solid #ef4444;
+  box-shadow: 0 0 4px rgba(239, 68, 68, 0.15);
+}
+
+/* 페이지네이션 */
 .pagination {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 8px;
-  margin-top: 20px;
+  gap: 4px;
+  margin-top: 12px;
 }
-
 .page-btn,
 .page-number {
-  padding: 8px 16px;
+  padding: 4px 8px;
   border: 1px solid #e5e7eb;
   background: white;
   color: #374151;
-  border-radius: 8px;
+  border-radius: 4px;
+  font-size: 12px;
   cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s;
 }
-
-.page-btn:hover:not(:disabled),
-.page-number:hover {
-  background: #f3f4f6;
-  border-color: #d1d5db;
-}
-
-.page-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
 .page-number.active {
   background: #393e46;
   color: white;
   border-color: #393e46;
-  font-weight: bold;
 }
 
-.page-number {
-  min-width: 40px;
-}
+/* 뒤로가기 */
 .top-buttons {
   display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
   justify-content: flex-end;
-  padding-top: 20px;
+  margin-top: 12px;
 }
 .back-btn {
-  padding: 10px 20px;
+  padding: 6px 12px;
+  font-size: 12px;
   background-color: #6b7280;
   color: white;
+  border-radius: 5px;
   border: none;
-  border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.3s;
-  
 }
-
 .back-btn:hover {
   background-color: #4b5563;
-}
-
-/* 포인트 클릭 가능한 항목 강조 */
-.history-item.clickable {
-  cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
-}
-
-.history-item.clickable:hover {
-  background-color: #eef6ff;
-  transform: translateY(-1px);
 }
 </style>

@@ -118,15 +118,27 @@ export function usePointshop() {
           : [];
 
       purchasedItems.value = data
-        .map((p) => ({
-          purchaseId: p.purchaseId ?? p.id ?? p.purchase_id ?? null,
-          pointId: p.pointId ?? p.point_id ?? p.point?.pointId ?? null,
-          pointItemName: p.pointItemName ?? p.point?.pointItemName ?? '상품명 없음',
-          pointItemImage: p.pointItemImage ?? p.point?.pointItemImage ?? p.imageUrl ?? p.images?.[0]?.imageUrl ?? null,
-          purchaseAt: p.purchaseAt ?? p.purchaseTime ?? p.createdAt ?? new Date().toISOString(),
-          pointScore: p.pointScore ?? p.point?.pointScore ?? 0,
-        }))
-        .sort((a, b) => new Date(b.purchaseAt) - new Date(a.purchaseAt));
+      .map((p) => ({
+        purchaseId: p.purchaseId ?? p.id ?? p.purchase_id ?? null,
+        pointId: p.pointId ?? p.point_id ?? p.point?.pointId ?? null,
+        pointItemName: p.pointItemName ?? p.point?.pointItemName ?? '상품명 없음',
+        pointItemImage:
+          p.pointItemImage ??
+          p.point?.pointItemImage ??
+          p.imageUrl ??
+          p.images?.[0]?.imageUrl ??
+          null,
+        purchaseAt: p.purchaseAt ?? p.purchaseTime ?? p.createdAt ?? new Date().toISOString(),
+        pointScore: p.pointScore ?? p.point?.pointScore ?? 0,
+
+        // 사용 완료 여부 명시적으로 판별
+        isUsed:
+          ['Y', true, 1].includes(p.usedYn) ||
+          p.isUsed === true ||
+          p.used === true ||
+          p.status === 'USED',
+      }))
+      .sort((a, b) => new Date(b.purchaseAt) - new Date(a.purchaseAt));
     } catch (err) {
       console.error('[usePointshop] 구매 내역 조회 실패:', err);
     } finally {
@@ -203,17 +215,41 @@ export function usePointshop() {
 
   // 구매내역 단일 호출
   const fetchUserPurchaseHistory = async () => {
-    try {
-      const res = await PointPurchaseService.getUserPurchaseHistory();
-      if (res?.success && Array.isArray(res.data)) {
-        purchasedItems.value = res.data;
-      } else {
-        console.warn('[usePointshop] 구매내역 응답이 비정상:', res);
-      }
-    } catch (err) {
-      console.error('[usePointshop] 구매내역 불러오기 실패:', err);
-    }
-  };
+  try {
+    const res = await PointPurchaseService.getUserPurchaseHistory();
+
+    const data =
+      Array.isArray(res?.data?.data)
+        ? res.data.data
+        : Array.isArray(res?.data)
+        ? res.data
+        : Array.isArray(res)
+        ? res
+        : [];
+
+    purchasedItems.value = data
+    .map((p) => ({
+      purchaseId: p.purchaseId ?? p.id ?? p.purchase_id ?? null,
+      pointId: p.pointId ?? p.point_id ?? p.point?.pointId ?? null,
+      pointItemName: p.pointItemName ?? p.point?.pointItemName ?? '상품명 없음',
+      pointItemImage:
+        p.pointItemImage ??
+        p.point?.pointItemImage ??
+        p.imageUrl ??
+        p.images?.[0]?.imageUrl ??
+        null,
+
+      purchaseAt: p.purchaseAt ?? p.purchaseTime ?? p.createdAt ?? new Date().toISOString(),
+      pointScore: p.pointScore ?? p.point?.pointScore ?? 0,
+
+      isUsed: ['Y', true, 1].includes(p.usedYn) || p.isUsed === true || p.used === true,
+      usedAt: p.usedAt ?? p.useDate ?? null,
+    }))
+    .sort((a, b) => new Date(b.purchaseAt) - new Date(a.purchaseAt));
+  } catch (err) {
+    console.error('[usePointshop] 구매내역 불러오기 실패:', err);
+  }
+};
 
    return {
     userPoints,

@@ -74,6 +74,11 @@ const goToDetail = (item) => {
   router.push(`/pointshop/purchase-history/detail/${item.purchaseId}`)
 }
 
+// 포인트 클릭 시 프로필 이동
+const goToProfile = () => {
+  router.push('/user/profile')
+}
+
 // 초기화
 onMounted(async () => {
   await initializePurchaseHistory()
@@ -82,12 +87,12 @@ onMounted(async () => {
 
 <template>
   <div class="history-container">
-    <h2 class="page-title">포인트샵 구매 내역</h2>
-
     <!-- 현재 포인트 -->
-    <div class="user-balance" :class="{ loading: isLoading }">
-      내 보유 포인트:
-      <strong>{{ animatedPoints.toLocaleString() }} P</strong>
+    <div class="user-balance" :class="{ loading: isLoading }"
+    @click="goToProfile">
+      내 보유 포인트 :
+      <strong>{{ animatedPoints.toLocaleString() }}</strong>
+      <img src="/image/main/point.png" alt="포인트 아이콘" class="point-icon" />
       <span v-if="isLoading" class="spinner"></span>
     </div>
 
@@ -95,177 +100,332 @@ onMounted(async () => {
     <div v-if="isLoading" class="loading">로딩 중입니다...</div>
 
     <!-- 구매 내역 -->
-    <table v-else-if="paginatedItems.length > 0" class="history-table">
-      <thead>
-        <tr>
-          <th>상품명</th>
-          <th>가격</th>
-          <th>구매일시</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="item in paginatedItems"
-          :key="item.pointId"
-          class="clickable-row"
-          @click="goToDetail(item)"
-        >
-          <td class="item-name">
-            <img
-              v-if="item.imageUrl"
-              :src="item.imageUrl"
-              alt="상품 이미지"
-              class="item-image"
-            />
-            {{ item.pointItemName || item.name }}
-          </td>
-          <td>
-            {{
-              (
-                item.price ||
-                item.pointPrice ||
-                item.pointScore ||
-                item.point?.pointScore ||
-                0
-              ).toLocaleString()
-            }}
-            P
-          </td>
-          <td>{{ formatDate(item.purchaseAt || item.createdAt) }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <!-- 헤더 -->
+    <div class="history-header">
+        <span class="header-name">상품명</span>
+        <span class="header-price">포인트</span>
+        <span class="header-date">구매일시</span>
+      </div>
+
+    <!-- 구매 내역 리스트 -->
+    <div class="history-list">
+    <div
+        v-for="item in paginatedItems"
+        :key="item.purchaseId"
+        class="history-row"
+        :class="{ used: item.isUsed }"
+        @click="!item.isUsed && goToDetail(item)"
+      >
+        <span class="item-name">{{ item.pointItemName || item.name }}</span>
+        <span class="item-price">
+          {{
+            (
+              item.price ||
+              item.pointPrice ||
+              item.pointScore ||
+              item.point?.pointScore ||
+              0
+            ).toLocaleString()
+          }}P
+        </span>
+        <span class="item-date">{{ formatDate(item.purchaseAt || item.createdAt) }}</span>
+        </div>
+      </div>
 
     <!-- 페이징 -->
     <div v-if="totalPages > 1" class="pagination">
-      <button
-        class="page-btn"
-        :disabled="currentPage === 1"
-        @click="changePage(currentPage - 1)"
-      >
-        이전
-      </button>
 
-      <button
-        v-for="page in pageNumbers"
-        :key="page"
-        class="page-number"
-        :class="{ active: page === currentPage }"
-        @click="changePage(page)"
-      >
-        {{ page }}
-      </button>
+    <!-- 이전 버튼 -->
+    <button
+      class="page-btn prev-btn"
+      :disabled="currentPage === 1"
+      @click="changePage(currentPage - 1)"
+    >
+      이전
+    </button>
 
-      <button
-        class="page-btn"
-        :disabled="currentPage === totalPages"
-        @click="changePage(currentPage + 1)"
-      >
-        다음
-      </button>
-    </div>
+    <!-- 페이지 번호 -->
+    <button
+      v-for="page in pageNumbers"
+      :key="page"
+      class="page-number"
+      :class="{ active: page === currentPage }"
+      @click="changePage(page)"
+    >
+      {{ page }}
+    </button>
+
+    <!-- 다음 버튼 -->
+    <button
+      class="page-btn next-btn"
+      :disabled="currentPage === totalPages"
+      @click="changePage(currentPage + 1)"
+    >
+      다음
+    </button>
+  </div>
 
     <!-- 구매 내역 없음 -->
-    <div v-else class="empty">
+    <div v-if="!paginatedItems.length" class="empty">
       <p>아직 구매한 상품이 없습니다.</p>
       <button class="go-shop-btn" @click="router.push('/pointshop')">
         포인트샵으로 이동 →
       </button>
     </div>
   </div>
+
+  <transition name="fade" mode="out-in">
+    <RouterView />
+  </transition>
 </template>
 
 <style scoped>
 .history-container {
-  max-width: 900px;
+  width: 100%;
+  max-width: 390px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 24px 20px;
   background: #fafafa;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  font-family: 'Noto Sans KR', sans-serif;
+  border: 1px solid #e6e6e6;
+  border-radius: 10px;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.08);
+  font-family: 'Pretendard', sans-serif;
+  color: #303030;
+  box-sizing: border-box;
 }
-.page-title {
-  text-align: center;
-  font-size: 1.8rem;
-  font-weight: bold;
-  margin-bottom: 24px;
-  color: #222;
-}
+
+/* 내 보유 포인트 */
 .user-balance {
-  text-align: right;
-  margin-bottom: 16px;
-  font-size: 1.1rem;
-  color: #333;
   display: flex;
-  justify-content: flex-end;
   align-items: center;
-  gap: 8px;
-  transition: opacity 0.3s;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-right: 6px;
+  margin-bottom: 14px;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
 }
+
+.user-balance strong {
+  font-size: 16px;
+  font-weight: 700;
+  color: #00b5df;
+}
+
+.point-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  transform: translateY(1px);
+}
+
 .user-balance.loading {
-  opacity: 0.7;
+  pointer-events: none;
+  opacity: 0.6;
 }
 .spinner {
   width: 14px;
   height: 14px;
   border: 2px solid #ccc;
-  border-top-color: #0078ff;
+  border-top: 2px solid #00b5df;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: spin 1s linear infinite;
 }
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-.loading {
+/* 헤더 + 행 공통 구조 */
+.history-header,
+.history-row {
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr 1.2fr;
+  align-items: center;
   text-align: center;
-  padding: 40px;
-  color: #777;
-  font-size: 1rem;
-}
-.history-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: #fff;
+  min-height: 44px;
+  max-width: 350px;
+  margin: 0 auto;
+  padding: 8px 10px;
   border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
 }
-th {
-  background-color: var(--color-primary, #0078ff);
-  color: #fff;
-  padding: 12px;
-  text-align: left;
-  font-size: 0.95rem;
+
+.history-row.used {
+  position: relative;
+  background: #f0f0f0;
+  color: #999;
+  pointer-events: none;
+  filter: grayscale(0.8);
+  opacity: 0.85;
 }
-td {
-  padding: 10px 12px;
-  border-bottom: 1px solid #eee;
-  font-size: 0.9rem;
-}
-tr:hover td {
-  background: #f9f9f9;
-}
-.item-name {
+
+.history-row.used::after {
+  content: "사용 완료";
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.55);
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  pointer-events: none;
 }
-.item-image {
-  width: 40px;
-  height: 40px;
-  object-fit: cover;
-  border-radius: 6px;
+
+/* 헤더 */
+.history-header {
+  background: #f4faff;
+  border: 1px solid #e6e6e6;
+  border-radius: 10px;
+  font-weight: 700;
+  color: #00b5df;
+  font-size: 13px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  max-width: 350px;
+  margin: 0 auto;
+  padding: 8px 10px;
+  box-sizing: border-box;
+  margin-bottom: 10px;
 }
-.clickable-row {
-  cursor: pointer;
-  transition: background 0.2s;
+.header-name {
+  text-align: left;
+  padding-left: 40px;
 }
-.clickable-row:hover {
-  background: #f0f8ff;
+.header-price {
+  text-align: center;
+  padding-left: 15px;
 }
+.header-date {
+  text-align: right;
+  padding-right: 30px;
+}
+
+/* 리스트 */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border: 1px solid #e6e6e6;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* 데이터 행 */
+.history-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.6fr 0.8fr 1.2fr;
+  align-items: center;
+  width: 100%;
+  padding: 2px 8px;
+  font-size: 12px;
+  line-height: 1.2;
+  color: #303030;
+  text-align: center;
+  border-top: 0.5px solid #f0f0f0;
+  background: #fff;
+  transition: background 0.2s ease, transform 0.15s ease;
+  overflow: hidden;
+  z-index: 0;
+  min-height: 35px;
+}
+
+/* hover 배경을 전체 폭으로 */
+.history-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  z-index: 0;
+  transition: background 0.25s ease;
+}
+
+/* hover 시 전체 가로 배경이 채워짐 */
+.history-row:hover::before {
+  background: #e8faff;
+  box-shadow: inset 0 0 0 9999px rgba(230, 250, 255, 0.7);
+}
+
+.history-row:hover {
+  background: #e8faff;
+  box-shadow: inset 0 0 0 1000px rgba(232, 250, 255, 0.9);
+  z-index: 1;
+  transform: translateY(-1px);
+}
+
+/* 텍스트 hover 배경 위로 표시 */
+.history-row span {
+  position: relative;
+  z-index: 1;
+}
+
+/* 첫 번째 행 상단선 제거 (헤더와 자연스러운 연결) */
+.history-row:first-child {
+  border-top: none;
+}
+
+/* 각 행 모서리 제거 (둥근 모서리는 부모에서 처리) */
+.history-row {
+  border-radius: 0;
+}
+
+/* 마지막 행 아래 라운드 유지 */
+.history-row:last-child {
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+/* 중간 행은 둥근 모서리 제거 */
+.history-row:not(:first-child):not(:last-child) {
+  border-radius: 0;
+}
+
+/* 텍스트 스타일 */
+.item-name {
+  text-align: left;
+  padding-left: 4px;
+  font-weight: 500;
+  color: #303030;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-price {
+  text-align: center;
+  font-weight: 700;
+  color: #00b5df;
+}
+
+.item-date {
+  text-align: right;
+  font-size: 10.5px;
+  padding-right: 10px;
+  color: #888;
+}
+
+/* 사용 완료 쿠폰 */
+.history-row.used {
+  background: #f2f2f2;
+  color: #a0a0a0;
+  opacity: 0.7;
+  pointer-events: none;
+  border: 1px solid #ddd;
+}
+.history-row.used .item-name {
+  text-decoration: line-through;
+  color: #999;
+}
+.history-row.used .item-price {
+  color: #bbb;
+}
+
+/* 페이지네이션 */
 .pagination {
   display: flex;
   justify-content: center;
@@ -275,47 +435,135 @@ tr:hover td {
 }
 .page-btn,
 .page-number {
-  padding: 8px 16px;
-  border: 1px solid #e5e7eb;
-  background: white;
-  color: #374151;
-  border-radius: 8px;
+  border: 1px solid #e6e6e6;
+  border-radius: 6px;
+  padding: 5px 9px;
+  font-size: 12px;
+  background: #fff;
+  color: #00b5df;
   cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
+/* hover 시 배경 하이라이트 */
 .page-btn:hover:not(:disabled),
-.page-number:hover {
-  background: #f3f4f6;
-  border-color: #d1d5db;
+.page-number:hover:not(:disabled) {
+  background: #e6f8fa;
+  transform: translateY(-1px);
 }
-.page-btn:disabled {
-  opacity: 0.5;
+
+/* 클릭(press) 시 눌림 효과 */
+.page-btn:active:not(:disabled),
+.page-number:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+/* 현재 페이지 강조 */
+.page-number.active {
+  background: #00b5df;
+  color: #fff;
+  border-color: #00b5df;
+}
+
+/* 마지막 페이지에서도 이전 버튼은 활성 색 유지 */
+.prev-btn:disabled {
+  background: #fff;
+  color: #00b5df;
+  border-color: #00b5df;
+  opacity: 1;
   cursor: not-allowed;
 }
-.page-number.active {
-  background: #0078ff;
-  color: white;
-  border-color: #0078ff;
-  font-weight: bold;
+
+/* 첫 페이지에서 이전 버튼 비활성화 색 유지 */
+.page-btn:disabled {
+  background: #f5f5f5;
+  color: #bbb;
+  border-color: #ddd;
+  cursor: not-allowed;
+  opacity: 0.7;
+  transform: none;
 }
+
+/* 활성화 버튼 */
+.page-btn:not(:disabled) {
+  color: #00b5df;
+}
+
+/* hover 효과 유지 */
+.page-btn:not(:disabled):hover {
+  background: #e6f8fa;
+  transform: translateY(-1px);
+}
+
+
+/* 부드러운 전환 */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+/* 빈 데이터 */
 .empty {
   text-align: center;
   color: #777;
   padding: 50px 0;
 }
 .go-shop-btn {
-  background-color: var(--color-primary, #0078ff);
+  background-color: #00b5df;
   color: #fff;
   border: none;
   padding: 8px 14px;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: 12px;
   margin-top: 12px;
   transition: background 0.2s;
 }
 .go-shop-btn:hover {
-  background-color: var(--color-skyblue, #4aa8ff);
+  background-color: #02b7c1;
+}
+
+.item-point.clickable {
+  color: #00b5df;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.item-point.clickable:hover {
+  text-decoration: underline;
+  color: #0091b5;
+}
+
+/* 반응형 */
+@media (max-width: 480px) {
+  .history-container {
+    padding: 16px;
+  }
+  .history-header,
+  .history-row {
+    max-width: 100%;
+    padding: 8px 10px;
+  }
+  .item-date {
+    font-size: 10px;
+  }
+}
+
+/* 페이드 인·아웃 애니메이션 */
+.fade-enter-active, .fade-leave-active {
+  transition: all 0.35s ease;
+}
+
+.fade-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
 }
 </style>

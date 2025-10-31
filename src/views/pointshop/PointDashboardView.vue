@@ -264,6 +264,9 @@ const goToPage = (p) => {
       </ul>
     </section>
 
+    <!-- 짧은 점선 구분선 -->
+    <div class="divider"></div>
+
     <!-- 구매 내역 -->
     <section class="purchase-section">
       <h3>구매 내역</h3>
@@ -274,6 +277,7 @@ const goToPage = (p) => {
           v-for="(h, idx) in paginatedPurchasedItems"
           :key="idx"
           class="history-item clickable"
+          :class="{ used: h.isUsed }"
           @click="goToPurchaseDetail(h.purchaseId)"
         >
           <span class="item-name">{{ h.pointItemName }}</span>
@@ -394,13 +398,7 @@ const goToPage = (p) => {
 .item-list {
   width: 340px;
   margin: 0 auto 40px;
-  padding-left: 2px;
-}
-.item-list h3 {
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 14px;
-  text-align: left;
+  padding-left: 1px;
 }
 
 /* 포인트 아이템 */
@@ -412,7 +410,7 @@ const goToPage = (p) => {
   grid-template-columns: repeat(2, 160px);
   justify-content: center;
   padding-right: 30px;
-  gap: 20px;
+  gap: 10px;
 }
 
 /* 아이템 카드 */
@@ -487,22 +485,35 @@ button.out {
   color: #393e46;
 }
 
+/* 짧은 점선 구분선 */
+.divider {
+  width: 80%;
+  max-width: 360px;
+  margin: 18px auto;
+  border-top: 1px dashed #ddd;
+  opacity: 0.8;
+}
+
 /* 구매 내역 */
 .purchase-section {
   width: 340px;
   margin: 0 auto;
-  padding-top: 30px;
-  border-top: 1px dashed #ddd;
+  padding-top: 10px;
   box-sizing: border-box;
-  margin-left: 0;
 }
+
+/* ✅ 공통 제목 h3 (포인트 아이템 목록 + 구매 내역) */
+.item-list h3,
 .purchase-section h3 {
   font-size: 16px;
   font-weight: 700;
-  margin-bottom: 14px;
-  text-align: left;
   color: #303030;
+  text-align: left;
+  margin: 0 0 14px 0;
+  padding-left: 2px;
 }
+
+/* 구매 내역 리스트 */
 .history-list {
   display: flex;
   flex-direction: column;
@@ -516,19 +527,54 @@ button.out {
   border: 1px solid #e6e6e6;
   border-radius: 10px;
   padding: 10px 14px;
+  cursor: pointer;
   font-size: 13px;
   font-weight: 500;
   line-height: 1.3;
   transition: background-color 0.2s, transform 0.1s;
   width: 340px;
-  margin: 0 0 0 -28px;
+  margin: 0 0 0 -30px;
   box-sizing: border-box;
 }
 .history-item:hover {
   background: #e6f8fa;
   transform: translateY(-2px);
-  z-index: 1;;
+  z-index: 1;
 }
+
+/* 사용 완료 처리 */
+.history-item.used {
+  background: #f2f2f2;
+  border: 1px solid #ddd;
+  color: #999;
+  cursor: default;
+  position: relative;
+  pointer-events: none;
+}
+
+.history-item.used::after {
+  content: "사용 완료";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.55);
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+}
+
+.history-item.used .amount {
+  color: #bbb;
+}
+
+.history-item.used .item-name {
+  text-decoration: line-through;
+  color: #999;
+}
+
 .item-name {
   color: #303030;
   font-weight: 500;
@@ -577,12 +623,17 @@ button.out {
   .pagination {
     width: 90%;
   }
+
   .items {
     grid-template-columns: repeat(2, 1fr);
     gap: 14px;
   }
+  .history-item {
+    margin-left: -40px;
+  }
 }
 </style>
+
 
 
 
